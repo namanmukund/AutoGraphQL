@@ -22,6 +22,8 @@ const BlockBasedProject = `
     projectThumbnail: File @relation(name: "BlockBasedProjectThumbnail", direction: "OneWay")
     externalPlatformLogo: File @relation(name: "BlockBasedProjectExternalPlatformLogo", direction: "OneWay")
     externalPlatformLink: String
+    platFormLinkLabel: String
+    fileUploadFormats: [String]
     layout: BlockBasedProjectLayout! @defaultValue(value: "externalPlatform")
     initialBlocks: String
     answerDescription: String @trim
@@ -33,6 +35,11 @@ const BlockBasedProject = `
     type: BlockBasedProjectType!
     courses: [Course] @relation(name: "CourseBlockBasedProject", direction: "OneWay")
     tags: [ContentTag] @relation(name: "BlockBasedProjectTag")
+    externalDescriptionEnabled: Boolean @defaultValue(value: "false")
+    embedViewHeight: Int @defaultValue(value: "100")
+    answerFormat: BlockBasedPracticeAnswerType @defaultValue(value: "answerContent")
+    answerFormatDescription: String @trim
+    answerFormatViewHeight: Int @defaultValue(value: "100")
   }
 `;
 

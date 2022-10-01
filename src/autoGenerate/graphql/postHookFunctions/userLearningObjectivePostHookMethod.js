@@ -52,6 +52,9 @@ const learningObjectiveQuery = (learningObjectiveId, courseId) => `
       }){
         id
       }
+      learningSlides(filter:{status:${PUBLISHED}}, orderBy:order_ASC,){
+        id
+      }
     }
   }
   `;
@@ -63,6 +66,7 @@ const addUserLearningObjectiveMutation = (
   restQuery,
   practiceQuestionsQuery,
   courseId,
+  learningSlidesQuery,
 ) => `
   mutation{
     addUserLearningObjective(
@@ -72,6 +76,7 @@ const addUserLearningObjectiveMutation = (
     input:{
         ${restQuery}
         ${practiceQuestionsQuery}
+        ${learningSlidesQuery}
     }
     ){
       id
@@ -90,6 +95,13 @@ const addUserLearningObjectiveMutation = (
         isHintUsed
         isAnswerUsed
         attemptNumber
+      }
+       learningSlides {
+        learningSlide {
+          id
+          order
+        }
+        status
       }
       chatStatus
       isChatBookmarked
@@ -113,7 +125,7 @@ It will be created and returned.
 Document contains all the necessary information needed on page along
 with the next component.
 */
-const userLearningObjectivePostHookMethod = async (input, params) => {
+const userLearningObjectivePostHookMethod = async (input, params, _mutationName, context) => {
   /*
   checking if document is already present in collection for user and LO id,
   returning input in that case
@@ -139,10 +151,12 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
   }
   const learningObjectiveQueryRes = await callLocalGraphqlApi(
     learningObjectiveQuery(learningObjectiveId, courseId),
+    context,
   );
   const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
   const {
     questionBank: practiceQuestionsInLO,
+    learningSlides: learningSlidesInLO,
   } = learningObjectiveInfo;
   const topicInfo = get(learningObjectiveInfo, 'topics[0]', null) || get(learningObjectiveInfo, 'topic');
   if (!topicInfo) {
@@ -162,6 +176,15 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
       practiceQuestionsQuery += `{ questionConnectId: "${practiceQuestionId}" }, `;
     });
     practiceQuestionsQuery += ']';
+  }
+  let learningSlidesQuery = '';
+  if (learningObjectiveInfo && learningSlidesInLO && learningSlidesInLO.length) {
+    learningSlidesQuery = 'learningSlides:[';
+    learningSlidesInLO.forEach((learningSlide) => {
+      const { id: learningSlideId } = learningSlide;
+      learningSlidesQuery += `{ learningSlideConnectId: "${learningSlideId}" }, `;
+    });
+    learningSlidesQuery += ']';
   }
 
   // obtaining next LO
@@ -197,7 +220,9 @@ const userLearningObjectivePostHookMethod = async (input, params) => {
       restQuery,
       practiceQuestionsQuery,
       courseId,
+      learningSlidesQuery,
     ),
+    context,
   );
   if (result) {
     /*

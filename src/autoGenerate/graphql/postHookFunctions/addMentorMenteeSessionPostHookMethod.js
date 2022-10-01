@@ -12,8 +12,10 @@ import addToMentorAvailabilitySlotMentorMenteeSession from './utils/addToMentorA
 import getCourseInfo from './utils/getCourseInfo';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import getSlotTimesInString from '../../../../utils/getSlotTimesInString';
+import isMentorChild from './utils/isMentorChild';
+import getUserActiveClassroom from '../../../../utils/getUserActiveClassroom';
 
-const getMentorMenteeSessionData = async (id) => {
+const getMentorMenteeSessionData = async (id, context) => {
   const query = `
     query{
       mentorMenteeSession(id:"${id}"){
@@ -31,7 +33,28 @@ const getMentorMenteeSessionData = async (id) => {
           user {
             studentProfile {
               batch {
+                id
                 code
+                course {
+                  id
+                }
+                coursePackage {
+                  courses {
+                    id
+                  }
+                }
+              }
+              batches {
+                id
+                code
+                course {
+                  id
+                }
+                coursePackage {
+                  courses {
+                    id
+                  }
+                }
               }
             }
           }
@@ -44,7 +67,7 @@ const getMentorMenteeSessionData = async (id) => {
       }
     }
   `;
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, context);
   return get(res, 'data.mentorMenteeSession');
 };
 
@@ -60,7 +83,7 @@ const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
       bookingDate,
       ...slots
     } = menteeSession;
-    const userInfo = await getMenteeInfo(get(user, 'id'));
+    const userInfo = await getMenteeInfo(get(user, 'id'), context);
     const topicInfo = await getTopicInfo(get(params, 'topicConnectId'));
     const courseInfo = await getCourseInfo(get(params, 'courseConnectId'));
     const slotTimeStringArray = getSelectedSlotsStringArray(slots);
@@ -69,26 +92,30 @@ const addMentorMenteeSessionPostHookMethod = async (input, params, context) => {
     const topicId = get(topicInfo, 'data.topic.id', '');
     const sessionStatus = get(input, 'sessionStatus');
     const mentorMenteeSessionId = get(input, 'id');
-    const mentorMenteeSessionDoc = await getMentorMenteeSessionData(mentorMenteeSessionId);
+    const mentorMenteeSessionDoc = await getMentorMenteeSessionData(mentorMenteeSessionId, context);
+    const isItMentorChild = await isMentorChild(clientId);
     context.previousDocument = mentorMenteeSessionDoc;
-    if (get(input, 'sessionStatus') === 'started') {
-      setSessionStartedLeadsquared(userInfo, topicInfo);
-      updateHomeworkStreaksMethod(clientId, context, topicId, input);
-    }
-    // send message to mentor regarding the session
-    if (get(topicInfo, 'data.topic.order') === 1 && mentorSessionConnectId) {
-      await extractMentorMenteeSessionAndSendMessage(bookingDate, slotTimeStringArray, mentorSessionConnectId, userInfo, topicInfo, input.id, courseInfo);
+    if (!isItMentorChild) {
+      if (get(input, 'sessionStatus') === 'started') {
+        setSessionStartedLeadsquared(userInfo, topicInfo);
+        updateHomeworkStreaksMethod(clientId, context, topicId, input);
+      }
+      // send message to mentor regarding the session
+      if (get(topicInfo, 'data.topic.order') === 1 && mentorSessionConnectId) {
+        await extractMentorMenteeSessionAndSendMessage(bookingDate, slotTimeStringArray, mentorSessionConnectId, userInfo, topicInfo, input.id, courseInfo);
+      }
     }
 
     // update session log entry
-    const batchCode = get(userInfo, 'data.user.studentProfile.batch.code', '');
+    const activeClassroom = await getUserActiveClassroom(context, { courseId: get(params, 'courseConnectId'), userBatches: get(userInfo, 'data.user.studentProfile', '') }, get(userInfo, 'data.user.studentProfile.batch.id'));
+    const batchCode = get(activeClassroom, 'code');
     const studentProfileId = get(userInfo, 'data.user.studentProfile.id');
     const bookingAgentId = get(userInfo, 'data.user.studentProfile.bookingAgent.id');
     if (studentProfileId) addToMentorMenteeSessionStudentProfile(mentorMenteeSessionId, studentProfileId, bookingAgentId);
     if (context.mentorAvailabilitySlotId) {
       addToMentorAvailabilitySlotMentorMenteeSession(mentorMenteeSessionId, context.mentorAvailabilitySlotId);
     }
-    addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'addMentorMenteeSession', batchCode, mentorSessionConnectId, sessionStatus);
+    addSessionLog(bookingDate, slotTimeStringArray, clientId, topicId, currentUser, courseId, 'addMentorMenteeSession', batchCode, mentorSessionConnectId, sessionStatus, '', get(context, 'isManualSession', false));
   }
 };
 

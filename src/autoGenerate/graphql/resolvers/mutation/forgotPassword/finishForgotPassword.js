@@ -33,7 +33,6 @@ export default function finishForgotPasswordMutationResolver(
     authentication,
     {},
   );
-
   const currentUser = authentication && authentication.user;
   if (currentUser) {
     throw new UserTokenNotRequiredError();

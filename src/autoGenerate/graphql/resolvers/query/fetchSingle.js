@@ -5,6 +5,8 @@ import { toObject } from '../../../../../utils';
 import { validate } from '../../validation';
 import { InvalidParamsError } from '../../../../../constants/errors';
 import { SINGULAR } from '../../../../../constants/graphqlOperations';
+import { checkIfDatabaseAggregationAllowedOnType } from '../../controllers/AggregationController';
+import prehookValidationForNestedFields from '../utils/prehookValidationForNestedFields';
 // Validate that the params used for single fetch are unique.
 const validateParamsUniqueness = (paramKey, typeAST) => {
   let isUniqueField = false;
@@ -61,7 +63,7 @@ const remoteApplicationPromises = (
   });
 };
 
-const fetchSingleQueryResolver = (
+const fetchSingleQueryResolver = async (
   root,
   params,
   typeName,
@@ -69,6 +71,7 @@ const fetchSingleQueryResolver = (
   ast,
   authentication,
   allowMultiple,
+  context,
 ) => {
   const { fieldNodes } = info; // Fields which are requested.
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
@@ -87,6 +90,16 @@ const fetchSingleQueryResolver = (
   const isValidParams = validateParamsUniqueness(paramsKeys[0], typeAST);
   if (!allowMultiple && (!params || paramsKeys.length !== 1 || !isValidParams)) {
     throw new InvalidParamsError();
+  }
+
+  if (checkIfDatabaseAggregationAllowedOnType({ typeName })) {
+    await prehookValidationForNestedFields({
+      typeName,
+      parsedASTMap: ast,
+      fieldsForFetch: fieldsFetched,
+      context,
+      params,
+    });
   }
   // Check if params is remote field.
   // If yes, the first query has to be to remote, which will give,
@@ -127,7 +140,11 @@ const fetchSingleQueryResolver = (
   }
   // If params is not remote field, first query db then,
   // query remote using id.
-  return modelQueries.fetchOne(params).then((result) => {
+  return modelQueries.fetchOne(params, {
+    typeName,
+    parsedASTMap: ast,
+    info,
+  }).then((result) => {
     // If there are no remote fields, return the result.
     if (!Object.keys(remoteFields).length) {
       return result;

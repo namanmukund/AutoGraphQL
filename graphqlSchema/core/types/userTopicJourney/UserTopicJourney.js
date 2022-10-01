@@ -9,6 +9,7 @@ const userJourneyLearningObjectiveType = `
    chatStatus: UserTopicTypeStatus @defaultValue(value: "incomplete")
    practiceQuestionStatus: UserTopicTypeStatus @defaultValue(value: "incomplete")
    comicStripStatus: UserTopicTypeStatus @defaultValue(value: "incomplete")
+   learningSlideStatus: UserTopicTypeStatus @defaultValue(value: "incomplete")
    order: Int
  }`;
 

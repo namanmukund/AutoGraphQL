@@ -21,8 +21,8 @@ const ComicStrip = `
     rule: allow
   ) 
   {
-    title: String @uniqueOrEmpty @trim
-    description: String @uniqueOrEmpty @trim
+    title: String @trim
+    description: String @trim
     comicImages: [ComicImage] @relation(name: "ComicStripeComicImage", isSubset: true)
     learningObjectives: [LearningObjective]! @relation(name: "LearningObjectiveComicStrip")
     status: ContentStatus! @defaultValue(value: "unpublished")

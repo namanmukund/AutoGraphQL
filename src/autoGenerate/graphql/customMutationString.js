@@ -15,6 +15,7 @@ const customMutationString = `
    userCourseSyllabus (courseId: ID): UserCourseSyllabus,
    userTopicJourney ( topicId: ID!, courseId: ID): UserTopicJourney,
    userFirstAndLatestQuizReport ( topicId: ID!, courseId: ID): UserFirstAndLatestQuizReport,
+   userFirstAndLatestQuizReports ( topicId: ID!, courseId: ID, userIds: [ID]): [UserFirstAndLatestQuizReport],
    skipVideo ( topicId: ID!): SkipVideo,
    skipPracticeQuestion ( learningObjectiveId: ID!): BooleanResult,
    userBadge (courseId: ID): UserBadge,
@@ -24,16 +25,17 @@ const customMutationString = `
    tcirtSdrowssaPtes ( id: ID!, password: String! ): User,
    uploadFile (fileInput: FileInput, connectInput: FileConnectInput, fileName: String): File! ,
    parentChildSignUp ( schoolId: ID, campaignId: ID, input: ParentChildSignUpInput, bookingAgentId: ID ): ParentChildToken,
-   updateParentChildDetail ( userId:ID!, schoolId: ID, input: UpdateParentChildDetailInput ): ParentChildToken,
+   updateParentChildDetail ( userId:ID!, schoolId: ID, batchId: ID, input: UpdateParentChildDetailInput ): ParentChildToken,
    signUpAffiliate ( input: SignUpAffiliateInput ): UserToken,
    signUpSchool ( schoolId: ID!, input: SignUpAffiliateInput ): UserToken,
-   loginViaPassword ( input: EmailLoginInput ): ParentChildToken,
+   loginViaPassword ( input: EmailUsernameLoginInput ): ParentChildToken,
    loginViaOtp ( input: ExistingUserInput ): BooleanResult,
    signupOrLoginViaOtp ( input: SignupOrLoginUserInput ): BooleanResult,
    validateUserOTP ( input: ValidateUserInput  ): ParentChildToken,
    getPaymentRequest ( productId: ID!, discountCode: String, isCreditUsed: Boolean): PaymentRequest,
    getPaymentResponse ( id: ID!, hash: String!, status: String!, payuMoneyId: String!): BooleanResult,
-   addUpdateBulkSchoolUserData (sheetId: String!, schoolName: String!, setPassword: Boolean, booking: Boolean): AddUpdateBulkSchoolUserDataOutput,
+   addUpdateBulkSchoolUserData (sheetId: String, schoolName: String!, setPassword: Boolean, booking: Boolean): AddUpdateBulkSchoolUserDataOutput,
+   verifyBulkSchoolUserLogin (sheetId: String, schoolName: String): AddUpdateBulkSchoolUserDataOutput,
    updateVisitorReactionOnUserApprovedCode(reactedByID: ID!, userApprovedCodeID: ID!, heart: Boolean, celebrate: Boolean, hot: Boolean): BooleanResult,
    addBulkMentorSession ( input: BulkMentorSessionInput ): [MentorSession],
    bookB2B2CSlots ( input: BookB2B2CSlotsInput ): BooleanResult, 
@@ -42,9 +44,19 @@ const customMutationString = `
    shiftBatchSessionsAfterGivenDate ( input: ShiftBatchSessionsInput ): BooleanResult,
    sendJourneySnapshotInMail ( input: SendJourneySnapshotInMailInput ): BooleanResult,
    generateCertificate ( input: GenerateCertificateInput ) : GenerateCertificateOutput,
+   generateCertificateInBulk ( input: GenerateCertificateInBulkInput ) : BooleanResult,
    validateMagicLink ( input: ValidateMagicLinkInput  ): ParentChildToken,
    resetPasswordAndLogin ( input: ResetPasswordAndLoginInput ): UserToken,
    generateMentorPayoutReport ( input: MentorPayoutReportInput ): MentorPayoutReportOutput,
+   generateMentorChild ( mentorId: String ): MentorChildOutput
+   updateEventSessionAttendance (input: EventAttendanceInput): BooleanResult
+   scheduleSessions (input: ScheduleSessionsInput): BooleanResult
+   schoolLiveClassLoginViaOtp ( input: SchoolLiveClassLoginInput ): ParentChildToken,
+   menteeCourseHomework (courseId: ID): [MenteeCourseHomework]
+   advanceBatchCurrentSession(schoolName: String, classroomTitle: String, batchId: String, latestTopicOrder: Int!): BooleanResult
+   generateBatchSessionOtp (batchSessionIds: [ID]): [BatchSession]
+   updateSchoolStudentEmail (schoolId: ID): BooleanResult
+   removeBatchStudents ( batchId: ID! ): RemoveBatchStudentsResult
    `;
 
 export default customMutationString;

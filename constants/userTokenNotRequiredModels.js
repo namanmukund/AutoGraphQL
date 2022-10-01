@@ -5,9 +5,13 @@ const userTokenNotRequiredModels = [
   'EventCertificate',
   'IqaReport',
   'UserCourse',
-  'User',
-  'StudentProfile',
-  'ParentProfile',
+  'ContentTag',
+  'File',
+  'EventCategory',
+  'Event',
+  'EventJoinReason',
+  'EventPrize',
+  'ShortLink',
 ];
 
 export default userTokenNotRequiredModels;

@@ -37,6 +37,8 @@ const UserActivityVideoDump = `
     storyHitCount: Int
     video: Video @relation(name: "VideoUserActivityVideoDump", direction: "OneWay")
     course: Course @relation(name: "UserActivityVideoDumpCourse", direction: "OneWay")
+    startTime:Date
+    endTime: Date
   }
 `;
 

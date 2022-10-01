@@ -26,7 +26,6 @@ const loginViaOtp = async (root, params, context, info) => {
     authentication,
   ).then((result) => {
     const newResult = toObject(result);
-
     return posthook(newResult, mutationName);
   });
 };

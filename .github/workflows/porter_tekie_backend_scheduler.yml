@@ -1,8 +1,5 @@
-"on":
-  push:
-    branches:
-    - master
-name: Deploy to Porter
+on: workflow_dispatch
+name: Deploy Master Scheduler to Porter
 jobs:
   porter-deploy:
     runs-on: ubuntu-latest

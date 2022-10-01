@@ -1,7 +1,7 @@
 import { childTopicComponents } from '../../../../../constants';
 
 const {
-  message, practiceQuestion, comicStrip, chatbot,
+  message, practiceQuestion, comicStrip, chatbot, learningSlide,
 } = childTopicComponents;
 const LearningObjectiveComponents = `
   enum LearningObjectiveComponents {
@@ -9,6 +9,7 @@ const LearningObjectiveComponents = `
       ${practiceQuestion}
       ${comicStrip}
       ${chatbot}
+      ${learningSlide}
   }`;
 
 export default LearningObjectiveComponents;

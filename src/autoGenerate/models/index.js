@@ -191,9 +191,16 @@ Object.keys(parsedASTMap).forEach((type) => {
         const fieldDirectives = fieldDefinition.directive;
         const isRemote = fieldDirectives.remote;
         const isDefaultField = fieldDirectives.defaultValue;
+        const isIndexedField = fieldDirectives.createIndex;
         if (isDefaultField) {
           fieldObject.fieldModelDefinition.default = getDirectiveArgumentValue(
             parsedASTMap, typeName, fieldDefinition.name.value, 'defaultValue', 'value',
+          );
+        }
+        if (isIndexedField) {
+          // TODO: assign default value as 1
+          fieldObject.fieldModelDefinition.index = getDirectiveArgumentValue(
+            parsedASTMap, typeName, fieldDefinition.name.value, 'createIndex', 'value',
           );
         }
         const { fieldModelDefinition } = fieldObject;

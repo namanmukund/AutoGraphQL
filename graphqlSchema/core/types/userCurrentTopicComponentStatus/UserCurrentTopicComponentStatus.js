@@ -23,6 +23,7 @@ const UserCurrentTopicComponentStatus = `
     currentTopicComponentType: CurrentTopicComponentType!
     currentVideo: Video @relation(name: "UserCurrentTopicComponentStatusVideo", direction: "OneWay")
     currentBlockBasedProject: BlockBasedProject @relation(name: "UserCurrentTopicComponentStatusBlockBasedProject", direction: "OneWay")
+    currentLearningSlide: LearningSlide @relation(name: "UserCurrentTopicComponentStatusLearningSlide", direction: "OneWay")
     skillsLevel: SkillsLevel @defaultValue(value: "easy")
   }
 `;

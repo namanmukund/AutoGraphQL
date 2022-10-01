@@ -150,6 +150,7 @@ const addSessionLog = async (
       getSalesOperationData(
         clientId,
       ),
+      {},
     );
     salesOperationInput = get(salesOperationDataRes, 'data.salesOperations[0]', null);
   }

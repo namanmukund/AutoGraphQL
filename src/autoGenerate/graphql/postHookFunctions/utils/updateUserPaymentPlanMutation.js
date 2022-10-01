@@ -21,7 +21,7 @@ mutation($input:UserPaymentPlanUpdate){
   }
 }
 `;
-  const res = await callLocalGraphqlApi(query, '', { input });
+  const res = await callLocalGraphqlApi(query, null, { input });
   const data = get(res, 'data.updateUserPaymentPlan');
   return data;
 };

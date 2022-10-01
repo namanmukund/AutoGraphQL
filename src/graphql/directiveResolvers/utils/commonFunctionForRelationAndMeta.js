@@ -1,6 +1,6 @@
 // the resolvers for the directives defined in your schema
 import pluralize from 'pluralize';
-import { camelCase } from 'lodash';
+import { camelCase, get } from 'lodash';
 import models from '../../../autoGenerate/models';
 import { fetchListQueryResolver, fetchSingleQueryResolver } from '../../../autoGenerate/graphql/resolvers/query';
 import { getParsedASTMap } from '../../../autoGenerate/utils';
@@ -9,11 +9,11 @@ import { InvalidParamsError } from '../../../../constants/errors';
 import { ifAuthorized, types } from '../../../../utils';
 import { verifyToken } from '../../../auth';
 import { handleUserToken } from '../../../middlewares/authMiddleware';
-import fetchListAggregationQueryResolver
-  from '../../../autoGenerate/graphql/resolvers/query/fetchListAggregationQueryResolver';
+import fetchListAggregationQueryResolver from '../../../autoGenerate/graphql/resolvers/query/fetchListAggregationQueryResolver';
 import addAdditionalRelationFieldsToResponse from './addAdditionalRelationFieldsToResponse';
 import { prehook } from '../../../autoGenerate/graphql/preHook';
 import { posthook } from '../../../autoGenerate/graphql/postHook';
+import parseGraphqlResolveInfo from '../../../../utils/parseGraphqlResolveInfo';
 
 const parsedASTMap = getParsedASTMap(types);
 
@@ -25,11 +25,12 @@ const commonFunctionForRelationAndMeta = async (
   info,
   isMetaType = false,
 ) => {
+  const parsedInfoMap = parseGraphqlResolveInfo(info);
   const countDoc = {
     count: 0,
   };
   if (isMetaType && (!params || !params.filter)) {
-    countDoc.count = result.length || 0;
+    countDoc.count = get(result, 'length') || 0;
     return countDoc;
   }
   if (params && params.first && params.last) {
@@ -90,10 +91,18 @@ const commonFunctionForRelationAndMeta = async (
       return result;
     }
     // get model name
-    const typeName = result[0].type;
+    // Checking if type and typeId both exists in result and extracting relational type.
+    const typeName = (result[0].type && result[0].typeId) ? result[0].type : null;
     if (!typeName) {
       if (isMetaType) {
         return countDoc;
+      }
+      // If result already exists, call postHook and return updated result
+      if (result && result.length && get(result, '0.id')) {
+        if (parsedInfoMap && parsedInfoMap.typeName) {
+          const postHookResult = await posthook(result, camelCase(parsedInfoMap.typeName), context, params, info);
+          return postHookResult;
+        }
       }
       return result;
     }
@@ -145,15 +154,28 @@ const commonFunctionForRelationAndMeta = async (
       info,
       parsedASTMap,
       authentication,
+      context,
     ).then(async (res) => {
       const finalRelationValue = addAdditionalRelationFieldsToResponse(result, res);
-      const postHookResult = await posthook(finalRelationValue, modelSingular, context, params);
+      const postHookResult = await posthook(finalRelationValue, modelSingular, context, params, info);
       return postHookResult;
     });
   }
-  const typeName = result.type;
+  // Checking if type and typeId both exists in result and extracting relational type.
+  const typeName = (result.type && result.typeId) ? result.type : null;
   const model = models[typeName];
   const { typeId } = result;
+
+  // if result already exists and model is not defined i.e resulting relation
+  // is already resolved so call postHook and return updated result.
+  if (result && result.id && !typeId && !model) {
+    if (parsedInfoMap && parsedInfoMap.typeName) {
+      const postHookResult = await posthook(result, camelCase(parsedInfoMap.typeName), context, params, info);
+      return postHookResult;
+    }
+    return result;
+  }
+
   // if result is null or empty doc,i.e. reference doesnt exist, then return null
   if (!model) {
     return null;
@@ -179,9 +201,10 @@ const commonFunctionForRelationAndMeta = async (
     parsedASTMap,
     authentication,
     true, // Allow multiple
+    context,
   ).then(async (res) => {
     const finalRelationValue = addAdditionalRelationFieldsToResponse([result], [res]);
-    const postHookResult = await posthook(finalRelationValue[0], modelSingular, context, params);
+    const postHookResult = await posthook(finalRelationValue[0], modelSingular, context, params, info);
     return postHookResult;
   });
 };

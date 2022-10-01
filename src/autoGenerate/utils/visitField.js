@@ -17,6 +17,7 @@ const getMongooseDefaultValidations = (
   const {
     unique,
     defaultValue,
+    createIndex,
     uniqueOrEmpty,
     length, uppercase, lowercase, trim, match,
   } = directivesObject;
@@ -125,6 +126,11 @@ const getMongooseDefaultValidations = (
   if (uniqueOrEmpty) {
     fieldModelDefinition.unique = true;
     fieldModelDefinition.sparse = true;
+  }
+
+  // create index on the field
+  if (createIndex) {
+    fieldModelDefinition.index = true;
   }
 
   // check if default value entered by user is defined in enum type

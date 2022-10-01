@@ -229,6 +229,15 @@ const generateQueryParamsForRelationFilter = async (relatedType,
   return queryParams;
 };
 
+const getFilterValueBasedOnType = (modelName, filterKey, filterValue) => {
+  if (filterValue) {
+    const relatedFieldType = get(parsedASTMap[modelName], `field[${filterKey}].type.dataType`);
+    const fieldFilterValue = relatedFieldType === 'Date' ? new Date(filterValue) : filterValue;
+    return fieldFilterValue;
+  }
+  return '';
+};
+
 const generateQueryParamsForFilter = (
   filterTypeName,
   filterKey,
@@ -246,19 +255,19 @@ const generateQueryParamsForFilter = (
       break;
     }
     case allFilters.lt: {
-      queryParams[filterKey] = { $lt: filterValue ? new Date(filterValue) : '' };
+      queryParams[filterKey] = { $lt: getFilterValueBasedOnType(modelName, filterKey, filterValue) };
       break;
     }
     case allFilters.lte: {
-      queryParams[filterKey] = { $lte: filterValue ? new Date(filterValue) : '' };
+      queryParams[filterKey] = { $lte: getFilterValueBasedOnType(modelName, filterKey, filterValue) };
       break;
     }
     case allFilters.gt: {
-      queryParams[filterKey] = { $gt: filterValue ? new Date(filterValue) : '' };
+      queryParams[filterKey] = { $gt: getFilterValueBasedOnType(modelName, filterKey, filterValue) };
       break;
     }
     case allFilters.gte: {
-      queryParams[filterKey] = { $gte: filterValue ? new Date(filterValue) : '' };
+      queryParams[filterKey] = { $gte: getFilterValueBasedOnType(modelName, filterKey, filterValue) };
       break;
     }
     case allFilters.contains: {

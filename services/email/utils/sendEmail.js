@@ -1,8 +1,10 @@
+/* eslint-disable no-unreachable */
 import sgMail from '@sendgrid/mail';
 import sendGridApi from '../../../config/sendGrid';
 import { log } from '../../../utils/log';
 
 const sendEmail = (emailMsgObject) => {
+  return null;
   sgMail.setApiKey(sendGridApi.SENDGRID_API_KEY);
   sgMail
     .send(emailMsgObject, (error) => {

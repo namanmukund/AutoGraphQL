@@ -3,13 +3,13 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
 import { PastDateOrSlotError } from '../../../../../constants/errors/db';
-import batchSessionQuery from '../../graphqlQueries/batchSessionQuery';
+import batchSessionQuery, { schoolSessionOtpQuery } from '../../graphqlQueries/batchSessionQuery';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
 import getSelectedSlotsStringArray from '../../postHookFunctions/utils/getSelectedSlotsStringArray';
 
 const deleteBatchSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: batchSessionId } = params;
-  const batchSessionData = await callLocalGraphqlApi(batchSessionQuery(batchSessionId));
+  const batchSessionData = await callLocalGraphqlApi(batchSessionQuery(batchSessionId), context);
   const batchSession = get(batchSessionData, 'data.batchSession');
 
   if (!batchSession || !batchSession.id) {
@@ -33,8 +33,12 @@ const deleteBatchSessionValidation = async (params, mutationOrQueryName, context
       date.getHours() + slotTimeArray[0],
     );
     const currentDate = new Date();
-    if (dateTime <= currentDate) {
-      throw new PastDateOrSlotError();
+    // REVERT TEMP BYPASS CHECK
+    // eslint-disable-next-line no-constant-condition
+    if (false) {
+      if (dateTime <= currentDate) {
+        throw new PastDateOrSlotError();
+      }
     }
   }
 
@@ -53,6 +57,8 @@ const deleteBatchSessionValidation = async (params, mutationOrQueryName, context
   const {
     currentUser,
   } = userInfo;
+  const schoolSessionOtp = await callLocalGraphqlApi(schoolSessionOtpQuery(batchSessionId), context);
+  context.schoolSessionOtpArray = get(schoolSessionOtp, 'data.schoolSessionOtps');
   context.currentUser = currentUser;
 };
 

@@ -48,6 +48,10 @@ const userAssignmentQuery = (
             componentName
             order
             childComponentName
+            learningObjectiveComponentsRule {
+              componentName
+              order
+            }
             learningObjective{
               id
               order
@@ -58,6 +62,12 @@ const userAssignmentQuery = (
                 count
               }
               comicStripsMeta(filter:{status:${PUBLISHED}}){
+                count
+              }
+              learningSlides(filter:{status:${PUBLISHED}}){
+                id
+              }
+              learningSlidesMeta(filter:{status:${PUBLISHED}}){
                 count
               }
             }
@@ -94,6 +104,7 @@ const updateUserAssignment = async (
   userAssignmentId,
   assignmentAction,
   assignmentStatusInUserAssignment,
+  context,
 ) => {
   const { next } = userActionType;
   const { complete, incomplete } = userTopicTypeStatus;
@@ -152,9 +163,9 @@ const updateUserAssignment = async (
 
   const popAllQuery = 'assignment:{  popAll: true }';
   // pop all the elements in the assignment array in userAssignment
-  await callLocalGraphqlApi(updateUserAssignmentMutation(userAssignmentId, popAllQuery));
+  await callLocalGraphqlApi(updateUserAssignmentMutation(userAssignmentId, popAllQuery), context);
   // push all the existing elements with updated data in the assignment array in userAssignment
-  await callLocalGraphqlApi(updateUserAssignmentMutation(userAssignmentId, pushManyQuery));
+  await callLocalGraphqlApi(updateUserAssignmentMutation(userAssignmentId, pushManyQuery), context);
 
   return true;
 };
@@ -177,7 +188,7 @@ const addUserActivityAssignmentDumpPostHookMethod = async (input, mutationName, 
   we are getting userAssignment for below purpose:
   -we get userAssignment id , which will be used further to update the document
   */
-  const userAssignmentQueryRes = await callLocalGraphqlApi(userAssignmentQuery(userId, topicId, courseId));
+  const userAssignmentQueryRes = await callLocalGraphqlApi(userAssignmentQuery(userId, topicId, courseId), context);
   const userAssignmentInfo = get(userAssignmentQueryRes, 'data.userAssignments[0]');
   const assignmentQuestionsInUserAssignment = get(userAssignmentInfo, 'assignment');
   const assignmentStatusInUserAssignment = get(userAssignmentInfo, 'assignmentStatus');
@@ -212,6 +223,7 @@ const addUserActivityAssignmentDumpPostHookMethod = async (input, mutationName, 
     userAssignmentId,
     assignmentAction,
     assignmentStatusInUserAssignment,
+    context,
   );
 
   const currentTopicComponentInfo = get(context, `${mutationName}.userCurrentTopicComponentStatuses`);
@@ -221,6 +233,7 @@ const addUserActivityAssignmentDumpPostHookMethod = async (input, mutationName, 
     const topicOrder = get(userAssignmentInfo, 'topic.order');
     const page = isHomework ? 'homeworkAssignment' : 'assignment';
     await updateCurrentComponentStatusOfNewCourse(
+      userId,
       courseId,
       currentTopicComponentInfo,
       assignmentAction,

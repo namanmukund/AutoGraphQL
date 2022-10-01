@@ -1,6 +1,9 @@
 const CourseCategory = `
   enum CourseCategory {
-       technology
+    technology
+    tools
+    theory
+    programming
   }`;
 
 export default CourseCategory;

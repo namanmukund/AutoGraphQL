@@ -58,7 +58,7 @@ const extractMenteeSessionInfoAndSendEmail = async (
   const slotNumber = slotTimeStringArray[0].split('slot')[1];
 
   const { user: { typeId: userId }, topic: { typeId: topicId } } = input;
-  const userInfo = await callLocalGraphqlApi(menteeInfoQuery(userId));
+  const userInfo = await callLocalGraphqlApi(menteeInfoQuery(userId), {});
   const menteeInfo = get(userInfo, 'data.user');
   const parentInfo = get(menteeInfo, 'studentProfile.parents[0].user');
   // const parentId = get(parentInfo, 'id');
@@ -82,7 +82,7 @@ const extractMenteeSessionInfoAndSendEmail = async (
     isSessionBefore3Hours: moment(dateObject).diff(getIntlDateTime(new Date(), new Date().getHours(), timezone), 'hours', false) >= 4,
     isBookSessionReminderSent: get(menteeInfo, 'isBookSessionReminderSent'),
   };
-  const topicInfo = await callLocalGraphqlApi(topicInfoQuery(topicId));
+  const topicInfo = await callLocalGraphqlApi(topicInfoQuery(topicId), {});
   menteeObj.topicTitle = get(topicInfo, 'data.topic.title');
   const topicThumbnail = get(topicInfo, 'data.topic.thumbnailSmall.uri');
   menteeObj.topicThumbnail = '';

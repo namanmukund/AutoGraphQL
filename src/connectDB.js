@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { log, dbConfig } from '../utils';
 import db from './db';
 import createScheduler from '../utils/createScheduler';
@@ -25,8 +26,9 @@ db.on('error', (err) => {
     && process.env.IS_SCHEDULER_INSTANCE
     && process.env.IS_SCHEDULER_INSTANCE !== 'false') {
     createScheduler('mentorReport');
-    createScheduler('sessionReport');
-    createScheduler('sessionCourseReport');
+    createScheduler('batchSessionOtpGeneration');
+    createScheduler('autoCompleteThoeryClassroomSessions');
+    createScheduler('b2cBatchSessionReport');
     reRunJobsFromDB();
   }
 });

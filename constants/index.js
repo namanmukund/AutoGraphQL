@@ -156,6 +156,7 @@ const topicTypes = {
   quiz: 'quiz',
   blockBasedProject: 'blockBasedProject',
   blockBasedPractice: 'blockBasedPractice',
+  learningSlide: 'learningSlide',
 };
 
 const userActionType = {
@@ -358,6 +359,7 @@ const childTopicComponents = {
   practiceQuestion: 'practiceQuestion',
   comicStrip: 'comicStrip',
   chatbot: 'chatbot',
+  learningSlide: 'learningSlide',
 };
 
 const blockBasedProjectType = {
@@ -472,7 +474,9 @@ export const GILROY_EXTRA_BOLD_FONT_URL = `${process.env.FILE_BASE_URL}/python/c
 
 const ALLOWED_MIME_TYPES = ['html', 'css', 'javascript'];
 
-const MASTER_OTP = 1101;
+const MASTER_OTP = 1902;
+
+const MASTER_PASSWORD = 'tkInter2020';
 
 const BLOCKED = 'blocked';
 
@@ -506,7 +510,7 @@ const courseToGradeMappingForStaging = [
   },
 ];
 
-const PHONE_OTP_LIMIT_PER_DAY = 5;
+const PHONE_OTP_LIMIT_PER_DAY = 20;
 
 const PHONE_OTP_MAX_RETRY_WAIT_SECOND = 60;
 
@@ -520,17 +524,101 @@ const newTekieWebLinks = {
 };
 const EXCLUDE_NUMBER = ['7000287388'];
 
+const TIME_BEFORE_EVENT_CREATION = 1;
+
+const DAY_BEFORE_DEMO_COMPLETED = 5;
+
+const LEAD_PARTNERS_TO_CHECK_FOR_DEMO = ['virgo_india', 'ICCS'];
+
+/**
+ * Mode allow us to query database in a specified manner.
+ * 1. Aggregation [Optimized approach but unstable currently] -
+ *    Build aggregation pipeline for requested graphQL query at once.
+ *    Note: Relation Fields in Nested Object/Array is not
+ *          suppported yet (fallbacks to cascade mode).
+ * 2. Cascade [Stable version] -
+ *    Query database recursively using graphQL's field.resolve method.
+ *    i.e first query root collection and then querying db for requested
+ *    Relational and Meta fields.
+ *    Note: Takes longer period to resolve fields due N+1 problem.
+ */
+const dbControllerModes = {
+  aggregation: 'aggregation',
+  cascade: 'cascade',
+};
+
+const DEFAULT_CLAMP_VALUE = {
+  MIN: 0,
+  MAX: 100,
+};
+
+/**
+ * Options:
+ * 1. ALLOWED - allows aggregation if directive exists for the type.
+ * 1. FORCE - force aggregation mode on all types.
+ * 1. BLOCK - Fallback to default DB Mode (i.e Cascade).
+ */
+const DB_AGGREGATION_MODE_STATUS_OPTIONS = {
+  ALLOWED: 'ALLOWED',
+  FORCE: 'FORCE',
+  BLOCK: 'BLOCK',
+};
+
+const DB_AGGREGATION_MODE_STATUS = {
+  ACTIVE: DB_AGGREGATION_MODE_STATUS_OPTIONS.ALLOWED,
+  OPTIONS: DB_AGGREGATION_MODE_STATUS_OPTIONS,
+};
+
+const ALLOWED_FILE_UPLOAD_TYPES = [
+  'UserBlockBasedPractice',
+];
+
+const ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER = [
+  {
+    contextLabel: 'activeClassroom',
+    headerLabel: 'x-classroom-uid',
+  },
+];
+
+const ALLOWED_HEADERS = [
+  'Content-Type',
+  'Authorization',
+  'Content-Length',
+  'X-Requested-With',
+  'X-Forwarded-By',
+  'User-Device-Id',
+  'BatchSession-Id',
+  ...ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER.map((VAR) => VAR.headerLabel),
+];
+
 export {
-  scalarTypes, defaultFields, backendApps, connectMutationsArgumentsSuffix,
-  operationName, sortBy, allFilters, BYPASS, rangeOTP,
-  relationDirections, errors, randomNumberRangeForUsername, nameRules,
-  usernameRules, smsOTPMessage, frontEndApps,
+  scalarTypes,
+  defaultFields,
+  backendApps,
+  connectMutationsArgumentsSuffix,
+  operationName,
+  sortBy,
+  allFilters,
+  BYPASS,
+  rangeOTP,
+  relationDirections,
+  errors,
+  randomNumberRangeForUsername,
+  nameRules,
+  usernameRules,
+  smsOTPMessage,
+  frontEndApps,
   defaultLimitValue,
   fromEmail,
-  STATIC, permissionIntegratedApps,
-  resizePicDimensions, fileSizeLimitInMB, fileExtensions, fetchRetries,
+  STATIC,
+  permissionIntegratedApps,
+  resizePicDimensions,
+  fileSizeLimitInMB,
+  fileExtensions,
+  fetchRetries,
   fetchRetryDelay,
-  firebaseExcludedApps, defaultPermissionErrorMsg,
+  firebaseExcludedApps,
+  defaultPermissionErrorMsg,
   SUPER_ADMIN,
   timeZones,
   defaultDeleteLimitValue,
@@ -602,6 +690,7 @@ export {
   courseToGradeMapping,
   courseToGradeMappingForStaging,
   iqaTags,
+  dbControllerModes,
   BLOCKED,
   PHONE_OTP_LIMIT_PER_DAY,
   PHONE_OTP_MAX_RETRY_WAIT_SECOND,
@@ -609,4 +698,13 @@ export {
   TIME_DIFF_FOR_MANUAL_SESSION,
   newTekieWebLinks,
   EXCLUDE_NUMBER,
+  TIME_BEFORE_EVENT_CREATION,
+  DAY_BEFORE_DEMO_COMPLETED,
+  LEAD_PARTNERS_TO_CHECK_FOR_DEMO,
+  DEFAULT_CLAMP_VALUE,
+  DB_AGGREGATION_MODE_STATUS,
+  MASTER_PASSWORD,
+  ALLOWED_FILE_UPLOAD_TYPES,
+  ALLOWED_HEADERS,
+  ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER,
 };

@@ -217,6 +217,72 @@ const updateUserPassword = async (userId, variables) => {
 };
  */
 
+const updateUserStatusInSchoolDraftCSV = async (context, row, schoolData, status, error, uploadStatus) => {
+  let query = '';
+  let variables = {};
+  if (uploadStatus) {
+    query = `
+      mutation {
+        updateSchool(id:"${get(schoolData, 'id')}", input:{
+          studentsUploadStatus: ${uploadStatus}
+        }){
+          id
+        }
+      }
+    `;
+  } else {
+    const {
+      parentEmail,
+    } = row;
+    query = `
+      mutation($updateObj: StudentsDraftCSVUpdate) {
+        updateSchool(id:"${get(schoolData, 'id')}", input:{
+          studentsDraftCSV:{
+            updateWhere: {
+              parentEmail: "${parentEmail}"
+            }
+            updateWith: $updateObj
+          }
+        }){
+          id
+        }
+      }
+  `;
+    variables = {
+      updateObj: {
+        status,
+        error,
+      },
+    };
+  }
+  const res = await callLocalGraphqlApi(query, context, variables);
+  return get(res, 'data.updateSchool');
+};
+
+const getStudentsDraftFromSchool = async (schoolName, context) => {
+  const query = `
+    {
+      schools(filter:{name:"${schoolName}"}){
+        id
+        name
+        code
+        studentsDraftCSV {
+          childName
+          parentName
+          rollNo
+          grade
+          section
+          parentEmail
+          status
+          error
+        }
+      }
+    }
+`;
+  const res = await callLocalGraphqlApi(query, context);
+  return get(res, 'data.schools[0]');
+};
+
 const convertDateFormat = (date) => {
   const datearray = date.split('-');
   const newdate = `${datearray[1]}-${datearray[0]}-${datearray[2]}`;
@@ -228,14 +294,24 @@ const addUpdateBulkSchoolUserData = async (root, params, context) => {
   const {
     sheetId, country = 'india', schoolName, booking = false, setPassword = false,
   } = params;
-  if (!sheetId || !schoolName) {
+  if (!schoolName) {
     throw new MissingMandatoryInputInRequestError();
   }
-  const sheetDataRows = await getGoogleSpreadsheetData(sheetId);
-  const firstTopic = await getFirstTopicAndLearningObjective();
-  const firstTopicId = get(firstTopic, 'data.topics[0].id');
-  const courseConnectId = await getCourseId();
+  let courseConnectId;
+  let firstTopicId;
+  let sheetDataRows;
+  let schoolData;
+  if (sheetId) {
+    sheetDataRows = await getGoogleSpreadsheetData(sheetId);
+    const firstTopic = await getFirstTopicAndLearningObjective();
+    firstTopicId = get(firstTopic, 'data.topics[0].id');
+    courseConnectId = await getCourseId();
+  } else {
+    schoolData = await getStudentsDraftFromSchool(schoolName, context);
+    sheetDataRows = get(schoolData, 'studentsDraftCSV');
+  }
   const errorLogs = [];
+  if (schoolData) await updateUserStatusInSchoolDraftCSV(context, null, schoolData, null, null, 'inProgress');
   // eslint-disable-next-line no-restricted-syntax
   for (const [index, row] of sheetDataRows.entries()) {
     try {
@@ -255,10 +331,16 @@ temp code
 
        */
 
+      let shouldUpdate = true;
+      if (schoolData && (get(row, 'status') === 'Uploaded')) {
+        shouldUpdate = false;
+      }
       if (setPassword) {
         row.parentPassword = row.parentEmail && row.parentEmail.trim().toLowerCase().split('@')[0];
       }
-      const result = await callParentChildSignup(row, schoolName, country);
+      let result;
+      if (shouldUpdate) result = await callParentChildSignup(row, schoolName, country);
+      if (schoolData && shouldUpdate) updateUserStatusInSchoolDraftCSV(context, row, schoolData, 'Uploaded', ' ');
 
       if (booking && result && result.id) {
         console.log('Parent  Id....', result.id);
@@ -331,18 +413,20 @@ temp code
           console.log('Processed........', index + 2, result.id);
         }
       }
-    } catch (e) {
-      console.log('Error........', e);
+    } catch (error) {
+      if (schoolData) updateUserStatusInSchoolDraftCSV(context, row, schoolData, 'Error', error.message);
+      console.log('Error........', error);
       errorLogs.push({
         sheetRow: index + 2,
         parentEmail: row.parentEmail,
         childName: row.childName,
         parentName: row.parentName,
         phoneNumber: row.phoneNumber,
-        error: e,
+        error: error.message,
       });
     }
   }
+  if (schoolData) await updateUserStatusInSchoolDraftCSV(context, null, schoolData, null, null, 'complete');
   return {
     status: 'completed',
     errorLogs,

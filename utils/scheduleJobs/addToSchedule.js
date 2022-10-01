@@ -5,9 +5,38 @@
 // import sendB2B2CBookingReminder from './jobs/sendB2B2CBookingReminder';
 // import sendB2CSessionReminder from './jobs/sendB2CSessionReminder';
 import extractBatchSessionAndPostCarnival from '../../src/autoGenerate/graphql/postHookFunctions/utils/extractBatchSessionAndSendPostCarnival';
+// import scheduleB2BSessionHomeworkRemainder from './scheduleB2BSessionHomeworkRemainder';
+// import scheduleB2BSessionReminder from './scheduleB2BSessionReminder';
 // import sendB2CBookReminderNextDay from './jobs/sendB2CBookReminderNextDay';
 // import sendMentorSessionReminder from './jobs/sendMentorSessionReminder';
 // import sendMentorSessionReminderB2B2C from './jobs/sendMentorSessionReminderB2B2C';
+// import sendMentorVerifyBookingReminder from './jobs/sendMentorVerifyBookingReminder';
+// import sendEventCommunication from './jobs/sendEventCommunication';
+// import eventNewRegistrationReminder from './jobs/eventNewRegistrationReminder';
+// import addStudentToEventSession from './jobs/addStudentsToEventSession';
+
+// const getScheduleJobAndDelete = async (eventSessionId) => {
+//   const query = `{
+//   scheduleJobs(filter: { eventSessionId: "${eventSessionId}" }) {
+//     id
+//   }
+// }
+// `;
+//   const scheduleJob = await callLocalGraphqlApi(query);
+//   if (get(scheduleJob, 'data.scheduleJobs', []).length) {
+//     let jobIds = '';
+//     get(scheduleJob, 'data.scheduleJobs', []).forEach((job) => { jobIds += `"${get(job, 'id')}"`; });
+//     if (jobIds) {
+//       const deleteQuery = `mutation {
+//       deleteScheduleJobs(filter: { id_in: [${jobIds}] }) {
+//         id
+//       }
+//     }
+//     `;
+//       await callLocalGraphqlApi(deleteQuery);
+//     }
+//   }
+// };
 
 // const addScheduleJob = ({
 //   jobType,
@@ -27,6 +56,17 @@ import extractBatchSessionAndPostCarnival from '../../src/autoGenerate/graphql/p
 //   sessionLink,
 //   mentorUserId,
 //   mentorPhoneNumber,
+//   taskId,
+//   studentProfileId,
+//   templateName,
+//   isEmailRule = false,
+//   commsVariables,
+//   eventId,
+//   condition,
+//   attendanceFilter,
+//   value,
+//   unit,
+//   eventSessionId,
 // }) => `
 //   mutation {
 //     addScheduleJob(
@@ -45,8 +85,19 @@ import extractBatchSessionAndPostCarnival from '../../src/autoGenerate/graphql/p
 //         ${sessionTime ? `sessionTime: "${sessionTime}"` : ''}
 //         ${sessionLink ? `sessionLink: "${sessionLink}"` : ''}
 //         ${mentorUserId ? `mentorUserId: "${mentorUserId}"` : ''}
+//         ${taskId ? `taskId: "${taskId}"` : ''}
 //         ${mentorPhoneNumber ? `mentorPhoneNumber: "${mentorPhoneNumber}"` : ''}
 //         scheduledDate: "${scheduledDate.toISOString()}"
+//         ${studentProfileId ? `studentProfileId:"${studentProfileId}"` : ''}
+//         ${commsVariables ? `commsVariables: ${commsVariables}` : ''}
+//         ${templateName ? `templateName: "${templateName}"` : ''}
+//         ${isEmailRule ? 'isEmailRule: true' : ''}
+//         ${eventId ? `eventId: "${eventId}"` : ''}
+//         ${condition ? `condition: ${condition}` : ''}
+//         ${attendanceFilter ? `attendanceFilter: ${attendanceFilter}` : ''}
+//         ${value ? `value: ${value}` : ''}
+//         ${unit ? `unit: ${unit}` : ''}
+//         ${eventSessionId ? `eventSessionId: "${eventSessionId}"` : ''}
 //       }
 //       ${userId ? `parentConnectId: "${userId}"` : ''}
 //     ) {
@@ -78,6 +129,10 @@ const addToSchedule = async (jobType, scheduledDate, {
   // sessionLink,
   // mentorUserId,
   // mentorPhoneNumber,
+  // taskId,
+  // studentProfileId,
+  // eventId,
+  // eventCommsRule,
 }) => {
   switch (jobType) {
     case 'sendNextDayBookReminder': {
@@ -87,6 +142,26 @@ const addToSchedule = async (jobType, scheduledDate, {
       // const jobId = get(res, 'data.addScheduleJob.id');
       // schedule.scheduleJob(scheduledDate, () => {
       //   sendB2B2CBookReminderNextDay({ userId, code }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      // });
+      break;
+    }
+    case 'sendB2BReminder': {
+      // const res = await callLocalGraphqlApi(addScheduleJob({
+      //   jobType, scheduledDate, batchSessionId,
+      // }));
+      // const jobId = get(res, 'data.addScheduleJob.id');
+      // schedule.scheduleJob(scheduledDate, () => {
+      //   scheduleB2BSessionReminder(batchSessionId, deleteJob(jobId));
+      // });
+      break;
+    }
+    case 'sendB2BHomeworkReminder': {
+      // const res = await callLocalGraphqlApi(addScheduleJob({
+      //   jobType, scheduledDate, batchSessionId,
+      // }));
+      // const jobId = get(res, 'data.addScheduleJob.id');
+      // schedule.scheduleJob(scheduledDate, () => {
+      //   scheduleB2BSessionHomeworkRemainder(batchSessionId, deleteJob(jobId));
       // });
       break;
     }
@@ -264,6 +339,110 @@ const addToSchedule = async (jobType, scheduledDate, {
       // });
       break;
     }
+    case 'sendMentorVerifyBookingReminder': {
+      // const res = await callLocalGraphqlApi(addScheduleJob({
+      //   jobType, mentorUserId, taskId, scheduledDate,
+      // }));
+      // const jobId = get(res, 'data.addScheduleJob.id');
+      // schedule.scheduleJob(scheduledDate, () => {
+      //   sendMentorVerifyBookingReminder({
+      //     taskId, mentorUserId, jobType,
+      //   }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      // });
+      break;
+    }
+    case 'eventCommsJob': {
+      // let commsVariables = '';
+      // get(eventCommsRule, 'commsVariables', []).forEach((comms) => {
+      //   if (get(comms, 'dataField')) {
+      //     commsVariables += `{
+      //       whatsappVariableName: "${get(comms, 'whatsappVariableName') || ''}",
+      //       emailVariableName: "${get(comms, 'emailVariableName') || ''}",
+      //       dataField: ${get(comms, 'dataField')}
+      //     },`;
+      //   }
+      // });
+      // commsVariables = `[${commsVariables}]`;
+      // const res = await callLocalGraphqlApi(addScheduleJob({
+      //   jobType,
+      //   eventId,
+      //   scheduledDate,
+      //   templateName: get(eventCommsRule, 'templateName'),
+      //   isEmailRule: get(eventCommsRule, 'isEmailRule', false),
+      //   commsVariables,
+      //   condition: get(eventCommsRule, 'condition'),
+      //   attendanceFilter: get(eventCommsRule, 'attendanceFilter'),
+      //   value: get(eventCommsRule, 'value'),
+      //   unit: get(eventCommsRule, 'unit'),
+      // }));
+      // const jobId = get(res, 'data.addScheduleJob.id');
+      // schedule.scheduleJob(new Date(scheduledDate), () => {
+      //   sendEventCommunication({
+      //     eventId,
+      //     eventCommsRule,
+      //     jobType,
+      //     commsVariables: get(eventCommsRule, 'commsVariables', []),
+      //     templateName: get(eventCommsRule, 'templateName'),
+      //     isEmailRule: get(eventCommsRule, 'isEmailRule', false),
+      //     condition: get(eventCommsRule, 'condition'),
+      //     attendanceFilter: get(eventCommsRule, 'attendanceFilter'),
+      //     value: get(eventCommsRule, 'value'),
+      //     unit: get(eventCommsRule, 'unit'),
+      //     jobId,
+      //   }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      // });
+      break;
+    }
+    case 'eventNewRegistrationReminder': {
+      // let commsVariables = '';
+      // get(eventCommsRule, 'commsVariables', []).forEach((comms) => {
+      //   if (get(comms, 'dataField')) {
+      //     commsVariables += `{
+      //       whatsappVariableName: "${get(comms, 'whatsappVariableName') || ''}",
+      //       emailVariableName: "${get(comms, 'emailVariableName') || ''}",
+      //       dataField: ${get(comms, 'dataField')}
+      //     },`;
+      //   }
+      // });
+      // commsVariables = `[${commsVariables}]`;
+      // const res = await callLocalGraphqlApi(addScheduleJob({
+      //   jobType,
+      //   eventId,
+      //   scheduledDate,
+      //   commsVariables,
+      //   studentProfileId,
+      //   templateName: get(eventCommsRule, 'templateName'),
+      //   isEmailRule: get(eventCommsRule, 'isEmailRule', false),
+      // }));
+      // const jobId = get(res, 'data.addScheduleJob.id');
+      // schedule.scheduleJob(new Date(scheduledDate), () => {
+      //   eventNewRegistrationReminder({
+      //     eventId,
+      //     jobType,
+      //     studentProfileId,
+      //     commsVariables: get(eventCommsRule, 'commsVariables', []),
+      //     templateName: get(eventCommsRule, 'templateName'),
+      //     isEmailRule: get(eventCommsRule, 'isEmailRule', false),
+      //   }, () => callLocalGraphqlApi(deleteJob(jobId)));
+      // });
+      break;
+    }
+    // case 'eventSessionAttendance': {
+    //   if (isUpdatingEventSession) {
+    //     await getScheduleJobAndDelete(eventSessionId);
+    //   }
+    //   const res = await callLocalGraphqlApi(addScheduleJob({
+    //     jobType, eventSessionId, scheduledDate,
+    //   }));
+    //   const jobId = get(res, 'data.addScheduleJob.id');
+    //   schedule.scheduleJob(scheduledDate, () => {
+    //     addStudentToEventSession({
+    //       eventSessionId,
+    //       jobId,
+    //     }, () => callLocalGraphqlApi(deleteJob(jobId)));
+    //   });
+    //   break;
+    // }
     default:
       break;
   }

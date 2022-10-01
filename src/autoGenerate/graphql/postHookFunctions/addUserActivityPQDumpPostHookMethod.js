@@ -113,6 +113,58 @@ const addUserPracticeQuestionReportMutation = (
   }
   `;
 
+// mutation to update UserPracticeQuestionReport
+const updateUserPracticeQuestionReportMutation = (
+  pqReportId,
+) => `
+  mutation($input: UserPracticeQuestionReportUpdate) {
+  updateUserPracticeQuestionReport(id: "${pqReportId}", input: $input) {
+    id
+  }
+}
+  `;
+// get UserPracticeQuestionReport
+const getUserPracticeQuestionReportQuery = (
+  userId,
+  learningObjectiveId,
+  courseId,
+) => `
+  {
+  userPracticeQuestionReports(filter:{
+    and:[
+      {
+        user_some:{id:"${userId}"}
+      }
+      {
+        course_some:{
+          id:"${courseId}"
+        }
+      }
+      {
+        learningObjective_some:{
+          id:"${learningObjectiveId}"
+        }
+      }
+    ]
+  }){
+    id
+    detailedReport{
+      question{
+        id
+      }
+      attemptNumber
+      isCorrect
+      firstTry
+      secondTry
+      thirdOrMoreTry
+      isAnswerUsed
+      isHintUsed
+      startTime
+      endTime
+    }
+  }
+}
+  `;
 /*
 Current topic component status and
 UserLearningObjective(bookmark, practiceQuestionStatus etc) is updated based on-
@@ -147,7 +199,7 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
   -we get next component from the document and update user current topic component status with same
   */
   const userLearningObjectiveQueryRes = await callLocalGraphqlApi(
-    userLearningObjectiveQuery(userId, learningObjectiveId, courseId),
+    userLearningObjectiveQuery(userId, learningObjectiveId, courseId), context,
   );
   const userLearningObjectiveInfo = get(userLearningObjectiveQueryRes, 'data.userLearningObjectives[0]');
   const {
@@ -219,13 +271,15 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
           isAnswerUsed,
           attemptNumber,
           questionAction,
+          startTime,
+          endTime,
         } = inputPracticeQuestion;
         /*
         As we are iterating over each question from userLearningObjective and input
         So, checking here for same question in both
         */
         if (questionConnectId === inputQuestionConnectId) {
-          detailedReport.push({
+          const detailedReportObj = {
             questionConnectId,
             isCorrect,
             isAnswerUsed,
@@ -233,7 +287,11 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
             firstTry: attemptNumber === 1,
             secondTry: attemptNumber === 2,
             thirdOrMoreTry: attemptNumber > 2,
-          });
+            attemptNumber,
+          };
+          if (startTime) detailedReportObj.startTime = startTime;
+          if (endTime) detailedReportObj.endTime = endTime;
+          detailedReport.push({ ...detailedReportObj });
           Object.assign(newPracticeQuestionInUserLearningObjective, { questionConnectId });
           /*
           Case: When individual question is incomplete and whole PQ is also incomplete.
@@ -274,6 +332,12 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
               Object.assign(newPracticeQuestionInUserLearningObjective, { attemptNumber });
             }
           }
+          if (startTime) {
+            Object.assign(newPracticeQuestionInUserLearningObjective, { startTime });
+          }
+          if (endTime) {
+            Object.assign(newPracticeQuestionInUserLearningObjective, { endTime });
+          }
         }
       });
       /*
@@ -285,6 +349,8 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
         isAnswerUsed: updatedIsAnswerUsed,
         attemptNumber: updatedAttemptNumber,
         status: updatedStatus,
+        startTime: updatedStartTime,
+        endTime: updatedEndTime,
       } = newPracticeQuestionInUserLearningObjective;
       /*
       Storing count of all questions in completed state. We will use this in validating
@@ -298,7 +364,9 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
       pushManyQuery += `isHintUsed: ${updatedIsHintUsed}, 
                                                isAnswerUsed: ${updatedIsAnswerUsed}, 
                                                attemptNumber: ${updatedAttemptNumber}, 
-                                               status: ${updatedStatus}, 
+                                               status: ${updatedStatus},
+                                               ${updatedStartTime ? `startTime: "${updatedStartTime}"` : ''}
+                                               ${updatedEndTime ? `endTime: "${updatedEndTime}"` : ''}
                                               }, `;
 
       /*
@@ -325,7 +393,7 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
                    }`;
 
   // check if all PQ questions are sent in input in case pq action is "next"
-  if (pqAction && pqAction === next && completedQuestionCount !== totalQuestions) {
+  if (pqAction && pqAction === next && (!get(context, 'fromAddUserLSDump', false) && (completedQuestionCount !== totalQuestions))) {
     log('PracticeQuestions are not present in input in addUserActivityPQDumpPostHookMethod');
     throw new PracticeQuestionsNotPresentError();
   }
@@ -373,6 +441,7 @@ And current component status will not get changed when it is already consumed in
     );
   } else {
     await updateCurrentComponentStatusOfNewCourse(
+      userId,
       courseId,
       currentTopicComponentInfo,
       pqAction,
@@ -393,27 +462,76 @@ And current component status will not get changed when it is already consumed in
     isPracticeQuestionBookmarked,
     practiceQuestionStatus,
     popAllQuery,
-  ));
+  ), context);
   // pushing new array of objects(updated questions)
   await callLocalGraphqlApi(updateUserLearningObjectiveMutationPracticeQuestions(
     userLearningObjectiveId,
     pushManyQuery,
-  ));
+  ), context);
+  const pqReportInput = {
+    firstTryCount,
+    secondTryCount,
+    threeOrMoreTryCount,
+    helpUsedCount,
+    answerUsedCount,
+    detailedReport,
+  };
+  if (get(context, 'fromAddUserLSDump')) {
+    const pqReport = await callLocalGraphqlApi(getUserPracticeQuestionReportQuery(userId, learningObjectiveIdInResult, courseId), context);
+    if (get(pqReport, 'data.userPracticeQuestionReports', []).length) {
+      const prevDetailedReport = get(pqReport, 'data.userPracticeQuestionReports[0].detailedReport', []);
+      prevDetailedReport.forEach((questionReport) => {
+        const isAlreadyAdded = detailedReport.find((detailReport) => get(detailReport, 'questionConnectId') === get(questionReport, 'question.id'));
+        if (!isAlreadyAdded) {
+          const questionConnectId = get(questionReport, 'question.id');
+          const {
+            attemptNumber, isCorrect, firstTry, secondTry,
+            thirdOrMoreTry, isAnswerUsed, isHintUsed, startTime, endTime,
+          } = questionReport;
+          const detailedReportObj = {
+            questionConnectId,
+            isCorrect,
+            isAnswerUsed,
+            isHintUsed,
+            firstTry,
+            secondTry,
+            thirdOrMoreTry,
+            attemptNumber,
+          };
+          if (startTime) detailedReportObj.startTime = startTime;
+          if (endTime) detailedReportObj.endTime = endTime;
+          detailedReport.push({ ...detailedReportObj });
+        }
+      });
+      // if pqReport exist update pqReport
+      Object.assign(pqReportInput, {
+        detailedReport: {
+          replace: detailedReport,
+        },
+      });
+      await callLocalGraphqlApi(updateUserPracticeQuestionReportMutation(get(pqReport, 'data.userPracticeQuestionReports[0].id')), context, {
+        input: pqReportInput,
+      });
+    } else {
+      // adding pqReport
+      await callLocalGraphqlApi(addUserPracticeQuestionReportMutation(
+        userId,
+        learningObjectiveIdInResult,
+        courseId,
+      ), context, {
+        input: pqReportInput,
+      });
+    }
+    return true;
+  }
   // PQ report will be generated every time when user hits next
   if (pqAction === next && completedQuestionCount === totalQuestions) {
     await callLocalGraphqlApi(addUserPracticeQuestionReportMutation(
       userId,
       learningObjectiveIdInResult,
       courseId,
-    ), '', {
-      input: {
-        firstTryCount,
-        secondTryCount,
-        threeOrMoreTryCount,
-        helpUsedCount,
-        answerUsedCount,
-        detailedReport,
-      },
+    ), context, {
+      input: pqReportInput,
     });
   }
   return true;

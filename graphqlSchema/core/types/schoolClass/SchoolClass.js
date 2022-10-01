@@ -3,6 +3,8 @@ const SchoolClass = `
     school: School! @relation(name: "SchoolClassSchool", isSubset: true)
     grade: Grade! @groupBy
     section: Section @groupBy
+    gradeDisplayName: String
+    sectionDisplayName: String
     students: [StudentProfile] @relation(name: "SchoolClassStudentProfile")
   }
 `;

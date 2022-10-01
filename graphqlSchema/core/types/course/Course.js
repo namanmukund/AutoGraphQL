@@ -34,6 +34,12 @@ const ThemeType = `
  }
 `;
 
+const ArrayValue = `
+ type ArrayValue {
+   value: String
+ }
+`;
+
 const CourseTargetUserType = `
  type CourseTargetUserType {
    type: ProductTargetUserType
@@ -41,7 +47,8 @@ const CourseTargetUserType = `
 `;
 
 const Course = `
-  type Course @model 
+  type Course @model
+  @databaseController(mode: "aggregation")
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },
@@ -64,6 +71,7 @@ const Course = `
   ) 
   {
     order: Int
+    courseDisplayName: String
     title: String! @length(min: 3, max: 100) @trim
     bannerTitle: String
     bannerDescription: String
@@ -85,10 +93,14 @@ const Course = `
     badgeDescription: String @uniqueOrEmpty @trim
     projectsCount: Int
     codingLanguages: [CodingLanguage]
+    tools: [ArrayValue]
+    programming: [ArrayValue]
+    theory: [ArrayValue]
     minGrade: Int
     maxGrade: Int
     documentationUrl: String
+    thumbnailSmall: File @relation(name: "CourseThumbnailSmall", direction: "OneWay")
   }
 `;
 
-export default [Course, CourseComponentsRule, ThemeType, CourseTargetUserType, LearningObjectiveComponentsRule];
+export default [Course, CourseComponentsRule, ThemeType, CourseTargetUserType, LearningObjectiveComponentsRule, ArrayValue];

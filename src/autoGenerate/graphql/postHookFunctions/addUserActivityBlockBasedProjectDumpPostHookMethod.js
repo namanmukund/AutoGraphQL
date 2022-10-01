@@ -34,6 +34,10 @@ const userBlockBasedProjectQuery = (userId, topicId, blockBasedProjectId, course
           componentName
           order
           childComponentName
+          learningObjectiveComponentsRule {
+            componentName
+            order
+          }
           learningObjective{
             id
             order
@@ -44,6 +48,12 @@ const userBlockBasedProjectQuery = (userId, topicId, blockBasedProjectId, course
               count
             }
             comicStripsMeta(filter:{status:${PUBLISHED}}){
+              count
+            }
+            learningSlides(filter:{status:${PUBLISHED}}){
+              id
+            }
+            learningSlidesMeta(filter:{status:${PUBLISHED}}){
               count
             }
           }
@@ -63,12 +73,14 @@ const userBlockBasedProjectQuery = (userId, topicId, blockBasedProjectId, course
 // query to update user LO based on activity done by user
 const updateUserBlockBasedProjectMutation = (userBlockBasedProjectId,
   blockBasedProjectStatus,
-  answerLink, savedBlocks) => `
+  answerLink, savedBlocks, startTime, endTime) => `
   mutation{
     updateUserBlockBasedProject(id:"${userBlockBasedProjectId}",  input:{
       ${answerLink ? `answerLink: "${answerLink}"` : ''}
       ${savedBlocks ? `savedBlocks: "${savedBlocks}"` : ''}
       status: ${blockBasedProjectStatus}
+      ${startTime ? `startTime: "${startTime}"` : ''}
+      ${endTime ? `endTime: "${endTime}"` : ''}
     }){
       id
       status
@@ -98,7 +110,7 @@ const addUserActivityBlockBasedProjectDumpPostHookMethod = async (input, mutatio
     in that case if he is hitting back after blockBasedProject consumption, status will not get updated
     if it is already completed
   */
-  const userBlockBasedProjectQueryRes = await callLocalGraphqlApi(userBlockBasedProjectQuery(userId, topicId, blockBasedProjectId, courseId));
+  const userBlockBasedProjectQueryRes = await callLocalGraphqlApi(userBlockBasedProjectQuery(userId, topicId, blockBasedProjectId, courseId), context);
   const userBlockBasedProjectInfo = get(userBlockBasedProjectQueryRes, 'data.userBlockBasedProjects[0]');
 
   const {
@@ -108,6 +120,8 @@ const addUserActivityBlockBasedProjectDumpPostHookMethod = async (input, mutatio
   const {
     answerLink,
     savedBlocks,
+    startTime,
+    endTime,
   } = input;
 
   const topicComponentRule = get(userBlockBasedProjectInfo, 'topic.topicComponentRule', []);
@@ -132,6 +146,7 @@ const addUserActivityBlockBasedProjectDumpPostHookMethod = async (input, mutatio
   Calling method to update current user Topic Component status
   */
   await updateCurrentComponentStatusOfNewCourse(
+    userId,
     courseId,
     currentTopicComponentInfo,
     blockBasedProjectAction,
@@ -161,7 +176,9 @@ const addUserActivityBlockBasedProjectDumpPostHookMethod = async (input, mutatio
     blockBasedProjectStatus,
     answerLink,
     savedBlocks,
-  ));
+    startTime,
+    endTime,
+  ), context);
   return true;
 };
 

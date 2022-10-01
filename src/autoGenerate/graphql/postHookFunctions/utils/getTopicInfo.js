@@ -14,7 +14,7 @@ const topicInfoQuery = (topicId) => `
 `;
 
 const getTopicInfo = async (topicId) => {
-  const topicInfo = await callLocalGraphqlApi(topicInfoQuery(topicId));
+  const topicInfo = await callLocalGraphqlApi(topicInfoQuery(topicId), {});
   return topicInfo;
 };
 

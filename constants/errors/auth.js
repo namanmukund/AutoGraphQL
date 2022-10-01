@@ -9,7 +9,7 @@ export const UnknownUserError = createError('UnknownUserError', {
 });
 
 export const PasswordMismatchError = createError('PasswordMismatchError', {
-  message: 'Incorrect password',
+  message: 'Incorrect Password',
 });
 
 export const OTPMismatchError = createError('OTPMismatchError', {
@@ -68,4 +68,14 @@ export const ResetPasswordLinkExpired = createError('ResetPasswordLinkExpired', 
 
 export const PasswordMismatchMessageError = createError('PasswordMismatchMessageError', {
   message: 'Password Mismatched',
+});
+export const RollNumberMismatchMessageError = createError('RollNumberMismatchMessageError', {
+  message: 'Incorrect Roll Number',
+});
+export const InvalidUserIdError = createError('InvalidUserIdError', {
+  message: 'Invalid User',
+});
+
+export const UserAlreadyLoggedInIntoAnotherSystemError = createError('UserAlreadyLoggedInIntoAnotherSystemError', {
+  message: 'User is already loggedIn into another system',
 });

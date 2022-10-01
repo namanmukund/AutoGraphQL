@@ -37,6 +37,7 @@ const updateSalesOperationPostHookMethod = async (input, params, mutationName, c
       addSalesOperationActivityQuery(
         loggedByConnectId, input.id, 'leadStatus', leadStatus,
       ),
+      context,
     );
     // update leadStatus in MentorMenteeSession
     const firstMentorMenteeSessionId = get(input, 'firstMentorMenteeSession.typeId');
@@ -50,6 +51,7 @@ const updateSalesOperationPostHookMethod = async (input, params, mutationName, c
       addSalesOperationActivityQuery(
         loggedByConnectId, input.id, 'leadStatus', leadStatus, prevLeadStatus,
       ),
+      context,
     );
     // update leadStatus in MentorMenteeSession
     const firstMentorMenteeSessionId = get(input, 'firstMentorMenteeSession.typeId');
@@ -64,6 +66,7 @@ const updateSalesOperationPostHookMethod = async (input, params, mutationName, c
       addSalesOperationActivityQuery(
         loggedByConnectId, input.id, 'nextSteps', nextSteps,
       ),
+      context,
     );
   }
   // case of update  nextSteps
@@ -72,6 +75,7 @@ const updateSalesOperationPostHookMethod = async (input, params, mutationName, c
       addSalesOperationActivityQuery(
         loggedByConnectId, input.id, 'nextSteps', nextSteps, prevNextSteps,
       ),
+      context,
     );
   }
 
@@ -81,6 +85,7 @@ const updateSalesOperationPostHookMethod = async (input, params, mutationName, c
       addSalesOperationActivityQuery(
         loggedByConnectId, input.id, 'nextCallOn', nextCallOn,
       ),
+      context,
     );
   }
   // case of update  prevNextCallOn
@@ -89,9 +94,10 @@ const updateSalesOperationPostHookMethod = async (input, params, mutationName, c
       addSalesOperationActivityQuery(
         loggedByConnectId, input.id, 'nextCallOn', nextCallOn, prevNextCallOn,
       ),
+      context,
     );
   }
-  const userInfo = await getMenteeInfo(get(input, 'client.typeId'));
+  const userInfo = await getMenteeInfo(get(input, 'client.typeId'), context);
   updateSalesOperationLeadsquared(get(input, 'id'), userInfo);
 };
 

@@ -20,6 +20,8 @@ query{
       id
       code
       type
+      customSessionLink
+      documentType
       allottedMentor{
         id
       }
@@ -38,6 +40,13 @@ query{
     course{
         id
     }
+  }
+}
+`;
+
+export const schoolSessionOtpQuery = (batchSessionId) => `{
+  schoolSessionOtps(filter: { batchSession_some: { id: "${batchSessionId}" } }) {
+    id
   }
 }
 `;

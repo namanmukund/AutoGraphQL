@@ -9,7 +9,7 @@ import {
   DatabaseRecordNotFoundError,
 } from '../../../../../../constants/errors';
 import getUserIdandAppNameAfterValidation
-  from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
+from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
@@ -194,7 +194,7 @@ const userCourseSyllabusMutationResolver = async (
         },
       });
     }
-    const courseResult = await callLocalGraphqlApi(getCourseQuery());
+    const courseResult = await callLocalGraphqlApi(getCourseQuery(), context);
     const course = get(courseResult, 'data.courses');
     if (course.length <= 0) {
       throw new DatabaseRecordNotFoundError({

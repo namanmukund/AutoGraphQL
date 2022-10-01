@@ -21,7 +21,7 @@ const HomeworkStreaksType = `
 `;
 
 const UserCourse = `
-  type UserCourse @model
+  type UserCourse @model @cacheControl(maxAge: 240)
   @userToken(isRequired:"false")
   @appPermissions(
     permissions:[

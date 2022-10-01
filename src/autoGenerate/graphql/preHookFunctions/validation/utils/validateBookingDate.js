@@ -8,21 +8,26 @@ const validateBookingDate = (
 ) => {
   const date = new Date(bookingDate);
   const currentDate = new Date();
-  // if date is same check for hours
-  if (slotTime && slotTime.length
-      && isToday(date)) {
-    // eslint-disable-next-line no-restricted-syntax
-    for (const st of slotTime) {
-      if (st <= (Math.floor(currentDate.getHours()) + PRE_BOOKING_HOUR_LIMIT)) {
-        throw new InvalidTimeError();
+  // REVERT TEMP BYPASS CHECK
+  // eslint-disable-next-line no-constant-condition
+  if (false) {
+    // if date is same check for hours
+    if (slotTime && slotTime.length
+        && isToday(date)) {
+      // eslint-disable-next-line no-restricted-syntax
+      for (const st of slotTime) {
+        if (st <= (Math.floor(currentDate.getHours()) + PRE_BOOKING_HOUR_LIMIT)) {
+          throw new InvalidTimeError();
+        }
       }
     }
-  }
 
-  // if date belongs to the past
-  if (date.setHours(0, 0, 0, 0) < currentDate.setHours(0, 0, 0, 0)) {
-    throw new InvalidDateError();
+    // if date belongs to the past
+    if (date.setHours(0, 0, 0, 0) < currentDate.setHours(0, 0, 0, 0)) {
+      throw new InvalidDateError();
+    }
   }
+  return true;
 };
 
 export default validateBookingDate;

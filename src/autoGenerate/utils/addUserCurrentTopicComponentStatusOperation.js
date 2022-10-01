@@ -4,10 +4,9 @@ import { OLD_COURSE_ID, PUBLISHED, topicTypes } from '../../../constants';
 import addUserCurrentTopicComponentStatusForNewCourse from './addUserCurrentTopicComponentStatusForNewCourse';
 import { log } from '../../../utils';
 import callLocalGraphqlApi from '../../api/callLocalGraphqlApi';
+import getNextLoComponent from './getNextLoComponent';
 
-const {
-  message, practiceQuestion, comicStrip, quiz,
-} = topicTypes;
+const { quiz } = topicTypes;
 
 const getTopicDetailsForCourse = async (courseId, oldCourse = false) => {
   const query = `
@@ -37,6 +36,10 @@ query{
       ${oldCourse ? `topicComponentRule{
         componentName
         order
+        learningObjectiveComponentsRule {
+          componentName
+          order
+        }
         learningObjective{
           id
           messagesMeta{
@@ -46,6 +49,9 @@ query{
             count
           }
           comicStripsMeta(filter:{status:${PUBLISHED}}){
+            count
+          }
+          learningSlidesMeta(filter:{status:${PUBLISHED}}){
             count
           }
         }
@@ -63,7 +69,7 @@ query{
   return get(result, 'data.topics', []);
 };
 
-const addUserCurrentTopicComponentStatusOperation = async (courseId, clientId) => {
+const addUserCurrentTopicComponentStatusOperation = async (courseId, clientId, context) => {
   log(`adding currentTopicComponent for user ${clientId} with course ${courseId}`);
   if (courseId === OLD_COURSE_ID) {
     const topicDetail = await getTopicDetailsForCourse(courseId, false);
@@ -82,16 +88,7 @@ const addUserCurrentTopicComponentStatusOperation = async (courseId, clientId) =
     let blockBasedPracticeId = '';
     if (currentTopicComponent.componentName) {
       if (currentTopicComponent.componentName === 'learningObjective') {
-        const messageCount = get(currentTopicComponent, 'learningObjective.messagesMeta.count', 0);
-        const pqCount = get(currentTopicComponent, 'learningObjective.questionBankMeta.count', 0);
-        const comicStripCount = get(currentTopicComponent, 'learningObjective.comicStripsMeta.count', 0);
-        if (messageCount) {
-          currentTopicComponentType = message;
-        } else if (pqCount) {
-          currentTopicComponentType = practiceQuestion;
-        } else if (comicStripCount) {
-          currentTopicComponentType = comicStrip;
-        }
+        currentTopicComponentType = getNextLoComponent(currentTopicComponent);
       } else if ((currentTopicComponent.componentName === 'assignment') || (currentTopicComponent.componentName === 'homeworkAssignment') || (currentTopicComponent.componentName === 'homeworkPractice')) {
         currentTopicComponentType = quiz;
       } else {
@@ -109,7 +106,7 @@ const addUserCurrentTopicComponentStatusOperation = async (courseId, clientId) =
     if (currentTopicComponent.blockBasedProject && currentTopicComponent.blockBasedProject.id) {
       blockBasedPracticeId = currentTopicComponent.blockBasedProject.id;
     }
-    addUserCurrentTopicComponentStatusForNewCourse(clientId, courseId, firstTopicId, learningObjectiveId, videoId, blockBasedPracticeId, currentTopicComponentType);
+    addUserCurrentTopicComponentStatusForNewCourse(clientId, courseId, firstTopicId, learningObjectiveId, videoId, blockBasedPracticeId, currentTopicComponentType, context);
   }
 };
 

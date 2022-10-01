@@ -30,6 +30,7 @@ const Campaign = `
   )
   {
     course: Course! @relation(name: "CampaignCourse", direction: "OneWay")
+    coursePackage: CoursePackage @relation(name: "CampaignCourse", direction: "OneWay")
     title: String! @trim
     code: String @unique @trim
     description: String

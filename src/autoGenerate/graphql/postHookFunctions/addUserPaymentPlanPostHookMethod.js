@@ -123,7 +123,7 @@ const addUserPaymentInstallment = (
   This method adds user payment installments on the basis of installment number, final selling price
   , sessions per month.
 */
-const addUserPaymentPlanPostHookMethod = async (input, params) => {
+const addUserPaymentPlanPostHookMethod = async (input, params, _mutationName, context) => {
   const userId = get(params, 'userConnectId');
   if (!userId) {
     log('UserId is missing in input of addUserPaymentPlanPostHookMethod');
@@ -138,7 +138,7 @@ const addUserPaymentPlanPostHookMethod = async (input, params) => {
   } = input;
   const { productConnectId } = params;
 
-  const userPaymentLinksQueryRes = await callLocalGraphqlApi(userPaymentLinksQuery());
+  const userPaymentLinksQueryRes = await callLocalGraphqlApi(userPaymentLinksQuery(), context);
   const paymentLinks = get(userPaymentLinksQueryRes, 'data.userPaymentLinks');
   let linkConnectId = '';
   if (paymentLinks && paymentLinks.length === 1) {
@@ -159,7 +159,7 @@ const addUserPaymentPlanPostHookMethod = async (input, params) => {
       linkConnectId,
       amountPerInstallment,
       new Date(dueDate),
-    ));
+    ), context);
   }
 
   /** Initialize UserPaymentPlan with default values and nextPaymentDate  */
@@ -176,7 +176,7 @@ const addUserPaymentPlanPostHookMethod = async (input, params) => {
   // returning updated userPaymentInstallments
   if (input && userPaymentPlanId) {
     // getting updated Payment installments
-    const userPaymentPlansQueryRes = await callLocalGraphqlApi(userPaymentPlanQuery(userPaymentPlanId));
+    const userPaymentPlansQueryRes = await callLocalGraphqlApi(userPaymentPlanQuery(userPaymentPlanId), context);
     const userPaymentInstallments = get(userPaymentPlansQueryRes, 'data.userPaymentPlan.userPaymentInstallments', []);
     phoneNumber = get(userPaymentPlansQueryRes, 'data.userPaymentPlan.user.studentProfile.parents[0].user.phone.number', '');
     // parsing userPaymentInstallments data to be returned in userPaymentPlan
@@ -186,7 +186,7 @@ const addUserPaymentPlanPostHookMethod = async (input, params) => {
 
   // update Leadsquared
   if (productConnectId) {
-    const product = await callLocalGraphqlApi(fetchProduct(productConnectId));
+    const product = await callLocalGraphqlApi(fetchProduct(productConnectId), context);
     const productType = get(product, 'data.product.type');
     updateProductTypeLeadSquared(phoneNumber, productType);
   }

@@ -10,6 +10,7 @@ const TopicComponentsRule = `
    componentName: TopicComponents
    childComponentName: ChildTopicComponents
    order: Int
+   learningObjectiveComponentsRule: [LearningObjectiveComponentsRule]
    learningObjective: LearningObjective @relation(name: "TopicComponentLearningObjective", direction: "OneWay")
    video: Video @relation(name: "TopicComponentVideo", direction: "OneWay")
    blockBasedProject: BlockBasedProject @relation(name: "TopicComponentBlockBasedProject", direction: "OneWay")
@@ -17,6 +18,7 @@ const TopicComponentsRule = `
 
 const Topic = `
   type Topic @model
+  @databaseController(mode: "aggregation")
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },
@@ -72,6 +74,13 @@ const Topic = `
     blockBasedProjects: [BlockBasedProject] @relation(name: "TopicBlockBasedProject")
     videoContent: [Video] @relation(name: "TopicVideoContent")
     topicComponentRule: [TopicComponentsRule]
+    tools: [ArrayValue]
+    programming: [ArrayValue]
+    theory: [ArrayValue]
+    learningSlides: [LearningSlide] @relation(name: "LearningSlideTopic")
+    classType: ClassType @defaultValue(value: "lab")
+    referenceContent: String
+    referenceContentWidth: Int
   }
 `;
 

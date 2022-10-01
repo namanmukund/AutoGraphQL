@@ -106,14 +106,15 @@ const addAdhocSessionPostHookMethod = async (input, params, mutationName, contex
   const batchId = get(params, 'batchConnectId');
   // const topicId = get(params, 'topicConnectId');
   let courseId = get(params, 'courseConnectId');
+  const coursePackageId = get(params, 'coursePackageConnectId');
   const { id: adhocSessionId } = input;
   const addAdhocInput = get(params, 'input', {});
   const { bookingDate, ...slots } = addAdhocInput;
   /*
     get Course Id
   */
-  if (!courseId) {
-    const courseResult = await callLocalGraphqlApi(getCourseQuery());
+  if (!courseId && !coursePackageId) {
+    const courseResult = await callLocalGraphqlApi(getCourseQuery(), context);
     const course = get(courseResult, 'data.courses');
     if (course.length <= 0) {
       throw new DatabaseRecordNotFoundError({
@@ -128,7 +129,7 @@ const addAdhocSessionPostHookMethod = async (input, params, mutationName, contex
   /*
     get batch info
   */
-  const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId));
+  const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId), context);
   const batchInfo = get(batchResult, 'data.batch');
   const { students } = batchInfo;
 
@@ -147,17 +148,17 @@ const addAdhocSessionPostHookMethod = async (input, params, mutationName, contex
     await callLocalGraphqlApi(updateAdhocSessionQuery(
       adhocSessionId,
       pushManyQuery,
-    ));
+    ), context);
   }
 
   const inputSlotTimeArray = getSelectedSlotsTime(slots);
   // fetch batch session for same date and slot
-  const batchSessionsRes = await callLocalGraphqlApi(getBatchSessions(batchId, bookingDate, inputSlotTimeArray[0]));
+  const batchSessionsRes = await callLocalGraphqlApi(getBatchSessions(batchId, bookingDate, inputSlotTimeArray[0]), context);
   const batchSessions = get(batchSessionsRes, 'data.batchSessions', []);
   if (batchSessions.length > 0) {
     // if exists, call shiftBatchSessions mutation for same date and slot (this will delete that batch session and shift the others by one)
     const { filteredSlotsString } = extractSlotsFromInput(slots);
-    await callLocalGraphqlApi(shiftBatchSessionsAfterGivenDate(bookingDate, batchId, filteredSlotsString));
+    await callLocalGraphqlApi(shiftBatchSessionsAfterGivenDate(bookingDate, batchId, filteredSlotsString), context);
     log('****** Finished shifting topics in batch sessions');
   }
 

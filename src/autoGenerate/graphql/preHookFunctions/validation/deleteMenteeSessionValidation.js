@@ -10,10 +10,10 @@ import getMentorMenteeSession from '../../postHookFunctions/utils/getMentorMente
 
 const deleteMenteeSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: menteeSessionId } = params;
-  const menteeSessionData = await callLocalGraphqlApi(menteeSessionQuery(menteeSessionId));
+  const menteeSessionData = await callLocalGraphqlApi(menteeSessionQuery(menteeSessionId), context);
 
   const menteeSession = get(menteeSessionData, 'data.menteeSession');
-  const { mentorSessionId, id: mmsId } = await getMentorMenteeSession(menteeSessionId);
+  const { mentorSessionId, id: mmsId } = await getMentorMenteeSession(menteeSessionId, context);
 
   context.mentorSessionId = mentorSessionId;
   context.mmsId = mmsId;

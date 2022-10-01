@@ -12,11 +12,11 @@ import { SINGULAR } from '../../../../../../constants/graphqlOperations';
 import loginViaOtpInputValidation from './utils/loginViaOtpInputValidation';
 import { getUserFromDBQuery } from './utils';
 import authParams from '../../../../../../config/authParams';
-import { PARENT } from '../../../../../../constants/roles';
+import { PARENT, MENTOR } from '../../../../../../constants/roles';
 import getChildrenToken from './utils/getChildrenToken';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
 import getTimeDifferenceWithCurrentDateInSeconds
-  from '../../../../../../utils/getTimeDifferenceWithCurrentDateInSeconds';
+from '../../../../../../utils/getTimeDifferenceWithCurrentDateInSeconds';
 import updateLeadSquared from '../../../../../../services/leadsquared/updateLeadSquared';
 import { BLOCKED, MASTER_OTP } from '../../../../../../constants';
 
@@ -140,8 +140,8 @@ const validateUserOTPMutationResolver = async (
 
   const userTokenData = createUserTokenTypeData(result, authentication);
   // if user is a parent then get children tokens as well
-  if (role === PARENT) {
-    userTokenData.children = await getChildrenToken(context, id);
+  if (role === PARENT || role === MENTOR) {
+    userTokenData.children = await getChildrenToken(context, id, role);
   }
   return userTokenData;
 };

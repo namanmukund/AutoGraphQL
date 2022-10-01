@@ -2,7 +2,8 @@ import { get } from 'lodash';
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import { ApolloServer, PubSub } from 'apollo-server-express';
+import { ApolloServer } from 'apollo-server-express';
+import { BaseRedisCache } from 'apollo-server-cache-redis';
 import schema from './graphql';
 import { log, types } from '../utils';
 import { authMiddleware, graphqlUpload } from './middlewares';
@@ -10,12 +11,14 @@ import isSentryAppAndEnv from '../utils/isSentryAppAndEnv';
 import Raven from './Raven';
 import dataExtractedFromReq from '../constants/dataExtractedFromReq';
 import { getParsedASTMap } from './autoGenerate/utils';
-import routes from './phonePeAPI/routes';
+import phonePeRoutes from './externalProductAPI/phonePe/routes';
+import iciciRoutes from './externalProductAPI/icici/routes';
 import typeformRoute from './typeformAPI';
+import redis from './redis';
+import pubsub from './pubsub';
+import { ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER, ALLOWED_HEADERS } from '../constants';
 
 const http = require('http');
-
-const pubsub = new PubSub();
 
 const port = process.env.PORT || 80;
 const env = process.env.NODE_ENV || 'development';
@@ -26,7 +29,8 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-routes(app);
+phonePeRoutes(app);
+iciciRoutes(app);
 typeformRoute(app);
 
 const path = `/graphql/${application}`;
@@ -58,7 +62,7 @@ app.use(authMiddleware);
 const corsOptions = {
   origin: '*',
   optionsSuccessStatus: 200,
-  allowedHeaders: ['Content-Type', 'Authorization', 'Content-Length', 'X-Requested-With', 'X-Forwarded-By'],
+  allowedHeaders: ALLOWED_HEADERS,
 };
 
 app.use(cors(corsOptions));
@@ -69,6 +73,7 @@ const parsedASTMap = getParsedASTMap(types);
 // using apollo-server
 const server = new ApolloServer({
   schema,
+  introspection: process.env.ENABLE_GRAPHQL_INTROSPECTION,
   playground: {
     endpoint: `http://0.0.0.0:${port}${path}`,
     settings: {
@@ -77,6 +82,12 @@ const server = new ApolloServer({
   },
   debug: true,
   uploads: false,
+  cache: new BaseRedisCache({
+    client: redis,
+  }),
+  cacheControl: {
+    defaultMaxAge: 5,
+  },
   formatError: (error) => {
     if (error.name !== 'GraphQLError') {
       Raven.captureException(error);
@@ -90,12 +101,21 @@ const server = new ApolloServer({
     };
   },
   context: ({ req, connection }) => {
+    const additionalContextDataFromHeader = {};
+    if (req && req.headers) {
+      ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER
+        .forEach(({ contextLabel: key, headerLabel: label }) => {
+          if (req.headers[label]) additionalContextDataFromHeader[key] = req.headers[label];
+        });
+    }
     if (connection) {
       // context comes in connection in case WS
       return {
         ...connection.context,
         pubsub,
         parsedASTMap,
+        redis,
+        ...additionalContextDataFromHeader,
       };
     }
     // file info from middleware
@@ -150,6 +170,8 @@ const server = new ApolloServer({
       filePayload,
       pubsub,
       parsedASTMap,
+      redis,
+      ...additionalContextDataFromHeader,
     };
   },
 });

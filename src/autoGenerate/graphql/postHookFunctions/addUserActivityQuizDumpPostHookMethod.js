@@ -15,7 +15,7 @@ import updateCurrentComponentStatusOfNewCourse from './utils/updateCurrentCompon
 import getMasteryLevel from '../resolvers/utils/getMasteryLevel';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import validateTokenAndExtractInformation
-  from '../preHookFunctions/validation/utils/validateTokenAndExtractInformation';
+from '../preHookFunctions/validation/utils/validateTokenAndExtractInformation';
 import { MENTEE } from '../../../../constants/roles';
 import getNextComponent from './utils/getNextComponent';
 
@@ -55,9 +55,16 @@ const userQuizQuery = (
           componentName
           order
           childComponentName
+          learningObjectiveComponentsRule {
+            componentName
+            order
+          }
           learningObjective{
             id
             order
+            learningSlides(filter:{status:${PUBLISHED}}){
+              id
+            }
             messagesMeta{
               count
             }
@@ -65,6 +72,9 @@ const userQuizQuery = (
               count
             }
             comicStripsMeta(filter:{status:${PUBLISHED}}){
+              count
+            }
+            learningSlidesMeta(filter:{status:${PUBLISHED}}){
               count
             }
           }
@@ -563,6 +573,7 @@ const evaluateUserQuiz = async (
   quizQuestionsInUserQuiz,
   quizQuestions,
   courseId,
+  context,
 ) => {
   const totalQuestions = quizQuestionsInUserQuiz.length;
   // code to evaluate report of quiz
@@ -586,7 +597,7 @@ const evaluateUserQuiz = async (
     }
   });
   questionIdsQuery += ']';
-  const questionBankQueryRes = await callLocalGraphqlApi(questionBankQuery(questionIdsQuery, courseId));
+  const questionBankQueryRes = await callLocalGraphqlApi(questionBankQuery(questionIdsQuery, courseId), context);
   const questionBankInfo = get(questionBankQueryRes, 'data.questionBanks');
   const learningObjectiveReportObject = {};
   // Initializing quiz report with default count as 0 for all of fields
@@ -751,6 +762,7 @@ const evaluateUserScholarship = async (
   userId,
   topicId,
   quizReport,
+  context,
 ) => {
   const { quiz } = topicTypes;
   const {
@@ -772,7 +784,7 @@ const evaluateUserScholarship = async (
     // there is logic in post hook of userProfile to create userProfile with
     // default data if it was not present. So we will always get this
     //
-    const userProfileResult = await callLocalGraphqlApi(userProfileQuery(userId));
+    const userProfileResult = await callLocalGraphqlApi(userProfileQuery(userId), context);
     const userProfileInfo = get(userProfileResult, 'data.userProfiles[0]');
     const userProfileId = get(userProfileInfo, 'id');
     if (!userProfileId) {
@@ -833,7 +845,7 @@ const evaluateUserScholarship = async (
       freeMasteredTopicCount,
       familiarTopicCount,
       freeFamiliarTopicCount,
-    ));
+    ), context);
   }
   return true;
 };
@@ -862,7 +874,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
   -we get userQuiz id , which will be used further to update the document
   -we get next component from the document and update user current topic component status with same
   */
-  const userQuizQueryRes = await callLocalGraphqlApi(userQuizQuery(userId, topicId, courseId));
+  const userQuizQueryRes = await callLocalGraphqlApi(userQuizQuery(userId, topicId, courseId), context);
   const userQuizInfo = get(userQuizQueryRes, 'data.userQuizs[0]');
   const quizQuestionsInUserQuiz = get(userQuizInfo, 'quiz');
   const nextTopicId = get(userQuizInfo, 'nextComponent.topic.id');
@@ -897,6 +909,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
     const topicOrder = get(userQuizInfo, 'topic.order');
 
     await updateCurrentComponentStatusOfNewCourse(
+      userId,
       courseId,
       currentTopicComponentInfo,
       quizAction,
@@ -937,7 +950,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
 
   // getting menteeSessionId to update mentorMenteeSession in case of a mentee
   if (userRoleFromContext === MENTEE) {
-    const menteeSessionRes = await callLocalGraphqlApi(menteeSessionQuery(userId, topicId));
+    const menteeSessionRes = await callLocalGraphqlApi(menteeSessionQuery(userId, topicId), context);
     const menteeSessionInfo = get(menteeSessionRes, 'data.menteeSessions[0]');
     const menteeSessionId = get(menteeSessionInfo, 'id');
     if (!menteeSessionId) {
@@ -945,7 +958,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
     }
     // Ideally menteeSessionId should be there if user has reached to this point
     if (menteeSessionId) {
-      const mentorMenteeSessionRes = await callLocalGraphqlApi(mentorMenteeSessionQuery(menteeSessionId, topicId));
+      const mentorMenteeSessionRes = await callLocalGraphqlApi(mentorMenteeSessionQuery(menteeSessionId, topicId), context);
       const mentorMenteeSessionInfo = get(mentorMenteeSessionRes, 'data.mentorMenteeSessions[0]');
       const mentorMenteeSessionId = get(mentorMenteeSessionInfo, 'id');
       if (!mentorMenteeSessionId) {
@@ -953,7 +966,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
       }
       if (mentorMenteeSessionId) {
         // updating isQuizSubmitted for the topic for which quiz dump is called
-        await callLocalGraphqlApi(updateMentorMenteeSessionMutation(mentorMenteeSessionId));
+        await callLocalGraphqlApi(updateMentorMenteeSessionMutation(mentorMenteeSessionId), context);
       }
     }
   }
@@ -974,12 +987,13 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
       quizQuestionsInUserQuiz,
       quizQuestions,
       courseId,
+      context,
     );
     if (!userQuizId) {
       log('Not able to fetch userQuizId in addUserActivityQuizDumpPostHookMethod');
     }
     // updating UserQuiz to change status to complete
-    await callLocalGraphqlApi(updateUserQuizMutation(userQuizId));
+    await callLocalGraphqlApi(updateUserQuizMutation(userQuizId), context);
     const nextComponentQuery = getNextComponent(
       '',
       nextTopicId,
@@ -994,7 +1008,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
       pushManyQuery,
       nextComponentQuery,
       courseId,
-    ));
+    ), context);
     const addUserQuizReportId = get(addUserQuizReportRes, 'data.addUserQuizReport.id');
     Object.assign(input, {
       quizReportId: addUserQuizReportId,
@@ -1005,6 +1019,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
       userId,
       topicId,
       quizReport,
+      context,
     );
   }
   return true;

@@ -3,7 +3,7 @@ import { GLOBAL_COURSE_TITLE } from '../../../../../constants';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
 // query to get published topics count
-const getTopics = async (courseId) => {
+const getTopics = async (courseId, context) => {
   const query = `
           {
             topics(filter: 
@@ -18,30 +18,119 @@ const getTopics = async (courseId) => {
             }
           }
           `;
-  const topicMeta = await callLocalGraphqlApi(query);
+  const topicMeta = await callLocalGraphqlApi(query, context);
   return get(topicMeta, 'data.topics');
 };
 
-// query to get batch sessions (started, completed)
-const getBatchSessions = async (batchId) => {
+// query to get batch sessions
+const getBatchSessions = async (batchId, bookingDate, slot, sessionStatus, slotInput, dateInput, context) => {
   const query = `
           {
-            batchSessions(filter: {batch_some: {id: "${batchId}"}}, orderBy:bookingDate_ASC){
+            batchSessions(filter: {
+              and: [
+                {batch_some: {id: "${batchId}"}}
+                ${bookingDate ? `{bookingDate: "${bookingDate}"}` : ''}
+                ${slot ? `{slot${slot}: true}` : ''}
+                ${sessionStatus ? `{sessionStatus: ${sessionStatus}}` : ''}
+                ${!slotInput ? '' : slotInput}
+                ${!dateInput ? '' : dateInput}
+              ]
+            }, orderBy:bookingDate_ASC){
               id
               bookingDate
               sessionStatus
+              course{
+                id
+              }
+              startMinutes
+              endMinutes
+              slot0
+              slot1
+              slot2
+              slot3
+              slot4
+              slot5
+              slot6
+              slot7
+              slot8
+              slot9
+              slot11
+              slot12
+              slot13
+              slot14
+              slot15
+              slot16
+              slot17
+              slot18
+              slot19
+              slot20
+              slot21
+              slot22
+              slot23
               topic{
                 order
               }
             }
           }
           `;
-  const batches = await callLocalGraphqlApi(query);
-  return get(batches, 'data.batchSessions');
+  const batches = await callLocalGraphqlApi(query, context);
+  return get(batches, 'data.batchSessions', []);
+};
+
+// query to get adhoc sessions
+const getAdhocSessions = async (batchId, bookingDate, slot, sessionStatus, slotInput, dateInput, context) => {
+  const query = `
+          {
+            adhocSessions(filter: {
+              and: [
+                {batch_some: {id: "${batchId}"}}
+                ${bookingDate ? `{bookingDate: "${bookingDate}"}` : ''}
+                ${slot ? `{slot${slot}: true}` : ''}
+                ${sessionStatus ? `{sessionStatus: ${sessionStatus}}` : ''}
+                ${!slotInput ? '' : slotInput}
+                ${!dateInput ? '' : dateInput}
+              ]
+            }, orderBy:bookingDate_ASC){
+              id
+              bookingDate
+              sessionStatus
+              startMinutes
+              slot0
+              slot1
+              slot2
+              slot3
+              slot4
+              slot5
+              slot6
+              slot7
+              slot8
+              slot9
+              slot11
+              slot12
+              slot13
+              slot14
+              slot15
+              slot16
+              slot17
+              slot18
+              slot19
+              slot20
+              slot21
+              slot22
+              slot23
+              endMinutes
+              previousTopic{
+                order
+              }
+            }
+          }
+          `;
+  const sessions = await callLocalGraphqlApi(query, context);
+  return get(sessions, 'data.adhocSessions', []);
 };
 
 // query to get batch sessions (started, completed)
-const getBatch = async (batchId) => {
+const getBatch = async (batchId, context) => {
   const query = `
           {
             batch(id:"${batchId}"){
@@ -83,19 +172,23 @@ const getBatch = async (batchId) => {
             }
           }
           `;
-  const currBatch = await callLocalGraphqlApi(query);
+  const currBatch = await callLocalGraphqlApi(query, context);
   return get(currBatch, 'data.batch');
 };
 
-const createBatchSession = async (batchId, date, slots, topicId, mentorSessionId, courseId) => {
+const createBatchSession = async (batchId, date, slots, topicId, mentorSessionId, courseId, coursePackageId, startTime, endTime, sessionMode, context) => {
   const query = `
           mutation{
             addBatchSession(batchConnectId: "${batchId}",
             ${topicId ? `topicConnectId: "${topicId}"` : ''}
             ${mentorSessionId ? `mentorSessionConnectId: "${mentorSessionId}"` : ''}
             ${courseId ? `courseConnectId: "${courseId}"` : ''}
+            ${coursePackageId ? `coursePackageConnectId: "${coursePackageId}"` : ''}
             input:{
               bookingDate:"${date}",
+              ${typeof startTime === 'number' ? `startMinutes: ${startTime},` : ''}
+              ${typeof endTime === 'number' ? `endMinutes: ${endTime},` : ''}
+              ${sessionMode ? `sessionMode: ${sessionMode},` : ''}
               ${slots}
             }
             ){
@@ -103,19 +196,23 @@ const createBatchSession = async (batchId, date, slots, topicId, mentorSessionId
             }
           }
           `;
-  await callLocalGraphqlApi(query);
+  await callLocalGraphqlApi(query, context);
   return true;
 };
 
-const updateBatchSession = async (sessionId, slots, date, mentorSessionId, courseId) => {
+const updateBatchSession = async (sessionId, slots, date, mentorSessionId, courseId, coursePackageId, startTime, endTime, sessionMode, context) => {
   const query = `
           mutation{
             updateBatchSession(
             id: "${sessionId}",
             ${mentorSessionId ? `mentorSessionConnectId: "${mentorSessionId}"` : ''}
             ${courseId ? `courseConnectId: "${courseId}"` : ''}
+            ${coursePackageId ? `coursePackageConnectId: "${coursePackageId}"` : ''}
             input:{
               bookingDate:"${date}",
+              ${typeof startTime === 'number' ? `startMinutes: ${startTime},` : ''}
+              ${typeof endTime === 'number' ? `endMinutes: ${endTime},` : ''}
+              ${sessionMode ? `sessionMode: ${sessionMode},` : ''}
               ${slots}
             }
             ){
@@ -123,9 +220,124 @@ const updateBatchSession = async (sessionId, slots, date, mentorSessionId, cours
             }
           }
           `;
-  await callLocalGraphqlApi(query);
+  await callLocalGraphqlApi(query, context);
   return true;
 };
 
+const createAdhocSession = async (batchId, date, slots, topicId, mentorSessionId, courseId, adhocSessionType, coursePackageId, startTime, endTime, sessionMode, context) => {
+  const query = `
+          mutation{
+            addAdhocSession(batchConnectId: "${batchId}",
+            ${topicId ? `previousTopicConnectId: "${topicId}"` : ''}
+            ${mentorSessionId ? `mentorSessionConnectId: "${mentorSessionId}"` : ''}
+            ${courseId ? `courseConnectId: "${courseId}"` : ''}
+            ${coursePackageId ? `coursePackageConnectId: "${coursePackageId}"` : ''}
+            input:{
+              bookingDate:"${date}",
+              type: ${adhocSessionType}
+              ${typeof startTime === 'number' ? `startMinutes: ${startTime},` : ''}
+              ${typeof endTime === 'number' ? `endMinutes: ${endTime},` : ''}
+              ${sessionMode ? `sessionMode: ${sessionMode},` : ''}
+              ${slots}
+            }
+            ){
+              id
+            }
+          }
+          `;
+  await callLocalGraphqlApi(query, context);
+  return true;
+};
+
+const updateAdhocSession = async (sessionId, slots, date, mentorSessionId, courseId, coursePackageId, startTime, endTime, sessionMode, context) => {
+  const query = `
+          mutation{
+            updateAdhocSession(
+            id: "${sessionId}",
+            ${mentorSessionId ? `mentorSessionConnectId: "${mentorSessionId}"` : ''}
+            ${courseId ? `courseConnectId: "${courseId}"` : ''}
+            ${coursePackageId ? `coursePackageConnectId: "${coursePackageId}"` : ''}
+            input:{
+              bookingDate:"${date}",
+              ${typeof startTime === 'number' ? `startMinutes: ${startTime},` : ''}
+              ${typeof endTime === 'number' ? `endMinutes: ${endTime},` : ''}
+              ${sessionMode ? `sessionMode: ${sessionMode},` : ''}
+              ${slots}
+            }
+            ){
+              id
+            }
+          }
+          `;
+  await callLocalGraphqlApi(query, context);
+  return true;
+};
+
+const getBatchSession = (batchId,
+  topicId) => `
+  {
+    batchSessions(filter:{
+      and:[
+        {batch_some:{id:"${batchId}"}}
+        {topic_some:{id: "${topicId}"}}
+      ]
+    }){
+      id
+      bookingDate
+    }
+  }
+`;
+
+const getAdhocSession = (batchId,
+  topicId) => `
+  {
+    adhocSessions(filter:{
+      and:[
+        {batch_some:{id:"${batchId}"}}
+        {previousTopic_some:{id: "${topicId}"}}
+      ]
+    }){
+      id
+      bookingDate
+    }
+  }
+`;
+
+const getTopicsFromCoursePackage = async (coursePackageId, context) => {
+  const query = `
+  query{
+  coursePackage(id: "${coursePackageId}"){
+    topics{
+      order
+      isRevision
+      topic{
+        classType 
+        courses{
+          id
+        }
+        id
+      }
+    }
+  }
+}
+  `;
+  const res = await callLocalGraphqlApi(query, context);
+  return get(res, 'data.coursePackage');
+};
+
+const getCourseIdFromTopic = async (topicId, context) => {
+  const query = `
+  {
+  topic(id: "${topicId}"){
+    courses{
+      id
+    }
+  }
+}
+  `;
+  const res = await callLocalGraphqlApi(query, context);
+  return get(res, 'data.topic.courses[0].id');
+};
+
 /* eslint-disable object-curly-newline */
-export { getTopics, getBatchSessions, getBatch, createBatchSession, updateBatchSession };
+export { getTopics, getBatchSessions, getBatch, createBatchSession, updateBatchSession, createAdhocSession, getAdhocSessions, updateAdhocSession, getBatchSession, getAdhocSession, getTopicsFromCoursePackage, getCourseIdFromTopic };

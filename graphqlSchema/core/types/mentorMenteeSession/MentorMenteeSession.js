@@ -51,8 +51,9 @@ const internetSpeed = `
 }`;
 
 const MentorMenteeSession = `
-  type MentorMenteeSession @model {
+  type MentorMenteeSession @model @databaseController(mode: "aggregation") {
     course: Course @relation(name: "MentorMenteeSessionCourse", direction: "OneWay")
+    coursePackage: CoursePackage @relation(name: "MentorMenteeSessionCoursePackage", direction: "OneWay")
     topic: Topic! @relation(name: "MentorMenteeSessionTopic", direction: "OneWay")
     menteeSession: MenteeSession! @relation(name: "SessionDataMenteeSession", direction: "OneWay")
     mentorSession: MentorSession @relation(name: "SessionDataMentorSession")
@@ -61,12 +62,14 @@ const MentorMenteeSession = `
     sessionStartDate: Date
     sessionEndDate: Date
     sessionStatus: SessionStatus! @defaultValue(value: "allotted")
+    triedToReachParent: TriedToReachParent @defaultValue(value: "didNotTriedToReachParent")
     classMissedMessageStatus: ClassMissedMessageStatus @defaultValue(value: "pending")
     isQuizSubmitted: Boolean @defaultValue(value: "false")
     quizSubmitDate: Date
     isPracticeSubmitted: Boolean @defaultValue(value: "false")
     practiceSubmitDate: Date
     isAssignmentSubmitted: Boolean @defaultValue(value: "false")
+    isAssignmentAttempted: Boolean @defaultValue(value: "false")
     isReviewSubmittedOnTime: Boolean @defaultValue(value: "false")
     assignmentSubmitDate: Date
     isHomeworkCheckedByMentor: Boolean @defaultValue(value: "false")
@@ -122,6 +125,8 @@ const MentorMenteeSession = `
     sessionJoinedByMenteeAt: Date
     verificationStatus: VerificationStatus @defaultValue(value: "unverified")
     verifiedBy: User @relation(name: "MentorMenteeSessionVerifiedBy", direction: "OneWay")
+    startMinutes: Int @defaultValue(value: "0")
+    endMinutes: Int @defaultValue(value: "0")
 }`;
 
 export default [MentorMenteeSession, internetSpeed];

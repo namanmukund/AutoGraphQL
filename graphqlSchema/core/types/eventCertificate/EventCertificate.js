@@ -31,6 +31,7 @@ const EventCertificate = `
     assetUrl: String
     eventType: EventType @defaultValue(value: "radioStreet")
     eventName: EventName @defaultValue(value: "spySquadCamp")
+    numberOfDownloads: Int @defaultValue(value: 0)
   }
 `;
 

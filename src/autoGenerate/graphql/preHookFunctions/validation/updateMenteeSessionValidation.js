@@ -5,15 +5,17 @@ import { DatabaseRecordNotFoundError } from '../../../../../constants/errors';
 import menteeSessionQuery from '../../graphqlQueries/menteeSessionQuery';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
 import validateTokenAndExtractInformation from './utils/validateTokenAndExtractInformation';
+// import validateMenteeSession from './utils/validateMenteeSession';
 import getMentorMenteeSession from '../../postHookFunctions/utils/getMentorMenteeSession';
-import { ALLOWED_ROLE_FOR_MANUAL_SESSIONS, TMS } from '../../../../../constants';
+import { ALLOWED_ROLE_FOR_MANUAL_SESSIONS, TMS, TBA } from '../../../../../constants';
 import getSelectedSlotsStringArray from '../../postHookFunctions/utils/getSelectedSlotsStringArray';
+import isMentorChild from '../../postHookFunctions/utils/isMentorChild';
 
 const updateMenteeSessionValidation = async (params, mutationOrQueryName, context) => {
   const { id: menteeSessionId } = params;
-  const menteeSessionData = await callLocalGraphqlApi(menteeSessionQuery(menteeSessionId));
+  const menteeSessionData = await callLocalGraphqlApi(menteeSessionQuery(menteeSessionId), context);
   const menteeSession = get(menteeSessionData, 'data.menteeSession');
-  const mentorMenteeSession = await getMentorMenteeSession(menteeSessionId);
+  const mentorMenteeSession = await getMentorMenteeSession(menteeSessionId, context);
   const { mentorSessionId, id: mmsId } = mentorMenteeSession;
 
   context.mentorSessionId = mentorSessionId;
@@ -68,6 +70,15 @@ const updateMenteeSessionValidation = async (params, mutationOrQueryName, contex
   }
   // eslint-disable-next-line no-param-reassign
   context.previousDocument = menteeSession;
+
+  const userId = get(menteeSession, 'user.id', '');
+  const mentorChild = await isMentorChild(userId);
+  if (!mentorChild && slotTimeStringArray && slotTimeStringArray.length > 0 && appName !== TBA) {
+    // const validationFailed = await validateMenteeSession(slotTimeStringArray[0], userId, get(params, 'input.bookingDate'));
+    // if (validationFailed) {
+    //   throw new SlotsOccupiedError();
+    // }
+  }
   return true;
 };
 

@@ -10,14 +10,14 @@ import {
   createBatchGroupBySection,
 } from '../src/autoGenerate/graphql/postHookFunctions/utils/updateCampaignHelperMethods';
 
-const createB2BBatchesBasedOnBatchRules = async (campaignId, courseId, batchRules, classesConnectIds, campaignSchoolId) => {
+const createB2BBatchesBasedOnBatchRules = async (campaignId, courseId, batchRules, classesConnectIds, campaignSchoolId, coursePackageId) => {
   if (batchRules && batchRules.batchCreationBasis && classesConnectIds && classesConnectIds.length > 0) {
     const classes = await fetchAllConnectedSchoolClasses(classesConnectIds);
     // here sort the classes based on the batchCreationBasis rules
     if (batchRules.batchCreationBasis === 'grade') {
       // Map, with key = grade, value = array of classes corresponding to that grade
       const classesGroupByGrade = getClassesGroupByGrade(classes);
-      createBatchGroupByGrade(classesGroupByGrade, campaignId, courseId, campaignSchoolId);
+      createBatchGroupByGrade(classesGroupByGrade, campaignId, courseId, campaignSchoolId, coursePackageId);
     } else {
       // check if section exists in atleast one of the school classes
       const noSectionExists = getSectionExists(classes);
@@ -25,13 +25,13 @@ const createB2BBatchesBasedOnBatchRules = async (campaignId, courseId, batchRule
         throw new NoSectionExists();
       } else {
         // create separate batches for all the schoolClasses
-        createBatchGroupBySection(classes, campaignId, courseId);
+        createBatchGroupBySection(classes, campaignId, courseId, coursePackageId);
       }
     }
   }
 };
 
-const createB2B2CEventBatchesBasedOnBatchRules = async (campaignId, courseId, batchRules, timeTableRules, schoolId, classesConnectIds, context) => {
+const createB2B2CEventBatchesBasedOnBatchRules = async (campaignId, courseId, batchRules, timeTableRules, schoolId, classesConnectIds, context, coursePackageId) => {
   if (context.prevTimeTableRules.length > 0 && timeTableRules) {
     const prevTimeTableRulesArray = get(context, 'prevTimeTableRules');
     const timeTableRulesArray = get(timeTableRules, 'replace', []);
@@ -51,11 +51,11 @@ const createB2B2CEventBatchesBasedOnBatchRules = async (campaignId, courseId, ba
 
     // if there exists any batches to be made
     if (diff.length > 0) {
-      createBatchForB2B2C(diff, campaignId, courseId, schoolId, classesConnectIds, context);
+      createBatchForB2B2C(diff, campaignId, courseId, schoolId, classesConnectIds, context, coursePackageId);
     }
   } else if (batchRules && timeTableRules && schoolId) {
     const timeTableRulesArray = get(timeTableRules, 'replace', []);
-    createBatchForB2B2C(timeTableRulesArray, campaignId, courseId, schoolId, classesConnectIds, context);
+    createBatchForB2B2C(timeTableRulesArray, campaignId, courseId, schoolId, classesConnectIds, context, coursePackageId);
   }
 };
 

@@ -2,10 +2,9 @@ import { get } from 'lodash';
 import {
   GLOBAL_COURSE_TITLE,
   PUBLISHED,
-  sessionStatus,
 } from '../../../../constants';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
-import addMentorMenteeSessionForBatch from '../../utils/addMentorMenteeSessionForBatch';
+// import addMentorMenteeSessionForBatch from '../../utils/addMentorMenteeSessionForBatch';
 import { DatabaseRecordNotFoundError } from '../../../../constants/errors';
 
 // query to topics between 2 orders
@@ -55,20 +54,20 @@ const updateBatchCurrentComponentStatusPostHookMethod = async (input, params, mu
     topicDoc,
   } = context;
   const studentsList = get(batchCurrentComponentStatusDoc, 'batch.students');
-  const mentorId = get(batchCurrentComponentStatusDoc, 'batch.allottedMentor.id');
+  // const mentorId = get(batchCurrentComponentStatusDoc, 'batch.allottedMentor.id');
   const topicStartOrder = get(batchCurrentComponentStatusDoc, 'currentTopic.order');
   const topicEndOrder = get(topicDoc, 'order');
   let courseId = get(input, 'currentCourse.typeId', '');
 
   if (studentsList && studentsList.length && topicStartOrder && topicEndOrder && topicEndOrder > topicStartOrder) {
-    const topicsListResult = await callLocalGraphqlApi(getTopicSList(topicStartOrder, topicEndOrder, courseId));
+    const topicsListResult = await callLocalGraphqlApi(getTopicSList(topicStartOrder, topicEndOrder, courseId), context);
     const topicsList = get(topicsListResult, 'data.topics');
     if (topicsList && topicsList.length) {
       /*
         get Course Id
       */
       if (!courseId) {
-        const courseResult = await callLocalGraphqlApi(getCourseQuery());
+        const courseResult = await callLocalGraphqlApi(getCourseQuery(), context);
         const course = get(courseResult, 'data.courses');
         if (course.length <= 0) {
           throw new DatabaseRecordNotFoundError({
@@ -85,27 +84,27 @@ const updateBatchCurrentComponentStatusPostHookMethod = async (input, params, mu
       date.setHours(0, 0, 0, 0);
       // call addMentorMenteeSessionFor batch to create mentorMenteesession for each student for each topics
       // eslint-disable-next-line no-restricted-syntax
-      for (const student of studentsList) {
-        // eslint-disable-next-line no-restricted-syntax
-        for (const topic of topicsList) {
-          if (student.user && student.user.id && topic && topic.id && get(context, 'shouldUpdateMentorMentee', true)) {
-            // eslint-disable-next-line no-await-in-loop
-            await addMentorMenteeSessionForBatch(
-              context,
-              student.user.id,
-              mentorId,
-              topic.id,
-              date,
-              '23',
-              '',
-              courseId,
-              sessionStatus.completed,
-              student.user.source,
-              'updateBatchCurrentComponentStatus',
-            );
-          }
-        }
-      }
+      // for (const student of studentsList) {
+      //   // eslint-disable-next-line no-restricted-syntax
+      //   for (const topic of topicsList) {
+      //     if (student.user && student.user.id && topic && topic.id && get(context, 'shouldUpdateMentorMentee', true)) {
+      //       // eslint-disable-next-line no-await-in-loop
+      //       await addMentorMenteeSessionForBatch(
+      //         context,
+      //         student.user.id,
+      //         mentorId,
+      //         topic.id,
+      //         date,
+      //         '23',
+      //         '',
+      //         courseId,
+      //         sessionStatus.completed,
+      //         student.user.source,
+      //         'updateBatchCurrentComponentStatus',
+      //       );
+      //     }
+      //   }
+      // }
     }
   }
 };

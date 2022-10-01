@@ -1,6 +1,7 @@
 const EmailLoginInput = `
   input EmailLoginInput {
-    email: String!
+    email: String
+    username: String
     password : String!
   }`;
 

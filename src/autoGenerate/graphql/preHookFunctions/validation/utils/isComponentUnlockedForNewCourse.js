@@ -9,8 +9,7 @@ import {
   UserOrTopicNotPresentError,
   PaidComponentLockedError,
 } from '../../../../../../constants/errors';
-import getUserCurrentTopicComponentStatusForNewCourse
-  from '../../../../utils/getUserCurrentTopicComponentStatusForNewCourse';
+import getUserCurrentTopicComponentStatusForNewCourse from '../../../../utils/getUserCurrentTopicComponentStatusForNewCourse';
 import isTopicUnlocked from '../../../../utils/isTopicUnlocked';
 import {
   backendApps,
@@ -19,11 +18,14 @@ import {
 } from '../../../../../../constants';
 import getTopicForValidation from './getTopicForValidation';
 import getUserIdandAppNameAfterValidation from './getUserIdandAppNameAfterValidation';
-import getBatchCurrentComponentStatus
-  from '../../../../utils/getBatchCurrentComponentStatus';
-import validateMentorMenteePermissionForComponentForNewCourse
-  from './validateMentorMenteePermissionForComponentForNewCourse';
+import getBatchCurrentComponentStatus from '../../../../utils/getBatchCurrentComponentStatus';
+import validateMentorMenteePermissionForComponentForNewCourse from './validateMentorMenteePermissionForComponentForNewCourse';
 import { getMentorMenteeSessionForValidation } from './index';
+import { ifAuthorized } from '../../../../../../utils';
+import { MENTOR, SCHOOL_TEACHER } from '../../../../../../constants/roles';
+import getSortedTopics from '../../../../../../utils/getSortedTopicsFromCoursePackageOrder';
+import isUserInheritedFromMentor from '../../../postHookFunctions/utils/isMentorChild';
+import getUserActiveClassroom from '../../../../../../utils/getUserActiveClassroom';
 
 /*
 This is a common method to check whether the called topic component is locked or not
@@ -40,7 +42,7 @@ const isComponentUnlockedForNewCourse = async (
   courseId,
 ) => {
   const {
-    video, message, practiceQuestion, comicStrip, quiz, blockBasedProject, blockBasedPractice,
+    video, message, practiceQuestion, comicStrip, quiz, blockBasedProject, blockBasedPractice, learningSlide,
   } = topicTypes;
   let currentTopicQuery = '';
   let currentLearningObjectiveQuery = '';
@@ -59,7 +61,7 @@ const isComponentUnlockedForNewCourse = async (
     userIdFromContext,
     appName,
   } = userAndAppInfo;
-  if (page === message || page === practiceQuestion || page === comicStrip) {
+  if (page === message || page === practiceQuestion || page === comicStrip || page === learningSlide) {
     if (inputUserId && inputLearningObjectiveId) {
       userId = inputUserId;
       learningObjectiveId = inputLearningObjectiveId;
@@ -136,7 +138,10 @@ const isComponentUnlockedForNewCourse = async (
                                 order
                              }`;
   }
-  if (!backendApps.includes(appName) && userIdFromContext !== userId) {
+  const authentication = ifAuthorized(context);
+  const userRole = get(authentication, 'user.role');
+  const isNotMentorOrTeacher = !(userRole === MENTOR || userRole === SCHOOL_TEACHER);
+  if ((!backendApps.includes(appName) && userIdFromContext !== userId && page !== 'quiz') && isNotMentorOrTeacher) {
     throw new UserMismatchError();
   }
   if (!topicInfo) {
@@ -146,15 +151,48 @@ const isComponentUnlockedForNewCourse = async (
       },
     });
   }
+
   const userCurrentTopicComponentStatusRes = await getUserCurrentTopicComponentStatusForNewCourse(
     courseId,
     userId,
     currentTopicQuery,
     currentLearningObjectiveQuery,
     'enrollmentType',
+    context,
   );
   const currentTopicComponentInfo = get(userCurrentTopicComponentStatusRes, 'data.userCurrentTopicComponentStatuses[0]');
-  if (!currentTopicComponentInfo) {
+  // Bypassing component validation incase if schoolTeacher is accessing the content.
+  const checkForMentorChild = await isUserInheritedFromMentor(userIdFromContext, true);
+
+  if (userIdFromContext && ((typeof checkForMentorChild === 'boolean' && checkForMentorChild) || !isNotMentorOrTeacher)) {
+    if (mutationOrQueryName) {
+      const userCurrentTopicComponentStatusData = {};
+      if (page === message || page === practiceQuestion || page === comicStrip || page === learningSlide) {
+      // passing data in context which can be used further in post hook methods
+      // this will prevent a further query
+        userCurrentTopicComponentStatusData[mutationOrQueryName] = {
+          userCurrentTopicComponentStatuses: currentTopicComponentInfo,
+          learningObjective: learningObjectiveInfo,
+        };
+      } else if (page === video || page === quiz || page === blockBasedProject || page === blockBasedPractice) {
+        userCurrentTopicComponentStatusData[mutationOrQueryName] = {
+          userCurrentTopicComponentStatuses: currentTopicComponentInfo,
+        };
+      }
+      Object.assign(context, userCurrentTopicComponentStatusData);
+    }
+    return true;
+  }
+  const batchCurrentComponentStatusRes = await getBatchCurrentComponentStatus(
+    userId,
+    context,
+  );
+  const activeClassroom = await getUserActiveClassroom(context, {
+    studentProfile: get(batchCurrentComponentStatusRes, 'data.user.studentProfile'),
+  }, get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.id'));
+  const batchCurrentComponentInfo = get(activeClassroom, 'currentComponent');
+
+  if (!currentTopicComponentInfo && !batchCurrentComponentInfo) {
     throw new DatabaseRecordNotFoundError({
       data: {
         error: 'CurrentTopicComponentInfo: is not present',
@@ -162,8 +200,11 @@ const isComponentUnlockedForNewCourse = async (
     });
   }
   const {
-    order: topicOrder,
     isTrial,
+  } = topicInfo;
+
+  let {
+    order: topicOrder,
   } = topicInfo;
 
   topicId = topicInfo && topicInfo.id;
@@ -195,12 +236,29 @@ const isComponentUnlockedForNewCourse = async (
   }
   // condition to check if topic is free, if not then user should be pro
   // type to access that topic
-  const { order: currentTopicOrder } = currentTopic;
-  const batchCurrentComponentStatusRes = await getBatchCurrentComponentStatus(
-    userId,
-  );
-  const batchCurrentComponentInfo = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.batch.currentComponent');
+  let { order: currentTopicOrder } = currentTopic;
+  const { id: currentTopicId } = currentTopic;
   const schoolInfo = get(batchCurrentComponentStatusRes, 'data.user.studentProfile.school');
+
+  const isCoursePackageBatch = get(activeClassroom, 'coursePackage.id');
+
+  if (isCoursePackageBatch) {
+    let coursePackageTopics = [];
+    if (get(activeClassroom, 'coursePackageTopicRule', []).length) {
+      coursePackageTopics = getSortedTopics(get(activeClassroom, 'coursePackageTopicRule', []));
+    } else {
+      coursePackageTopics = getSortedTopics(get(activeClassroom, 'coursePackage.topics', []));
+    }
+    // topic we send in input
+    const topicFound = coursePackageTopics.find((o) => o.id === topicId);
+    topicOrder = get(topicFound, 'coursePackageOrder');
+    // current topic we get from userCurrentComponentStatus
+    const currentTopicFound = coursePackageTopics.find((o) => o.id === currentTopicId);
+    currentTopicOrder = get(currentTopicFound, 'coursePackageOrder');
+    // current Topic we get from batchCurrentComponentStatus
+    const currentTopicInBatch = coursePackageTopics.find((o) => o.id === get(batchCurrentComponentInfo, 'currentTopic.id'));
+    batchCurrentComponentInfo.currentTopic.order = get(currentTopicInBatch, 'coursePackageOrder');
+  }
 
   const { free, pro } = enrollmentTypes;
 
@@ -254,7 +312,7 @@ const isComponentUnlockedForNewCourse = async (
   // no mentor token, he should not be able to hit API
   // this will be checked for normal flow and not for batch
   if (!batchCurrentComponentInfo) {
-    const mentorMenteeSessionQueryRes = await getMentorMenteeSessionForValidation(userId, topicId);
+    const mentorMenteeSessionQueryRes = await getMentorMenteeSessionForValidation(userId, topicId, context);
     const mentorMenteeSessionStatus = get(mentorMenteeSessionQueryRes, 'data.mentorMenteeSessions[0].sessionStatus', '');
 
     validateMentorMenteePermissionForComponentForNewCourse(
@@ -269,7 +327,7 @@ const isComponentUnlockedForNewCourse = async (
   if (mutationOrQueryName) {
     // initialising object to be passed in context to save query
     const userCurrentTopicComponentStatusData = {};
-    if (page === message || page === practiceQuestion || page === comicStrip) {
+    if (page === message || page === practiceQuestion || page === comicStrip || page === learningSlide) {
       // passing data in context which can be used further in post hook methods
       // this will prevent a further query
       userCurrentTopicComponentStatusData[mutationOrQueryName] = {

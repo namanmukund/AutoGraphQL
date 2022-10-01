@@ -34,6 +34,10 @@ const userBlockBasedPracticeQuery = (userId, topicId, blockBasedPracticeId, cour
           componentName
           order
           childComponentName
+          learningObjectiveComponentsRule {
+            componentName
+            order
+          }
           learningObjective{
             id
             order
@@ -45,6 +49,12 @@ const userBlockBasedPracticeQuery = (userId, topicId, blockBasedPracticeId, cour
             }
             comicStripsMeta(filter:{status:${PUBLISHED}}){
               count
+            }
+            learningSlidesMeta(filter:{status:${PUBLISHED}}){
+              count
+            }
+            learningSlides(filter:{status:${PUBLISHED}}){
+              id
             }
           }
           blockBasedProject{
@@ -63,12 +73,14 @@ const userBlockBasedPracticeQuery = (userId, topicId, blockBasedPracticeId, cour
 // query to update user LO based on activity done by user
 const updateUserBlockBasedPracticeMutation = (userBlockBasedPracticeId,
   blockBasedPracticeStatus,
-  answerLink, savedBlocks) => `
+  answerLink, savedBlocks, startTime, endTime) => `
   mutation{
     updateUserBlockBasedPractice(id:"${userBlockBasedPracticeId}",  input:{
       ${answerLink ? `answerLink: "${answerLink}"` : ''}
       ${savedBlocks ? `savedBlocks: "${savedBlocks}"` : ''}
       status: ${blockBasedPracticeStatus}
+      ${startTime ? `startTime: "${startTime}"` : ''}
+      ${endTime ? `endTime: "${endTime}"` : ''}
     }){
       id
       status
@@ -98,7 +110,7 @@ const addUserActivityBlockBasedPracticeDumpPostHookMethod = async (input, mutati
     in that case if he is hitting back after blockBasedPractice consumption, status will not get updated
     if it is already completed
   */
-  const userBlockBasedPracticeQueryRes = await callLocalGraphqlApi(userBlockBasedPracticeQuery(userId, topicId, blockBasedPracticeId, courseId));
+  const userBlockBasedPracticeQueryRes = await callLocalGraphqlApi(userBlockBasedPracticeQuery(userId, topicId, blockBasedPracticeId, courseId), context);
   const userBlockBasedPracticeInfo = get(userBlockBasedPracticeQueryRes, 'data.userBlockBasedPractices[0]');
   const {
     id: userBlockBasedPracticeId,
@@ -107,6 +119,8 @@ const addUserActivityBlockBasedPracticeDumpPostHookMethod = async (input, mutati
   const {
     answerLink,
     savedBlocks,
+    startTime,
+    endTime,
   } = input;
   const isHomework = get(input, 'isHomework');
   const topicComponentRule = get(userBlockBasedPracticeInfo, 'topic.topicComponentRule', []);
@@ -132,6 +146,7 @@ const addUserActivityBlockBasedPracticeDumpPostHookMethod = async (input, mutati
   */
   const page = isHomework ? 'homeworkPractice' : 'blockBasedPractice';
   await updateCurrentComponentStatusOfNewCourse(
+    userId,
     courseId,
     currentTopicComponentInfo,
     blockBasedPracticeAction,
@@ -161,7 +176,9 @@ const addUserActivityBlockBasedPracticeDumpPostHookMethod = async (input, mutati
     blockBasedPracticeStatus,
     answerLink,
     savedBlocks,
-  ));
+    startTime,
+    endTime,
+  ), context);
   return true;
 };
 

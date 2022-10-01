@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
-const getSchoolClass = async (input, studentSchoolId) => {
+const getSchoolClass = async (input, studentSchoolId, context) => {
   const {
     grade,
     section,
@@ -19,11 +19,11 @@ const getSchoolClass = async (input, studentSchoolId) => {
   }
 }
   `;
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, context);
   return get(res, 'data.schoolClasses.0.id');
 };
 
-const addSchoolClass = async (input, studentSchoolId, studentProfileId) => {
+const addSchoolClass = async (input, studentSchoolId, studentProfileId, context) => {
   const query = `
     mutation($input: SchoolClassInput!){
       addSchoolClass(
@@ -42,11 +42,11 @@ const addSchoolClass = async (input, studentSchoolId, studentProfileId) => {
       section,
     },
   };
-  const res = await callLocalGraphqlApi(query, '', variables);
+  const res = await callLocalGraphqlApi(query, context, variables);
   return get(res, 'data.addSchoolClass.id');
 };
 
-const connectSchoolClassWithStudentProfile = async (schoolClassId, studentSchoolId, studentProfileId) => {
+const connectSchoolClassWithStudentProfile = async (schoolClassId, studentSchoolId, studentProfileId, context) => {
   const query = `
     mutation($input: SchoolClassUpdate){
       updateSchoolClass(
@@ -61,18 +61,18 @@ const connectSchoolClassWithStudentProfile = async (schoolClassId, studentSchool
   const variables = {
     input: {},
   };
-  const res = await callLocalGraphqlApi(query, '', variables);
+  const res = await callLocalGraphqlApi(query, context, variables);
   return get(res, 'data.updateSchoolClass.id');
 };
 
-const addUpdateSchoolClass = async (input, studentSchoolId, studentProfileId) => {
-  const schoolClassId = await getSchoolClass(input, studentSchoolId);
+const addUpdateSchoolClass = async (input, studentSchoolId, studentProfileId, context) => {
+  const schoolClassId = await getSchoolClass(input, studentSchoolId, context);
   // map student profile with school class if exist else create first and then map
   if (schoolClassId) {
     // just connect school class and student profile
-    return connectSchoolClassWithStudentProfile(schoolClassId, studentSchoolId, studentProfileId);
+    return connectSchoolClassWithStudentProfile(schoolClassId, studentSchoolId, studentProfileId, context);
   }
-  return addSchoolClass(input, studentSchoolId, studentProfileId);
+  return addSchoolClass(input, studentSchoolId, studentProfileId, context);
 };
 
 export default addUpdateSchoolClass;

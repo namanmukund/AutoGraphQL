@@ -1,13 +1,21 @@
 import { get } from 'lodash';
 import extractSlotsFromInput from '../../../../utils/extractSlotsFromInput';
+import getSortedTopics from '../../../../utils/getSortedTopicsFromCoursePackageOrder';
 import getSelectedDays from './utils/getSelectedDays';
 import getPossibleDates from '../../../../utils/getPossibleDates';
 import {
   getTopics, getBatchSessions, createBatchSession, updateBatchSession,
+  getTopicsFromCoursePackage,
 } from './utils/updateBatchPostHookQueries';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import getSelectedSlotsTime from '../preHookFunctions/validation/utils/getSelectedSlotsTime';
 import getSlotTimesInString from '../../../../utils/getSlotTimesInString';
+import getCombinedSchedules from './utils/getCombinedSchedulesForBatch';
+import { fetchBatch } from '../resolvers/mutation/shift/queries/scheduleSessionsQueries';
+import { CannotScheduleOutsideWorkingHoursError } from '../../../../constants/errors';
+import checkIfOutsideWorkingSchedule from './utils/checkIfOutsideWorkingSchedule';
+import getScheduleSessionsRulesGroupedByDay from './utils/getScheduledSessionsRulesGroupedByDay';
+import purgeUserActiveProfileCache from './utils/purgeUserActiveProfileCache';
 
 // query to get all not completed batchSessions of a batch to update student
 const getBatchSessionsQuery = (batchId) => `
@@ -152,12 +160,12 @@ const getUsers = (studentConnectId) => `
 }
 `;
 
-const getMentorSessionId = async (allottedMentorId, date, slotsInInput, courseId, sessionType) => {
+const getMentorSessionId = async (allottedMentorId, date, slotsInInput, courseId, sessionType, context) => {
   let finalMentorSessionId = '';
   if (allottedMentorId) {
     const sentSlotsArray = getSelectedSlotsTime(slotsInInput);
     // eslint-disable-next-line no-await-in-loop
-    const mentorSessionsRes = await callLocalGraphqlApi(fetchMentorSessions(date, allottedMentorId, sessionType));
+    const mentorSessionsRes = await callLocalGraphqlApi(fetchMentorSessions(date, allottedMentorId, sessionType), context);
     const mentorSession = get(mentorSessionsRes, 'data.mentorSessions[0]');
     if (mentorSession && mentorSession.id) {
       const { id: mentorSessionId, ...slotsInMentorSession } = mentorSession;
@@ -165,18 +173,18 @@ const getMentorSessionId = async (allottedMentorId, date, slotsInInput, courseId
       const slotsInMentorSessionArray = getSelectedSlotsTime(slotsInMentorSession);
       if (sentSlotsArray && sentSlotsArray.length && slotsInMentorSessionArray && slotsInMentorSessionArray.length && sentSlotsArray[0] !== slotsInMentorSessionArray[0]) {
         // eslint-disable-next-line no-await-in-loop
-        await callLocalGraphqlApi(updateMentorSession(mentorSessionId, date, `slot${sentSlotsArray[0]}`));
+        await callLocalGraphqlApi(updateMentorSession(mentorSessionId, date, `slot${sentSlotsArray[0]}`), context);
       }
     } else {
       // eslint-disable-next-line no-await-in-loop
-      const addMentorSessionRes = await callLocalGraphqlApi(addMentorSession(allottedMentorId, courseId, date, `slot${sentSlotsArray[0]}`, sessionType));
+      const addMentorSessionRes = await callLocalGraphqlApi(addMentorSession(allottedMentorId, courseId, date, `slot${sentSlotsArray[0]}`, sessionType), context);
       finalMentorSessionId = get(addMentorSessionRes, 'data.addMentorSession.id');
     }
   }
   return finalMentorSessionId;
 };
 
-const createBatchSessions = async (batchId, possibleDates, filteredSlots, slotsInInput, possibleSessionCount, topics, allottedMentorId, courseId, batchType) => {
+const createBatchSessions = async (batchId, possibleDates, filteredSlots, slotsInInput, possibleSessionCount, topics, allottedMentorId, courseId, batchType, context) => {
   if (possibleDates.length <= possibleSessionCount) {
     // eslint-disable-next-line no-restricted-syntax
     for (const date of possibleDates) {
@@ -187,8 +195,8 @@ const createBatchSessions = async (batchId, possibleDates, filteredSlots, slotsI
         sessionType = 'trial';
       }
       // eslint-disable-next-line no-await-in-loop
-      const finalMentorSessionId = await getMentorSessionId(allottedMentorId, date, slotsInInput, courseId, sessionType);
-      createBatchSession(batchId, date, filteredSlots, topics[index].id, finalMentorSessionId, courseId);
+      const finalMentorSessionId = await getMentorSessionId(allottedMentorId, date, slotsInInput, courseId, sessionType, context);
+      createBatchSession(batchId, date, filteredSlots, topics[index].id, finalMentorSessionId, courseId, context);
     }
   } else {
     for (let i = 0; i < possibleSessionCount; i += 1) {
@@ -198,15 +206,15 @@ const createBatchSessions = async (batchId, possibleDates, filteredSlots, slotsI
         sessionType = 'trial';
       }
       // eslint-disable-next-line no-await-in-loop
-      const finalMentorSessionId = await getMentorSessionId(allottedMentorId, possibleDates[i], slotsInInput, courseId, sessionType);
-      createBatchSession(batchId, possibleDates[i].toISOString(), filteredSlots, topics[i].id, finalMentorSessionId, courseId);
+      const finalMentorSessionId = await getMentorSessionId(allottedMentorId, possibleDates[i], slotsInInput, courseId, sessionType, context);
+      createBatchSession(batchId, possibleDates[i].toISOString(), filteredSlots, topics[i].id, finalMentorSessionId, courseId, context);
     }
   }
 
   return true;
 };
 
-const updateAllottedBatchSessions = async (sessionsAllotted, possibleDates, filteredSlotsString, slotsInInput, allottedMentorId, courseId, batchType) => {
+const updateAllottedBatchSessions = async (sessionsAllotted, possibleDates, filteredSlotsString, slotsInInput, allottedMentorId, courseId, batchType, context) => {
   let i = 0;
   /* eslint-disable array-callback-return */
   // eslint-disable-next-line no-restricted-syntax
@@ -217,10 +225,10 @@ const updateAllottedBatchSessions = async (sessionsAllotted, possibleDates, filt
       sessionType = 'trial';
     }
     // eslint-disable-next-line no-await-in-loop
-    const finalMentorSessionId = await getMentorSessionId(allottedMentorId, possibleDates[i], slotsInInput, courseId, sessionType);
+    const finalMentorSessionId = await getMentorSessionId(allottedMentorId, possibleDates[i], slotsInInput, courseId, sessionType, context);
     /* eslint-disable array-callback-return */
     const date = possibleDates[i].toISOString();
-    updateBatchSession(session.id, filteredSlotsString, date, finalMentorSessionId, courseId);
+    updateBatchSession(session.id, filteredSlotsString, date, finalMentorSessionId, courseId, null, null, null, null, context);
     i += 1;
   }
 };
@@ -250,6 +258,7 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
   const { id: batchId, studentsConnectIds, allottedMentorConnectId } = params;
   const mentorUserId = get(input, 'allottedMentor.typeId', '');
   const courseId = get(input, 'course.typeId', '');
+  const coursePackageId = get(input, 'coursePackage.typeId');
   const timeTableRule = get(params, 'input.timeTableRule', null);
   const batchType = get(input, 'type', '');
   /*
@@ -260,10 +269,40 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
     -> if there are no batchSessions in the Db, create batchSessions for all the dates in the date array
     -> if there are some batchSessions, update the remaining batchSessions with the new passed values and create batchSessions if necessary.
   */
+
   if (timeTableRule) {
-    // topic count
-    let topics = await getTopics(courseId);
-    const topicCount = topics && topics.length;
+    const batch = await fetchBatch(batchId);
+    const sessionRules = [];
+    sessionRules.push(timeTableRule);
+    const daysRule = getScheduleSessionsRulesGroupedByDay(sessionRules);
+
+    // combine school and batch timetableschedules
+    const { combinedWorkingDaySchedule, combinedEventScheduleArray } = getCombinedSchedules(batch);
+
+    if (combinedWorkingDaySchedule.startDate && combinedWorkingDaySchedule.endDate) {
+      const { isOutsideWorkingSchedule, errorMessage } = checkIfOutsideWorkingSchedule(combinedWorkingDaySchedule, combinedEventScheduleArray, timeTableRule, daysRule);
+      if (isOutsideWorkingSchedule) {
+        throw new CannotScheduleOutsideWorkingHoursError({
+          data: {
+            message: errorMessage,
+          },
+        });
+      }
+    }
+
+    let topics;
+    let topicCount;
+    if (coursePackageId) {
+      // topic count
+      const coursePackage = await getTopicsFromCoursePackage(coursePackageId, context);
+      const topicRules = get(coursePackage, 'topics');
+      topics = getSortedTopics(topicRules);
+      topicCount = topics && topics.length;
+    } else {
+      // topic count
+      topics = await getTopics(courseId);
+      topicCount = topics && topics.length;
+    }
     // batch sessions
     const batchSessions = await getBatchSessions(batchId);
 
@@ -294,7 +333,7 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
       const allottedSessionsCount = sessionsAllotted.length;
       if (allottedSessionsCount > 0) {
         possibleSessionCount -= allottedSessionsCount;
-        updateAllottedBatchSessions(sessionsAllotted, possibleDates, filteredSlotsString, slots, mentorUserId, courseId, batchType);
+        updateAllottedBatchSessions(sessionsAllotted, possibleDates, filteredSlotsString, slots, mentorUserId, courseId, batchType, context);
       }
       if (possibleSessionCount > 0) {
         // all the remaining sessions have to be created
@@ -302,19 +341,19 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
         possibleDates = possibleDates.slice(startFromIndex);
         const topicStartIndex = topicCount - possibleSessionCount;
         topics = topics.splice(topicStartIndex);
-        createBatchSessions(batchId, possibleDates, filteredSlotsString, slots, possibleSessionCount, topics, mentorUserId, courseId, batchType);
+        createBatchSessions(batchId, possibleDates, filteredSlotsString, slots, possibleSessionCount, topics, mentorUserId, courseId, batchType, context);
       }
     } else {
       // if there are no exisiting batchSessions for the given batch id, create all of them
       const possibleSessionCount = topicCount;
       const possibleDates = getPossibleDates(startDate, endDate, days);
-      createBatchSessions(batchId, possibleDates, filteredSlotsString, slots, possibleSessionCount, topics, mentorUserId, courseId, batchType);
+      createBatchSessions(batchId, possibleDates, filteredSlotsString, slots, possibleSessionCount, topics, mentorUserId, courseId, batchType, context);
     }
   } else if (allottedMentorConnectId) {
     const previouslyAllottedMentorId = get(context, 'previousDocument.allottedMentor.id', '');
     if (previouslyAllottedMentorId !== allottedMentorConnectId) {
       // fetch all the batch Sessions corresponding to given batch which are !completed state
-      const notCompletedBatchSessionsResult = await callLocalGraphqlApi(getBatchSessionsQuery(batchId));
+      const notCompletedBatchSessionsResult = await callLocalGraphqlApi(getBatchSessionsQuery(batchId), context);
       const notCompletedBatchSessions = get(notCompletedBatchSessionsResult, 'data.batchSessions');
       notCompletedBatchSessions.forEach(async (batchSession) => {
         // we add or update mentor sessions of the new mentor based on the batch session dates
@@ -324,15 +363,15 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
         if (batchType === 'b2b2c' && topicOrder === 1) {
           sessionType = 'trial';
         }
-        const finalMentorSessionId = await getMentorSessionId(allottedMentorConnectId, bookingDate, slots, courseId, sessionType);
+        const finalMentorSessionId = await getMentorSessionId(allottedMentorConnectId, bookingDate, slots, courseId, sessionType, context);
         // update the new mentorSessionId in the batch Session
-        callLocalGraphqlApi(updateNewMentorSessionInBatchSession(batchSessionId, finalMentorSessionId));
+        callLocalGraphqlApi(updateNewMentorSessionInBatchSession(batchSessionId, finalMentorSessionId), context);
       });
     }
   }
   // while we are adding new students to a batch, adding those students to not completed batch Sessions
   if (studentsConnectIds && studentsConnectIds.length && batchId) {
-    const notCompletedBatchSessionsResult = await callLocalGraphqlApi(getBatchSessionsQuery(batchId));
+    const notCompletedBatchSessionsResult = await callLocalGraphqlApi(getBatchSessionsQuery(batchId), context);
     const notCompletedBatchSessions = get(notCompletedBatchSessionsResult, 'data.batchSessions');
     notCompletedBatchSessions.forEach((batchSession) => {
       let pushManyQuery = 'attendance:{ pushMany: [';
@@ -361,11 +400,13 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
     /* eslint-disable-next-line no-restricted-syntax */
     for (const studentConnectId of studentsConnectIds) {
       /* eslint-disable-next-line no-await-in-loop */
-      const userRes = await callLocalGraphqlApi(getUsers(studentConnectId));
+      const userRes = await callLocalGraphqlApi(getUsers(studentConnectId), context);
       const userId = get(userRes, 'data.users[0].id', '');
-      callLocalGraphqlApi(updateUser(userId, vertical));
+      callLocalGraphqlApi(updateUser(userId, vertical), context);
     }
   }
+
+  await purgeUserActiveProfileCache(context);
 };
 
 export default updateBatchPostHookMethod;

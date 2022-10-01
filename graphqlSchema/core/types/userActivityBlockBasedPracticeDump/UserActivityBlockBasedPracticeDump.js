@@ -5,9 +5,12 @@ const UserActivityBlockBasedPracticeDump = `
     blockBasedPracticeAction: UserActionType
     answerLink: String
     savedBlocks: String
+    attachments: [File] @relation(name: "UserActivityBlockBasedPracticeDumpAttachment", direction: "OneWay")
     isHomework: Boolean @defaultValue(value: "false")
     topic: Topic @relation(name: "TopicUserActivityBlockBasedPracticeDump", direction: "OneWay")
     course: Course @relation(name: "UserActivityBlockBasedPracticeDumpCourse", direction: "OneWay")
+    startTime: Date
+    endTime: Date
   }
 `;
 

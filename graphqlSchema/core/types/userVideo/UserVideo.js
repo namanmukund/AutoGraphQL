@@ -17,6 +17,8 @@ const UserVideo = `
     videoCurrentTime: Int @defaultValue(value: "0")
     status: UserTopicTypeStatus @defaultValue(value: "incomplete")
     nextComponent: UserVideoNextComponentType
+    activityStartTime: Date
+    activityEndTime: Date
   }
 `;
 

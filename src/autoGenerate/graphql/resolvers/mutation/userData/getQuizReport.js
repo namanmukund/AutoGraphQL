@@ -11,12 +11,13 @@ import {
   ComponentLockedError,
   DatabaseRecordNotFoundError, UnauthenticatedUserError,
 } from '../../../../../../constants/errors';
-import callGraphqlApi from '../../../../../api/callGraphqlApi';
+// import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getUserIdandAppNameAfterValidation
-  from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
+from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
 import { log } from '../../../../../../utils';
+import getUserActiveClassroom from '../../../../../../utils/getUserActiveClassroom';
 
 // query to get current component status of user
 const getUserCurrentTopicComponentStatus = (userId, courseId) => `
@@ -160,6 +161,37 @@ const getBatchStatus = (userId) => `
         batch{
           id
           type
+          course {
+            id
+          }
+          coursePackage {
+            courses {
+              id
+            }
+          }
+          currentComponent{
+            currentCourse{
+              id
+              order
+            }
+            currentTopic{
+              id
+              order
+            }
+            latestSessionStatus
+          }
+        }
+        batches {
+          id
+          type
+          course {
+            id
+          }
+          coursePackage {
+            courses {
+              id
+            }
+          }
           currentComponent{
             currentCourse{
               id
@@ -275,13 +307,9 @@ const getQuizReportMutationResolver = async (
     });
   }
 
-  const { authorization: token } = context;
-  const res = await callGraphqlApi(
+  const res = await callLocalGraphqlApi(
     getUserCurrentTopicComponentStatus(userId, courseId),
-    '',
-    '',
-    '',
-    token,
+    context,
   );
 
   const currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
@@ -296,15 +324,13 @@ const getQuizReportMutationResolver = async (
     '',
   );
 
-  const batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
+  const activeClassroom = getUserActiveClassroom(context, { courseId, studentProfile: get(batchRes, 'data.user.studentProfile') }, get(batchRes, 'data.user.studentProfile.batch.id'));
+  const batchCurrentComponentInfo = get(activeClassroom, 'currentComponent');
 
   // calling API to get data of fetched topic
-  const topicRes = await callGraphqlApi(
+  const topicRes = await callLocalGraphqlApi(
     getTopicQuery(topicId),
-    '',
-    '',
-    '',
-    token,
+    context,
   );
   // getting info of called topic
   const topicInfo = get(topicRes, 'data.topic');
@@ -327,7 +353,7 @@ const getQuizReportMutationResolver = async (
   if (topicInfo.order > currentRunningTopic.order) {
     throw new ComponentLockedError();
   }
-  const userQuizQueryRes = await callGraphqlApi(userQuizQuery(userId, topicId, courseId));
+  const userQuizQueryRes = await callLocalGraphqlApi(userQuizQuery(userId, topicId, courseId), context);
   const userQuizInfo = get(userQuizQueryRes, 'data.userQuizs[0]');
   const quizQuestionsInUserQuiz = get(userQuizInfo, 'quiz');
   if (!quizQuestionsInUserQuiz
@@ -344,25 +370,20 @@ const getQuizReportMutationResolver = async (
   Sending and awaiting user quiz dump
   This is called beforehand so that the userQuizReport document gets created for just sent quiz data
   */
-  await callGraphqlApi(
+  await callLocalGraphqlApi(
     addUserQuizDump(userId, topicId, courseId),
+    context,
     {
       input: quizQuestions,
     },
-    '',
-    '',
-    token,
   );
 
   // Constructing data for first and latest quiz report
   let parsedFirstQuizReport;
   let parsedLatestQuizReport;
-  const quizRes = await callGraphqlApi(
+  const quizRes = await callLocalGraphqlApi(
     getQuizReportQuery(userId, topicId),
-    '',
-    '',
-    '',
-    token,
+    context,
   );
   // Constructing data for first and latest quiz report
   const quizInfo = get(quizRes, 'data.userQuizReports');

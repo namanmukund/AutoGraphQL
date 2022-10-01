@@ -6,10 +6,11 @@ import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { ADMIN, UMS_ADMIN } from '../../../../../constants/roles';
 import { InsufficientPermissionError } from '../../../../../constants/errors';
 import { UserWithSimilarEmailAlreadyExist, UserWithSimilarNumberAlreadyExist } from '../../../../../constants/errors/db';
+import getUserActiveClassroom from '../../../../../utils/getUserActiveClassroom';
 
 const allowedRoles = [ADMIN, UMS_ADMIN];
 
-const fetchUser = async (id) => {
+const fetchUser = async (id, context) => {
   const query = `
     {
       user(id: "${id}") {
@@ -29,11 +30,11 @@ const fetchUser = async (id) => {
       }
     }
   `;
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, context);
   return get(res, 'data.user');
 };
 
-const fetchUserDetail = async (emailOrPhoneNumber = '', userId, shouldCheckPhone = false) => {
+const fetchUserDetail = async (emailOrPhoneNumber = '', userId, shouldCheckPhone = false, context) => {
   const query = `{
   users(
     filter: {
@@ -47,7 +48,7 @@ const fetchUserDetail = async (emailOrPhoneNumber = '', userId, shouldCheckPhone
   }
 }
 `;
-  const user = await callLocalGraphqlApi(query);
+  const user = await callLocalGraphqlApi(query, context);
   return get(user, 'data.users', []).length;
 };
 
@@ -74,33 +75,34 @@ const updateUserValidation = async (params, context, mutationOrQueryName) => {
   const {
     currentUser,
   } = userInfo;
-  const user = await fetchUser(userId);
+  const user = await fetchUser(userId, context);
   // if the user vertical is unassigned, try to change it
   // check if vertical can be determined, first from source, then campaign type, and then lastly batch type
   if (email) {
-    const isUserExistWithEmail = await fetchUserDetail(email, userId);
+    const isUserExistWithEmail = await fetchUserDetail(email, userId, false, context);
     if (isUserExistWithEmail) {
       throw new UserWithSimilarEmailAlreadyExist();
     }
   }
   if (get(phone, 'number')) {
-    const isUserExistWithNumber = await fetchUserDetail(get(phone, 'number'), userId, true);
+    const isUserExistWithNumber = await fetchUserDetail(get(phone, 'number'), userId, true, context);
     if (isUserExistWithNumber) {
       throw new UserWithSimilarNumberAlreadyExist();
     }
   }
+  const activeClassroom = await getUserActiveClassroom(context, {}, get(user, 'studentProfile.batch.id'));
   let userVertical = 'unassigned';
   if (get(user, 'vertical') === 'unassigned'
   && (get(user, 'role') === 'mentee' || get(user, 'role') === 'parent')) {
     if (get(user, 'source') !== 'school') {
       userVertical = 'b2c';
-    } else if (get(user, 'studentProfile.batch.type')) {
+    } else if (get(activeClassroom, 'type')) {
       /* eslint-disable no-lonely-if */
-      if (get(user, 'studentProfile.batch.type') === 'normal') {
+      if (get(activeClassroom, 'type') === 'normal') {
         userVertical = 'b2c';
-      } else if (get(user, 'studentProfile.batch.type') === 'b2b') {
+      } else if (get(activeClassroom, 'type') === 'b2b') {
         userVertical = 'b2b';
-      } else if (get(user, 'studentProfile.batch.type') === 'b2b2c') {
+      } else if (get(activeClassroom, 'type') === 'b2b2c') {
         userVertical = 'b2b2c';
       }
     } else {

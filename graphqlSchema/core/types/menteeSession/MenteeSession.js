@@ -5,11 +5,14 @@ const slotTimeFields = getSlotTimeFields('Boolean', false);
 const MenteeSession = `
   type MenteeSession @model {
     course: Course @relation(name: "MenteeSessionCourse", direction: "OneWay")
+    coursePackage: CoursePackage @relation(name: "MenteeSessionCoursePackage", direction: "OneWay")
     user: User! @relation(name: "MenteeSessionUser", direction: "OneWay")
     topic: Topic! @relation(name: "MenteeSessionTopic", direction: "OneWay")
     bookingDate: Date!
     scheduleRunStatus: ScheduleRunStatus
     ${slotTimeFields}
+    startMinutes: Int @defaultValue(value: "0")
+    endMinutes: Int @defaultValue(value: "0")
     source: UserOriginSource @defaultValue(value: "website")
     country: Country @defaultValue(value: "india")
     bookedBy: BookedBy @defaultValue(value: "customer")

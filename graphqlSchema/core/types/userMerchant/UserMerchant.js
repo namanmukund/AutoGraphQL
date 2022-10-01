@@ -14,6 +14,13 @@ const UserMerchant = `
     parentPhone: Phone @uniqueOrEmpty
     parentEmail: String
     productId: String!
+    externalProductId: String
+    productName: String
+    city: String
+    state: String
+    pincode: String
+    joiningDate: Date
+    purchaseDate: Date
     merchantCampaignType: String
     grade: Grade
     parentName: String

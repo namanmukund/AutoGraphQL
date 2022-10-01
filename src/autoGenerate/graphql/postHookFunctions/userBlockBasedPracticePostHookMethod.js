@@ -5,6 +5,7 @@ import {
 import getInfoFromParams from './utils/getInfoFromParams';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import { MENTEE } from '../../../../constants/roles';
 
 // query to add UserBlockBasedPractice if it is not already present for user, blockBasedProjectId and topic id
 const addUserBlockBasedPracticeMutation = (
@@ -34,6 +35,10 @@ const addUserBlockBasedPracticeMutation = (
         id
       }
       answerLink
+      attachments {
+        id
+        uri
+      }
       savedBlocks
     }
     }
@@ -45,13 +50,16 @@ It will be created and returned to tekie app.
 Document contains all the necessary information needed on page along
 with the next component.
 */
-const userBlockBasedPracticePostHookMethod = async (input, params) => {
+const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
   /*
   checking if document is already present in collection for user and topic id,
   returning input in that case
   if it is not already present, we will add a new document with default data
   */
-  if (input && input.length) {
+  if ((input && input.length) || (typeof input === 'object' && get(input, 'id'))) {
+    return input;
+  }
+  if (get(context, 'userRoleFromContext') && get(context, 'userRoleFromContext') !== MENTEE) {
     return input;
   }
   const resultArray = [];
@@ -62,7 +70,7 @@ const userBlockBasedPracticePostHookMethod = async (input, params) => {
     blockBasedPracticeId,
   } = getInfoFromParams(params, 'blockBasedPractice');
   // In case there is no topic id, empty data will be sent
-  if (!topicId) {
+  if (!topicId || !blockBasedPracticeId) {
     return resultArray;
   }
 
@@ -74,7 +82,7 @@ const userBlockBasedPracticePostHookMethod = async (input, params) => {
     topicId,
     courseId,
     blockBasedPracticeId,
-  ));
+  ), context);
   if (result) {
     /*
       parsing data 'addUserBlockBasedPractice' so that the logic implemented ahead can read data is

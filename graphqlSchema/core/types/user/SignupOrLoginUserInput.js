@@ -2,6 +2,7 @@ const SignupOrLoginUserInput = `
   input SignupOrLoginUserInput {
     email: String
     phone: PhoneInput
+    username: String
     campaignId: String
     utmSource: String
     utmCampaign: String
@@ -14,6 +15,8 @@ const SignupOrLoginUserInput = `
     city: String
     timezone: String
     role: UserRole @defaultValue(value: "parent")
+    eventId: String
+    shouldAddInWaitingList: Boolean @defaultValue(value: "false")
   }`;
 
 export default SignupOrLoginUserInput;

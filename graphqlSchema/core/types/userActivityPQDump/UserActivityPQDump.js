@@ -12,6 +12,8 @@ const practiceQuestionsType = `
    userFibInputAnswer: [FibInputAnswer]
    userFibBlockAnswer: [FibBlocksAnswer]
    userArrangeAnswer: [ArrangeAnswer]
+   startTime: Date
+   endTime: Date
  }`;
 
 const PQShareType = `

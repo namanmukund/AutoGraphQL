@@ -8,6 +8,7 @@ const addStudentProfile = async (
   studentSchoolId,
   batchId,
   bookingAgentId,
+  context,
 ) => {
   let schoolConnectId = '';
   if (studentSchoolId) {
@@ -37,7 +38,7 @@ mutation($input: StudentProfileInput!){
 }
 `;
 
-  const res = await callLocalGraphqlApi(query, '', variables);
+  const res = await callLocalGraphqlApi(query, context, variables);
   return get(res, 'data.addStudentProfile.id');
 };
 

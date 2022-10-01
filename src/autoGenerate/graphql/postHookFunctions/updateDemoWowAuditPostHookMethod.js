@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 
-const updateDemoWowAudit = async (DemoWowAuditId, input) => {
+const updateDemoWowAudit = async (DemoWowAuditId, input, context) => {
   const query = `
     mutation($input:DemoWowAuditUpdate){
       updateDemoWowAudit(
@@ -15,11 +15,11 @@ const updateDemoWowAudit = async (DemoWowAuditId, input) => {
   const variables = {
     input,
   };
-  const res = await callLocalGraphqlApi(query, '', variables);
+  const res = await callLocalGraphqlApi(query, context, variables);
   return get(res, 'data.updateDemoWowAudit');
 };
 
-const updateDemoWowAuditPostHookMethod = async (input, params) => {
+const updateDemoWowAuditPostHookMethod = async (input, params, _mutationName, context) => {
   const { auditorConnectId } = params;
   /**
    * Check if prev status is not started and auditorConnectId not provided then update status to started
@@ -27,7 +27,7 @@ const updateDemoWowAuditPostHookMethod = async (input, params) => {
    * */
   if (get(params, 'input.status', false) !== 'completed') {
     if (get(input, 'status', false) !== 'started' && !auditorConnectId) {
-      const updateDemoWowAuditData = await updateDemoWowAudit(get(input, 'id'), { status: 'started' });
+      const updateDemoWowAuditData = await updateDemoWowAudit(get(input, 'id'), { status: 'started' }, context);
       if (updateDemoWowAuditData && updateDemoWowAuditData.id) {
         Object.assign(input, {
           status: updateDemoWowAuditData.status,

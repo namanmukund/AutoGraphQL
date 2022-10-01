@@ -3,6 +3,7 @@ const DateCondition = `
     before
     during
     after
+    afterRegistration
   }`;
 
 export default DateCondition;

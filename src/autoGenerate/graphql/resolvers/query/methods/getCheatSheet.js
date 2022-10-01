@@ -78,7 +78,7 @@ const getCheatSheetContents = async ({ input, bookmarkedCheatSheetData }) => {
         cheatsheet: { type: 'CheatSheet', typeId: `${concept.id}` },
         isBookmarked: isBookmark,
         isSelected: i === 0,
-        bookmarkId,
+        userCheatSheetId: bookmarkId,
       });
     });
   } else if (input.isFavourite) {
@@ -87,7 +87,7 @@ const getCheatSheetContents = async ({ input, bookmarkedCheatSheetData }) => {
         cheatsheet: { type: 'CheatSheet', typeId: `${get(concept, 'cheatsheet.id')}` },
         isBookmarked,
         isSelected: i === 0,
-        bookmarkId: id,
+        userCheatSheetId: id,
       });
     });
   } else if (input.cheatSheetId !== '') {
@@ -113,7 +113,7 @@ const getCheatSheetContents = async ({ input, bookmarkedCheatSheetData }) => {
         cheatsheet: { type: 'CheatSheet', typeId: `${concept.id}` },
         isBookmarked: isBookmark,
         isSelected: i === 0,
-        bookmarkId,
+        userCheatSheetId: bookmarkId,
       });
     });
   }
@@ -144,7 +144,7 @@ const getCheatSheetContentWithoutInput = async (bookmarkedCheatSheetData) => {
         cheatsheet: { type: 'CheatSheet', typeId: `${concept.id}` },
         isBookmarked: isBookmark,
         isSelected: i === 0,
-        bookmarkId,
+        userCheatSheetId: bookmarkId,
       });
     });
   }

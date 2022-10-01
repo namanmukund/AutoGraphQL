@@ -44,12 +44,13 @@ const getUserCurrentTopicComponentStatusForNewCourse = (
   currentTopic,
   currentLearningObjective,
   enrollmentType,
+  context,
 ) => callLocalGraphqlApi(userCurrentTopicComponentStatusQuery(
   courseId,
   userId,
   currentTopic,
   currentLearningObjective,
   enrollmentType,
-));
+), context);
 
 export default getUserCurrentTopicComponentStatusForNewCourse;

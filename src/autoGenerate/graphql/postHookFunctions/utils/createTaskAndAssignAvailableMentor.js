@@ -1,9 +1,11 @@
 import { get } from 'lodash';
+import { log } from '../../../../../utils';
 import extractSlotsFromInput from '../../../../../utils/extractSlotsFromInput';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
+import sendAutoAssignmentFailedMessage from './sendAutoAssignmentFailedMessage';
 
 // query to fetch mentorSession
-const fetchMentorSessions = async (date, slots) => {
+const fetchMentorSessions = async (date, slots, context) => {
   const query = `
   query{
     mentorSessions(
@@ -19,7 +21,7 @@ const fetchMentorSessions = async (date, slots) => {
     }
   }
   `;
-  const res = await callLocalGraphqlApi(query, '');
+  const res = await callLocalGraphqlApi(query, context);
   return get(res, 'data.mentorSessions', []);
 };
 
@@ -30,6 +32,7 @@ const callAddMentorMenteeSession = async (
   mentorSessionConnectId,
   variables,
   courseConnectId,
+  context,
 ) => {
   const query = `
 mutation($input: MentorMenteeSessionInput!){
@@ -44,7 +47,7 @@ mutation($input: MentorMenteeSessionInput!){
   }
 }
 `;
-  const res = await callLocalGraphqlApi(query, '', variables);
+  const res = await callLocalGraphqlApi(query, context, variables);
   return get(res, 'data.addMentorMenteeSession.id');
 };
 
@@ -54,6 +57,7 @@ const callAddTask = async (
   menteeSessionId,
   mentorUserId,
   taskStatus,
+  context,
 ) => {
   const query = `
 mutation{
@@ -68,11 +72,12 @@ mutation{
   }
 }
 `;
-  const res = await callLocalGraphqlApi(query, '');
+  const res = await callLocalGraphqlApi(query, context);
   return get(res, 'data.addTask.id');
 };
 
 const createTaskAndAssignAvailableMentor = async (
+  context,
   userInfo,
   topicInfo,
   input,
@@ -87,18 +92,22 @@ const createTaskAndAssignAvailableMentor = async (
   let mentorUserId = '';
   let mentorMenteeSessionId = '';
   // fetch mentor sessions, from the earliest created
-  const avalilableMentorSession = await fetchMentorSessions(bookingDate, filteredSlotsStringForFilterQuery);
+  const avalilableMentorSession = await fetchMentorSessions(bookingDate, filteredSlotsStringForFilterQuery, context);
   // console.log('avalilableMentorSession', avalilableMentorSession);
-  if (avalilableMentorSession && avalilableMentorSession.length && get(avalilableMentorSession, '[0].id')) {
-    const mentorSessionId = get(avalilableMentorSession, '[0].id');
-    mentorUserId = get(avalilableMentorSession, '[0].user.id');
-    const variables = {
-      input: {
-        sessionStatus: 'allotted',
-      },
-    };
-    // add mentor mentee session
-    mentorMenteeSessionId = await callAddMentorMenteeSession(topicId, menteeSessionId, mentorSessionId, variables, courseId);
+  try {
+    if (avalilableMentorSession && avalilableMentorSession.length && get(avalilableMentorSession, '[0].id')) {
+      const mentorSessionId = get(avalilableMentorSession, '[0].id');
+      mentorUserId = get(avalilableMentorSession, '[0].user.id');
+      const variables = {
+        input: {
+          sessionStatus: 'allotted',
+        },
+      };
+      // add mentor mentee session
+      mentorMenteeSessionId = await callAddMentorMenteeSession(topicId, menteeSessionId, mentorSessionId, variables, courseId, context);
+    }
+  } catch (err) {
+    log('Error Adding Mentor Mentee Session');
   }
   // console.log('mentorMenteeSessionId', mentorMenteeSessionId);
   // add task irrespective of whether the mentorMenteeSession is created or not
@@ -107,8 +116,12 @@ const createTaskAndAssignAvailableMentor = async (
   if (mentorMenteeSessionId) {
     taskStatus = 'assigned';
   }
-  const taskId = await callAddTask(mentorMenteeSessionId, menteeSessionId, mentorUserId, taskStatus);
-  // console.log('taskId', taskId);
+  const taskId = await callAddTask(mentorMenteeSessionId, menteeSessionId, mentorUserId, taskStatus, context);
+  if (taskStatus === 'unassigned') {
+    // send message to MSM when auto assignment failed
+    log('Auto Assignment Failed');
+    sendAutoAssignmentFailedMessage(context, userInfo);
+  }
   return {
     mentorMenteeSessionId,
     taskId,

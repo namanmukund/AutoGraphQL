@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
-import { PermissionDeniedError } from '../../../../../constants/errors';
+import { PermissionDeniedError, MentorIsInactiveError } from '../../../../../constants/errors';
 import {
   ADMIN, UMS_ADMIN, MENTOR, UMS_VIEWER,
 } from '../../../../../constants/roles';
@@ -49,6 +49,9 @@ query{
     id
     user{
       id
+      mentorProfile{
+        isMentorActive
+      }
     }
   }
 }`;
@@ -86,7 +89,7 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
       },
     });
   }
-
+  
 
   // getting user role from context. We will allow adding batchSession if logged in user is admin
   const userInfo = validateTokenAndExtractInformation(context, false);
@@ -112,15 +115,21 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
   // check if mentor already has another session in same slot
   console.log('change1 *** addBatchSessionValidation')
   if (mentorSessionConnectId) {
-    const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId));
+    const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId), context);
     const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
     const bookingDate = get(params, 'input.bookingDate', '');
+    const isMentorActive = get(fetchMentorRes,'data.mentorSession.user.mentorProfile.isMentorActive')
+    if(!isMentorActive){
+      throw new MentorIsInactiveError()
+    }
+  
     if (mentorUserId && bookingDate) {
       const getMentorSessionsRes = await callLocalGraphqlApi(
         getMentorSessions(
           mentorUserId,
           bookingDate,
         ),
+        context,
       );
       const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
       checkIfSlotCanBeOpenedValidation(params, mentorSessions);
@@ -137,7 +146,7 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
 
   // throw error if document already exists
   if (topicId) {
-    const getBatchSessionsRes = await callLocalGraphqlApi(getBatchSessions(batchId, topicId));
+    const getBatchSessionsRes = await callLocalGraphqlApi(getBatchSessions(batchId, topicId), context);
     const batchSessions = get(getBatchSessionsRes, 'data.batchSessions');
     if (batchSessions && batchSessions.length) {
       throw new SimilarDocumentAlreadyExistError();

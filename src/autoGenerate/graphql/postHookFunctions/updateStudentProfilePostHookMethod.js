@@ -1,8 +1,9 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import addUpdateSchoolClass from './utils/addUpdateSchoolClass';
+import purgeUserActiveProfileCache from './utils/purgeUserActiveProfileCache';
 
-const updateUserApprovedCodeQuery = async (userApprovedCodeID, input) => {
+const updateUserApprovedCodeQuery = async (userApprovedCodeID, input, context) => {
   const query = `
     mutation($input:UserApprovedCodeUpdate!){
       updateUserApprovedCode(
@@ -15,11 +16,11 @@ const updateUserApprovedCodeQuery = async (userApprovedCodeID, input) => {
   const variables = {
     input,
   };
-  const res = await callLocalGraphqlApi(query, '', variables);
+  const res = await callLocalGraphqlApi(query, context, variables);
   return get(res, 'data.updateUserApprovedCode');
 };
 
-const userApprovedCodeQuery = async (userId) => {
+const userApprovedCodeQuery = async (userId, context) => {
   const query = `
       query{
         userApprovedCodes(filter: {
@@ -31,11 +32,11 @@ const userApprovedCodeQuery = async (userId) => {
           id
         }
       }`;
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, context);
   return get(res, 'data.userApprovedCodes');
 };
 
-const removeFromSchoolCLassStudentProfile = async (schoolClassId, studentProfileId) => {
+const removeFromSchoolCLassStudentProfile = async (schoolClassId, studentProfileId, context) => {
   const query = `
   mutation{
     removeFromSchoolClassStudentProfile(
@@ -46,19 +47,19 @@ const removeFromSchoolCLassStudentProfile = async (schoolClassId, studentProfile
     }
   }
   `;
-  const res = await callLocalGraphqlApi(query);
+  const res = await callLocalGraphqlApi(query, context);
   return get(res, 'data.removeFromSchoolClassStudentProfile.fieldName');
 };
 
-const removeOldLinkAndAddUpdateSchoolClass = async (previousSchoolClassId, input, studentSchoolId, studentProfileId) => {
-  await removeFromSchoolCLassStudentProfile(previousSchoolClassId, studentProfileId);
-  return addUpdateSchoolClass(input, studentSchoolId, studentProfileId);
+const removeOldLinkAndAddUpdateSchoolClass = async (previousSchoolClassId, input, studentSchoolId, studentProfileId, context) => {
+  await removeFromSchoolCLassStudentProfile(previousSchoolClassId, studentProfileId, context);
+  return addUpdateSchoolClass(input, studentSchoolId, studentProfileId, context);
 };
 
 const updateStudentProfilePostHookMethod = async (input, params, mutationName, context) => {
   if (get(params, 'input.profileAvatarCode') !== get(context, 'previousDocument.profileAvatarCode')) {
     const userId = get(context, 'previousDocument.user.id');
-    const userApprovedCodes = await userApprovedCodeQuery(userId);
+    const userApprovedCodes = await userApprovedCodeQuery(userId, context);
     const updateObj = {
       studentAvatar: get(input, 'profileAvatarCode', 'theo'),
     };
@@ -67,7 +68,7 @@ const updateStudentProfilePostHookMethod = async (input, params, mutationName, c
       for (const userApprovedCode of userApprovedCodes) {
         const userApprovedCodeID = get(userApprovedCode, 'id');
         // eslint-disable-next-line no-await-in-loop
-        await updateUserApprovedCodeQuery(userApprovedCodeID, updateObj);
+        await updateUserApprovedCodeQuery(userApprovedCodeID, updateObj, context);
       }
     }
   }
@@ -93,6 +94,7 @@ const updateStudentProfilePostHookMethod = async (input, params, mutationName, c
         },
         schoolId,
         input.id,
+        context,
       );
       Object.assign(input, { schoolClass: { type: 'SchoolClass', typeId: schoolClassId } });
     }
@@ -112,10 +114,13 @@ const updateStudentProfilePostHookMethod = async (input, params, mutationName, c
         },
         schoolId,
         input.id,
+        context,
       );
       Object.assign(input, { schoolClass: { type: 'SchoolClass', typeId: schoolClassId } });
     }
   }
+
+  await purgeUserActiveProfileCache(context);
 };
 
 export default updateStudentProfilePostHookMethod;

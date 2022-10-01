@@ -34,7 +34,7 @@ const addUserCurrentTopicComponentStatusMutation = (
 
 // mutation to create current component status of user
 const addUserCurrentTopicComponentStatusForNewCourse = async (
-  userId, courseId, firstTopicId, firstLearningObjectiveId, firstVideoId, firstBlockedBasedProjectId, firstComponentName,
+  userId, courseId, firstTopicId, firstLearningObjectiveId, firstVideoId, firstBlockedBasedProjectId, firstComponentName, context,
 ) => {
   await callLocalGraphqlApi(addUserCurrentTopicComponentStatusMutation(
     userId,
@@ -44,7 +44,7 @@ const addUserCurrentTopicComponentStatusForNewCourse = async (
     firstVideoId,
     firstBlockedBasedProjectId,
     firstComponentName,
-  ));
+  ), context);
 };
 
 export default addUserCurrentTopicComponentStatusForNewCourse;

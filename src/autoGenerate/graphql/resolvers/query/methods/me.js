@@ -37,6 +37,8 @@ const me = ((root, params, context, info) => {
     info,
     parsedASTMap,
     authentication,
+    false,
+    context,
   );
 });
 

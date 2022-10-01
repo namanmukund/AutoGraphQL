@@ -4,6 +4,7 @@ const sessionDetailType = `
    menteeSessionId: ID
    chapterOrder: Int
    chapterTitle: String
+   classType: ClassType
    topicId: ID
    topicTitle: String
    topicThumbnail: File
@@ -13,6 +14,7 @@ const sessionDetailType = `
    bookingDate: Date
    slotTime: Int
    isAccessible: Boolean
+   course: Course
  }`;
 
 const completedSessionDetailType = `
@@ -21,6 +23,7 @@ const completedSessionDetailType = `
    menteeSessionId: ID
    chapterOrder: Int
    chapterTitle: String
+   classType: ClassType
    topicId: ID
    topicTitle: String
    topicThumbnail: File
@@ -32,6 +35,7 @@ const completedSessionDetailType = `
    mentorId: String
    mentorName: String
    mentorProfilePic: File
+   course: Course
  }`;
 
 const menteeCourseSyllabusSkills = `
@@ -53,8 +57,6 @@ const menteeCourseSyllabusCourse = `
    badgeDescription: String
    chapterCount: Int
    topicCount: Int
-   projectCount: Int
-   practiceCount: Int
    courseCompletionPercentage: Float
  }`;
 

@@ -1,7 +1,7 @@
-import { includes } from 'lodash';
-import { fileSizeLimitInMB, fileExtensions } from '../../../constants';
+import { includes, get } from 'lodash';
+import { fileSizeLimitInMB, fileExtensions, ALLOWED_FILE_UPLOAD_TYPES } from '../../../constants';
 
-const checkFileSizeAndExtensions = (fileType, size, ext) => {
+const checkFileSizeAndExtensions = (fileType, size, ext, connectInput) => {
   const {
     image: imageSizeLimit,
     audio: audioSizeLimit,
@@ -11,6 +11,7 @@ const checkFileSizeAndExtensions = (fileType, size, ext) => {
     lottie: lottieSizeLimit,
     pdf: pdfSizeLimit,
     programFiles: programFilesSizeLimit,
+    others: othersSizeLimit,
   } = fileSizeLimitInMB;
 
   const {
@@ -23,6 +24,8 @@ const checkFileSizeAndExtensions = (fileType, size, ext) => {
     documentExtensions,
     programExtensions,
   } = fileExtensions;
+
+  const operationTypeName = get(connectInput, 'type');
 
   const doc = {};
   doc.isValidSize = false;
@@ -104,6 +107,12 @@ const checkFileSizeAndExtensions = (fileType, size, ext) => {
       break;
     }
     default:
+      if (ALLOWED_FILE_UPLOAD_TYPES.includes(operationTypeName)) {
+        if (size <= (othersSizeLimit * 1024 * 1024)) {
+          doc.isValidSize = true;
+        }
+        doc.isValidExtension = true;
+      }
   }
   return doc;
 };

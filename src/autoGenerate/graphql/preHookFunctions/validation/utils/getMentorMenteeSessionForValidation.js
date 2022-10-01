@@ -26,6 +26,6 @@ const mentorMenteeSessionQuery = (userId, topicId) => `
   `;
 
 // quey to get mentorMenteeSession for related topic and user
-const getMentorMenteeSessionForValidation = (userId, topicId) => callLocalGraphqlApi(mentorMenteeSessionQuery(userId, topicId));
+const getMentorMenteeSessionForValidation = (userId, topicId, context) => callLocalGraphqlApi(mentorMenteeSessionQuery(userId, topicId), context);
 
 export default getMentorMenteeSessionForValidation;

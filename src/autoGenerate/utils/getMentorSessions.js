@@ -10,6 +10,8 @@ const getMentorSessions = (userId, availabilityDate) => `query{
     }){
       id
       sessionType
+      startMinutes
+      endMinutes
       mentorMenteeSessions{
           id
           menteeSession{
@@ -17,9 +19,16 @@ const getMentorSessions = (userId, availabilityDate) => `query{
             user {
               name
               studentProfile {
+                id
                 batch {
                   id
                   code
+                  documentType
+                }
+                batches {
+                  id
+                  code
+                  documentType
                 }
               }
             }
@@ -28,10 +37,13 @@ const getMentorSessions = (userId, availabilityDate) => `query{
         }
       batchSessions{
         id
+        startMinutes
+        endMinutes
         batch {
           id
           type
           code
+          documentType
           studentsMeta {
             count
           }
@@ -40,9 +52,12 @@ const getMentorSessions = (userId, availabilityDate) => `query{
       }
       adhocSessions{
         id
+        startMinutes
+        endMinutes
         batch {
           type
           code
+          documentType
           studentsMeta {
             count
           }

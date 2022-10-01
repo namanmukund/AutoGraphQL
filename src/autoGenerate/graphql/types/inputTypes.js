@@ -103,7 +103,7 @@ Object.keys(parsedASTMap).forEach((type) => {
         }
         // if field type is array
         if (parsedASTMap[type].field[fieldName].type.isList) {
-          if (!['UserToken', 'ParentChildToken'].includes(type)) {
+          if (!['UserToken', 'ParentChildToken', 'ClassroomDetails'].includes(type)) {
             throw new UnsupportedListFieldInsideSubDocumentObjectError(
               {
                 data: {

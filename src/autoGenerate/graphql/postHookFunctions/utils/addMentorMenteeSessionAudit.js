@@ -44,7 +44,7 @@ const addMentorMenteeSessionAudit = async (
   mentorMenteeSessionId,
   order,
 ) => {
-  const mentorMenteeSessionAuditInfo = await callLocalGraphqlApi(mentorMenteeSessionAuditQuery(mentorMenteeSessionId));
+  const mentorMenteeSessionAuditInfo = await callLocalGraphqlApi(mentorMenteeSessionAuditQuery(mentorMenteeSessionId), {});
   const mentorMenteeSessionAuditId = get(mentorMenteeSessionAuditInfo, 'data.mentorMenteeSessionAudits[0].id', false);
 
   if (!mentorMenteeSessionAuditId) {
@@ -79,7 +79,7 @@ const addMentorMenteeSessionAudit = async (
       auditQuestionsIds,
       questionSectionsQuery,
       totalScore,
-    ));
+    ), {});
   }
 };
 

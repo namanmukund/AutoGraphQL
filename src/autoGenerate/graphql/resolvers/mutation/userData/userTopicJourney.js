@@ -9,12 +9,14 @@ import {
   DatabaseRecordNotFoundError, UnauthenticatedUserError,
 } from '../../../../../../constants/errors';
 import getUserIdandAppNameAfterValidation
-  from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
+from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
 import { log } from '../../../../../../utils';
 import getMasteryLevel from '../../utils/getMasteryLevel';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import validateCurrentTopicComponentForNewCourse from '../../utils/validateCurrentTopicComponentForNewCourse';
+import isUserIsMentorChild from '../../../postHookFunctions/utils/isMentorChild';
+import getUserActiveClassroom from '../../../../../../utils/getUserActiveClassroom';
 
 // query to get current component status of user
 const getUserCurrentTopicComponentStatus = (userId, courseId) => `
@@ -108,6 +110,10 @@ query{
       topicComponentRule{
       order
       componentName
+      learningObjectiveComponentsRule {
+        componentName
+        order
+      }
       learningObjective{
         id
         order
@@ -189,6 +195,7 @@ const getUserLearningObjectiveQuery = (userId, learningObjectiveId) => `
     }){
       id
       practiceQuestionStatus
+      learningSlideStatus
       chatStatus
     }
   }
@@ -205,6 +212,40 @@ const getBatchStatus = (userId) => `
         batch{
           id
           type
+          course {
+            id
+          }
+          coursePackage {
+            id
+            courses {
+              id
+            }
+          }
+          currentComponent{
+            enrollmentType
+            currentCourse{
+              id
+              order
+            }
+            currentTopic{
+              id
+              order
+            }
+            latestSessionStatus
+          }
+        }
+        batches {
+          id
+          type
+          course {
+            id
+          }
+          coursePackage {
+            id
+            courses {
+              id
+            }
+          }
           currentComponent{
             enrollmentType
             currentCourse{
@@ -238,6 +279,7 @@ const getUpdatedLearningObjectivesData = async (userId, learningObjectivesData, 
     if (userLearningObjectiveInfo) {
       loInArray.practiceQuestionStatus = userLearningObjectiveInfo.practiceQuestionStatus;
       loInArray.chatStatus = userLearningObjectiveInfo.chatStatus;
+      loInArray.learningSlideStatus = userLearningObjectiveInfo.learningSlideStatus;
     }
   }
   return clonedLearningObjectivesData;
@@ -284,6 +326,9 @@ const userTopicJourneyMutationResolver = async (
     context,
     '',
   );
+  // Bypassing component validation incase if schoolTeacher is accessing the content.
+  let checkForMentorChild = await isUserIsMentorChild(userId, true, context);
+  checkForMentorChild = typeof checkForMentorChild === 'boolean' && checkForMentorChild;
   const currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
   // calling method to validate user current topic component status
   if (!courseId || (courseId === OLD_COURSE_ID)) {
@@ -299,10 +344,12 @@ const userTopicJourneyMutationResolver = async (
     '',
   );
 
-  const batchCurrentComponentCourseId = get(batchRes, 'data.user.studentProfile.batch.currentComponent.currentCourse.id');
+  const activeClassroom = await getUserActiveClassroom(context, { courseId, studentProfile: get(batchRes, 'data.user.studentProfile') }, get(batchRes, 'data.user.studentProfile.batch.id'));
+  const batchCurrentComponentCourseId = get(activeClassroom, 'currentComponent.currentCourse.id');
+  const coursePackageId = get(activeClassroom, 'coursePackage.id');
   let batchCurrentComponentInfo;
-  if ((courseId && batchCurrentComponentCourseId === courseId) || !courseId) {
-    batchCurrentComponentInfo = get(batchRes, 'data.user.studentProfile.batch.currentComponent');
+  if ((courseId && batchCurrentComponentCourseId === courseId) || !courseId || coursePackageId) {
+    batchCurrentComponentInfo = get(activeClassroom, 'currentComponent');
   }
 
   const { free, pro } = enrollmentTypes;
@@ -317,6 +364,8 @@ const userTopicJourneyMutationResolver = async (
     const schoolEnrollmentType = get(schoolInfo, 'enrollmentType', free);
     combinedEnrollmentType = (combinedEnrollmentType === free && schoolEnrollmentType === free ? free : pro);
   }
+  // Assigning enrollmentType with pro for school Teachers.
+  if (checkForMentorChild) combinedEnrollmentType = pro;
 
   const userTopicData = {};
   if (!courseId || (courseId === OLD_COURSE_ID)) {
@@ -366,6 +415,7 @@ const userTopicJourneyMutationResolver = async (
         thumbnail,
         practiceQuestionStatus: incomplete,
         chatStatus: incomplete,
+        learningSlideStatus: incomplete,
       });
     });
     // constructing data for quiz component
@@ -395,7 +445,7 @@ const userTopicJourneyMutationResolver = async (
       currentRunningTopicOrder = currentRunningTopic.order;
     }
 
-    if (topicInfo.order < currentRunningTopicOrder) {
+    if ((topicInfo.order < currentRunningTopicOrder) || coursePackageId || checkForMentorChild) {
       if (topicInfo.isTrial || combinedEnrollmentType === pro) {
         videoData.isUnlocked = true;
       } else {
@@ -529,6 +579,7 @@ const userTopicJourneyMutationResolver = async (
                 if (userLearningObjectiveInfo) {
                   loInArray.practiceQuestionStatus = userLearningObjectiveInfo.practiceQuestionStatus;
                   loInArray.chatStatus = userLearningObjectiveInfo.chatStatus;
+                  loInArray.learningSlideStatus = userLearningObjectiveInfo.learningSlideStatus;
                 }
               } else {
                 loInArray.isUnlocked = false;
@@ -602,6 +653,7 @@ const userTopicJourneyMutationResolver = async (
           comicStripStatus: incomplete,
           practiceQuestionStatus: incomplete,
           chatStatus: incomplete,
+          learningSlideStatus: incomplete,
         });
       } else if (topicComponent.componentName === blockBasedPractice) {
         blockBasedPracticeData.push({
@@ -639,7 +691,7 @@ const userTopicJourneyMutationResolver = async (
     } else {
       currentRunningTopicOrder = currentRunningTopic.order;
     }
-    if (topicInfo.order < currentRunningTopicOrder) {
+    if ((topicInfo.order < currentRunningTopicOrder) || coursePackageId || checkForMentorChild) {
       if (topicInfo.isTrial || combinedEnrollmentType === pro) {
         for (const videoElem of videoData) {
           videoElem.isUnlocked = true;
@@ -655,6 +707,7 @@ const userTopicJourneyMutationResolver = async (
         learningObjective.comicStripStatus = complete;
         learningObjective.practiceQuestionStatus = complete;
         learningObjective.chatStatus = complete;
+        learningObjective.learningSlideStatus = complete;
       }
 
       for (const blockBasedPracticeElem of blockBasedPracticeData) {
@@ -678,6 +731,7 @@ const userTopicJourneyMutationResolver = async (
         learningObjective.comicStripStatus = complete;
         learningObjective.practiceQuestionStatus = complete;
         learningObjective.chatStatus = complete;
+        learningObjective.learningSlideStatus = complete;
       }
 
       for (const blockBasedPracticeElem of blockBasedPracticeData) {
@@ -716,6 +770,7 @@ const userTopicJourneyMutationResolver = async (
             learningObjective.comicStripStatus = complete;
             learningObjective.practiceQuestionStatus = complete;
             learningObjective.chatStatus = complete;
+            learningObjective.learningSlideStatus = complete;
           }
 
           for (const blockBasedPracticeElem of blockBasedPracticeData) {
@@ -776,11 +831,13 @@ const userTopicJourneyMutationResolver = async (
             learningObjective.comicStripStatus = incomplete;
             learningObjective.practiceQuestionStatus = incomplete;
             learningObjective.chatStatus = incomplete;
+            learningObjective.learningSlideStatus = incomplete;
           } else {
             learningObjective.isUnlocked = true;
             learningObjective.comicStripStatus = complete;
             learningObjective.practiceQuestionStatus = complete;
             learningObjective.chatStatus = complete;
+            learningObjective.learningSlideStatus = complete;
           }
         }
 

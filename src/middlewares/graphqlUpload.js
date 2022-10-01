@@ -134,10 +134,12 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
           const fileMimeType = type;
           const fileTypeName = getFileTypeName(type);
           // compare file size with the predefined allowed sizes
+          const { variables: { connectInput } } = operations;
           const { isValidSize, isValidExtension } = checkFileSizeAndExtensions(
             fileTypeName,
             size,
             ext,
+            connectInput,
           );
 
           const {
@@ -145,7 +147,6 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
               fileInput: {
                 fileBucket,
               },
-              connectInput,
               fileName,
             },
           } = operations;

@@ -4,6 +4,9 @@ const assignmentType = `
    assignmentQuestionDisplayOrder: Int
    isAttempted: Boolean @defaultValue(value: "false")
    userAnswerCodeSnippet: String @trim
+   result: EvaluationResult @defaultValue(value: "pending")
+   startTime: Date
+   endTime: Date
  }`;
 
 const UserAssignment = `
@@ -13,6 +16,7 @@ const UserAssignment = `
     assignment: [AssignmentType]
     topic: Topic! @relation(name: "TopicUserAssignment", direction: "OneWay")
     course: Course @relation(name: "UserAssignmentCourse", direction: "OneWay")
+    evaluationStatus: TaskCompletionStatus
   }
 `;
 

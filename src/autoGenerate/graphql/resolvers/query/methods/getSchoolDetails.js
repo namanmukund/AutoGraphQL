@@ -18,6 +18,10 @@ const getSchoolData = (code) => `
     coordinatorName
     city
     country
+    isTeachersAppEnabled
+    isOtpLoginEnabled
+    isBuddyLoginEnabled
+    buddyLoginLimit
     schoolPicture {
       id
     }
@@ -37,7 +41,7 @@ const getSchoolDetails = (async (root, params, context) => {
   // this will be sent in output
   const result = {};
 
-  const getSchoolRes = await callLocalGraphqlApi(getSchoolData(code));
+  const getSchoolRes = await callLocalGraphqlApi(getSchoolData(code), context);
   const schoolId = get(getSchoolRes, 'data.school.id', '');
   const schoolLogoId = get(getSchoolRes, 'data.school.logo.id', '');
   const schoolPictureId = get(getSchoolRes, 'data.school.schoolPicture.id', '');
@@ -54,6 +58,10 @@ const getSchoolDetails = (async (root, params, context) => {
   result.coordinatorRole = get(getSchoolRes, 'data.school.coordinatorRole', '');
   result.coordinatorName = get(getSchoolRes, 'data.school.coordinatorName', '');
   result.city = get(getSchoolRes, 'data.school.city', '');
+  result.isTeachersAppEnabled = get(getSchoolRes, 'data.school.isTeachersAppEnabled', false);
+  result.isOtpLoginEnabled = get(getSchoolRes, 'data.school.isOtpLoginEnabled', false);
+  result.isBuddyLoginEnabled = get(getSchoolRes, 'data.school.isBuddyLoginEnabled', false);
+  result.buddyLoginLimit = get(getSchoolRes, 'data.school.buddyLoginLimit', 0);
   result.country = get(getSchoolRes, 'data.school.country', '');
   if (schoolLogoId) {
     result.logo = { type: 'File', typeId: `${schoolLogoId}` };

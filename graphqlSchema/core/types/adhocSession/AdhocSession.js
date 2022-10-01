@@ -1,43 +1,26 @@
-import { TLA, TMS, TWA } from '../../../../constants';
-import { READ } from '../../../../constants/graphqlOperations';
-import {
-  MENTOR, SALES_EXECUTIVE, SCHOOL_ADMIN, SENSEI, UMS_HEAD,
-} from '../../../../constants/roles';
 import getSlotTimeFields from '../../functions/getSlotTimeFields';
 
 const slotTimeFields = getSlotTimeFields('Boolean', false);
 
 const AdhocSession = `
-  type AdhocSession @model
-  @appPermissions(
-    permissions:[
-      { appName: "${TMS}" operations: "*" },
-      { appName: "${TLA}" operations: ${READ} },
-      { appName: "${TWA}" operations: ${READ} }
-      ], 
-    rule: allow
-  )  
-  @userPermissions(
-  permissions:[
-    { userRole: ${UMS_HEAD} appName: "*" operations: "*" },
-    { userRole: ${MENTOR} appName: "*" operations: ${READ} },
-    { userRole: ${SCHOOL_ADMIN} appName: "*" operations: "*" },
-    { userRole: ${SALES_EXECUTIVE} appName: "*" operations: "*" },
-    { userRole: ${SENSEI} appName: "*" operations: "*" },
-    ],
-  rule: allow
-  )
-  {
+  type AdhocSession @model {
     course: Course @relation(name: "AdhocSessionCourse", direction: "OneWay")
+    coursePackage: CoursePackage @relation(name: "AdhocSessionCoursePackage", direction: "OneWay")
     batch: Batch! @relation(name: "AdhocSessionBatch", direction: "OneWay")
     previousTopic: Topic @relation(name: "AdhocSessionTopic", direction: "OneWay")
+    revisionTopics: [Topic] @relation(name: "AdhocSessionRevisionTopics", direction: "OneWay")
     type: AdhocSessionType!
+    sessionMode: SessionMode @defaultValue(value: "online")
     order: Int
     mentorSession: MentorSession @relation(name: "AdhocSessionMentorSession")
     bookingDate: Date!
+    startMinutes: Int @defaultValue(value: "0")
+    endMinutes: Int @defaultValue(value: "0")
     ${slotTimeFields}
     sessionStartDate: Date
     sessionEndDate: Date
+    mentorStartAttendance: Date
+    mentorSavesAttendance: Date
     sessionStatus: SessionStatus! @defaultValue(value: "allotted")
     sessionRecordingLink: String
     sessionCommentByMentor: String
@@ -45,6 +28,7 @@ const AdhocSession = `
     mentorPaymentStatus: MentorPaymentStatus @defaultValue(value: "declined")
     paymentApprovedBy: User @relation(name: "MentorMenteeSessionPaymentApprovedUser", direction: "OneWay")
     isAudit: Boolean @defaultValue(value: "false")
+    title: String
 }`;
 
 export default [AdhocSession];
