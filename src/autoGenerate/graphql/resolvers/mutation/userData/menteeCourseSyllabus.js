@@ -14,6 +14,7 @@ import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { log } from '../../../../../../utils';
 import { QueryController, RedisController } from '../../../controllers';
 import { activeClassroomIdFromContext, activeCourseIdFromContext } from '../../../../../../utils/getUserActiveClassroom';
+import userCourseSyllabusMethod from '../../../preHookFunctions/userCourseSyllabusMethod';
 // import { parseBadges } from '../utils/parseBadges';
 // import { sortBadges } from '../utils/sortBadges';
 
@@ -590,41 +591,12 @@ const getBatchSessionsAggregation = (batchId) => [
     },
   },
   {
-    $lookup: {
-      from: 'Topic',
-      let: {
-        topicId: '$topic.typeId',
-      },
-      pipeline: [
-        {
-          $match: {
-            $expr: {
-              $eq: ['$id', '$$topicId'],
-            },
-          },
-        },
-        {
-          $project: {
-            id: 1,
-            title: 1,
-            description: 1,
-            order: 1,
-            isTrial: 1,
-          },
-        },
-      ],
-      as: 'topic',
-    },
-  },
-  {
     $project: {
       id: 1,
       bookingDate: 1,
       sessionEndDate: 1,
       sessionStatus: 1,
-      topic: {
-        $arrayElemAt: ['$topic', 0],
-      },
+      topic: 1,
       ...getSlotTimeFields(true),
     },
   },
@@ -1980,7 +1952,7 @@ const constructSessionsArr = ({
   const isAccessible = isTopicAccessible(combinedEnrollmentType, isTrial);
   // checking logic for topics which are yet not booked by mentee
   const batchSessionArray = batchSessions
-    && batchSessions.filter((item) => item.topic && item.topic.id === topicId);
+    && batchSessions.filter((item) => get(item, 'topic') && get(item, 'topic.typeId') === topicId);
   const batchSession = batchSessionArray[0];
   const { bookingDate, sessionEndDate, sessionStatus: batchSessionStatus } = batchSession;
 
@@ -2172,7 +2144,7 @@ const menteeCourseSyllabusMutationResolver = async (
     const userBatchDetailsRes = new QueryController('StudentProfile', { bypass: true });
     userBatchDetails = await fetchOrCacheQueryRes({
       hkey: `user::studentProfile::batches::${userId}`,
-      maxAge: '300',
+      maxAge: 24 * 60 * 60, // 1 day
       dbCallback: () => userBatchDetailsRes.aggregate(getUserBatchDetails(userId)),
     });
     // userBatchDetails = await userBatchDetailsRes.aggregate(getUserBatchDetails(userId));
@@ -2193,7 +2165,7 @@ const menteeCourseSyllabusMutationResolver = async (
     if (activeClassroomId && !userActiveClassroom && userBatchDetails) {
       const batchDetails = userBatchDetails[0];
       const activeBatchInBatchesArr = get(batchDetails, 'batches', []).find((el) => get(el, 'id') === activeClassroomId);
-      log(`${get(batchDetails, 'batch.id')} :: ${get(batchDetails, 'batch.id') === activeClassroomId}`);
+
       if (get(batchDetails, 'batch.id') === activeClassroomId) {
         userActiveClassroom = get(batchDetails, 'batch');
       } else if (activeBatchInBatchesArr) {
@@ -2209,6 +2181,7 @@ const menteeCourseSyllabusMutationResolver = async (
 
     let userCurrentTopicComponentStatusesRes = [];
     if (!get(userActiveClassroom, 'coursePackage.id')) {
+      await userCourseSyllabusMethod(context, params);
       const userCurrentCompModel = new QueryController('UserCurrentTopicComponentStatus', { bypass: true });
       userCurrentTopicComponentStatusesRes = await userCurrentCompModel.aggregate(getUserCurrentTopicComponentStatusAggregation(userId, courseId));
     }
