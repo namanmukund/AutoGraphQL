@@ -174,105 +174,107 @@ const signupOrLoginViaOtp = async (
   }
 
   if (!userData || !userData.id) {
-    // create user if it doesn't exist and phone is passed in input else throw error
-    if (input.phone) {
-      const modelMutations = new MutationController(typeName, { bypass: true });
-      let userRole = PARENT;
-      if (input.role === 'schoolAdmin') {
-        userRole = 'schoolAdmin';
-      }
-      const newUser = {
-        phone: {
-          number: input.phone.number,
-          countryCode: input.phone.countryCode,
-        },
-        role: userRole,
-      };
-      if (input.campaignId) {
-        newUser.campaign = {
-          type: 'Campaign',
-          typeId: input.campaignId,
-        };
-      }
-      if (input.source) {
-        newUser.source = input.source;
-      }
-      if (input.name) {
-        newUser.name = input.name;
-      }
-      if (input.utmSource) {
-        newUser.utmSource = input.utmSource;
-      }
-      if (input.utmCampaign) {
-        newUser.utmCampaign = input.utmCampaign;
-      }
-      if (input.utmTerm) {
-        newUser.utmTerm = input.utmTerm;
-      }
-      if (input.utmContent) {
-        newUser.utmContent = input.utmContent;
-      }
-      if (input.utmMedium) {
-        newUser.utmMedium = input.utmMedium;
-      }
-      if (get(input, 'eventId') && !(get(input, 'utmSource') || get(input, 'utmCampaign')
-        || get(input, 'utmTerm') || get(input, 'utmContent') || get(input, 'utmMedium'))) {
-        const eventUtms = await fetchEventUtm(get(input, 'eventId'));
-        if (eventUtms) {
-          if (eventUtms.utmSource) {
-            newUser.utmSource = eventUtms.utmSource;
-          }
-          if (eventUtms.utmCampaign) {
-            newUser.utmCampaign = eventUtms.utmCampaign;
-          }
-          if (eventUtms.utmTerm) {
-            newUser.utmTerm = eventUtms.utmTerm;
-          }
-          if (eventUtms.utmContent) {
-            newUser.utmContent = eventUtms.utmContent;
-          }
-          if (eventUtms.utmMedium) {
-            newUser.utmMedium = eventUtms.utmMedium;
-          }
-        }
-      }
-      newUser.country = input.country || 'india';
-      newUser.timezone = input.timezone || 'Asia/Kolkata';
-      input.country = input.country ? input.country : 'india';
-      if (!get(newUser, 'source')) {
-        const source = getUserOriginSource(get(newUser, 'utmSource'), '', '', '', '');
-        newUser.source = source;
-      }
-      input.leadStatus = 'New Lead';
-      input.unVerifiedLead = true;
-      // fetch campaign type early to modfiy newUser obj with vertical
-      let campaignRes = null;
-      let campaignType = null;
-      if (input.campaignId) {
-        campaignRes = await callLocalGraphqlApi(FETCH_CAMPAIGN(input.campaignId));
-        campaignType = get(campaignRes, 'data.campaign.type', '');
-      }
-      if (campaignType && campaignType === 'b2b') {
-        newUser.vertical = 'b2b';
-      } else if (campaignType) {
-        newUser.vertical = 'b2b2c';
-      }
-      userData = generateCuid(newUser);
-      await modelMutations.addDocument(userData);
-      // sendBookingReminderOrConfirmationB2BC(userData.id);
-      // create on leadsquared
-      if (input.campaignId) {
-        input.schoolName = get(campaignRes, 'data.campaign.school.name', '');
-        input.Vertical = campaignType.replace('Event', '');
-        input.campaignCode = get(campaignRes, 'data.campaign.code');
-        input.mx_Demo_Model = `1:${get(campaignRes, 'data.campaign.batchRules.batchSize', '')}`;
-        parentChildSignupPostHookMethod(input, params);
-      } else {
-        parentChildSignupPostHookMethod(input, params);
-      }
-    } else {
-      throw new DatabaseRecordNotFoundError();
-    }
+    // create user if it doesn't exist and phone is passed in input else throw error - old
+    // throw error if user doesn't exist - new
+    // if (input.phone) {
+    //   const modelMutations = new MutationController(typeName, { bypass: true });
+    //   let userRole = PARENT;
+    //   if (input.role === 'schoolAdmin') {
+    //     userRole = 'schoolAdmin';
+    //   }
+    //   const newUser = {
+    //     phone: {
+    //       number: input.phone.number,
+    //       countryCode: input.phone.countryCode,
+    //     },
+    //     role: userRole,
+    //   };
+    //   if (input.campaignId) {
+    //     newUser.campaign = {
+    //       type: 'Campaign',
+    //       typeId: input.campaignId,
+    //     };
+    //   }
+    //   if (input.source) {
+    //     newUser.source = input.source;
+    //   }
+    //   if (input.name) {
+    //     newUser.name = input.name;
+    //   }
+    //   if (input.utmSource) {
+    //     newUser.utmSource = input.utmSource;
+    //   }
+    //   if (input.utmCampaign) {
+    //     newUser.utmCampaign = input.utmCampaign;
+    //   }
+    //   if (input.utmTerm) {
+    //     newUser.utmTerm = input.utmTerm;
+    //   }
+    //   if (input.utmContent) {
+    //     newUser.utmContent = input.utmContent;
+    //   }
+    //   if (input.utmMedium) {
+    //     newUser.utmMedium = input.utmMedium;
+    //   }
+    //   if (get(input, 'eventId') && !(get(input, 'utmSource') || get(input, 'utmCampaign')
+    //     || get(input, 'utmTerm') || get(input, 'utmContent') || get(input, 'utmMedium'))) {
+    //     const eventUtms = await fetchEventUtm(get(input, 'eventId'));
+    //     if (eventUtms) {
+    //       if (eventUtms.utmSource) {
+    //         newUser.utmSource = eventUtms.utmSource;
+    //       }
+    //       if (eventUtms.utmCampaign) {
+    //         newUser.utmCampaign = eventUtms.utmCampaign;
+    //       }
+    //       if (eventUtms.utmTerm) {
+    //         newUser.utmTerm = eventUtms.utmTerm;
+    //       }
+    //       if (eventUtms.utmContent) {
+    //         newUser.utmContent = eventUtms.utmContent;
+    //       }
+    //       if (eventUtms.utmMedium) {
+    //         newUser.utmMedium = eventUtms.utmMedium;
+    //       }
+    //     }
+    //   }
+    //   newUser.country = input.country || 'india';
+    //   newUser.timezone = input.timezone || 'Asia/Kolkata';
+    //   input.country = input.country ? input.country : 'india';
+    //   if (!get(newUser, 'source')) {
+    //     const source = getUserOriginSource(get(newUser, 'utmSource'), '', '', '', '');
+    //     newUser.source = source;
+    //   }
+    //   input.leadStatus = 'New Lead';
+    //   input.unVerifiedLead = true;
+    //   // fetch campaign type early to modfiy newUser obj with vertical
+    //   let campaignRes = null;
+    //   let campaignType = null;
+    //   if (input.campaignId) {
+    //     campaignRes = await callLocalGraphqlApi(FETCH_CAMPAIGN(input.campaignId));
+    //     campaignType = get(campaignRes, 'data.campaign.type', '');
+    //   }
+    //   if (campaignType && campaignType === 'b2b') {
+    //     newUser.vertical = 'b2b';
+    //   } else if (campaignType) {
+    //     newUser.vertical = 'b2b2c';
+    //   }
+    //   userData = generateCuid(newUser);
+    //   await modelMutations.addDocument(userData);
+    //   // sendBookingReminderOrConfirmationB2BC(userData.id);
+    //   // create on leadsquared
+    //   if (input.campaignId) {
+    //     input.schoolName = get(campaignRes, 'data.campaign.school.name', '');
+    //     input.Vertical = campaignType.replace('Event', '');
+    //     input.campaignCode = get(campaignRes, 'data.campaign.code');
+    //     input.mx_Demo_Model = `1:${get(campaignRes, 'data.campaign.batchRules.batchSize', '')}`;
+    //     parentChildSignupPostHookMethod(input, params);
+    //   } else {
+    //     parentChildSignupPostHookMethod(input, params);
+    //   }
+    // } else {
+    //   throw new DatabaseRecordNotFoundError();
+    // }
+    throw new DatabaseRecordNotFoundError();
   }
 
   const phoneOtp = getRandomNumber(rangeOTP.min, rangeOTP.max);
