@@ -15,6 +15,7 @@ const sessionDetailType = `
    slotTime: Int
    isAccessible: Boolean
    course: Course
+   sessionStatus: SessionStatus
  }`;
 
 const completedSessionDetailType = `
@@ -36,6 +37,7 @@ const completedSessionDetailType = `
    mentorName: String
    mentorProfilePic: File
    course: Course
+   sessionStatus: SessionStatus
  }`;
 
 const menteeCourseSyllabusSkills = `
@@ -110,6 +112,7 @@ const MenteeCourseSyllabus = `
     totalTopics: Int
     isPaid: Boolean @defaultValue(value: "false")
     course: MenteeCourseSyllabusCourse
+    coursePackage: CoursePackage
     skills: [MenteeCourseSyllabusSkills]
     mentor: MenteeCourseSyllabusMentor
     projects: [MenteeCourseSyllabusProject]

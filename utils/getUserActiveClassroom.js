@@ -6,6 +6,8 @@ const USER_PROFILE_EXPIRY_TIME = 86400; // 1 day
 
 export const activeClassroomIdFromContext = (context) => get(context, 'activeClassroom');
 
+export const activeCourseIdFromContext = (context) => get(context, 'activeCourse');
+
 const userProfileCacheKey = (userId) => `userProfile::activeClassroom::${userId}`;
 
 const getStudentProfile = async (context) => {
@@ -22,7 +24,7 @@ const getStudentProfile = async (context) => {
           }
         }) {
           id 
-          batches {
+          batches(orderBy:createdAt_DESC) {
             id
             type
             documentType

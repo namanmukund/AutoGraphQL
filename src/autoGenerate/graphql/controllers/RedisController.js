@@ -21,15 +21,20 @@ class RedisController extends MasterController {
   async get(hkey) {
     if (this.validateRedisConn()) {
       const data = await this.redis.get(hkey);
-      return JSON.parse(data);
+      try {
+        return JSON.parse(data);
+      } catch (e) {
+        log(e);
+        return data || '';
+      }
     }
     return null;
   }
 
-  async set(obj, { hkey, maxAge } = {}) {
+  async set(obj, { hkey, maxAge, maxAgeUnit = 'EX' } = {}) {
     try {
       if (this.validateRedisConn()) {
-        await this.redis.set(hkey, JSON.stringify(obj), 'EX', maxAge);
+        await this.redis.set(hkey, JSON.stringify(obj), maxAgeUnit, maxAge);
       }
     } catch (e) {
       log(e);
