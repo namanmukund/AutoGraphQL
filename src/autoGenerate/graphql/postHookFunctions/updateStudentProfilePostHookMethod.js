@@ -1,5 +1,6 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import { RedisController } from '../controllers';
 import addUpdateSchoolClass from './utils/addUpdateSchoolClass';
 import purgeUserActiveProfileCache from './utils/purgeUserActiveProfileCache';
 
@@ -57,8 +58,8 @@ const removeOldLinkAndAddUpdateSchoolClass = async (previousSchoolClassId, input
 };
 
 const updateStudentProfilePostHookMethod = async (input, params, mutationName, context) => {
+  const userId = get(context, 'previousDocument.user.id');
   if (get(params, 'input.profileAvatarCode') !== get(context, 'previousDocument.profileAvatarCode')) {
-    const userId = get(context, 'previousDocument.user.id');
     const userApprovedCodes = await userApprovedCodeQuery(userId, context);
     const updateObj = {
       studentAvatar: get(input, 'profileAvatarCode', 'theo'),
@@ -121,6 +122,10 @@ const updateStudentProfilePostHookMethod = async (input, params, mutationName, c
   }
 
   await purgeUserActiveProfileCache(context);
+  if (get(params, 'batchConnectId') || get(params, 'batchesConnectIds', []).length) {
+    const cacheController = new RedisController({ bypass: true });
+    cacheController.destroy(`user::studentProfile::batches::${userId}`);
+  }
 };
 
 export default updateStudentProfilePostHookMethod;

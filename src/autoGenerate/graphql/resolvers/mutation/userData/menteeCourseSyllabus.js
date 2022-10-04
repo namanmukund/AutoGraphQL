@@ -925,7 +925,7 @@ const fetchOrCacheQueryRes = async ({ hkey, maxAge = 9000, dbCallback = () => { 
   } else {
     log(`[MCS] CACHE_MISS: ${hkey}`);
     response = await dbCallback();
-    await redisClient.set(response, {
+    redisClient.set(response, {
       hkey,
       maxAge,
     });
@@ -2138,16 +2138,19 @@ const menteeCourseSyllabusMutationResolver = async (
   let mentorData = {};
   let firstComponent = {};
 
+  const expireCacheDurationInSeconds = 24 * 60 * 60; // 1 day
+
   // if we get userId through token, then we will return syllabus for that user
   if (userId) {
+    // @TODO - Separately cache batch data (independent of student profile) and use it as global cache for all students having same batch.
+
     // Fetch user profile having batches.
     const userBatchDetailsRes = new QueryController('StudentProfile', { bypass: true });
     userBatchDetails = await fetchOrCacheQueryRes({
       hkey: `user::studentProfile::batches::${userId}`,
-      maxAge: 24 * 60 * 60, // 1 day
+      maxAge: expireCacheDurationInSeconds, // 1 day
       dbCallback: () => userBatchDetailsRes.aggregate(getUserBatchDetails(userId)),
     });
-    // userBatchDetails = await userBatchDetailsRes.aggregate(getUserBatchDetails(userId));
 
     const activeClassroomId = activeClassroomIdFromContext(context);
 
@@ -2506,7 +2509,12 @@ const menteeCourseSyllabusMutationResolver = async (
       const batchSessionModel = new QueryController('BatchSession', {
         bypass: true,
       });
-      batchSessions = await batchSessionModel.aggregate(getBatchSessionsAggregation(batchId, courseOrPackageFilter));
+      batchSessions = await fetchOrCacheQueryRes({
+        hkey: `batchSessions::${batchId}`,
+        maxAge: expireCacheDurationInSeconds,
+        dbCallback: () => batchSessionModel.aggregate(getBatchSessionsAggregation(batchId, courseOrPackageFilter)),
+      });
+      // batchSessions = await
       // currentTopicOrder = get(batchCurrentComponentInfo, 'currentTopic.order');
     } else {
       // const getMenteeSessionsRes = await callLocalGraphqlApi(getMenteeSessions(userId, courseId));
