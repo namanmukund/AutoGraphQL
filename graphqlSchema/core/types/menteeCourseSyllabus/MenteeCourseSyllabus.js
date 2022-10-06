@@ -16,6 +16,7 @@ const sessionDetailType = `
    isAccessible: Boolean
    course: Course
    sessionStatus: SessionStatus
+   previousHomeworkExists: Boolean @defaultValue(value: false)
  }`;
 
 const completedSessionDetailType = `
@@ -38,6 +39,7 @@ const completedSessionDetailType = `
    mentorProfilePic: File
    course: Course
    sessionStatus: SessionStatus
+   previousHomeworkExists: Boolean @defaultValue(value: false)
  }`;
 
 const menteeCourseSyllabusSkills = `
