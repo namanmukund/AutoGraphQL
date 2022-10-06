@@ -1329,6 +1329,7 @@ const batchPipeline = (batchIdVariable, isArray) => [
             chapter: 1,
             courses: 1,
             classType: 1,
+            topicComponentRule: 1,
           },
         },
         {
@@ -1429,6 +1430,7 @@ const batchPipeline = (batchIdVariable, isArray) => [
             order: 1,
             isTrial: 1,
             description: 1,
+            topicComponentRule: 1,
             thumbnail: {
               $arrayElemAt: [
                 '$thumbnail',
@@ -1503,6 +1505,7 @@ const batchPipeline = (batchIdVariable, isArray) => [
                 $project: {
                   id: 1,
                   order: 1,
+                  topicComponentRule: 1,
                 },
               },
             ],
@@ -1633,6 +1636,7 @@ const batchPipeline = (batchIdVariable, isArray) => [
                   chapter: 1,
                   classType: 1,
                   courses: 1,
+                  topicComponentRule: 1,
                 },
               },
               {
@@ -1734,6 +1738,7 @@ const batchPipeline = (batchIdVariable, isArray) => [
                   isTrial: 1,
                   description: 1,
                   courses: 1,
+                  topicComponentRule: 1,
                   thumbnail: {
                     $arrayElemAt: [
                       '$thumbnail',
@@ -1932,6 +1937,7 @@ const constructSessionsArr = ({
   bookedSession,
   packageLastTopicId,
   course = {},
+  previousHomeworkExists = false,
 }) => {
   const { id: chapterId, title: chapterTitle, order: chapterOrder } = chapter;
 
@@ -1986,6 +1992,7 @@ const constructSessionsArr = ({
           course,
           endingDate: sessionEndDate,
           status: batchSessionStatus,
+          previousHomeworkExists,
         };
         completedSessionObj = completedMenteeSession;
       } else {
@@ -2005,6 +2012,7 @@ const constructSessionsArr = ({
           chapterOrder,
           course,
           status: batchSessionStatus,
+          previousHomeworkExists,
         };
         if (get(mentorSession, 'user')) {
           mentorData = getMentorData(get(mentorSession, 'user'));
@@ -2030,6 +2038,7 @@ const constructSessionsArr = ({
         chapterOrder,
         course,
         status: batchSessionStatus,
+        previousHomeworkExists,
       };
       if (
         topicId === packageLastTopicId
@@ -2076,6 +2085,7 @@ const constructSessionsArr = ({
       mentorId: get(mentorSession, 'user.id'),
       mentorName: get(mentorSession, 'user.name'),
       mentorProfilePic: get(mentorSession, 'user.profilePic'),
+      previousHomeworkExists,
     };
     completedSessionObj = completedMenteeSession;
   }
@@ -2632,7 +2642,11 @@ const menteeCourseSyllabusMutationResolver = async (
     if (coursePackage && get(coursePackage, 'id')) {
       lastTopicBookedOrder = getTopicOrderFromCoursePackage(coursePackage, currentTopic, userActiveClassroom).order;
       const packageLastTopicId = get(packageTopics[packageTopics.length - 1], 'id');
+      const packageLabTopics = (packageTopics || []).filter((topic) => get(topic, 'classType') === 'lab');
       packageTopics.forEach((topic) => {
+        const currentIndex = (packageLabTopics || []).findIndex((labTopic) => get(labTopic, 'id') === get(topic, 'id'));
+        const previousTopic = packageLabTopics[currentIndex - 1];
+        const previousHomeworkExists = get(previousTopic, 'topicComponentRule', []).some((topicComponent) => ['homeworkAssignment', 'quiz', 'homeworkPractice'].includes(get(topicComponent, 'componentName')));
         const constructedSessionsArr = constructSessionsArr({
           lastTopicBookedOrder,
           lastTopicSessionStatus,
@@ -2650,6 +2664,7 @@ const menteeCourseSyllabusMutationResolver = async (
           upComingSession,
           bookedSession,
           packageLastTopicId,
+          previousHomeworkExists,
         });
         if (get(constructedSessionsArr, 'completedSessionObj')) {
           completedSession.push(get(constructedSessionsArr, 'completedSessionObj', {}));
