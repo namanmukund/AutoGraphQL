@@ -6,6 +6,7 @@ import { STATIC } from '../../constants';
 import { DatabaseRecordNotFoundError } from '../../constants/errors';
 import appSpecificAuthTokens from '../../constants/appSpecificAuthTokens';
 import validateBuddyToken from './utils/validateBuddyToken';
+import { get } from 'lodash';
 
 const application = process.env.APPLICATION || 'core';
 const CACHE_EXPIRY_IN_SECONDS = 3600;
@@ -81,7 +82,7 @@ const handleUserToken = async (id, currentApp, currentUser) => {
   });
   let user = {};
   const cachedUserRes = await redisClient.get(`user::cache::${id}`);
-  if (cachedUserRes) {
+  if (cachedUserRes && get(cachedUserRes, 'id')) {
     user = cachedUserRes;
   } else {
     user = await fetchUser(id);
