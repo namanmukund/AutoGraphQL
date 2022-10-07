@@ -1960,7 +1960,9 @@ const constructSessionsArr = ({
   const batchSessionArray = batchSessions
     && batchSessions.filter((item) => get(item, 'topic') && get(item, 'topic.typeId') === topicId);
   const batchSession = batchSessionArray[0];
-  const { bookingDate, sessionEndDate, sessionStatus: batchSessionStatus } = batchSession;
+  const bookingDate = get(batchSession, 'bookingDate', '');
+  const sessionEndDate = get(batchSession, 'sessionEndDate', '');
+  const batchSessionStatus = get(batchSession, 'sessionStatus', 'allotted');
 
   if (topicOrder >= lastTopicBookedOrder) {
     if (batchSessionArray && batchSessionArray.length) {
