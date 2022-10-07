@@ -16,6 +16,7 @@ const sessionDetailType = `
    isAccessible: Boolean
    course: Course
    sessionStatus: SessionStatus
+   batchSession: BatchSession
    previousHomeworkExists: Boolean @defaultValue(value: false)
  }`;
 
@@ -39,6 +40,7 @@ const completedSessionDetailType = `
    mentorProfilePic: File
    course: Course
    sessionStatus: SessionStatus
+   batchSession: BatchSession
    previousHomeworkExists: Boolean @defaultValue(value: false)
  }`;
 

@@ -1995,6 +1995,7 @@ const constructSessionsArr = ({
           endingDate: sessionEndDate,
           status: batchSessionStatus,
           previousHomeworkExists,
+          batchSession,
         };
         completedSessionObj = completedMenteeSession;
       } else {
@@ -2015,6 +2016,7 @@ const constructSessionsArr = ({
           course,
           status: batchSessionStatus,
           previousHomeworkExists,
+          batchSession,
         };
         if (get(mentorSession, 'user')) {
           mentorData = getMentorData(get(mentorSession, 'user'));
@@ -2041,6 +2043,7 @@ const constructSessionsArr = ({
         course,
         status: batchSessionStatus,
         previousHomeworkExists,
+        batchSession,
       };
       if (
         topicId === packageLastTopicId
@@ -2088,6 +2091,7 @@ const constructSessionsArr = ({
       mentorName: get(mentorSession, 'user.name'),
       mentorProfilePic: get(mentorSession, 'user.profilePic'),
       previousHomeworkExists,
+      batchSession,
     };
     completedSessionObj = completedMenteeSession;
   }
