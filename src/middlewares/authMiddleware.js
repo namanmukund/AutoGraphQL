@@ -1,4 +1,5 @@
 import base64 from 'base-64';
+import { get } from 'lodash';
 import { verifyToken, verifyAppToken } from '../auth';
 import { QueryController, RedisController } from '../autoGenerate/graphql/controllers';
 import { toObject, log } from '../../utils';
@@ -6,7 +7,6 @@ import { STATIC } from '../../constants';
 import { DatabaseRecordNotFoundError } from '../../constants/errors';
 import appSpecificAuthTokens from '../../constants/appSpecificAuthTokens';
 import validateBuddyToken from './utils/validateBuddyToken';
-import { get } from 'lodash';
 
 const application = process.env.APPLICATION || 'core';
 const CACHE_EXPIRY_IN_SECONDS = 3600;
