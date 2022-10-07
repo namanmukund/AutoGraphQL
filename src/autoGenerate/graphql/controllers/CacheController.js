@@ -2,7 +2,7 @@ import { log } from '../../../../utils';
 import redis from '../../../redis';
 import MasterController from './MasterController';
 
-class RedisController extends MasterController {
+class CacheController extends MasterController {
   REDIS_SUCCESS_STATE = ['ready', 'connect'];
 
   constructor(authentication) {
@@ -62,4 +62,4 @@ class RedisController extends MasterController {
   }
 }
 
-export default RedisController;
+export default CacheController;

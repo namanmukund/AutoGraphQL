@@ -12,13 +12,13 @@ import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAn
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { log } from '../../../../../../utils';
-import { QueryController, RedisController } from '../../../controllers';
+import { QueryController, CacheController } from '../../../controllers';
 import { activeClassroomIdFromContext, activeCourseIdFromContext } from '../../../../../../utils/getUserActiveClassroom';
 import userCourseSyllabusMethod from '../../../preHookFunctions/userCourseSyllabusMethod';
 // import { parseBadges } from '../utils/parseBadges';
 // import { sortBadges } from '../utils/sortBadges';
 
-const redisClient = new RedisController({
+const cacheClient = new CacheController({
   bypass: true,
 });
 
@@ -918,14 +918,14 @@ query{
 
 const fetchOrCacheQueryRes = async ({ hkey, maxAge = 9000, dbCallback = () => { } }) => {
   let response;
-  const cachedRes = await redisClient.get(hkey);
+  const cachedRes = await cacheClient.get(hkey);
   if (cachedRes) {
     log(`[MCS] CACHE_HIT: ${hkey}`);
     response = cachedRes;
   } else {
     log(`[MCS] CACHE_MISS: ${hkey}`);
     response = await dbCallback();
-    redisClient.set(response, {
+    cacheClient.set(response, {
       hkey,
       maxAge,
     });

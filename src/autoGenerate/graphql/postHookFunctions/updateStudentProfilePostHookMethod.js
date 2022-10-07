@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
-import { RedisController } from '../controllers';
+import { CacheController } from '../controllers';
 import addUpdateSchoolClass from './utils/addUpdateSchoolClass';
 import purgeUserActiveProfileCache from './utils/purgeUserActiveProfileCache';
 
@@ -123,7 +123,7 @@ const updateStudentProfilePostHookMethod = async (input, params, mutationName, c
 
   await purgeUserActiveProfileCache(context);
   if (get(params, 'batchConnectId') || get(params, 'batchesConnectIds', []).length) {
-    const cacheController = new RedisController({ bypass: true });
+    const cacheController = new CacheController({ bypass: true });
     cacheController.destroy(`user::studentProfile::batches::${userId}`);
   }
 };

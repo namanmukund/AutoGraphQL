@@ -3,7 +3,7 @@ import QueryController from './QueryController';
 import RemoteController from './RemoteController';
 import FirebaseController from './FirebaseController';
 import TokenController from './TokenController';
-import RedisController from './RedisController';
+import CacheController from './CacheController';
 import AggregationController from './AggregationController';
 
 export {
@@ -12,6 +12,6 @@ export {
   RemoteController,
   FirebaseController,
   TokenController,
-  RedisController,
+  CacheController,
   AggregationController,
 };

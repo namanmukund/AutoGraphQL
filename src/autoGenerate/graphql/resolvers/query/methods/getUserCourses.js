@@ -721,7 +721,7 @@ const getUserCourses = (async (root, params, context, info) => {
     }
     const userCoursesModel = getTypeQueryController('UserCourse');
     const userCoursesRes = await userCoursesModel.aggregate(getUserCoursesAggregation(userId, courseProgress));
-    // await redisClient.set(userCoursesRes, {
+    // await cacheClient.set(userCoursesRes, {
     //   hkey: `userCourses_${userId}`,
     //   maxAge: 900,
     // });

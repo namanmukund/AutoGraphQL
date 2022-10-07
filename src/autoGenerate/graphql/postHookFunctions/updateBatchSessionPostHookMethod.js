@@ -32,7 +32,7 @@ import generateOtpForBatchSession from './utils/generateOtpForBatchSession';
 import { MENTEE } from '../../../../constants/roles';
 import { getTopicsFromCoursePackage } from './utils/updateBatchPostHookQueries';
 import getSortedTopics from '../../../../utils/getSortedTopicsFromCoursePackageOrder';
-import { RedisController } from '../controllers';
+import { CacheController } from '../controllers';
 // import extractBatchSessionAndSendB2B from './utils/extractBatchSessionAndSendB2B';
 
 // query to get chapters and topics belomngin to a course
@@ -607,7 +607,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
   }
 
   if (get(params, 'input.sessionEndDate') || get(params, 'input.sessionStatus')) {
-    const cacheController = new RedisController({ bypass: true });
+    const cacheController = new CacheController({ bypass: true });
     const cachedBatchSessions = await cacheController.get(`batchSessions::${batchId}`);
     if (cachedBatchSessions && cachedBatchSessions.length) {
       const updatedBatchSessions = cachedBatchSessions.map((batchSession) => {
