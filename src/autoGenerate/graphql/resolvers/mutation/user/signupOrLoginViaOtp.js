@@ -10,7 +10,7 @@ import {
 } from '../../../../../../constants/errors';
 import { MutationController, QueryController } from '../../../controllers';
 import { getUserFromDBQuery } from './utils';
-import { generateCuid, getRandomNumber } from '../../../../../../utils';
+import { getRandomNumber } from '../../../../../../utils';
 import {
   BLOCKED,
   EXCLUDE_NUMBER,
@@ -18,43 +18,40 @@ import {
 } from '../../../../../../constants';
 import loginViaOtpInputValidation from './utils/loginViaOtpInputValidation';
 import getNumberAndSendSms from '../../../../../sms/getNumberAndSendSms';
-import { PARENT } from '../../../../../../constants/roles';
-import parentChildSignupPostHookMethod from '../../../postHookFunctions/parentChildSignupPostHookMethod';
 // import sendBookingReminderOrConfirmationB2BC from '../../../postHookFunctions/utils/sendBookingReminderOrConfirmationB2B2C';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import userLogsActivity from '../utils/userLogsActivity';
-import getUserOriginSource from './utils/getUserOriginSource';
 
 const USER_TYPE = 'User';
 
-const FETCH_CAMPAIGN = (campaignId) => `{
-  campaign(id: "${campaignId}") {
-    type
-    batchRules {
-      batchSize 
-    }
-    code
-    school {
-      name
-    }
-  }
-}`;
+// const FETCH_CAMPAIGN = (campaignId) => `{
+//   campaign(id: "${campaignId}") {
+//     type
+//     batchRules {
+//       batchSize
+//     }
+//     code
+//     school {
+//       name
+//     }
+//   }
+// }`;
 
-const fetchEventUtm = async (eventId) => {
-  const eventQuery = `{
-    event(id:"${eventId}"){
-      utm{
-        utmSource
-        utmCampaign
-        utmContent
-        utmMedium
-        utmTerm
-      }
-    }
-  }`;
-  const result = await callLocalGraphqlApi(eventQuery);
-  return get(result, 'data.event.utm[0]', null);
-};
+// const fetchEventUtm = async (eventId) => {
+//   const eventQuery = `{
+//     event(id:"${eventId}"){
+//       utm{
+//         utmSource
+//         utmCampaign
+//         utmContent
+//         utmMedium
+//         utmTerm
+//       }
+//     }
+//   }`;
+//   const result = await callLocalGraphqlApi(eventQuery);
+//   return get(result, 'data.event.utm[0]', null);
+// };
 
 const fetchUserWaitList = async (email, phone, context) => {
   const query = `{
@@ -157,7 +154,7 @@ const signupOrLoginViaOtp = async (
   }
 
   const modelQueries = new QueryController(USER_TYPE, authentication);
-  let userData = await getUserFromDBQuery(input, modelQueries);
+  const userData = await getUserFromDBQuery(input, modelQueries);
 
   if (get(userData, 'status') === BLOCKED) {
     throw new BlockedOperationError();
