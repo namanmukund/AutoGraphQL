@@ -1590,9 +1590,11 @@ const batchPipeline = (batchIdVariable, isArray) => [
                 $project: {
                   id: 1,
                   title: 1,
+                  description: 1,
                   category: 1,
                   courseDisplayName: 1,
                   secondaryCategory: 1,
+                  codingLanguages: 1,
                   thumbnailSmall: {
                     $arrayElemAt: ['$thumbnailSmall', 0],
                   },
