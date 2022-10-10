@@ -39,6 +39,7 @@ const LearningObjective = `
     comicStrips: [ComicStrip] @relation(name: "LearningObjectiveComicStrip")
     courses: [Course] @relation(name: "CourseLearningObjective", direction: "OneWay")
     learningSlides: [LearningSlide] @relation(name: "LearningSlideLearningObjective")
+    inheritedFrom: LearningObjective @relation(name: "LearningObjectiveInheritedFrom", direction: "OneWay")
   }
 `;
 

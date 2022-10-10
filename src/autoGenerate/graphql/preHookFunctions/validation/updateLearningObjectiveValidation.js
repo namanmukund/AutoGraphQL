@@ -1,5 +1,5 @@
 import { get } from 'lodash';
-import { LOWithSimilarTitleAlreadyExist, OrderAlreadyExistsError } from '../../../../../constants/errors';
+import { OrderAlreadyExistsError } from '../../../../../constants/errors';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { fetchLO } from './addLearningObjectiveValidation';
 
@@ -32,12 +32,12 @@ const updateLearningObjectiveValidation = async (params, mutationOrQueryName, co
         throw new OrderAlreadyExistsError();
       }
     }
-    if (title) {
-      const LoData = await fetchLO(courseIds, null, title, LoFilter);
-      if (LoData && LoData.length > 0) {
-        throw new LOWithSimilarTitleAlreadyExist();
-      }
-    }
+    // if (title) {
+    // const LoData = await fetchLO(courseIds, null, title, LoFilter);
+    // if (LoData && LoData.length > 0) {
+    //   throw new LOWithSimilarTitleAlreadyExist();
+    // }
+    // }
   }
   return true;
 };
