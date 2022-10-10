@@ -1852,7 +1852,7 @@ const constructSessionsArr = ({
   mentorMenteeSessions,
   bookedSession,
   packageLastTopicId,
-  course = {},
+  course,
   previousHomeworkExists = false,
   previousHomeworkComponent = null,
 }) => {
@@ -2190,7 +2190,7 @@ const menteeCourseSyllabusMutationResolver = async (
       }
     }
 
-    if (!coursePackage) {
+    if (!batchCurrentComponentInfo) {
       const modelQuery = new QueryController('MentorMenteeSession', { bypass: true });
       mentorMenteeSessions = await modelQuery.aggregate([
         {
