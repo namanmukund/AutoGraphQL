@@ -726,7 +726,7 @@ resolvers.Query.getPracticeQuestionReport = getPracticeQuestionReport;
 // Resolver to check for the loggedIn status of buddies in buddy login flow
 resolvers.Query.getBuddyStatus = getBuddyStatus;
 // Resolver to get completed practice or coding assignments
-resolvers.Query.getSubmittedAssignmentsStudents = getSubmittedAssignmentsStudents
+resolvers.Query.getSubmittedAssignmentsStudents = getSubmittedAssignmentsStudents;
 // Redis utility queries
 resolvers.Query.cacheKeys = redisUtils.cacheKeys;
 resolvers.Query.purgeCache = redisUtils.purgeCache;

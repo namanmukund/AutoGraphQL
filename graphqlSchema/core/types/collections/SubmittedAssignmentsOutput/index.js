@@ -1,3 +1,3 @@
-import SubmittedAssignmentsOutput from "./SubmittedAssignmentsOutput";
+import SubmittedAssignmentsOutput from './SubmittedAssignmentsOutput';
 
-export default SubmittedAssignmentsOutput
+export default SubmittedAssignmentsOutput;
