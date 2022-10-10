@@ -1277,21 +1277,10 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
     .getPipeline();
  */
 
-const batchPipeline = (batchIdVariable, isArray) => [
+const getBatchDetailAggregation = (batchId) => [
   {
     $match: {
-      $expr: {
-        [`${isArray ? '$in' : '$eq'}`]: ['$id', `$$${batchIdVariable}`],
-      },
-    },
-  },
-  {
-    $project: {
-      id: 1,
-      course: 1,
-      currentComponent: 1,
-      coursePackage: 1,
-      coursePackageTopicRule: 1,
+      id: batchId,
     },
   },
   {
@@ -1311,13 +1300,6 @@ const batchPipeline = (batchIdVariable, isArray) => [
           },
         },
         {
-          $match: {
-            $expr: {
-              $eq: ['$status', 'published'],
-            },
-          },
-        },
-        {
           $project: {
             id: 1,
             title: 1,
@@ -1327,8 +1309,8 @@ const batchPipeline = (batchIdVariable, isArray) => [
             thumbnail: 1,
             thumbnailSmall: 1,
             chapter: 1,
-            courses: 1,
             classType: 1,
+            courses: 1,
             topicComponentRule: 1,
           },
         },
@@ -1620,13 +1602,6 @@ const batchPipeline = (batchIdVariable, isArray) => [
                 },
               },
               {
-                $match: {
-                  $expr: {
-                    $eq: ['$status', 'published'],
-                  },
-                },
-              },
-              {
                 $project: {
                   id: 1,
                   title: 1,
@@ -1812,77 +1787,16 @@ const batchPipeline = (batchIdVariable, isArray) => [
 
 const getUserBatchDetails = (userId) => [
   {
-    $project: {
-      id: 1,
-      batch: 1,
-      batches: 1,
-      school: 1,
-      user: 1,
-    },
-  },
-  {
     $match: {
       'user.typeId': userId,
-    },
-  },
-  {
-    $lookup: {
-      from: 'Batch',
-      let: { batchId: '$batch.typeId' },
-      pipeline: batchPipeline('batchId', false),
-      as: 'batch',
-    },
-  },
-  {
-    $lookup: {
-      from: 'Batch',
-      let: {
-        batchesId: {
-          $ifNull: ['$batches.typeId', []],
-        },
-      },
-      pipeline: batchPipeline('batchesId', true),
-      as: 'batches',
-    },
-  },
-  {
-    $lookup: {
-      from: 'School',
-      let: {
-        schoolId: '$school.typeId',
-      },
-      pipeline: [
-        {
-          $match: {
-            $expr: {
-              $eq: [
-                '$id',
-                '$$schoolId',
-              ],
-            },
-          },
-        },
-        {
-          $project: {
-            id: 1,
-            enrollmentType: 1,
-          },
-        },
-      ],
-      as: 'school',
     },
   },
   {
     $project: {
       _id: 0,
       id: 1,
-      batch: {
-        $arrayElemAt: ['$batch', 0],
-      },
+      batch: 1,
       batches: 1,
-      school: {
-        $arrayElemAt: ['$school', 0],
-      },
     },
   },
 ];
@@ -2160,43 +2074,49 @@ const menteeCourseSyllabusMutationResolver = async (
 
   // if we get userId through token, then we will return syllabus for that user
   if (userId) {
-    // @TODO - Separately cache batch data (independent of student profile) and use it as global cache for all students having same batch.
+    let activeClassroomId = activeClassroomIdFromContext(context);
 
-    // Fetch user profile having batches.
-    const userBatchDetailsRes = new QueryController('StudentProfile', { bypass: true });
-    userBatchDetails = await fetchOrCacheQueryRes({
-      hkey: `user::studentProfile::batches::${userId}`,
-      maxAge: expireCacheDurationInSeconds, // 1 day
-      dbCallback: () => userBatchDetailsRes.aggregate(getUserBatchDetails(userId)),
-    });
+    const precision = 3; // 3 decimal places
+    if (!activeClassroomId) {
+      // Fetch user profile having batches.
+      const start = process.hrtime(); // reset the timer
+      const userBatchDetailsRes = new QueryController('StudentProfile', { bypass: true });
+      userBatchDetails = await fetchOrCacheQueryRes({
+        hkey: `user::studentProfile::batches::${userId}`,
+        maxAge: expireCacheDurationInSeconds, // 1 day
+        dbCallback: () => userBatchDetailsRes.aggregate(getUserBatchDetails(userId)),
+      });
+      const elapsed = process.hrtime(start)[1] / 1000000;
+      log(`User Batches: ${process.hrtime(start)[0]} s, ${elapsed.toFixed(precision)} ms`);
 
-    const activeClassroomId = activeClassroomIdFromContext(context);
-
-    // If Classroom Id is not sent in context i.e user is visiting sessions page after login and active classroom is not set in client.
-    // Then we select default batch as active.
-    if (!activeClassroomId && userBatchDetails && userBatchDetails.length) {
-      const batchDetails = userBatchDetails[0];
-      if (get(batchDetails, 'batch.id')) {
-        userActiveClassroom = get(batchDetails, 'batch');
-      } else if (get(batchDetails, 'batches', []).length) {
-        userActiveClassroom = get(batchDetails, 'batches.0');
+      // If Classroom Id is not sent in context i.e user is visiting sessions page after login and active classroom is not set in client.
+      // Then we select default batch as active.
+      if (userBatchDetails && userBatchDetails.length) {
+        const batchDetails = userBatchDetails[0];
+        if (get(batchDetails, 'batch.typeId')) {
+          activeClassroomId = get(batchDetails, 'batch.typeId');
+        } else if (get(batchDetails, 'batches', []).length) {
+          activeClassroomId = get(batchDetails, 'batches.0.typeId');
+        }
       }
     }
 
-    if (activeClassroomId && !userActiveClassroom && userBatchDetails) {
-      const batchDetails = userBatchDetails[0];
-      const activeBatchInBatchesArr = get(batchDetails, 'batches', []).find((el) => get(el, 'id') === activeClassroomId);
-
-      if (get(batchDetails, 'batch.id') === activeClassroomId) {
-        userActiveClassroom = get(batchDetails, 'batch');
-      } else if (activeBatchInBatchesArr) {
-        userActiveClassroom = activeBatchInBatchesArr;
-      }
+    if (activeClassroomId) {
+      const starta = process.hrtime(); // reset the timer
+      const batchDetailsModel = new QueryController('Batch', { bypass: true });
+      userActiveClassroom = await fetchOrCacheQueryRes({
+        hkey: `batches::${activeClassroomId}`,
+        maxAge: expireCacheDurationInSeconds, // 1 day
+        dbCallback: () => batchDetailsModel.aggregate(getBatchDetailAggregation(activeClassroomId)),
+      });
+      if (Array.isArray(userActiveClassroom) && userActiveClassroom.length) userActiveClassroom = userActiveClassroom[0];
+      const elapseda = process.hrtime(starta)[1] / 1000000;
+      log(`Batch Details: ${process.hrtime(starta)[0]} s, ${elapseda.toFixed(precision)} ms`);
     }
 
     const responseObj = get(context, 'res');
     const activeCourseId = activeCourseIdFromContext(context);
-    if (!activeCourseId && !activeClassroomId && responseObj && get(userActiveClassroom, 'id')) {
+    if (!activeCourseId && !activeClassroomIdFromContext(context) && responseObj && get(userActiveClassroom, 'id')) {
       responseObj.header(HEADER_VARIABLES.CLASSROOM_UID, get(userActiveClassroom, 'id'));
     }
 
@@ -2258,7 +2178,7 @@ const menteeCourseSyllabusMutationResolver = async (
       || get(coursePackage, 'id')
     ) {
       batchCurrentComponentInfo = get(userActiveClassroom, 'currentComponent');
-      schoolInfo = get(userBatchDetails, '0.school');
+      schoolInfo = { enrollmentType: enrollmentTypes.pro };
       const allottedMentor = get(userActiveClassroom, 'allottedMentor');
       if (allottedMentor && allottedMentor.name) {
         mentorData = getMentorData(allottedMentor);
@@ -2527,11 +2447,14 @@ const menteeCourseSyllabusMutationResolver = async (
       const batchSessionModel = new QueryController('BatchSession', {
         bypass: true,
       });
+      const startb = process.hrtime();
       batchSessions = await fetchOrCacheQueryRes({
         hkey: `batchSessions::${batchId}`,
         maxAge: expireCacheDurationInSeconds,
         dbCallback: () => batchSessionModel.aggregate(getBatchSessionsAggregation(batchId, courseOrPackageFilter)),
       });
+      const elapsedb = process.hrtime(startb)[1] / 1000000;
+      log(`Batch Sessions: ${process.hrtime(startb)[0]} s, ${elapsedb.toFixed(precision)} ms`);
       // batchSessions = await
       // currentTopicOrder = get(batchCurrentComponentInfo, 'currentTopic.order');
     } else {
