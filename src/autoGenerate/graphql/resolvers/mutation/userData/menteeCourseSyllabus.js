@@ -1854,6 +1854,7 @@ const constructSessionsArr = ({
   packageLastTopicId,
   course = {},
   previousHomeworkExists = false,
+  previousHomeworkComponent = null,
 }) => {
   const { id: chapterId, title: chapterTitle, order: chapterOrder } = chapter;
 
@@ -1911,6 +1912,7 @@ const constructSessionsArr = ({
           endingDate: sessionEndDate,
           status: batchSessionStatus,
           previousHomeworkExists,
+          previousHomeworkComponent,
           batchSession,
         };
         completedSessionObj = completedMenteeSession;
@@ -1932,6 +1934,7 @@ const constructSessionsArr = ({
           course,
           status: batchSessionStatus,
           previousHomeworkExists,
+          previousHomeworkComponent,
           batchSession,
         };
         if (get(mentorSession, 'user')) {
@@ -1959,6 +1962,7 @@ const constructSessionsArr = ({
         course,
         status: batchSessionStatus,
         previousHomeworkExists,
+        previousHomeworkComponent,
         batchSession,
       };
       if (
@@ -2007,6 +2011,7 @@ const constructSessionsArr = ({
       mentorName: get(mentorSession, 'user.name'),
       mentorProfilePic: get(mentorSession, 'user.profilePic'),
       previousHomeworkExists,
+      previousHomeworkComponent,
       batchSession,
     };
     completedSessionObj = completedMenteeSession;
@@ -2577,7 +2582,8 @@ const menteeCourseSyllabusMutationResolver = async (
       packageTopics.forEach((topic) => {
         const currentIndex = (packageLabTopics || []).findIndex((labTopic) => get(labTopic, 'id') === get(topic, 'id'));
         const previousTopic = packageLabTopics[currentIndex - 1];
-        const previousHomeworkExists = get(previousTopic, 'topicComponentRule', []).some((topicComponent) => ['homeworkAssignment', 'quiz', 'homeworkPractice'].includes(get(topicComponent, 'componentName')));
+        const previousHomeworkComponents = get(previousTopic, 'topicComponentRule', []).filter((topicComponent) => ['homeworkAssignment', 'quiz', 'homeworkPractice'].includes(get(topicComponent, 'componentName')));
+        const previousHomeworkFirstComponent = get(previousHomeworkComponents, '0.componentName');
         const constructedSessionsArr = constructSessionsArr({
           lastTopicBookedOrder,
           lastTopicSessionStatus,
@@ -2595,7 +2601,8 @@ const menteeCourseSyllabusMutationResolver = async (
           upComingSession,
           bookedSession,
           packageLastTopicId,
-          previousHomeworkExists,
+          previousHomeworkExists: Boolean(previousHomeworkFirstComponent),
+          previousHomeworkComponent: previousHomeworkFirstComponent
         });
         if (get(constructedSessionsArr, 'completedSessionObj')) {
           completedSession.push(get(constructedSessionsArr, 'completedSessionObj', {}));
