@@ -2582,16 +2582,12 @@ const menteeCourseSyllabusMutationResolver = async (
       packageTopics.forEach((topic) => {
         const currentIndex = (packageLabTopics || []).findIndex((labTopic) => get(labTopic, 'id') === get(topic, 'id'));
         const previousTopic = packageLabTopics[currentIndex - 1];
-        const previousHomeworkComponents = get(previousTopic, 'topicComponentRule', []).filter((topicComponent) => ['homeworkAssignment', 'quiz', 'homeworkPractice'].includes(get(topicComponent, 'componentName')));
+        const previousHomeworkComponents = get(previousTopic, 'topicComponentRule', []).filter((topicComponent) => ['homeworkAssignment', 'quiz', 'homeworkPractice'].includes(get(topicComponent, 'componentName'))).sort((a, b) => a.order - b.order);
         const previousHomeworkFirstComponent = get(previousHomeworkComponents, '0.componentName');
         const constructedSessionsArr = constructSessionsArr({
           lastTopicBookedOrder,
           lastTopicSessionStatus,
-          chapter: {
-            id: get(coursePackage, 'id'),
-            title: get(coursePackage, 'title', 'Package'),
-            order: 1,
-          },
+          chapter: get(topic, 'chapter'),
           course: get(topic, 'courses', [])[0],
           topic,
           batchSessions,
@@ -2602,7 +2598,7 @@ const menteeCourseSyllabusMutationResolver = async (
           bookedSession,
           packageLastTopicId,
           previousHomeworkExists: Boolean(previousHomeworkFirstComponent),
-          previousHomeworkComponent: previousHomeworkFirstComponent
+          previousHomeworkComponent: previousHomeworkFirstComponent,
         });
         if (get(constructedSessionsArr, 'completedSessionObj')) {
           completedSession.push(get(constructedSessionsArr, 'completedSessionObj', {}));
