@@ -18,6 +18,7 @@ const sessionDetailType = `
    sessionStatus: SessionStatus
    batchSession: BatchSession
    previousHomeworkExists: Boolean @defaultValue(value: false)
+   previousHomeworkComponent: String
  }`;
 
 const completedSessionDetailType = `
@@ -41,7 +42,7 @@ const completedSessionDetailType = `
    course: Course
    sessionStatus: SessionStatus
    batchSession: BatchSession
-   previousHomeworkExists: Boolean @defaultValue(value: false)
+   previousHomeworkComponent: String
  }`;
 
 const menteeCourseSyllabusSkills = `
