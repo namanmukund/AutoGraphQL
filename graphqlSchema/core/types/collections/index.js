@@ -26,6 +26,7 @@ import ScheduleSessionsInput from './ScheduleSessions';
 import CodeEditorConfig from './CodeEditorConfig';
 import EvaluationTag from './EvaluationTag';
 import CacheKeyResult from './CacheKeyResult';
+import SubmittedAssignmentsOutput from './SubmittedAssignmentsOutput';
 
 export default [
   ...Enum,
@@ -56,4 +57,5 @@ export default [
   ...CodeEditorConfig,
   CacheKeyResult,
   ...EvaluationTag,
+  SubmittedAssignmentsOutput,
 ];
