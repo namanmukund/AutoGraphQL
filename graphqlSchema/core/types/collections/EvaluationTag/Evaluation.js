@@ -5,6 +5,7 @@ const Evaluation = `
         comment: String
         userPractice: UserBlockBasedPractice @relation(name: "UserBlockBasedPracticeEvaluation")
         userAssignment: UserAssignment @relation(name: "UserAssignmentEvaluation")
+        user: User! @relation(name: "Evaluation", direction: "OneWay")
     }
 `;
 
