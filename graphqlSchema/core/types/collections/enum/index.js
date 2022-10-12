@@ -137,7 +137,6 @@ import LearningSlideContentType from './LearningSlideContentType';
 import LayoutType from './LayoutType';
 import LearningSlideType from './LearningSlideType';
 import ClassType from './ClassType';
-import EvaluationResult from './EvaluationResult';
 import DatabaseControllerMode from './DatabaseControllerMode';
 import CoursePackageType from './CoursePackageType';
 import CoursePackageTopicRuleType from './CoursePackageTopicRuleType';
@@ -285,7 +284,6 @@ export default [
   LayoutType,
   LearningSlideType,
   ClassType,
-  EvaluationResult,
   DatabaseControllerMode,
   CoursePackageType,
   CoursePackageTopicRuleType,

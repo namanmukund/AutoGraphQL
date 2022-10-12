@@ -8,9 +8,10 @@ const UserBlockBasedPractice = `
     attachments: [File] @relation(name: "UserBlockBasedPracticeAttachment", direction: "OneWay")
     topic: Topic! @relation(name: "TopicUserBlockBasedPractice", direction: "OneWay")
     course: Course @relation(name: "UserBlockBasedPracticeCourse", direction: "OneWay")
-    result: EvaluationResult @defaultValue(value: "pending")
     startTime: Date
     endTime: Date
+    evaluation: Evaluation @relation(name: "UserBlockBasedPracticeEvaluation")
+    evaluationStatus: TaskCompletionStatus @defaultValue(value: "incomplete")
   }
 `;
 
