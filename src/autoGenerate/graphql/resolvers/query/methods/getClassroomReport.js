@@ -251,7 +251,7 @@ const getUserQuizReportAggregation = ({ userIds, topicId }) =>
 const getUserAssignmentAggregation = ({
   userIds,
   topicId,
-  isHomework,
+  homeworkObj,
 }) => [{
   $match: {
     'user.typeId': {
@@ -302,7 +302,7 @@ const getUserAssignmentAggregation = ({
   },
 }, {
   $match: {
-    'assignmentQuestion.isHomework': isHomework,
+    ...homeworkObj
   },
 }];
 
@@ -567,11 +567,15 @@ const classroomReport = (async (root, params, context) => {
         }),
       );
     }
+    let homeworkObj = { 'assignmentQuestion.isHomework': 'true' };
+    if (!isHomework) {
+      homeworkObj = { 'assignmentQuestion.isHomework': { $not: { $eq: 'true' } } };
+    }
     usersAssignmentRes = await userAssignmentModel.aggregate(
       getUserAssignmentAggregation({
         userIds,
         topicId,
-        isHomework,
+        homeworkObj,
       }),
     );
     usersBlockbasedPracticeRes = await userBlockBasedPracticeModel.aggregate(
@@ -678,20 +682,18 @@ const classroomReport = (async (root, params, context) => {
           obj.assignmentUnevaluated += 1;
         }
         // individual questions
-        if (get(assignmentQuestion, 'assignmentStatus', '') === 'complete') {
-          if (obj.assignmentQuestions.has(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''))) {
-            if (get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '') !== 'null' && get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '')) {
-              obj.assignmentQuestions.set(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''), obj.assignmentQuestions.get(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', '')) + 1);
-              isAssignmentAttemptedAndSubmitted += 1;
-            }
+        if (obj.assignmentQuestions.has(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''))) {
+          if (get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '') !== 'null' && get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '')) {
+            obj.assignmentQuestions.set(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''), obj.assignmentQuestions.get(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', '')) + 1);
+            isAssignmentAttemptedAndSubmitted += 1;
+          }
+        } else {
+          if (get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '') !== 'null' && get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '')) {
+            obj.assignmentQuestions.set(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''), 1);
+            isAtleastOneAssignmentSubmitted = true;
+            isAssignmentAttemptedAndSubmitted += 1;
           } else {
-            if (get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '') !== 'null' && get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '')) {
-              obj.assignmentQuestions.set(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''), 1);
-              isAtleastOneAssignmentSubmitted = true;
-              isAssignmentAttemptedAndSubmitted += 1;
-            } else {
-              obj.assignmentQuestions.set(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''), 0);
-            }
+            obj.assignmentQuestions.set(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''), 0);
           }
         }
       }
