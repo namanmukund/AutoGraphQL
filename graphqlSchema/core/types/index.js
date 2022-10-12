@@ -169,7 +169,7 @@ import PracticeQuestionReportOutput from './practiceQuestionReportOutput';
 import UserWaitlist from './userWaitlist';
 import RemoveBatchStudents from './removeBatchStudents';
 import RetakeSession from './retakeSession';
-import Ebook from './Ebook';
+import Ebook from './ebook';
 
 export default [
   ...User,
