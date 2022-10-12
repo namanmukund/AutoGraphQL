@@ -302,7 +302,7 @@ const getUserAssignmentAggregation = ({
   },
 }, {
   $match: {
-    ...homeworkObj
+    ...homeworkObj,
   },
 }];
 
