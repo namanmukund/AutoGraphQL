@@ -9,6 +9,9 @@ const FileType = `
     html
     css
     javascript
+    accdb
+    mdb
+    accdt
     others
   }`;
 
