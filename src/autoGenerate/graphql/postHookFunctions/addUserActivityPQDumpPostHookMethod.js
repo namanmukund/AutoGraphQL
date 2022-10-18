@@ -503,16 +503,22 @@ And current component status will not get changed when it is already consumed in
           detailedReport.push({ ...detailedReportObj });
         }
       });
+      const newThreeOrMoreTryCount = detailedReport.length - (firstTryCount + secondTryCount);
       // if pqReport exist update pqReport
       Object.assign(pqReportInput, {
         detailedReport: {
           replace: detailedReport,
         },
+        threeOrMoreTryCount: newThreeOrMoreTryCount,
       });
       await callLocalGraphqlApi(updateUserPracticeQuestionReportMutation(get(pqReport, 'data.userPracticeQuestionReports[0].id')), context, {
         input: pqReportInput,
       });
     } else {
+      const newThreeOrMoreTryCount = detailedReport.length - (firstTryCount + secondTryCount);
+      Object.assign(pqReportInput, {
+        threeOrMoreTryCount: newThreeOrMoreTryCount,
+      });
       // adding pqReport
       await callLocalGraphqlApi(addUserPracticeQuestionReportMutation(
         userId,
