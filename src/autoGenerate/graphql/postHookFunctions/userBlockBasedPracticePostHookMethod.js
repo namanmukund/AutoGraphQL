@@ -94,7 +94,7 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
 
   /* eslint-disable no-restricted-syntax */
   /* eslint-disable no-await-in-loop */
-  for (const practiceId of blockBasedPracticeIds) {
+  for (const practiceId of blockBasedPracticeNotCreated) {
     /*
       adding UserBlockBasedPractice document
     */
