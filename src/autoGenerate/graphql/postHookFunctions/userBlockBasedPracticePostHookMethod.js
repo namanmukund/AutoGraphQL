@@ -86,6 +86,8 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
     if (blockBasedPracticeNotCreated.length === 0) {
       return input;
     }
+  } else {
+    blockBasedPracticeNotCreated = blockBasedPracticeIds;
   }
 
   if (get(context, 'userRoleFromContext') && get(context, 'userRoleFromContext') !== MENTEE) {
