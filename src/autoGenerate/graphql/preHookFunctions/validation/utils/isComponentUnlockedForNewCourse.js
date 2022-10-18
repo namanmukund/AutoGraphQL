@@ -41,6 +41,8 @@ const isComponentUnlockedForNewCourse = async (
   checkForPaidLogic = false,
   courseId,
 ) => {
+  // returning early true, because we'll be deprecating currentComponent
+  return true;
   const {
     video, message, practiceQuestion, comicStrip, quiz, blockBasedProject, blockBasedPractice, learningSlide,
   } = topicTypes;
