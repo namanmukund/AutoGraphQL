@@ -1,3 +1,4 @@
+/* eslint-disable */
 // logic to checkif a component is unlocked
 import { get } from 'lodash';
 import getLearningObjectiveAndTopicForValidation from './getLearningObjectiveAndTopicForValidation';
