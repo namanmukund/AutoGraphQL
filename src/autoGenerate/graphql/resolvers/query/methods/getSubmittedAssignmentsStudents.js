@@ -53,13 +53,13 @@ const getSubmittedAssignmentsStudents = async (
   });
   const userBlockBasedPracticeModel = new QueryController('UserBlockBasedPractice', authentication);
   const UserBlockBasedPracticePipeline = new AggregationBuilder('UserBlockBasedPractice')
-    .Project(OnlyPayload('id', 'user', 'blockBasedPractice', 'evaluation', 'topic', 'course', 'answerLink', 'savedBlocks', 'attachments'))
+    .Project(OnlyPayload('id', 'user', 'blockBasedPractice', 'evaluation', 'topic', 'course', 'answerLink', 'savedBlocks', 'attachments', 'createdAt', 'updatedAt'))
     .Match({ 'user.typeId': { $in: userIds }, 'topic.typeId': topicId, 'course.typeId': courseId })
     .Lookup(EqualityPayload('Evaluation', 'evaluation', 'evaluation.typeId', 'id'))
     .Lookup(EqualityPayload('BlockBasedProject', 'blockBasedPractice', 'blockBasedPractice.typeId', 'id'))
     .Lookup(EqualityPayload('File', 'attachments', 'attachments.typeId', 'id'))
     .Project({
-      ...OnlyPayload('id', 'user', 'topic', 'course', 'answerLink', 'savedBlocks', 'attachments'),
+      ...OnlyPayload('id', 'user', 'topic', 'course', 'answerLink', 'savedBlocks', 'attachments', 'createdAt', 'updatedAt'),
       blockBasedPractice: ArrayElemAt(['$blockBasedPractice', 0], 0),
       evaluation: ArrayElemAt(['$evaluation', 0], 0),
     })
@@ -78,6 +78,8 @@ const getSubmittedAssignmentsStudents = async (
       evaluation: get(practice, 'evaluation[0]', {}),
       attachments: get(practice, 'attachments', {}),
       answerLink: get(practice, 'answerLink'),
+      createdAt: get(practice, 'createdAt'),
+      updatedAt: get(practice, 'updatedAt'),
     };
     userBlockBasedPracticeDataToSend.push(obj);
   });
