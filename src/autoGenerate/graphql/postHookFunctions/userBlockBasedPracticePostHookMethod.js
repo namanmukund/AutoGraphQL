@@ -60,7 +60,7 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
     blockBasedPracticeIds,
   } = getInfoFromParams(params, 'blockBasedPractice');
 
-  const resultArray = [];
+  let resultArray = [];
 
   // In case there is no topic id or blockBasedPracticeId/blockBasedPracticeIds,
   // empty data will be sent
@@ -119,6 +119,10 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
         resultArray.push(parseTopicComponentResultData(addUserBlockBasedPracticeResult, 'blockBasedPractice'));
       }
     }
+  }
+
+  if (input && input.length) {
+    resultArray = [...resultArray, ...input];
   }
 
   return resultArray;
