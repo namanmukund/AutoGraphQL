@@ -7,6 +7,34 @@ import parseTopicComponentResultData from './utils/parseTopicComponentResultData
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { MENTEE } from '../../../../constants/roles';
 
+const filterAndDeleteIfDupicate = (resultArray, context) => {
+  const uniqueBlockBasedPractice = [];
+  const uniqueIds = [];
+  const blockbasedPracticeToBeDeleted = [];
+  resultArray.forEach((result) => {
+    if (!uniqueIds.includes(result.blockBasedPractice.typeId)) {
+      uniqueBlockBasedPractice.push(result);
+      uniqueIds.push(result.blockBasedPractice.typeId);
+    } else {
+      blockbasedPracticeToBeDeleted.push(result.id);
+    }
+  });
+  blockbasedPracticeToBeDeleted.forEach((id) => {
+    callLocalGraphqlApi({
+      query: `
+        mutation {
+          deleteUserBlockBasedPractice(
+            id: "${id}"
+          ) {
+            id
+          }
+        }
+      `,
+    }, context);
+  });
+  return uniqueBlockBasedPractice;
+};
+
 // query to add UserBlockBasedPractice if it is not already present for user, blockBasedProjectId and topic id
 const addUserBlockBasedPracticeMutation = (
   userId,
@@ -81,10 +109,11 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
   */
   if ((input && input.length) || (typeof input === 'object' && get(input, 'id'))) {
     const inputArray = Array.isArray(input) ? input : [input];
-    const userBlockBasedPracticeIdsInInput = inputArray.map((item) => get(item, 'blockBasedPractice.id'));
+    const userBlockBasedPracticeIdsInInput = inputArray.map((item) => get(item, 'blockBasedPractice.typeId'));
     blockBasedPracticeNotCreated = blockBasedPracticeIds.filter((blockBasedPracticeIdInParam) => !userBlockBasedPracticeIdsInInput.includes(blockBasedPracticeIdInParam));
     if (blockBasedPracticeNotCreated.length === 0) {
-      return input;
+      const uniqueBlockBasedPractice = filterAndDeleteIfDupicate(inputArray, context);
+      return uniqueBlockBasedPractice;
     }
   } else {
     blockBasedPracticeNotCreated = blockBasedPracticeIds;
@@ -125,6 +154,7 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
     resultArray = [...resultArray, ...input];
   }
 
+  resultArray = filterAndDeleteIfDupicate(resultArray, context);
   return resultArray;
 };
 
