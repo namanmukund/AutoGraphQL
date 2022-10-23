@@ -31,12 +31,12 @@ const customQueries = `
     getSubmittedAssignmentsStudents (userIds: [ID], topicId: String, courseId: String, type: String): SubmittedAssignmentsOutput
 `;
 
-const redisCustomQueries = `
+const cacheCustomQueries = `
     cacheKeys (pattern: String!): CacheKeyResult
     getCache (key: String!): String
     purgeCache (pattern: String): BooleanResult
 `;
 
-const customQueryString = customQueries + redisCustomQueries;
+const customQueryString = customQueries + cacheCustomQueries;
 
 export default customQueryString;

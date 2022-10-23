@@ -100,7 +100,7 @@ const server = new ApolloServer({
       code: get(error, 'extensions.exception.name') || '',
     };
   },
-  context: ({ req, connection }) => {
+  context: ({ req, res, connection }) => {
     const additionalContextDataFromHeader = {};
     if (req && req.headers) {
       ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER
@@ -115,6 +115,7 @@ const server = new ApolloServer({
         pubsub,
         parsedASTMap,
         redis,
+        res,
         ...additionalContextDataFromHeader,
       };
     }
@@ -171,6 +172,7 @@ const server = new ApolloServer({
       pubsub,
       parsedASTMap,
       redis,
+      res,
       ...additionalContextDataFromHeader,
     };
   },

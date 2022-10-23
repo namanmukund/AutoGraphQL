@@ -573,10 +573,19 @@ const ALLOWED_FILE_UPLOAD_TYPES = [
   'UserBlockBasedPractice',
 ];
 
+const HEADER_VARIABLES = {
+  CLASSROOM_UID: 'x-classroom-uid',
+  COURSE_UID: 'x-course-uid',
+};
+
 const ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER = [
   {
     contextLabel: 'activeClassroom',
-    headerLabel: 'x-classroom-uid',
+    headerLabel: HEADER_VARIABLES.CLASSROOM_UID,
+  },
+  {
+    contextLabel: 'activeCourse',
+    headerLabel: HEADER_VARIABLES.COURSE_UID,
   },
 ];
 
@@ -707,4 +716,5 @@ export {
   ALLOWED_FILE_UPLOAD_TYPES,
   ALLOWED_HEADERS,
   ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER,
+  HEADER_VARIABLES,
 };

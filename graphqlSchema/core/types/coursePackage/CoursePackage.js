@@ -112,6 +112,7 @@ const CoursePackage = `
     minGrade: Int
     maxGrade: Int
     packageType: CoursePackageType! @defaultValue(value: "normal")
+    ebooks: [EBook] @relation(name: "CoursePackageEBooks", direction: "OneWay")
   }
 `;
 

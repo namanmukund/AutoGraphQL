@@ -1,3 +1,4 @@
+/* eslint-disable */
 // logic to checkif a component is unlocked
 import { get } from 'lodash';
 import getLearningObjectiveAndTopicForValidation from './getLearningObjectiveAndTopicForValidation';
@@ -41,6 +42,8 @@ const isComponentUnlockedForNewCourse = async (
   checkForPaidLogic = false,
   courseId,
 ) => {
+  // returning early true, because we'll be deprecating currentComponent
+  return true;
   const {
     video, message, practiceQuestion, comicStrip, quiz, blockBasedProject, blockBasedPractice, learningSlide,
   } = topicTypes;
