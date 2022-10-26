@@ -19,6 +19,7 @@ const userBlockBasedPracticeValidation = async (params, context) => {
     '',
     '',
     courseId,
+    false,
   );
   const userInfo = validateTokenAndExtractInformation(context, false);
   const {

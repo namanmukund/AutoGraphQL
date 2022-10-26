@@ -38,6 +38,7 @@ const userVideoValidation = async (params, context) => {
       '',
       currentApp !== backendApps[0],
       courseId,
+      false,
     );
   }
   return true;

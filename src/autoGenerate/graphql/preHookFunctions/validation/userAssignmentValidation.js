@@ -32,6 +32,7 @@ const userAssignmentValidation = async (params, context, mutationOrQueryName) =>
       '',
       false,
       courseId,
+      false,
     );
   }
 
