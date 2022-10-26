@@ -1,21 +1,29 @@
 import { get } from 'lodash';
 import {
-  OLD_COURSE_ID,
   PUBLISHED,
-  skillsLevel,
 } from '../../../../constants';
 import getInfoFromParams from './utils/getInfoFromParams';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { log } from '../../../../utils';
 import { MENTEE } from '../../../../constants/roles';
+import { fetchAndCacheQueryRes } from '../resolvers/mutation/userData/menteeCourseSyllabus';
 
 // query to get assignment questions associated with topic
-const topicQuery = (topicId) => `
+export const topicAssignmentAndQuizQuery = (topicId) => `
   query{
     topic(id:"${topicId}"){
       id
       order
+      topicQuestions {
+        question {
+          id
+          order
+          assessmentType
+          status
+        }
+        order
+      }
       topicHomeworkAssignmentQuestion {
         assignmentQuestion {
           id
@@ -33,16 +41,6 @@ const topicQuery = (topicId) => `
           status
         }
         order
-      }
-      assignmentQuestions(
-        filter:{
-          status: ${PUBLISHED}
-        }
-      ){
-        id
-        order
-        difficulty
-        isHomework
       }
     }
   }
@@ -99,12 +97,7 @@ const userAssignmentPostHookMethod = async (input, params, mutationName, context
   if (get(context, 'userRoleFromContext') && get(context, 'userRoleFromContext') !== MENTEE) {
     return input;
   }
-  const {
-    easy,
-    medium,
-    hard,
-  } = skillsLevel;
-  let userSkillLevel = easy;
+
   const resultArray = [];
   const {
     userId,
@@ -126,50 +119,36 @@ const userAssignmentPostHookMethod = async (input, params, mutationName, context
   }
 
   /*
-  Getting data for user current topic component status from context based on mutationName
-  This will be used to get the assignment questions based on skill level of the user
-  */
-  const currentTopicComponentInfo = get(context, `${mutationName}.userCurrentTopicComponentStatuses`);
-  if (currentTopicComponentInfo) {
-    const {
-      skillsLevel: userSkillsLevelFromDb,
-    } = currentTopicComponentInfo;
-    if (skillsLevel) {
-      userSkillLevel = userSkillsLevelFromDb;
-    }
-  }
-  /*
     we are getting below fields in topicQuery:
     -all published assignment questions of the topic
     */
-  const topicQueryRes = await callLocalGraphqlApi(topicQuery(topicId), context);
+  const topicQueryRes = await fetchAndCacheQueryRes({
+    hkey: `static::topic::userQuizOrAssignment::${topicId}`,
+    maxAge: 604800,
+    dbCallback: () => callLocalGraphqlApi(topicAssignmentAndQuizQuery(topicId), context),
+  });
   const topicInfo = get(topicQueryRes, 'data.topic');
   // adding assignment questions in the document
   // this logic will be changed based on assignment question sets
   let assignmentQuery = 'assignment:[';
   if (topicInfo) {
-    let assignmentQuestionsinTopic = get(topicInfo, 'assignmentQuestions');
-    if (courseId && courseId !== OLD_COURSE_ID) {
-      assignmentQuestionsinTopic = get(topicInfo, 'topicAssignmentQuestions', [])
+    let assignmentQuestionsinTopic = [];
+    assignmentQuestionsinTopic = get(topicInfo, 'topicAssignmentQuestions', [])
+      .filter((topicAQ) => get(topicAQ, 'assignmentQuestion.status') === PUBLISHED)
+      .map((topicAQ) => ({
+        ...get(topicAQ, 'assignmentQuestion', {}),
+        order: get(topicAQ, 'order'),
+      }));
+    assignmentQuestionsinTopic = [
+      ...assignmentQuestionsinTopic,
+      ...get(topicInfo, 'topicHomeworkAssignmentQuestion', [])
         .filter((topicAQ) => get(topicAQ, 'assignmentQuestion.status') === PUBLISHED)
         .map((topicAQ) => ({
           ...get(topicAQ, 'assignmentQuestion', {}),
           order: get(topicAQ, 'order'),
-        }));
-      assignmentQuestionsinTopic = [
-        ...assignmentQuestionsinTopic,
-        ...get(topicInfo, 'topicHomeworkAssignmentQuestion', [])
-          .filter((topicAQ) => get(topicAQ, 'assignmentQuestion.status') === PUBLISHED)
-          .map((topicAQ) => ({
-            ...get(topicAQ, 'assignmentQuestion', {}),
-            order: get(topicAQ, 'order'),
-          })),
-      ];
-    }
+        })),
+    ];
     let sortedAssignmentQuestionsinTopic = [];
-    const easyAssignmentQuestions = [];
-    const mediumAssignmentQuestions = [];
-    const difficultAssignmentQuestions = [];
 
     if (!assignmentQuestionsinTopic || (assignmentQuestionsinTopic && !assignmentQuestionsinTopic.length)) {
       log('assignmentQuestionsinTopic info missing in topicInfo');
@@ -178,176 +157,8 @@ const userAssignmentPostHookMethod = async (input, params, mutationName, context
       sortedAssignmentQuestionsinTopic = assignmentQuestionsinTopic.sort((a, b) => a.order - b.order);
     }
 
-    // dividing questions in the three buckets easy, medium and hard
-    // Easy(0, 1) medium(2, 3) difficult(4, 5)
-    sortedAssignmentQuestionsinTopic.forEach((sortedAssignmentQuestion) => {
-      if (!sortedAssignmentQuestion.difficulty || sortedAssignmentQuestion.difficulty < 2) {
-        easyAssignmentQuestions.push(sortedAssignmentQuestion);
-      } else if (sortedAssignmentQuestion.difficulty > 1 && sortedAssignmentQuestion.difficulty < 4) {
-        mediumAssignmentQuestions.push(sortedAssignmentQuestion);
-      } else {
-        difficultAssignmentQuestions.push(sortedAssignmentQuestion);
-      }
-    });
-
     let finalAssignmentQuestionsForQuery = [];
-    if (courseId && courseId !== OLD_COURSE_ID) {
-      finalAssignmentQuestionsForQuery = sortedAssignmentQuestionsinTopic || [];
-    } else {
-      // assignment question will populate on basis of user skill type and available questions
-      // LOgic is as below.
-      // Student' appetite:
-      // Easy(1) medium(2, 3) difficult(4, 5)
-      // Easy-4(E1, E2,   E3, E4)
-      // Medium-2 (E1, M1) (E3, M2)
-      // Difficult -2  (M1 D1) (M2, D2)
-      let assignmentQuestionCount = 0;
-      let homeworkQuestionCount = 0;
-      switch (userSkillLevel) {
-        case easy:
-          // push 2 questions each for homewok and assignment from medium
-          if (easyAssignmentQuestions.length > 0) {
-            easyAssignmentQuestions.forEach((easyAssignmentQuestion) => {
-              if (easyAssignmentQuestion && easyAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
-                finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion);
-                homeworkQuestionCount += 1;
-              }
-
-              if (easyAssignmentQuestion && !easyAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
-                finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion);
-                assignmentQuestionCount += 1;
-              }
-            });
-          }
-
-          // if 2 easy questions are not there for each homework and assignment, got to medium
-          if ((homeworkQuestionCount < 2 || assignmentQuestionCount < 2) && mediumAssignmentQuestions.length > 0) {
-            mediumAssignmentQuestions.forEach((mediumAssignmentQuestion) => {
-              if (mediumAssignmentQuestion && mediumAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
-                finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion);
-                homeworkQuestionCount += 1;
-              }
-
-              if (mediumAssignmentQuestion && !mediumAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
-                finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion);
-                assignmentQuestionCount += 1;
-              }
-            });
-          }
-
-          // if 2 questions are not still there go to difficult
-          if ((homeworkQuestionCount < 2 || assignmentQuestionCount < 2) && difficultAssignmentQuestions.length > 0) {
-            difficultAssignmentQuestions.forEach((difficultAssignmentQuestion) => {
-              if (difficultAssignmentQuestion && difficultAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
-                finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion);
-                homeworkQuestionCount += 1;
-              }
-
-              if (difficultAssignmentQuestion && !difficultAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
-                finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion);
-                assignmentQuestionCount += 1;
-              }
-            });
-          }
-          break;
-        case medium:
-          // push 1 question each for homewok and assignment from medium
-          if (mediumAssignmentQuestions.length > 0) {
-            mediumAssignmentQuestions.forEach((mediumAssignmentQuestion) => {
-              if (mediumAssignmentQuestion && mediumAssignmentQuestion.isHomework && homeworkQuestionCount < 1) {
-                finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion);
-                homeworkQuestionCount += 1;
-              }
-
-              if (mediumAssignmentQuestion && !mediumAssignmentQuestion.isHomework && assignmentQuestionCount < 1) {
-                finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion);
-                assignmentQuestionCount += 1;
-              }
-            });
-          }
-
-          // push 1 question each for homewok and assignment from easy
-          // if there were no medium questions, this will get populated
-          if (easyAssignmentQuestions.length > 0) {
-            easyAssignmentQuestions.forEach((easyAssignmentQuestion) => {
-              if (easyAssignmentQuestion && easyAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
-                finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion);
-                homeworkQuestionCount += 1;
-              }
-
-              if (easyAssignmentQuestion && !easyAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
-                finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion);
-                assignmentQuestionCount += 1;
-              }
-            });
-          }
-
-          // if 2 questions are not still there go to difficult
-          if ((homeworkQuestionCount < 2 || assignmentQuestionCount < 2) && difficultAssignmentQuestions.length > 0) {
-            difficultAssignmentQuestions.forEach((difficultAssignmentQuestion) => {
-              if (difficultAssignmentQuestion && difficultAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
-                finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion);
-                homeworkQuestionCount += 1;
-              }
-
-              if (difficultAssignmentQuestion && !difficultAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
-                finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion);
-                assignmentQuestionCount += 1;
-              }
-            });
-          }
-
-          break;
-        case hard:
-          // push 1 question each for homewok and assignment from difficult
-          if (difficultAssignmentQuestions.length > 0) {
-            difficultAssignmentQuestions.forEach((difficultAssignmentQuestion) => {
-              if (difficultAssignmentQuestion && difficultAssignmentQuestion.isHomework && homeworkQuestionCount < 1) {
-                finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion);
-                homeworkQuestionCount += 1;
-              }
-
-              if (difficultAssignmentQuestion && !difficultAssignmentQuestion.isHomework && assignmentQuestionCount < 1) {
-                finalAssignmentQuestionsForQuery.push(difficultAssignmentQuestion);
-                assignmentQuestionCount += 1;
-              }
-            });
-          }
-
-          // push remaining 1 question each for homewok and assignment from medium
-          // // if there were no difficult questions, this will get populated
-          if (mediumAssignmentQuestions.length > 0) {
-            mediumAssignmentQuestions.forEach((mediumAssignmentQuestion) => {
-              if (mediumAssignmentQuestion && mediumAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
-                finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion);
-                homeworkQuestionCount += 1;
-              }
-
-              if (mediumAssignmentQuestion && !mediumAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
-                finalAssignmentQuestionsForQuery.push(mediumAssignmentQuestion);
-                assignmentQuestionCount += 1;
-              }
-            });
-          }
-
-          // if 2 questions are not still there go to easy
-          if ((homeworkQuestionCount < 2 || assignmentQuestionCount < 2) && easyAssignmentQuestions.length > 0) {
-            easyAssignmentQuestions.forEach((easyAssignmentQuestion) => {
-              if (easyAssignmentQuestion && easyAssignmentQuestion.isHomework && homeworkQuestionCount < 2) {
-                finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion);
-                homeworkQuestionCount += 1;
-              }
-
-              if (easyAssignmentQuestion && !easyAssignmentQuestion.isHomework && assignmentQuestionCount < 2) {
-                finalAssignmentQuestionsForQuery.push(easyAssignmentQuestion);
-                assignmentQuestionCount += 1;
-              }
-            });
-          }
-          break;
-        default:
-      }
-    }
+    finalAssignmentQuestionsForQuery = sortedAssignmentQuestionsinTopic || [];
 
     // eslint-disable-next-line no-restricted-syntax
     for (const assignmentQuestion of finalAssignmentQuestionsForQuery) {
@@ -364,7 +175,6 @@ const userAssignmentPostHookMethod = async (input, params, mutationName, context
   }
   assignmentQuery += ']';
 
-  log('assignmentQuery: ', assignmentQuery);
   const result = await callLocalGraphqlApi(addUserAssignmentMutation(
     userId,
     topicId,
@@ -372,7 +182,6 @@ const userAssignmentPostHookMethod = async (input, params, mutationName, context
     courseId,
   ), context);
 
-  log('addUserAssignmentMutation result: ', result);
   if (result) {
     /*
       parsing data 'addUserAssignment' so that the logic implemented ahead can read data is
