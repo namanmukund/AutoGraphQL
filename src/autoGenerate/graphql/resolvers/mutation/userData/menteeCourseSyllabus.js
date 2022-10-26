@@ -1581,6 +1581,7 @@ const getBatchDetailAggregation = (batchId) => [
                     $arrayElemAt: ['$thumbnailSmall', 0],
                   },
                   defaultLoComponentRule: 1,
+                  ebooks: 1
                 },
               },
             ],
