@@ -1,5 +1,5 @@
-const SessionFeedbackTagRule = `
-  type SessionFeedbackTagRule {
+const SessionFeedbackFieldRule = `
+  type SessionFeedbackFieldRule {
     tag: SessionFeedbackTag
     liked: Boolean
  }`;
@@ -14,8 +14,8 @@ const SessionFeedback = `
     topic: Topic @relation(name: "SessionFeedbackTopic", direction: "OneWay")
     rating: Int @length(min: 1, max: 5) @groupBy
     studentComment: String
-    sessionFeedbackTagRules: [SessionFeedbackTagRule]
+    selectedFields: [SessionFeedbackFieldRule]
     feedbackType: SessionFeedbackType
 }`;
 
-export default [SessionFeedback, SessionFeedbackTagRule];
+export default [SessionFeedback, SessionFeedbackFieldRule];
