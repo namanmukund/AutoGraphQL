@@ -25,35 +25,12 @@ const defaultMentorMenteeSessionObject = {
   isReviewSubmittedOnTime: false,
 };
 
-const getMentorMenteeSessions = async (userId, context) => {
-  const query = `
-    {
-      mentorMenteeSessions(filter: {
-        and: [
-          { menteeSession_some: { user_some: { id: "${userId}" } } }
-        ]
-      }) {
-        id
-        sessionStatus
-        assignmentSubmitDate
-        quizSubmitDate
-        isSubmittedForReview
-        sessionJoinedByMenteeAt
-        isQuizSubmitted
-        isAssignmentSubmitted
-        isAssignmentAttempted
-        isPracticeSubmitted
-        practiceSubmitDate
-        isHomeworkCheckedByMentor
-        isReviewSubmittedOnTime
-        topic {
-          id
-        }
-      }
-    }
-  `;
-  const res = await callLocalGraphqlApi(query, context);
-  return get(res, 'data.mentorMenteeSessions', []);
+const getMentorMenteeSessions = async (userId) => {
+  const menteeSessionController = new QueryController('MenteeSession', { bypass: true });
+  const mentorMenteeSessionController = new QueryController('MentorMenteeSession', { bypass: true });
+  const menteeSessions = await menteeSessionController.fetchMultiple({ 'user.typeId': userId });
+  const res = await mentorMenteeSessionController.fetchMultiple({ 'menteeSession.typeId': (menteeSessions || []).map((menteeSession) => get(menteeSession, 'id')) });
+  return (res || []).map((session) => ({ ...session, topic: { id: get(session, 'topic.typeId') } }));
 };
 
 const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
@@ -461,6 +438,9 @@ const menteeCourseHomeworkMutationResolver = async (
       if (get(topic, 'order') > lastTopicBookedOrder) return;
       constructHomeworkArr(finalTopicBasedHomeworkArray, mentorMenteeSession, {
         ...topic,
+        topicQuestions: (get(topic, 'topicQuestions', []) || []).map((topicQuestion) => ({ id: get(topicQuestion, 'typeId') })),
+        topicAssignmentQuestions: (get(topic, 'topicAssignmentQuestions', []) || []).map((topicAssignmentQuestion) => ({ id: get(topicAssignmentQuestion, 'typeId') })),
+        topicHomeworkAssignmentQuestion: (get(topic, 'topicHomeworkAssignmentQuestion', []) || []).map((homeworkAssignmentQuestion) => ({ id: get(homeworkAssignmentQuestion, 'typeId') })),
         chapter: {
           id: get(coursePackage, 'id'),
           title: get(coursePackage, 'title', 'Package'),
