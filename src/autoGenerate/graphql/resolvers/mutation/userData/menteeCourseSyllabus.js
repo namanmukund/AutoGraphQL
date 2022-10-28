@@ -916,7 +916,7 @@ query{
 }
 `;
 
-const fetchOrCacheQueryRes = async ({ hkey, maxAge = 9000, dbCallback = () => { } }) => {
+export const fetchAndCacheQueryRes = async ({ hkey, maxAge = 9000, dbCallback = () => { } }) => {
   let response;
   const cachedRes = await cacheClient.get(hkey);
   if (cachedRes) {
@@ -1277,7 +1277,7 @@ const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
     .getPipeline();
  */
 
-const getBatchDetailAggregation = (batchId) => [
+export const getBatchDetailAggregation = (batchId) => [
   {
     $match: {
       id: batchId,
@@ -1312,6 +1312,9 @@ const getBatchDetailAggregation = (batchId) => [
             classType: 1,
             courses: 1,
             topicComponentRule: 1,
+            topicQuestions: 1,
+            topicAssignmentQuestions: 1,
+            topicHomeworkAssignmentQuestion: 1,
           },
         },
         {
@@ -1433,6 +1436,9 @@ const getBatchDetailAggregation = (batchId) => [
             },
             courses: 1,
             classType: 1,
+            topicQuestions: 1,
+            topicAssignmentQuestions: 1,
+            topicHomeworkAssignmentQuestion: 1,
           },
         },
       ],
@@ -1614,6 +1620,9 @@ const getBatchDetailAggregation = (batchId) => [
                   classType: 1,
                   courses: 1,
                   topicComponentRule: 1,
+                  topicQuestions: 1,
+                  topicAssignmentQuestions: 1,
+                  topicHomeworkAssignmentQuestion: 1,
                 },
               },
               {
@@ -1735,6 +1744,9 @@ const getBatchDetailAggregation = (batchId) => [
                     ],
                   },
                   classType: 1,
+                  topicQuestions: 1,
+                  topicAssignmentQuestions: 1,
+                  topicHomeworkAssignmentQuestion: 1,
                 },
               },
             ],
@@ -1785,7 +1797,7 @@ const getBatchDetailAggregation = (batchId) => [
   },
 ];
 
-const getUserBatchDetails = (userId) => [
+export const getUserBatchDetails = (userId) => [
   {
     $match: {
       'user.typeId': userId,
@@ -2033,6 +2045,9 @@ bookedSession -> only next 1 session will come here
 upComingSession -> all the sessions after booked session will come here
 completedSession -> all completed session will come here
 */
+
+export const oneDayExpireCacheInSeconds = 24 * 60 * 60; // 1 day
+
 const menteeCourseSyllabusMutationResolver = async (
   root,
   params,
@@ -2075,8 +2090,6 @@ const menteeCourseSyllabusMutationResolver = async (
   let mentorData = {};
   let firstComponent = {};
 
-  const expireCacheDurationInSeconds = 24 * 60 * 60; // 1 day
-
   // if we get userId through token, then we will return syllabus for that user
   if (userId) {
     let activeClassroomId = activeClassroomIdFromContext(context);
@@ -2086,9 +2099,9 @@ const menteeCourseSyllabusMutationResolver = async (
       // Fetch user profile having batches.
       const start = process.hrtime(); // reset the timer
       const userBatchDetailsRes = new QueryController('StudentProfile', { bypass: true });
-      userBatchDetails = await fetchOrCacheQueryRes({
+      userBatchDetails = await fetchAndCacheQueryRes({
         hkey: `user::studentProfile::batches::${userId}`,
-        maxAge: expireCacheDurationInSeconds, // 1 day
+        maxAge: oneDayExpireCacheInSeconds, // 1 day
         dbCallback: () => userBatchDetailsRes.aggregate(getUserBatchDetails(userId)),
       });
       const elapsed = process.hrtime(start)[1] / 1000000;
@@ -2109,9 +2122,9 @@ const menteeCourseSyllabusMutationResolver = async (
     if (activeClassroomId) {
       const starta = process.hrtime(); // reset the timer
       const batchDetailsModel = new QueryController('Batch', { bypass: true });
-      userActiveClassroom = await fetchOrCacheQueryRes({
+      userActiveClassroom = await fetchAndCacheQueryRes({
         hkey: `batches::${activeClassroomId}`,
-        maxAge: expireCacheDurationInSeconds, // 1 day
+        maxAge: oneDayExpireCacheInSeconds, // 1 day
         dbCallback: () => batchDetailsModel.aggregate(getBatchDetailAggregation(activeClassroomId)),
       });
       if (Array.isArray(userActiveClassroom) && userActiveClassroom.length) userActiveClassroom = userActiveClassroom[0];
@@ -2453,9 +2466,9 @@ const menteeCourseSyllabusMutationResolver = async (
         bypass: true,
       });
       const startb = process.hrtime();
-      batchSessions = await fetchOrCacheQueryRes({
+      batchSessions = await fetchAndCacheQueryRes({
         hkey: `batchSessions::${batchId}`,
-        maxAge: expireCacheDurationInSeconds,
+        maxAge: oneDayExpireCacheInSeconds,
         dbCallback: () => batchSessionModel.aggregate(getBatchSessionsAggregation(batchId, courseOrPackageFilter)),
       });
       const elapsedb = process.hrtime(startb)[1] / 1000000;
@@ -2867,7 +2880,7 @@ const menteeCourseSyllabusMutationResolver = async (
           componentId: bookedTopicId,
         };
       } else {
-        const topicRes = await fetchOrCacheQueryRes({
+        const topicRes = await fetchAndCacheQueryRes({
           hkey: `mcs_tQNC_${bookedTopicId}`,
           maxAge: 86400,
           dbCallback: () => callLocalGraphqlApi(
@@ -2932,7 +2945,7 @@ const menteeCourseSyllabusMutationResolver = async (
           }
           if (prevCompletedSession && prevCompletedSession.length) {
             const prevSessionTopicId = prevCompletedSession[0].topicId || '';
-            const prevTopicRes = await fetchOrCacheQueryRes({
+            const prevTopicRes = await fetchAndCacheQueryRes({
               hkey: `mcs_PtQNC_${prevSessionTopicId}`,
               maxAge: 86400,
               dbCallback: () => callLocalGraphqlApi(

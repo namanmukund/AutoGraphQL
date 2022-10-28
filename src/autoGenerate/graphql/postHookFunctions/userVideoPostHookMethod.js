@@ -1,11 +1,9 @@
 import { get } from 'lodash';
 import {
-  OLD_COURSE_ID,
   PUBLISHED, topicTypes,
   userTopicTypeStatus,
 } from '../../../../constants';
 import getInfoFromParams from './utils/getInfoFromParams';
-import getNextComponent from './utils/getNextComponent';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 
@@ -42,7 +40,6 @@ const topicQuery = (topicId) => `
 const addUserVideoMutation = (
   userId,
   topicId,
-  restQuery,
   courseId,
   videoId,
 ) => `
@@ -53,8 +50,7 @@ const addUserVideoMutation = (
     ${courseId ? `courseConnectId:"${courseId}"` : ''}
     ${videoId ? `videoConnectId:"${videoId}"` : ''}
     input:{
-        status: ${userTopicTypeStatus.incomplete}
-        ${restQuery}
+      status: ${userTopicTypeStatus.incomplete}
     }
     ){
       id
@@ -68,12 +64,6 @@ const addUserVideoMutation = (
       isBookmarked
       isLiked
       status
-      nextComponent{
-        learningObjective{
-          id
-        }
-        nextComponentType
-      }
     }
     }
     `;
@@ -90,7 +80,6 @@ const userVideoPostHookMethod = async (input, params, mutationName, context) => 
   returning input in that case
   if it is not already present, we will add a new document with default data
   */
-  let restQuery = '';
   if (input && input.length) {
     return input;
   }
@@ -111,38 +100,26 @@ const userVideoPostHookMethod = async (input, params, mutationName, context) => 
     we are getting below fields in topicQuery:
     -first published learning objective of the query to be populated in next component
     */
-  const topicQueryRes = await callLocalGraphqlApi(topicQuery(topicId), context);
-  const topicInfo = get(topicQueryRes, 'data.topic');
-  const learningObjectiveConnectId = get(topicInfo, 'learningObjectives[0].id');
-  const topicComponentRule = get(topicInfo, 'topicComponentRule');
-  if (!finalVideoId && topicComponentRule && topicComponentRule.length > 0) {
-    const {
-      video,
-    } = topicTypes;
-    const sortedTopicComponentRule = topicComponentRule.sort((firstItem, secondItem) => firstItem.order - secondItem.order);
-    sortedTopicComponentRule.forEach((topicComponent) => {
-      if (topicComponent.componentName === video && !finalVideoId) {
-        finalVideoId = topicComponent.video && topicComponent.video.id;
-      }
-    });
+  if (!finalVideoId) {
+    const topicQueryRes = await callLocalGraphqlApi(topicQuery(topicId), context);
+    const topicInfo = get(topicQueryRes, 'data.topic');
+    const topicComponentRule = get(topicInfo, 'topicComponentRule');
+    if (topicComponentRule && topicComponentRule.length > 0) {
+      const {
+        video,
+      } = topicTypes;
+      const sortedTopicComponentRule = topicComponentRule.sort((firstItem, secondItem) => firstItem.order - secondItem.order);
+      sortedTopicComponentRule.forEach((topicComponent) => {
+        if (topicComponent.componentName === video && !finalVideoId) {
+          finalVideoId = topicComponent.video && topicComponent.video.id;
+        }
+      });
+    }
   }
 
-  // next component will be chat of first published LO
-  if (!courseId || (courseId === OLD_COURSE_ID)) {
-    restQuery = getNextComponent(
-      learningObjectiveConnectId,
-      '',
-      'video',
-    );
-  }
-  /*
-    adding addUserVideo document on the basis of
-    restQuery(next component data), rest data will take default values from schema
-    */
   const result = await callLocalGraphqlApi(addUserVideoMutation(
     userId,
     topicId,
-    restQuery,
     courseId,
     finalVideoId,
   ), context);
