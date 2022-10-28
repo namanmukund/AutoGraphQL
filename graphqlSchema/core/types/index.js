@@ -170,6 +170,7 @@ import UserWaitlist from './userWaitlist';
 import RemoveBatchStudents from './removeBatchStudents';
 import RetakeSession from './retakeSession';
 import Ebook from './ebook';
+import SessionFeedback from './sessionFeedback';
 
 export default [
   ...User,
@@ -344,4 +345,5 @@ export default [
   ...RemoveBatchStudents,
   ...RetakeSession,
   ...Ebook,
+  ...SessionFeedback,
 ];
