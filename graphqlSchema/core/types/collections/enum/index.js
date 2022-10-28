@@ -143,8 +143,8 @@ import CoursePackageType from './CoursePackageType';
 import CoursePackageTopicRuleType from './CoursePackageTopicRuleType';
 import BlockBasedPracticeAnswerType from './BlockBasedPracticeAnswerType';
 import McqType from './McqType';
-import SessionFeedbackTag from './sessionFeedbackTags';
 import SessionFeedbackType from './sessionFeedbackType';
+import SessionFeedbackCategory from './SessionFeedbackCategory';
 
 export default [
   Status,
@@ -293,6 +293,6 @@ export default [
   CoursePackageTopicRuleType,
   BlockBasedPracticeAnswerType,
   McqType,
-  SessionFeedbackTag,
   SessionFeedbackType,
+  SessionFeedbackCategory,
 ];

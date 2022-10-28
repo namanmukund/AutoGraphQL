@@ -1,3 +1,4 @@
 import SessionFeedback from './SessionFeedback';
+import SessionFeedbackTag from './SessionFeedbackTag';
 
-export default [...SessionFeedback];
+export default [...SessionFeedback, ...SessionFeedbackTag];
