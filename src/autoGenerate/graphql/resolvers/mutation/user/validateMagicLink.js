@@ -18,31 +18,6 @@ import { MissingMandatoryInputInRequestError } from '../../../../../../constants
 
 const linkTokenSecret = coreAuthParams.LINK_TOKEN_SECRET;
 
-const getuserInfo = async (userId) => {
-  const query = `{
-  user(id: "${userId}") {
-    id
-    studentProfile {
-      id
-      parents {
-        id
-        user {
-          id
-          email
-          emailOtp
-          phone {
-            number
-            countryCode
-          }
-        }
-      }
-    }
-  }
-}`;
-  const userData = await callLocalGraphqlApi(query);
-  return get(userData, 'data.user');
-};
-
 const getTokenDetails = async (linkToken, userId) => {
   const query = `{
   magicLinkLogs(
@@ -120,13 +95,7 @@ const validateMagicLinkMutationResolver = async (
     if (moment().isAfter(moment(expiresIn))) {
       throw new LinkExpiredError();
     }
-    const userInfo = await getuserInfo(id);
-    const userPhone = get(userInfo, 'studentProfile.parents[0].user.phone');
-    if (get(userPhone, 'number')) {
-      input.phone = userPhone;
-    } else if (get(userInfo, 'studentProfile.parents[0].user.email')) {
-      input.email = get(userInfo, 'studentProfile.parents[0].user.email');
-    }
+    input.id = id;
   });
 
   Object.assign(authentication, {
