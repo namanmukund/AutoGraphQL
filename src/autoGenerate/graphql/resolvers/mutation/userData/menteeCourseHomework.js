@@ -8,7 +8,6 @@ import {
   getTopicsArrFromCoursePackages, getTopicOrderFromCoursePackage, getUserBatchDetails, fetchAndCacheQueryRes, getBatchDetailAggregation, oneDayExpireCacheInSeconds,
 } from './menteeCourseSyllabus';
 import { HEADER_VARIABLES, OLD_COURSE_ID } from '../../../../../../constants';
-import { callLocalGraphqlApi } from '../../../../../api';
 import { activeClassroomIdFromContext, activeCourseIdFromContext } from '../../../../../../utils/getUserActiveClassroom';
 
 const defaultMentorMenteeSessionObject = {
