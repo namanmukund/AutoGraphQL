@@ -36,9 +36,9 @@ import addUserActivityVideoDumpValidation from './preHookFunctions/validation/ad
 import addUserActivityChatDumpValidation from './preHookFunctions/validation/addUserActivityChatDumpValidation';
 import addUserActivityPQDumpValidation from './preHookFunctions/validation/addUserActivityPQDumpValidation';
 import addUserActivityQuizDumpValidation from './preHookFunctions/validation/addUserActivityQuizDumpValidation';
-import userVideoValidation from './preHookFunctions/validation/userVideoValidation';
-import userLearningObjectiveValidation from './preHookFunctions/validation/userLearningObjectiveValidation';
-import userQuizValidation from './preHookFunctions/validation/userQuizValidation';
+// import userVideoValidation from './preHookFunctions/validation/userVideoValidation';
+// import userLearningObjectiveValidation from './preHookFunctions/validation/userLearningObjectiveValidation';
+// import userQuizValidation from './preHookFunctions/validation/userQuizValidation';
 import { addLearningObjectiveValidation } from './preHookFunctions/validation';
 import userAssignmentValidation from './preHookFunctions/validation/userAssignmentValidation';
 import addUserActivityAssignmentDumpValidation from './preHookFunctions/validation/addUserActivityAssignmentDumpValidation';
@@ -360,18 +360,18 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       await addUserActivityQuizDumpValidation(params, mutationOrQueryName, context);
       return hook(input, mutationOrQueryName, 'PreHook');
     }
-    case 'userVideo': {
-      await userVideoValidation(params, context);
-      return hook(input, mutationOrQueryName, 'PreHook');
-    }
-    case 'userLearningObjective': {
-      await userLearningObjectiveValidation(params, context);
-      return hook(input, mutationOrQueryName, 'PreHook');
-    }
-    case 'userQuiz': {
-      await userQuizValidation(params, context);
-      return hook(input, mutationOrQueryName, 'PreHook');
-    }
+    // case 'userVideo': {
+    //   await userVideoValidation(params, context);
+    //   return hook(input, mutationOrQueryName, 'PreHook');
+    // }
+    // case 'userLearningObjective': {
+    //   await userLearningObjectiveValidation(params, context);
+    //   return hook(input, mutationOrQueryName, 'PreHook');
+    // }
+    // case 'userQuiz': {
+    //   await userQuizValidation(params, context);
+    //   return hook(input, mutationOrQueryName, 'PreHook');
+    // }
     case 'addLearningObjective': {
       await addLearningObjectiveValidation(params, mutationOrQueryName, context);
       break;

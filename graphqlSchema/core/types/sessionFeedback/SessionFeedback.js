@@ -1,13 +1,13 @@
 const SessionFeedbackFieldRule = `
   type SessionFeedbackFieldRule {
-    tag: SessionFeedbackTag
+    tags: SessionFeedbackTag @relation(name: "SessionFeedbackTag", direction: "OneWay")
     liked: Boolean
  }`;
 
 const SessionFeedback = `
   type SessionFeedback @model
   {
-    user: User! @relation(name: "MenteeSessionUser", direction: "OneWay")
+    user: User! @relation(name: "SessionFeedbackUser", direction: "OneWay")
     course: Course @relation(name: "SessionFeedbackCourse", direction: "OneWay")
     coursePackage: CoursePackage @relation(name: "SessionFeedbackCoursePackage", direction: "OneWay")
     batch: Batch! @relation(name: "SessionFeedbackBatch", direction: "OneWay")
