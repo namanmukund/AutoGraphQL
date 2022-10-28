@@ -116,8 +116,9 @@ const validateMagicLinkMutationResolver = async (
     }
     const userInfo = await getuserInfo(id);
     const parentInfo = get(userInfo, 'studentProfile.parents[0].user');
-    if (get(parentInfo, 'id')) input.id = get(parentInfo, 'id');
-    else input.id = id;
+    if (get(parentInfo, 'id')) {
+      input.id = get(parentInfo, 'id');
+    } else input.id = id;
   });
 
   Object.assign(authentication, {
