@@ -79,6 +79,9 @@ Document contains all the necessary information needed on page along
 with the next component.
 */
 const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
+  if (typeof input === 'object' && get(input, 'id')) {
+    return input;
+  }
   /* eslint-disable prefer-const */
   let {
     userId,
@@ -93,7 +96,7 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
   // In case there is no topic id or blockBasedPracticeId/blockBasedPracticeIds,
   // empty data will be sent
   if ((!topicId || !(blockBasedPracticeId || blockBasedPracticeIds.length > 0))) {
-    return resultArray;
+    return input || resultArray;
   }
 
   if (blockBasedPracticeId) {
@@ -107,7 +110,7 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
     returning input in that case
     if it is not already present, we will add a new document with default data
   */
-  if ((input && input.length) || (typeof input === 'object' && get(input, 'id'))) {
+  if (input && input.length) {
     const inputArray = Array.isArray(input) ? input : [input];
     const userBlockBasedPracticeIdsInInput = inputArray.map((item) => get(item, 'blockBasedPractice.typeId'));
     blockBasedPracticeNotCreated = blockBasedPracticeIds.filter((blockBasedPracticeIdInParam) => !userBlockBasedPracticeIdsInInput.includes(blockBasedPracticeIdInParam));

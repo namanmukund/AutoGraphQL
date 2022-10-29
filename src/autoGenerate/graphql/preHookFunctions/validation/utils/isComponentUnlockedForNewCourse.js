@@ -43,11 +43,9 @@ const isComponentUnlockedForNewCourse = async(
   courseId,
   forDumpQuery = true,
 ) => {
-  if (!forDumpQuery) {
     // returning early true, because we'll be deprecating currentComponent
     // Setting check for dump query we are getting some data from context in dump query posthook
-    return true;
-  }
+  return true;
   const {
     video, message, practiceQuestion, comicStrip, quiz, blockBasedProject, blockBasedPractice, learningSlide,
   } = topicTypes;
