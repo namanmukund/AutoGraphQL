@@ -105,7 +105,7 @@ const updateCurrentComponentStatusOfNewCourse = async (
   context,
 ) => {
   const checkForMentorChild = await isUserInheritedFromMentor(userId, true);
-  if (checkForMentorChild && !currentTopicComponentInfo) return true;
+  if (checkForMentorChild || !currentTopicComponentInfo) return true;
   const {
     video, message, practiceQuestion, comicStrip, quiz, blockBasedPractice, blockBasedProject, learningSlide,
   } = topicTypes;

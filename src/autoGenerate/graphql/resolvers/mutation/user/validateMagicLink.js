@@ -28,12 +28,6 @@ const getuserInfo = async (userId) => {
         id
         user {
           id
-          email
-          emailOtp
-          phone {
-            number
-            countryCode
-          }
         }
       }
     }
@@ -121,12 +115,10 @@ const validateMagicLinkMutationResolver = async (
       throw new LinkExpiredError();
     }
     const userInfo = await getuserInfo(id);
-    const userPhone = get(userInfo, 'studentProfile.parents[0].user.phone');
-    if (get(userPhone, 'number')) {
-      input.phone = userPhone;
-    } else if (get(userInfo, 'studentProfile.parents[0].user.email')) {
-      input.email = get(userInfo, 'studentProfile.parents[0].user.email');
-    }
+    const parentInfo = get(userInfo, 'studentProfile.parents[0].user');
+    if (get(parentInfo, 'id')) {
+      input.id = get(parentInfo, 'id');
+    } else input.id = id;
   });
 
   Object.assign(authentication, {

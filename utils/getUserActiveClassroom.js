@@ -1,18 +1,20 @@
 import { get } from 'lodash';
 import { callLocalGraphqlApi } from '../src/api';
-import { RedisController } from '../src/autoGenerate/graphql/controllers';
+import { CacheController } from '../src/autoGenerate/graphql/controllers';
 
 const USER_PROFILE_EXPIRY_TIME = 86400; // 1 day
 
 export const activeClassroomIdFromContext = (context) => get(context, 'activeClassroom');
+
+export const activeCourseIdFromContext = (context) => get(context, 'activeCourse');
 
 const userProfileCacheKey = (userId) => `userProfile::activeClassroom::${userId}`;
 
 const getStudentProfile = async (context) => {
   const { currentUser } = context;
   if (get(currentUser, 'id')) {
-    const redisCon = new RedisController({ bypass: true });
-    const cachedData = await redisCon.get(userProfileCacheKey(get(currentUser, 'id')));
+    const cacheCon = new CacheController({ bypass: true });
+    const cachedData = await cacheCon.get(userProfileCacheKey(get(currentUser, 'id')));
     if (cachedData && get(cachedData, 'id')) return cachedData;
     const studentProfile = await callLocalGraphqlApi(
       `{
@@ -22,7 +24,7 @@ const getStudentProfile = async (context) => {
           }
         }) {
           id 
-          batches {
+          batches(orderBy:createdAt_DESC) {
             id
             type
             documentType
@@ -61,7 +63,7 @@ const getStudentProfile = async (context) => {
       }`,
       context,
     );
-    redisCon.set(get(studentProfile, 'data.studentProfiles[0]'), { hkey: userProfileCacheKey(get(currentUser, 'id')), maxAge: USER_PROFILE_EXPIRY_TIME });
+    cacheCon.set(get(studentProfile, 'data.studentProfiles[0]'), { hkey: userProfileCacheKey(get(currentUser, 'id')), maxAge: USER_PROFILE_EXPIRY_TIME });
     return get(studentProfile, 'data.studentProfiles[0]');
   }
   return null;

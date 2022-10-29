@@ -30,6 +30,7 @@ const AcademicDuration = `
 
 const Batch = `
   type Batch @model
+  @databaseController(mode: "aggregation")
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },

@@ -165,6 +165,13 @@ const userPermissionsDoc = {
       read: [...NOT_UMS_HEAD_ARR],
     },
   },
+  SessionFeedbackTag: {
+    collection: {
+      rule: 'allow',
+      crud: [...UMS_HEAD_ARR, UMS_VIEWER, MENTOR],
+      read: [...NOT_UMS_HEAD_ARR],
+    },
+  },
 };
 
 export default userPermissionsDoc;

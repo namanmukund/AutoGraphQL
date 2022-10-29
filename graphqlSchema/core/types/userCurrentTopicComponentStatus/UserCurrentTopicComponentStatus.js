@@ -3,7 +3,8 @@ import { READ } from '../../../../constants/graphqlOperations';
 import getPermissionSchemaString from '../../../../src/autoGenerate/utils/getPermissionSchemaString';
 
 const UserCurrentTopicComponentStatus = `
-  type UserCurrentTopicComponentStatus @model 
+  type UserCurrentTopicComponentStatus @model
+  @databaseController(mode: "aggregation")
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },

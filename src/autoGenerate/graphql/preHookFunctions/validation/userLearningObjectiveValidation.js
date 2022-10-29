@@ -28,6 +28,7 @@ const userLearningObjectiveValidation = async (params, context) => {
       '',
       '',
       courseId,
+      false,
     );
   }
 
