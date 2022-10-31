@@ -149,61 +149,61 @@ const addUserQuizDump = (
   }
   `;
 
-// query to get batch status
-const getBatchStatus = (userId) => `
-  query{
-    user(id: "${userId}"){
-      studentProfile{
-        batch{
-          id
-          type
-          course {
-            id
-          }
-          coursePackage {
-            courses {
-              id
-            }
-          }
-          currentComponent{
-            currentCourse{
-              id
-              order
-            }
-            currentTopic{
-              id
-              order
-            }
-            latestSessionStatus
-          }
-        }
-        batches {
-          id
-          type
-          course {
-            id
-          }
-          coursePackage {
-            courses {
-              id
-            }
-          }
-          currentComponent{
-            currentCourse{
-              id
-              order
-            }
-            currentTopic{
-              id
-              order
-            }
-            latestSessionStatus
-          }
-        }
-      }
-    }
-  }
-  `;
+// // query to get batch status
+// const getBatchStatus = (userId) => `
+//   query{
+//     user(id: "${userId}"){
+//       studentProfile{
+//         batch{
+//           id
+//           type
+//           course {
+//             id
+//           }
+//           coursePackage {
+//             courses {
+//               id
+//             }
+//           }
+//           currentComponent{
+//             currentCourse{
+//               id
+//               order
+//             }
+//             currentTopic{
+//               id
+//               order
+//             }
+//             latestSessionStatus
+//           }
+//         }
+//         batches {
+//           id
+//           type
+//           course {
+//             id
+//           }
+//           coursePackage {
+//             courses {
+//               id
+//             }
+//           }
+//           currentComponent{
+//             currentCourse{
+//               id
+//               order
+//             }
+//             currentTopic{
+//               id
+//               order
+//             }
+//             latestSessionStatus
+//           }
+//         }
+//       }
+//     }
+//   }
+//   `;
 
 /*
   parsing data of user quiz report so that the logic implemented ahead can read data in
