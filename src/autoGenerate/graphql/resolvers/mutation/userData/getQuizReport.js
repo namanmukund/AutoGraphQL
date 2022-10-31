@@ -1,6 +1,5 @@
 import { get } from 'lodash';
 import {
-  GLOBAL_COURSE_TITLE,
   learningObjectiveQuizReportThreshHolds,
   learningObjectiveRecommendationTexts,
   masteryLevels,
@@ -8,46 +7,43 @@ import {
   userActionType,
 } from '../../../../../../constants';
 import {
-  ComponentLockedError,
   DatabaseRecordNotFoundError, UnauthenticatedUserError,
 } from '../../../../../../constants/errors';
 // import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getUserIdandAppNameAfterValidation
-from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
-import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
+  from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import { log } from '../../../../../../utils';
-import getUserActiveClassroom from '../../../../../../utils/getUserActiveClassroom';
 
 // query to get current component status of user
-const getUserCurrentTopicComponentStatus = (userId, courseId) => `
-  query{
-    userCurrentTopicComponentStatuses(filter:{
-      and:[
-        {user_some:{
-        id:"${userId}"
-        }},
-      {currentCourse_some:{
-        and:[
-          ${courseId ? `{id:"${courseId}"}` : `{title: "${GLOBAL_COURSE_TITLE}"}`}
-        ]
-      }}
-      ]
-    }){
-      id
-      currentTopic{
-        id
-        order
-      }
-      currentLearningObjective{
-        id
-        order
-      }
-      currentTopicComponentType
-      enrollmentType
-    }
-  }
-  `;
+// const getUserCurrentTopicComponentStatus = (userId, courseId) => `
+//   query{
+//     userCurrentTopicComponentStatuses(filter:{
+//       and:[
+//         {user_some:{
+//         id:"${userId}"
+//         }},
+//       {currentCourse_some:{
+//         and:[
+//           ${courseId ? `{id:"${courseId}"}` : `{title: "${GLOBAL_COURSE_TITLE}"}`}
+//         ]
+//       }}
+//       ]
+//     }){
+//       id
+//       currentTopic{
+//         id
+//         order
+//       }
+//       currentLearningObjective{
+//         id
+//         order
+//       }
+//       currentTopicComponentType
+//       enrollmentType
+//     }
+//   }
+//   `;
 
 // query to get topic and it's order
 const getTopicQuery = (topicId) => `
@@ -307,25 +303,25 @@ const getQuizReportMutationResolver = async (
     });
   }
 
-  const res = await callLocalGraphqlApi(
-    getUserCurrentTopicComponentStatus(userId, courseId),
-    context,
-  );
+  // const res = await callLocalGraphqlApi(
+  //   getUserCurrentTopicComponentStatus(userId, courseId),
+  //   context,
+  // );
 
-  const currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
+  // const currentTopicComponentInfo = get(res, 'data.userCurrentTopicComponentStatuses[0]');
 
-  // calling method to validate user current topic component status
-  validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
+  // // calling method to validate user current topic component status
+  // validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
 
   // checking if user belongs to a batch if he does everthing will be calculated on basis of batch
-  const batchRes = await callLocalGraphqlApi(
-    getBatchStatus(userId),
-    context,
-    '',
-  );
+  // const batchRes = await callLocalGraphqlApi(
+  //   getBatchStatus(userId),
+  //   context,
+  //   '',
+  // );
 
-  const activeClassroom = getUserActiveClassroom(context, { courseId, studentProfile: get(batchRes, 'data.user.studentProfile') }, get(batchRes, 'data.user.studentProfile.batch.id'));
-  const batchCurrentComponentInfo = get(activeClassroom, 'currentComponent');
+  // const activeClassroom = getUserActiveClassroom(context, { courseId, studentProfile: get(batchRes, 'data.user.studentProfile') }, get(batchRes, 'data.user.studentProfile.batch.id'));
+  // const batchCurrentComponentInfo = get(activeClassroom, 'currentComponent');
 
   // calling API to get data of fetched topic
   const topicRes = await callLocalGraphqlApi(
@@ -341,18 +337,18 @@ const getQuizReportMutationResolver = async (
       },
     });
   }
-  let currentRunningTopic;
+  // let currentRunningTopic;
 
   // if user belongs to a batch, quiz report will be calculated on basis of batchCurrentComponentStatus
-  if (batchCurrentComponentInfo) {
-    currentRunningTopic = batchCurrentComponentInfo && batchCurrentComponentInfo.currentTopic;
-  } else {
-    currentRunningTopic = currentTopicComponentInfo && currentTopicComponentInfo.currentTopic;
-  }
+  // if (batchCurrentComponentInfo) {
+  //   currentRunningTopic = batchCurrentComponentInfo && batchCurrentComponentInfo.currentTopic;
+  // } else {
+  //   currentRunningTopic = currentTopicComponentInfo && currentTopicComponentInfo.currentTopic;
+  // }
 
-  if (topicInfo.order > currentRunningTopic.order) {
-    throw new ComponentLockedError();
-  }
+  // if (topicInfo.order > currentRunningTopic.order) {
+  //   throw new ComponentLockedError();
+  // }
   const userQuizQueryRes = await callLocalGraphqlApi(userQuizQuery(userId, topicId, courseId), context);
   const userQuizInfo = get(userQuizQueryRes, 'data.userQuizs[0]');
   const quizQuestionsInUserQuiz = get(userQuizInfo, 'quiz');
