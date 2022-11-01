@@ -38,6 +38,7 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import addQuestionBankMessageMapping from '../scriptMethods/addQuestionBankMessageMapping';
 // import updateUserNameEmailPassword from '../scriptMethods/updateUserNameEmailPassword';
 // import RemappingBatchStudentInSchool from './RemappingBatchStudentInSchool';
+// import mentorMenteeSessionSchemaMigration from './mentorMenteeSessionSchemaMigration';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
@@ -99,6 +100,7 @@ const temporaryScript = (async (root, params, context) => {
   // await updateUserNameEmailPassword();
   // await RemappingBatchStudentInSchool(root, params, context);
   // await generateBulkBatchSession();
+  // await mentorMenteeSessionSchemaMigration(root, params, context);
   return {
     result: true,
   };

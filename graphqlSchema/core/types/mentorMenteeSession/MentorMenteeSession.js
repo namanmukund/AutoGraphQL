@@ -56,6 +56,7 @@ const MentorMenteeSession = `
     coursePackage: CoursePackage @relation(name: "MentorMenteeSessionCoursePackage", direction: "OneWay")
     topic: Topic! @relation(name: "MentorMenteeSessionTopic", direction: "OneWay")
     menteeSession: MenteeSession! @relation(name: "SessionDataMenteeSession", direction: "OneWay")
+    user: User @relation(name: "SessionDataUser", direction: "OneWay")
     mentorSession: MentorSession @relation(name: "SessionDataMentorSession")
     salesOperation: SalesOperation @relation(name:"SalesOperationFirstMentorMenteeSession")
     sessionAllotmentDate: Date

@@ -4,7 +4,6 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import { ApolloServer } from 'apollo-server-express';
 import { BaseRedisCache } from 'apollo-server-cache-redis';
-import createNewrelicApolloPlugin from '@newrelic/apollo-server-plugin';
 import schema from './graphql';
 import { log, types } from '../utils';
 import { authMiddleware, graphqlUpload } from './middlewares';
@@ -66,13 +65,6 @@ const corsOptions = {
   allowedHeaders: ALLOWED_HEADERS,
 };
 
-const newrelicApolloPlugin = createNewrelicApolloPlugin({
-  captureScalars: true,
-  captureIntrospectionQueries: true,
-  captureServiceDefinitionQueries: true,
-  captureHealthCheckQueries: true,
-});
-
 app.use(cors(corsOptions));
 
 app.use(path, bodyParser.json(), graphqlUpload({ uploadDir: '/tmp/uploads' }));
@@ -82,7 +74,6 @@ const parsedASTMap = getParsedASTMap(types);
 const server = new ApolloServer({
   schema,
   introspection: process.env.ENABLE_GRAPHQL_INTROSPECTION,
-  plugins: [newrelicApolloPlugin],
   playground: {
     endpoint: `http://0.0.0.0:${port}${path}`,
     settings: {

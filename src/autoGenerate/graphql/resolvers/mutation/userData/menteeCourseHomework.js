@@ -29,7 +29,7 @@ const getMentorMenteeSessions = async (userId) => {
   const mentorMenteeSessionController = new QueryController('MentorMenteeSession', { bypass: true });
   const menteeSessions = await menteeSessionController.fetchMultiple({ 'user.typeId': userId });
   const res = await mentorMenteeSessionController.fetchMultiple({ 'menteeSession.typeId': (menteeSessions || []).map((menteeSession) => get(menteeSession, 'id')) });
-  return (res || []).map((session) => ({ ...session, topic: { id: get(session, 'topic.typeId') } }));
+  return (res || []).map((session) => ({ ...get(session, '_doc', {}), topic: { id: get(session, 'topic.typeId') } }));
 };
 
 const getUserCurrentTopicComponentStatusAggregation = (userId, courseId) => [
