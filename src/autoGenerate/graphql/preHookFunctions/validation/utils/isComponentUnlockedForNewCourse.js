@@ -1,3 +1,4 @@
+/* eslint-disable */
 // logic to checkif a component is unlocked
 import { get } from 'lodash';
 import getLearningObjectiveAndTopicForValidation from './getLearningObjectiveAndTopicForValidation';
@@ -31,7 +32,7 @@ import getUserActiveClassroom from '../../../../../../utils/getUserActiveClassro
 This is a common method to check whether the called topic component is locked or not
 here page is component type(video, quiz, chat or practice question)
 */
-const isComponentUnlockedForNewCourse = async (
+const isComponentUnlockedForNewCourse = async(
   params,
   mutationOrQueryName,
   context,
@@ -40,7 +41,11 @@ const isComponentUnlockedForNewCourse = async (
   inputLearningObjectiveId = '',
   checkForPaidLogic = false,
   courseId,
+  forDumpQuery = true,
 ) => {
+    // returning early true, because we'll be deprecating currentComponent
+    // Setting check for dump query we are getting some data from context in dump query posthook
+  return true;
   const {
     video, message, practiceQuestion, comicStrip, quiz, blockBasedProject, blockBasedPractice, learningSlide,
   } = topicTypes;

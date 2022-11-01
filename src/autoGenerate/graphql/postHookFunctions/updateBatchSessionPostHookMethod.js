@@ -32,6 +32,7 @@ import generateOtpForBatchSession from './utils/generateOtpForBatchSession';
 import { MENTEE } from '../../../../constants/roles';
 import { getTopicsFromCoursePackage } from './utils/updateBatchPostHookQueries';
 import getSortedTopics from '../../../../utils/getSortedTopicsFromCoursePackageOrder';
+import { CacheController } from '../controllers';
 // import extractBatchSessionAndSendB2B from './utils/extractBatchSessionAndSendB2B';
 
 // query to get chapters and topics belomngin to a course
@@ -602,6 +603,24 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
       batchTopicOrder,
       batchTypeValue,
       auditType: auditTypeValues.mentor,
+    });
+  }
+
+  const cacheController = new CacheController({ bypass: true });
+  const cachedBatchSessions = await cacheController.get(`batchSessions::${get(input, 'batch.typeId')}`);
+  if (cachedBatchSessions && cachedBatchSessions.length) {
+    const updatedBatchSessions = cachedBatchSessions.map((batchSession) => {
+      if (get(batchSession, 'id') === get(input, 'id')) {
+        return {
+          ...batchSession,
+          ...(input || {}),
+        };
+      }
+      return batchSession;
+    });
+    await cacheController.set(updatedBatchSessions, {
+      hkey: `batchSessions::${get(input, 'batch.typeId')}`,
+      maxAge: 24 * 60 * 60,
     });
   }
 };

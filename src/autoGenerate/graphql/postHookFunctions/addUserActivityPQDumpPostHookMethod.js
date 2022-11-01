@@ -180,16 +180,6 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
     log('Either one of userId or learningObjectiveId is missing in input of addUserActivityPQDumpPostHookMethod');
   }
   const learningObjectiveInfo = get(context, `${mutationName}.learningObjective`);
-  const topicId = (get(learningObjectiveInfo, 'topics') && get(learningObjectiveInfo, 'topics[0].id')) || get(learningObjectiveInfo, 'topic.id');
-  if (!topicId) {
-    log('Not able to fetch LearningObjective.topic in addUserActivityPQDumpPostHookMethod');
-  }
-  const {
-    id: learningObjectiveIdInResult,
-  } = learningObjectiveInfo;
-  if (!learningObjectiveInfo) {
-    log('Not able to fetch LearningObjectiveInfo in addUserActivityPQDumpPostHookMethod');
-  }
   /*
   we are getting userLearningObjective for below purpose:
   -we get userLearningObjective id , which will be used further to update the document
@@ -424,37 +414,49 @@ And current component status will not get changed when it is already consumed in
   */
   const nextComponentLearningObjectiveId = get(userLearningObjectiveInfo, 'nextComponent.learningObjective.id');
   const nextComponentType = get(userLearningObjectiveInfo, 'nextComponent.nextComponentType');
-  /*
-  Calling method to update current user Topic Component status
-  */
-  if (!courseId || (courseId === OLD_COURSE_ID)) {
-    await updateCurrentComponentStatus(
-      currentTopicComponentInfo,
-      pqAction,
-      topicId,
-      learningObjectiveIdInResult,
-      'practiceQuestion',
-      nextComponentType,
-      completedQuestionCount,
-      totalQuestions,
-      nextComponentLearningObjectiveId,
-    );
-  } else {
-    await updateCurrentComponentStatusOfNewCourse(
-      userId,
-      courseId,
-      currentTopicComponentInfo,
-      pqAction,
-      topicId,
-      learningObjectiveIdInResult,
-      '',
-      '',
-      'practiceQuestion',
-      topicComponentRule,
-      topicOrder,
-      completedQuestionCount,
-      totalQuestions,
-    );
+  if (currentTopicComponentInfo) {
+    const topicId = (get(learningObjectiveInfo, 'topics') && get(learningObjectiveInfo, 'topics[0].id')) || get(learningObjectiveInfo, 'topic.id');
+    if (!topicId) {
+      log('Not able to fetch LearningObjective.topic in addUserActivityPQDumpPostHookMethod');
+    }
+    const {
+      id: learningObjectiveIdInResult,
+    } = learningObjectiveInfo;
+    if (!learningObjectiveInfo) {
+      log('Not able to fetch LearningObjectiveInfo in addUserActivityPQDumpPostHookMethod');
+    }
+    /*
+    Calling method to update current user Topic Component status
+    */
+    if (!courseId || (courseId === OLD_COURSE_ID)) {
+      await updateCurrentComponentStatus(
+        currentTopicComponentInfo,
+        pqAction,
+        topicId,
+        learningObjectiveIdInResult,
+        'practiceQuestion',
+        nextComponentType,
+        completedQuestionCount,
+        totalQuestions,
+        nextComponentLearningObjectiveId,
+      );
+    } else {
+      await updateCurrentComponentStatusOfNewCourse(
+        userId,
+        courseId,
+        currentTopicComponentInfo,
+        pqAction,
+        topicId,
+        learningObjectiveIdInResult,
+        '',
+        '',
+        'practiceQuestion',
+        topicComponentRule,
+        topicOrder,
+        completedQuestionCount,
+        totalQuestions,
+      );
+    }
   }
   // popping all the practice questions and sending rest of the fields for update
   await callLocalGraphqlApi(updateUserLearningObjectiveMutation(
@@ -477,7 +479,7 @@ And current component status will not get changed when it is already consumed in
     detailedReport,
   };
   if (get(context, 'fromAddUserLSDump')) {
-    const pqReport = await callLocalGraphqlApi(getUserPracticeQuestionReportQuery(userId, learningObjectiveIdInResult, courseId), context);
+    const pqReport = await callLocalGraphqlApi(getUserPracticeQuestionReportQuery(userId, learningObjectiveId, courseId), context);
     if (get(pqReport, 'data.userPracticeQuestionReports', []).length) {
       const prevDetailedReport = get(pqReport, 'data.userPracticeQuestionReports[0].detailedReport', []);
       prevDetailedReport.forEach((questionReport) => {
@@ -522,7 +524,7 @@ And current component status will not get changed when it is already consumed in
       // adding pqReport
       await callLocalGraphqlApi(addUserPracticeQuestionReportMutation(
         userId,
-        learningObjectiveIdInResult,
+        learningObjectiveId,
         courseId,
       ), context, {
         input: pqReportInput,
@@ -534,7 +536,7 @@ And current component status will not get changed when it is already consumed in
   if (pqAction === next && completedQuestionCount === totalQuestions) {
     await callLocalGraphqlApi(addUserPracticeQuestionReportMutation(
       userId,
-      learningObjectiveIdInResult,
+      learningObjectiveId,
       courseId,
     ), context, {
       input: pqReportInput,
