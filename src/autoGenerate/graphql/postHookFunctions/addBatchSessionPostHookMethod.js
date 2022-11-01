@@ -254,7 +254,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
     const batchSessions = await cacheController.get(`batchSessions::${batchId}`);
     cacheController.set([...(batchSessions || []), input], {
       hkey: `batchSessions::${batchId}`,
-      maxAge: '24 * 60 * 60',
+      maxAge: 24 * 60 * 60,
     });
     // update session log entry
     addSessionLog(bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'addBatchSession', code, mentorSessionConnectId, sessionStatusFromInput || sessionStatus.allotted, '', get(context, 'isManualSession', false));

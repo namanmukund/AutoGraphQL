@@ -618,7 +618,10 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
       }
       return batchSession;
     });
-    await cacheController.set(`batchSessions::${get(input, 'batch.typeId')}`, updatedBatchSessions);
+    await cacheController.set(updatedBatchSessions, {
+      hkey: `batchSessions::${get(input, 'batch.typeId')}`,
+      maxAge: 24 * 60 * 60,
+    });
   }
 };
 export default updateBatchSessionPostHookMethod;
