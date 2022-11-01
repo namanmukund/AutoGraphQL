@@ -67,6 +67,7 @@ const Batch = `
     academicDuration: [AcademicDuration]
     academicYearTitle: String
     inheritedFrom: Batch @relation(name: "BatchInheritedFrom", direction: "OneWay")
+    shouldShowEbook: Boolean @defaultValue(value: "false")
   }
 `;
 
