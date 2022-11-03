@@ -10,7 +10,7 @@ import {
   PaidComponentLockedError,
 } from '../../../../../../constants/errors';
 import getUserCurrentTopicComponentStatus
-from '../../../../utils/getUserCurrentTopicComponentStatus';
+  from '../../../../utils/getUserCurrentTopicComponentStatus';
 import isTopicUnlocked from '../../../../utils/isTopicUnlocked';
 import {
   backendApps,
@@ -21,7 +21,7 @@ import getTopicForValidation from './getTopicForValidation';
 import getUserIdandAppNameAfterValidation from './getUserIdandAppNameAfterValidation';
 import { validateMentorMenteePermissionForComponent, getMentorMenteeSessionForValidation } from './index';
 import getBatchCurrentComponentStatus
-from '../../../../utils/getBatchCurrentComponentStatus';
+  from '../../../../utils/getBatchCurrentComponentStatus';
 import getSortedTopics from '../../../../../../utils/getSortedTopicsFromCoursePackageOrder';
 import { ifAuthorized } from '../../../../../../utils';
 import { MENTOR, SCHOOL_TEACHER } from '../../../../../../constants/roles';

@@ -95,12 +95,6 @@ const addUserActivityLearningSlideDumpPostHookMethod = async (input, mutation, c
   if (!topicId) {
     log('Not able to fetch LearningObjective.topic in addUserActivityLearningSlidePostHookMethod');
   }
-  const {
-    id: learningObjectiveIdInResult,
-  } = learningObjectiveInfo;
-  if (!learningObjectiveInfo) {
-    log('Not able to fetch LearningObjectiveInfo in addUserActivityPQDumpPostHookMethod');
-  }
   const userLearningObjectiveQueryRes = await callLocalGraphqlApi(
     userLearningObjectiveQuery(userId, learningObjectiveId, courseId, learningSlideId), context,
   );
@@ -125,24 +119,33 @@ const addUserActivityLearningSlideDumpPostHookMethod = async (input, mutation, c
   } else if (userActionValue && userActionValue === skip) {
     learningSlideStatus = skipStatus;
   }
+
   const currentTopicComponentInfo = get(context, `${mutation}.userCurrentTopicComponentStatuses`);
-  await updateCurrentComponentStatusOfNewCourse(
-    userId,
-    courseId,
-    currentTopicComponentInfo,
-    learningSlideStatus,
-    topicId,
-    learningObjectiveIdInResult,
-    '',
-    '',
-    'learningSlide',
-    topicComponentRule,
-    topicOrder,
-    '',
-    '',
-    isLastLearningSlide,
-    learningSlideId,
-  );
+  if (currentTopicComponentInfo) {
+    if (!learningObjectiveInfo) {
+      log('Not able to fetch LearningObjectiveInfo in addUserActivityPQDumpPostHookMethod');
+    }
+    const {
+      id: learningObjectiveIdInResult,
+    } = learningObjectiveInfo;
+    await updateCurrentComponentStatusOfNewCourse(
+      userId,
+      courseId,
+      currentTopicComponentInfo,
+      learningSlideStatus,
+      topicId,
+      learningObjectiveIdInResult,
+      '',
+      '',
+      'learningSlide',
+      topicComponentRule,
+      topicOrder,
+      '',
+      '',
+      isLastLearningSlide,
+      learningSlideId,
+    );
+  }
   // if existing chatStatus is complete, it will remain complete
   if (userLearningObjectiveInfo
       && existinglearningSlideStatus === complete) {

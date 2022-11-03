@@ -8,7 +8,7 @@ const previousSchoolClass = `
  }`;
 
 const StudentProfile = `
-  type StudentProfile @model {
+  type StudentProfile @model @databaseController(mode: "aggregation") {
     grade: Grade @groupBy
     section: Section @groupBy
     branch: String

@@ -30,6 +30,7 @@ const AcademicDuration = `
 
 const Batch = `
   type Batch @model
+  @databaseController(mode: "aggregation")
   @appPermissions(
     permissions:[
       { appName: "${TMS}" operations: "*" },
@@ -66,6 +67,7 @@ const Batch = `
     academicDuration: [AcademicDuration]
     academicYearTitle: String
     inheritedFrom: Batch @relation(name: "BatchInheritedFrom", direction: "OneWay")
+    shouldShowEbook: Boolean @defaultValue(value: "false")
   }
 `;
 

@@ -30,12 +30,12 @@ const customQueries = `
     getBuddyStatus (sessionId: ID!, userId: ID, systemId: String, action: String, password: String, studentIds: [ID]): BooleanResult
 `;
 
-const redisCustomQueries = `
+const cacheCustomQueries = `
     cacheKeys (pattern: String!): CacheKeyResult
     getCache (key: String!): String
     purgeCache (pattern: String): BooleanResult
 `;
 
-const customQueryString = customQueries + redisCustomQueries;
+const customQueryString = customQueries + cacheCustomQueries;
 
 export default customQueryString;

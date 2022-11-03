@@ -100,6 +100,7 @@ const Course = `
     maxGrade: Int
     documentationUrl: String
     thumbnailSmall: File @relation(name: "CourseThumbnailSmall", direction: "OneWay")
+    ebooks: [EBookCourse] @relation(name: "EBookCourseCourses")
   }
 `;
 
