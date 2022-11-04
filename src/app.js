@@ -34,6 +34,13 @@ phonePeRoutes(app);
 iciciRoutes(app);
 typeformRoute(app);
 
+const newrelicApolloPlugin = createNewrelicApolloPlugin({
+  captureScalars: true,
+  captureIntrospectionQueries: true,
+  captureServiceDefinitionQueries: true,
+  captureHealthCheckQueries: true,
+});
+
 const path = `/graphql/${application}`;
 
 // Must configure Raven before doing anything else with it
@@ -66,13 +73,6 @@ const corsOptions = {
   allowedHeaders: ALLOWED_HEADERS,
 };
 
-const newrelicApolloPlugin = createNewrelicApolloPlugin({
-  captureScalars: true,
-  captureIntrospectionQueries: true,
-  captureServiceDefinitionQueries: true,
-  captureHealthCheckQueries: true,
-});
-
 app.use(cors(corsOptions));
 
 app.use(path, bodyParser.json(), graphqlUpload({ uploadDir: '/tmp/uploads' }));
@@ -82,13 +82,13 @@ const parsedASTMap = getParsedASTMap(types);
 const server = new ApolloServer({
   schema,
   introspection: process.env.ENABLE_GRAPHQL_INTROSPECTION,
-  plugins: [newrelicApolloPlugin],
   playground: {
     endpoint: `http://0.0.0.0:${port}${path}`,
     settings: {
       'editor.theme': 'light',
     },
   },
+  plugins: [newrelicApolloPlugin],
   debug: true,
   uploads: false,
   cache: new BaseRedisCache({

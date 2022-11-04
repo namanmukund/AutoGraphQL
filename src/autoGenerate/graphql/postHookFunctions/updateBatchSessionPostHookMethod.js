@@ -606,22 +606,22 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     });
   }
 
-  if (get(params, 'input.sessionEndDate') || get(params, 'input.sessionStatus')) {
-    const cacheController = new CacheController({ bypass: true });
-    const cachedBatchSessions = await cacheController.get(`batchSessions::${batchId}`);
-    if (cachedBatchSessions && cachedBatchSessions.length) {
-      const updatedBatchSessions = cachedBatchSessions.map((batchSession) => {
-        if (get(batchSession, 'id') === batchSessionId) {
-          return {
-            ...batchSession,
-            sessionEndDate: get(params, 'input.sessionEndDate', get(batchSession, 'sessionEndDate')),
-            sessionStatus: get(params, 'input.sessionStatus', get(batchSession, 'sessionStatus')),
-          };
-        }
-        return batchSession;
-      });
-      await cacheController.set(`batchSessions::${batchId}`, updatedBatchSessions);
-    }
+  const cacheController = new CacheController({ bypass: true });
+  const cachedBatchSessions = await cacheController.get(`batchSessions::${get(input, 'batch.typeId')}`);
+  if (cachedBatchSessions && cachedBatchSessions.length) {
+    const updatedBatchSessions = cachedBatchSessions.map((batchSession) => {
+      if (get(batchSession, 'id') === get(input, 'id')) {
+        return {
+          ...batchSession,
+          ...(input || {}),
+        };
+      }
+      return batchSession;
+    });
+    await cacheController.set(updatedBatchSessions, {
+      hkey: `batchSessions::${get(input, 'batch.typeId')}`,
+      maxAge: 24 * 60 * 60,
+    });
   }
 };
 export default updateBatchSessionPostHookMethod;

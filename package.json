@@ -41,7 +41,7 @@
       }
     },
     "start:core": {
-      "command": "nodemon -r newrelic src/serverCloud.js --exec babel-node",
+      "command": "nodemon src/serverCloud.js --exec babel-node",
       "env": {
         "APPLICATION": "core"
       }

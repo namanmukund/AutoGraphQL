@@ -1,11 +1,12 @@
 import { READ } from '../../../../constants/graphqlOperations';
 import { TLA, TMS, TWA } from '../../../../constants';
 
-const EBookCourses = `
-  type EBookCourses {
+const EBookCourse = `
+  type EBookCourse @model @databaseController(mode:"aggregation") {
    pageRangeStart: Int
    pageRangeEnd: Int
-   course: Course! @relation(name: "EBookCourse", direction: "OneWay")
+   ebook: EBook! @relation(name:"CourseEBook")
+   course: Course! @relation(name: "EBookCourseCourses")
  }`;
 
 const EbookCategory = `
@@ -29,7 +30,7 @@ const EBook = `
   {
     title: String! @trim
     description: String
-    courses: EBookCourses
+    courses: [EBookCourse] @relation(name:"CourseEBook")
     thumbnail: File @relation(name: "EBookThumbnail", direction: "OneWay")
     resourceURL: String!
     grades: [Grade]
@@ -37,4 +38,4 @@ const EBook = `
   }
 `;
 
-export default [EBook, EbookCategory, EBookCourses];
+export default [EBook, EbookCategory, EBookCourse];
