@@ -1,11 +1,14 @@
 import { get } from 'lodash';
-import {
-  userTopicTypeStatus,
-} from '../../../../constants';
+import { userTopicTypeStatus } from '../../../../constants';
 import getInfoFromParams from './utils/getInfoFromParams';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { MENTEE } from '../../../../constants/roles';
+import getUserActiveClassroom, {
+  getStudentProfile,
+} from '../../../../utils/getUserActiveClassroom';
+import { authenticateUser } from '../../../../utils';
+import { GSuitController } from '../controllers';
 
 const filterAndDeleteIfDupicate = (resultArray, context) => {
   const uniqueBlockBasedPractice = [];
@@ -20,8 +23,9 @@ const filterAndDeleteIfDupicate = (resultArray, context) => {
     }
   });
   blockbasedPracticeToBeDeleted.forEach((id) => {
-    callLocalGraphqlApi({
-      query: `
+    callLocalGraphqlApi(
+      {
+        query: `
         mutation {
           deleteUserBlockBasedPractice(
             id: "${id}"
@@ -30,7 +34,9 @@ const filterAndDeleteIfDupicate = (resultArray, context) => {
           }
         }
       `,
-    }, context);
+      },
+      context,
+    );
   });
   return uniqueBlockBasedPractice;
 };
@@ -41,6 +47,8 @@ const addUserBlockBasedPracticeMutation = (
   topicId,
   courseId,
   blockBasedPracticeId,
+  gsuitResponse,
+  gsuitResponseString,
 ) => `
   mutation{
     addUserBlockBasedPractice(
@@ -50,6 +58,8 @@ const addUserBlockBasedPracticeMutation = (
     ${blockBasedPracticeId ? `blockBasedPracticeConnectId:"${blockBasedPracticeId}"` : ''}
     input:{
         status: ${userTopicTypeStatus.incomplete}
+        ${gsuitResponse && gsuitResponse.webViewLink ? `answerLink: ${gsuitResponse.webViewLink}` : ''}
+        ${gsuitResponseString}
     }
     ){
       id
@@ -71,6 +81,86 @@ const addUserBlockBasedPracticeMutation = (
     }
   }
 `;
+
+const findOrCreateParentFolder = async (
+  fileOrFolderName,
+  gsuitParentFolderId,
+) => {
+  const gsuitController = new GSuitController();
+  const gsuitData = await gsuitController.getDriveFiles(gsuitParentFolderId);
+  const searchData = gsuitData.data.files.find(
+    (search) => search.name === fileOrFolderName,
+  );
+  if (searchData) {
+    return searchData.id;
+  // eslint-disable-next-line no-else-return
+  } else {
+    const creatingFileOrFolder = await gsuitController.createFileOrFolder(
+      fileOrFolderName,
+      'folder',
+      gsuitParentFolderId,
+    );
+    return creatingFileOrFolder.data.id;
+  }
+};
+
+const createGsuitFile = async (
+  practiceResult,
+  studentFileCreationName,
+  schoolName,
+  gradeSection,
+) => {
+  const gsuitController = new GSuitController();
+  let fileCreationResponse = {};
+  let gsuitType = '';
+  if (practiceResult.gsuitTempleteURL) {
+    gsuitType = practiceResult.gsuitTempleteURL.split('/')[3];
+  } else {
+    gsuitType = practiceResult.gsuitFileType;
+  }
+  const schoolFolderId = await findOrCreateParentFolder(
+    schoolName,
+    '10F9f2lE_Sjb7u7Gge-kBECt7aSzt83UK',
+  );
+  const clasroomsFolderId = await findOrCreateParentFolder(
+    `${gradeSection}`,
+    schoolFolderId,
+  );
+  const gsuitFileTypeFolderId = await findOrCreateParentFolder(
+    gsuitType,
+    clasroomsFolderId,
+  );
+
+  if (practiceResult.gsuitTempleteURL) {
+    const gsuitId = practiceResult.gsuitTempleteURL.split('/')[5];
+    fileCreationResponse = await gsuitController.duplicateFileOrFolder(
+      gsuitId,
+      studentFileCreationName,
+      gsuitFileTypeFolderId,
+    );
+  } else {
+    // Creating File
+    fileCreationResponse = await gsuitController.createFileOrFolder(
+      studentFileCreationName,
+      practiceResult.gsuitFileType,
+      gsuitFileTypeFolderId,
+    );
+  }
+  return fileCreationResponse.data;
+};
+
+const getIdArrForQuery = (idArr) => {
+  let arr = '';
+  if (idArr) {
+    idArr.forEach((id) => {
+      arr += `"${id}",`;
+    });
+    if (arr.length && arr[arr.length - 1] === ',') {
+      arr.substring(0, arr.length - 1);
+    }
+  }
+  return arr;
+};
 
 /*
 If userBlockBasedPractice document does not exist for provided combination of user id, topic id & blockBasedProjectId.
@@ -95,7 +185,7 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
 
   // In case there is no topic id or blockBasedPracticeId/blockBasedPracticeIds,
   // empty data will be sent
-  if ((!topicId || !(blockBasedPracticeId || blockBasedPracticeIds.length > 0))) {
+  if (!topicId || !(blockBasedPracticeId || blockBasedPracticeIds.length > 0)) {
     return input || resultArray;
   }
 
@@ -113,31 +203,101 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
   if (input && input.length) {
     const inputArray = Array.isArray(input) ? input : [input];
     const userBlockBasedPracticeIdsInInput = inputArray.map((item) => get(item, 'blockBasedPractice.typeId'));
-    blockBasedPracticeNotCreated = blockBasedPracticeIds.filter((blockBasedPracticeIdInParam) => !userBlockBasedPracticeIdsInInput.includes(blockBasedPracticeIdInParam));
+    blockBasedPracticeNotCreated = blockBasedPracticeIds.filter(
+      (blockBasedPracticeIdInParam) => !userBlockBasedPracticeIdsInInput.includes(blockBasedPracticeIdInParam),
+    );
     if (blockBasedPracticeNotCreated.length === 0) {
-      const uniqueBlockBasedPractice = filterAndDeleteIfDupicate(inputArray, context);
+      const uniqueBlockBasedPractice = filterAndDeleteIfDupicate(
+        inputArray,
+        context,
+      );
       return uniqueBlockBasedPractice;
     }
   } else {
     blockBasedPracticeNotCreated = blockBasedPracticeIds;
   }
 
-  if (get(context, 'userRoleFromContext') && get(context, 'userRoleFromContext') !== MENTEE) {
+  if (
+    get(context, 'userRoleFromContext') && get(context, 'userRoleFromContext') !== MENTEE
+  ) {
     return input;
   }
+
+  const allPracticesResult = await callLocalGraphqlApi(
+    `
+      {blockBasedProjects(filter:{
+        id_in: [${getIdArrForQuery(blockBasedPracticeNotCreated)}]
+      }){
+        gsuitFileType
+        gsuitTempleteURL
+        layout
+        id
+        title
+      }
+    }
+    `,
+    context,
+  );
+
+  // Get username classroom school grade
+  const activeClassroom = await getUserActiveClassroom(context, { courseId });
+  const getStudentProfileData = await getStudentProfile(context);
+  const schoolName = get(activeClassroom, 'school.name');
+  const userName = authenticateUser(context).name;
+  const grade = get(getStudentProfileData, 'grade');
+  const section = get(getStudentProfileData, 'section');
+  const gradeSection = `${grade} ${section}`;
 
   /* eslint-disable no-restricted-syntax */
   /* eslint-disable no-await-in-loop */
   for (const practiceId of blockBasedPracticeNotCreated) {
+    // Step 3
+    // Filter blockBasedProject
+    const practiceResult = allPracticesResult.data.blockBasedProjects.find(
+      (practiceResultData) => practiceResultData.id === practiceId,
+    );
+    const studentFileCreationName = `${userName}-${gradeSection}-${practiceResult.title}`;
+    let fileCreationResponse = {};
+    if (practiceResult.layout === 'gsuit') {
+      fileCreationResponse = await createGsuitFile(
+        practiceResult,
+        studentFileCreationName,
+        schoolName,
+        gradeSection,
+      );
+    }
+
+    //  if layout==gsuit => duplicateURL or create
+    // Step 4
+    // store in GsuitFile object
+    let gsuitResponseString = '';
+    if (fileCreationResponse) {
+      gsuitResponseString = '{gsuitFile: {';
+      if (fileCreationResponse.id) gsuitResponseString += `fileId: '${fileCreationResponse.id}',`;
+      if (fileCreationResponse.name) gsuitResponseString += `name: '${fileCreationResponse.name}',`;
+      if (fileCreationResponse.webViewLink) gsuitResponseString += `url: '${fileCreationResponse.webViewLink}',`;
+      if (fileCreationResponse.hasThumbnail) gsuitResponseString += `thumbnailUrl: 'https://drive.google.com/thumbnail?sz=w640&id=${fileCreationResponse.id}',`;
+      if (fileCreationResponse.mimeType) gsuitResponseString += `mimeType : '${fileCreationResponse.mimeType}',`;
+      if (fileCreationResponse.parents) gsuitResponseString += `parentsId: '${fileCreationResponse.parents}',`;
+      if (fileCreationResponse.iconLink) gsuitResponseString += `iconLink: '${fileCreationResponse.iconLink}',`;
+      if (fileCreationResponse.createdTime) gsuitResponseString += `createdTime: '${fileCreationResponse.createdTime}'`;
+      gsuitResponseString += '}}';
+    }
+    const gsuitSuitMeta = fileCreationResponse;
     /*
       adding UserBlockBasedPractice document
     */
-    const result = await callLocalGraphqlApi(addUserBlockBasedPracticeMutation(
-      userId,
-      topicId,
-      courseId,
-      practiceId,
-    ), context);
+    const result = await callLocalGraphqlApi(
+      addUserBlockBasedPracticeMutation(
+        userId,
+        topicId,
+        courseId,
+        practiceId,
+        gsuitSuitMeta,
+        gsuitResponseString,
+      ),
+      context,
+    );
     if (result) {
       /*
         parsing data 'addUserBlockBasedPractice' so that the logic implemented ahead can read data is
@@ -146,9 +306,17 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
         In that case he will get title and order only. And this is happening when we parse
         data as below. If parsing is not done, it is returning empty data.
         */
-      const addUserBlockBasedPracticeResult = get(result, 'data.addUserBlockBasedPractice');
+      const addUserBlockBasedPracticeResult = get(
+        result,
+        'data.addUserBlockBasedPractice',
+      );
       if (addUserBlockBasedPracticeResult) {
-        resultArray.push(parseTopicComponentResultData(addUserBlockBasedPracticeResult, 'blockBasedPractice'));
+        resultArray.push(
+          parseTopicComponentResultData(
+            addUserBlockBasedPracticeResult,
+            'blockBasedPractice',
+          ),
+        );
       }
     }
   }

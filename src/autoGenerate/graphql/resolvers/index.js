@@ -124,6 +124,7 @@ import generateBatchSessionOtp from './mutation/methods/generateBatchSessionOtp'
 import updateSchoolStudentEmail from './mutation/methods/updateSchoolStudentEmail';
 import removeBatchStudents from './mutation/methods/removeBatchStudents';
 import redisUtils from './query/redisUtils';
+import gsuitUtils from './query/gsuitUtils';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -728,6 +729,13 @@ resolvers.Query.getBuddyStatus = getBuddyStatus;
 resolvers.Query.cacheKeys = redisUtils.cacheKeys;
 resolvers.Query.purgeCache = redisUtils.purgeCache;
 resolvers.Query.getCache = redisUtils.getCache;
+// GSuit utility queries
+resolvers.Query.gsuitCreateFileOrFolder = gsuitUtils.gsuitCreateFileOrFolder;
+resolvers.Query.gsuitUpdatePermissionOfFileOrFolder = gsuitUtils.gsuitUpdatePermissionOfFileOrFolder;
+resolvers.Query.gsuitUpdateParentFolderOfFileOrFolder = gsuitUtils.gsuitUpdateParentFolderOfFileOrFolder;
+resolvers.Query.gsuitDuplicateFileOrFolder = gsuitUtils.gsuitDuplicateFileOrFolder;
+resolvers.Query.gsuitDeleteFileOrFolder = gsuitUtils.gsuitDeleteFileOrFolder;
+resolvers.Query.gsuitGettingChildFileOrFolder = gsuitUtils.gsuitGettingChildFileOrFolder;
 
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;

@@ -36,6 +36,15 @@ const cacheCustomQueries = `
     purgeCache (pattern: String): BooleanResult
 `;
 
-const customQueryString = customQueries + cacheCustomQueries;
+const googleApisCustomQueries = `
+    gsuitCreateFileOrFolder(name: String!, mimeType: String!, parentId: String, permission: PermissionInput): GSuitResponse
+    gsuitUpdatePermissionOfFileOrFolder(id: String!, permission: PermissionInput): GSuitResponse
+    gsuitUpdateParentFolderOfFileOrFolder(childId: String!, parentId: String!): GSuitResponse
+    gsuitDuplicateFileOrFolder(id: String!, name: String, parentId: String, permission: PermissionInput): GSuitResponse
+    gsuitDeleteFileOrFolder(id: String!): GSuitResponse
+    gsuitGettingChildFileOrFolder(id: String!): GSuitResponse
+`;
+
+const customQueryString = customQueries + cacheCustomQueries + googleApisCustomQueries;
 
 export default customQueryString;

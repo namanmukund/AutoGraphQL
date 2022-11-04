@@ -1,3 +1,15 @@
+const GsuitFile = `
+   type GsuitFile {
+    fileId: String
+    name: String
+    url: String
+    thumbnailUrl: String
+    mimeType: String
+    parentsId: [String]
+    iconLink: String
+    createdTime: String
+   }
+`;
 const UserBlockBasedPractice = `
   type UserBlockBasedPractice @model {
     user: User! @relation(name: "UserBlockBasedPractice", direction: "OneWay")
@@ -5,6 +17,8 @@ const UserBlockBasedPractice = `
     blockBasedPractice: BlockBasedProject! @relation(name: "PracticeUserBlockBasedPractice", direction: "OneWay")
     answerLink: String
     savedBlocks: String
+    gsuitFile: GsuitFile
+    gsuitLastRevision: GsuitFile
     attachments: [File] @relation(name: "UserBlockBasedPracticeAttachment", direction: "OneWay")
     topic: Topic! @relation(name: "TopicUserBlockBasedPractice", direction: "OneWay")
     course: Course @relation(name: "UserBlockBasedPracticeCourse", direction: "OneWay")
@@ -14,4 +28,4 @@ const UserBlockBasedPractice = `
   }
 `;
 
-export default [UserBlockBasedPractice];
+export default [UserBlockBasedPractice, GsuitFile];
