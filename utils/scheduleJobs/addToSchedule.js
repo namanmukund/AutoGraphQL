@@ -1,10 +1,12 @@
-// import { get } from 'lodash';
-// import schedule from 'node-schedule';
+import { get } from 'lodash';
+import schedule from 'node-schedule';
 // import callLocalGraphqlApi from '../../src/api/callLocalGraphqlApi';
 // import sendB2B2CBookReminderNextDay from './jobs/sendB2B2CBookReminderNextDay';
 // import sendB2B2CBookingReminder from './jobs/sendB2B2CBookingReminder';
 // import sendB2CSessionReminder from './jobs/sendB2CSessionReminder';
+import { callLocalGraphqlApi } from '../../src/api';
 import extractBatchSessionAndPostCarnival from '../../src/autoGenerate/graphql/postHookFunctions/utils/extractBatchSessionAndSendPostCarnival';
+import updateLogoutAllStudents from './jobs/updateLogoutAllStudents';
 // import scheduleB2BSessionHomeworkRemainder from './scheduleB2BSessionHomeworkRemainder';
 // import scheduleB2BSessionReminder from './scheduleB2BSessionReminder';
 // import sendB2CBookReminderNextDay from './jobs/sendB2CBookReminderNextDay';
@@ -38,81 +40,81 @@ import extractBatchSessionAndPostCarnival from '../../src/autoGenerate/graphql/p
 //   }
 // };
 
-// const addScheduleJob = ({
-//   jobType,
-//   userId,
-//   scheduledDate,
-//   code,
-//   menteeSessionId,
-//   menteeSessionUpdatedAt,
-//   menteeId,
-//   mentorMenteeSessionId,
-//   batchSessionId,
-//   courseName,
-//   batchCode,
-//   schoolName,
-//   sessionDate,
-//   sessionTime,
-//   sessionLink,
-//   mentorUserId,
-//   mentorPhoneNumber,
-//   taskId,
-//   studentProfileId,
-//   templateName,
-//   isEmailRule = false,
-//   commsVariables,
-//   eventId,
-//   condition,
-//   attendanceFilter,
-//   value,
-//   unit,
-//   eventSessionId,
-// }) => `
-//   mutation {
-//     addScheduleJob(
-//       input: {
-//         jobType: "${jobType}"
-//         ${code ? `code: "${code}"` : ''}
-//         ${batchSessionId ? `batchSessionId: "${batchSessionId}"` : ''}
-//         ${menteeSessionId ? `menteeSessionId: "${menteeSessionId}"` : ''}
-//         ${menteeId ? `menteeId: "${menteeId}"` : ''}
-//         ${menteeSessionUpdatedAt ? `menteeSessionUpdatedAt: "${menteeSessionUpdatedAt}"` : ''}
-//         ${mentorMenteeSessionId ? `mentorMenteeSessionId: "${mentorMenteeSessionId}"` : ''}
-//         ${courseName ? `courseName: "${courseName}"` : ''}
-//         ${batchCode ? `batchCode: "${batchCode}"` : ''}
-//         ${schoolName ? `schoolName: "${schoolName}"` : ''}
-//         ${sessionDate ? `sessionDate: "${sessionDate}"` : ''}
-//         ${sessionTime ? `sessionTime: "${sessionTime}"` : ''}
-//         ${sessionLink ? `sessionLink: "${sessionLink}"` : ''}
-//         ${mentorUserId ? `mentorUserId: "${mentorUserId}"` : ''}
-//         ${taskId ? `taskId: "${taskId}"` : ''}
-//         ${mentorPhoneNumber ? `mentorPhoneNumber: "${mentorPhoneNumber}"` : ''}
-//         scheduledDate: "${scheduledDate.toISOString()}"
-//         ${studentProfileId ? `studentProfileId:"${studentProfileId}"` : ''}
-//         ${commsVariables ? `commsVariables: ${commsVariables}` : ''}
-//         ${templateName ? `templateName: "${templateName}"` : ''}
-//         ${isEmailRule ? 'isEmailRule: true' : ''}
-//         ${eventId ? `eventId: "${eventId}"` : ''}
-//         ${condition ? `condition: ${condition}` : ''}
-//         ${attendanceFilter ? `attendanceFilter: ${attendanceFilter}` : ''}
-//         ${value ? `value: ${value}` : ''}
-//         ${unit ? `unit: ${unit}` : ''}
-//         ${eventSessionId ? `eventSessionId: "${eventSessionId}"` : ''}
-//       }
-//       ${userId ? `parentConnectId: "${userId}"` : ''}
-//     ) {
-//       id
-//     }
-//   }
-// `;
+const addScheduleJob = ({
+  jobType,
+  userId,
+  scheduledDate,
+  code,
+  menteeSessionId,
+  menteeSessionUpdatedAt,
+  menteeId,
+  mentorMenteeSessionId,
+  batchSessionId,
+  courseName,
+  batchCode,
+  schoolName,
+  sessionDate,
+  sessionTime,
+  sessionLink,
+  mentorUserId,
+  mentorPhoneNumber,
+  taskId,
+  studentProfileId,
+  templateName,
+  isEmailRule = false,
+  commsVariables,
+  eventId,
+  condition,
+  attendanceFilter,
+  value,
+  unit,
+  eventSessionId,
+}) => `
+  mutation {
+    addScheduleJob(
+      input: {
+        jobType: "${jobType}"
+        ${code ? `code: "${code}"` : ''}
+        ${batchSessionId ? `batchSessionId: "${batchSessionId}"` : ''}
+        ${menteeSessionId ? `menteeSessionId: "${menteeSessionId}"` : ''}
+        ${menteeId ? `menteeId: "${menteeId}"` : ''}
+        ${menteeSessionUpdatedAt ? `menteeSessionUpdatedAt: "${menteeSessionUpdatedAt}"` : ''}
+        ${mentorMenteeSessionId ? `mentorMenteeSessionId: "${mentorMenteeSessionId}"` : ''}
+        ${courseName ? `courseName: "${courseName}"` : ''}
+        ${batchCode ? `batchCode: "${batchCode}"` : ''}
+        ${schoolName ? `schoolName: "${schoolName}"` : ''}
+        ${sessionDate ? `sessionDate: "${sessionDate}"` : ''}
+        ${sessionTime ? `sessionTime: "${sessionTime}"` : ''}
+        ${sessionLink ? `sessionLink: "${sessionLink}"` : ''}
+        ${mentorUserId ? `mentorUserId: "${mentorUserId}"` : ''}
+        ${taskId ? `taskId: "${taskId}"` : ''}
+        ${mentorPhoneNumber ? `mentorPhoneNumber: "${mentorPhoneNumber}"` : ''}
+        scheduledDate: "${scheduledDate.toISOString()}"
+        ${studentProfileId ? `studentProfileId:"${studentProfileId}"` : ''}
+        ${commsVariables ? `commsVariables: ${commsVariables}` : ''}
+        ${templateName ? `templateName: "${templateName}"` : ''}
+        ${isEmailRule ? 'isEmailRule: true' : ''}
+        ${eventId ? `eventId: "${eventId}"` : ''}
+        ${condition ? `condition: ${condition}` : ''}
+        ${attendanceFilter ? `attendanceFilter: ${attendanceFilter}` : ''}
+        ${value ? `value: ${value}` : ''}
+        ${unit ? `unit: ${unit}` : ''}
+        ${eventSessionId ? `eventSessionId: "${eventSessionId}"` : ''}
+      }
+      ${userId ? `parentConnectId: "${userId}"` : ''}
+    ) {
+      id
+    }
+  }
+`;
 
-// const deleteJob = (id) => `
-//   mutation {
-//     deleteScheduleJob(id: "${id}") {
-//       id
-//     }
-//   }
-// `;
+const deleteJob = (id) => `
+  mutation {
+    deleteScheduleJob(id: "${id}") {
+      id
+    }
+  }
+`;
 
 const addToSchedule = async (jobType, scheduledDate, {
   // userId,
@@ -133,6 +135,7 @@ const addToSchedule = async (jobType, scheduledDate, {
   // studentProfileId,
   // eventId,
   // eventCommsRule,
+  context,
 }) => {
   switch (jobType) {
     case 'sendNextDayBookReminder': {
@@ -443,6 +446,19 @@ const addToSchedule = async (jobType, scheduledDate, {
     //   });
     //   break;
     // }
+    case 'updateLogoutAllStudents': {
+      const res = await callLocalGraphqlApi(addScheduleJob({
+        jobType, batchSessionId, scheduledDate,
+      }), context);
+      const jobId = get(res, 'data.addScheduleJob.id');
+      schedule.scheduleJob(scheduledDate, () => {
+        updateLogoutAllStudents({
+          batchSessionId,
+          context,
+        }, () => callLocalGraphqlApi(deleteJob(jobId), context));
+      });
+      break;
+    }
     default:
       break;
   }

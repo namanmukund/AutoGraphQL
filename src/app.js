@@ -108,6 +108,16 @@ const socketServer = useSocketServer({
     };
   },
 }, webSocketServer);
+
+const socketServerPlugin = {
+  async serverWillStart() {
+    return {
+      async drainServer() {
+        await socketServer.dispose();
+      },
+    };
+  },
+};
   // using apollo-server
 const server = new ApolloServer({
   schema,
@@ -118,15 +128,7 @@ const server = new ApolloServer({
       'editor.theme': 'light',
     },
   },
-  plugins: [newrelicApolloPlugin, {
-    async serverWillStart() {
-      return {
-        async drainServer() {
-          await socketServer.dispose();
-        },
-      };
-    },
-  }],
+  plugins: [newrelicApolloPlugin, socketServerPlugin],
   debug: true,
   uploads: false,
   cache: new BaseRedisCache({
