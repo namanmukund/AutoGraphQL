@@ -7,6 +7,7 @@ const fileExtensions = {
   lottieExtensions: ['json'],
   documentExtensions: ['pdf'],
   programExtensions: ['html', 'css', 'javascript'],
+  accessExtensions: ['mdb', 'accdb', 'accdt'],
 };
 
 export default fileExtensions;

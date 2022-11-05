@@ -35,10 +35,10 @@ const awsConfig = {
     aws: {
       accessKeyId,
       secretAccessKey,
-      region: 'us-east-1',
+      region: 'ap-south-1',
     },
     s3: {
-      bucket: 'tekie-backend',
+      bucket: 'tekie-production',
     },
     ACL: {
       publicReadWrite: 'public-read-write',
