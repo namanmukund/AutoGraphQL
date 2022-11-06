@@ -5,12 +5,10 @@ import {
 import {
   DatabaseRecordNotFoundError, UnauthenticatedUserError,
 } from '../../../../../../constants/errors';
-import getUserIdandAppNameAfterValidation
-  from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
+import getUserIdandAppNameAfterValidation from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import isComponentUnlocked from '../../../preHookFunctions/validation/utils/isComponentUnlocked';
 import { log } from '../../../../../../utils';
-import updateCurrentComponentStatus
-  from '../../../postHookFunctions/utils/updateCurrentComponentStatus';
+import updateCurrentComponentStatus from '../../../postHookFunctions/utils/updateCurrentComponentStatus';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { validateMentorMenteePermission } from '../../../preHookFunctions/validation/utils';
 

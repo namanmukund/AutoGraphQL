@@ -15,8 +15,7 @@ import authParams from '../../../../../../config/authParams';
 import { PARENT, MENTOR } from '../../../../../../constants/roles';
 import getChildrenToken from './utils/getChildrenToken';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
-import getTimeDifferenceWithCurrentDateInSeconds
-  from '../../../../../../utils/getTimeDifferenceWithCurrentDateInSeconds';
+import getTimeDifferenceWithCurrentDateInSeconds from '../../../../../../utils/getTimeDifferenceWithCurrentDateInSeconds';
 import updateLeadSquared from '../../../../../../services/leadsquared/updateLeadSquared';
 import { BLOCKED, MASTER_OTP } from '../../../../../../constants';
 

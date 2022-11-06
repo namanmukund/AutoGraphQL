@@ -28,6 +28,7 @@ const customQueries = `
     getClassroomReport (batchId: String, topicId: String, isHomework: Boolean): ClassroomHomeworkReportOutput
     getPracticeQuestionReport (batchId: String, topicId: String, learningObjectiveId: String, learningSlideId: String, learningObjectiveComponent: String, userId: String): PracticeQuestionReportOutput
     getBuddyStatus (sessionId: ID!, userId: ID, systemId: String, action: String, password: String, studentIds: [ID]): BooleanResult
+    getSubmittedAssignmentsStudents (userIds: [ID], topicId: String, courseId: String, type: String): SubmittedAssignmentsOutput
 `;
 
 const cacheCustomQueries = `

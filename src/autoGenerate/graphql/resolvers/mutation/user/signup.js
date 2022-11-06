@@ -12,8 +12,7 @@ import { validate } from '../../../validation';
 import localSignUpMutationPromise from '../utils/localSignUpMutationPromise';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
 import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
-import addUserCurrentTopicComponentStatus
-  from '../../../../utils/addUserCurrentTopicComponentStatus';
+import addUserCurrentTopicComponentStatus from '../../../../utils/addUserCurrentTopicComponentStatus';
 import { ADD } from '../../../../../../constants/graphqlOperations';
 import { commonUserValidation } from '../../../preHookFunctions/validation/utils';
 import {

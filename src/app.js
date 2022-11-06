@@ -4,7 +4,6 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import { ApolloServer } from 'apollo-server-express';
 import { BaseRedisCache } from 'apollo-server-cache-redis';
-import createNewrelicApolloPlugin from '@newrelic/apollo-server-plugin';
 import schema from './graphql';
 import { log, types } from '../utils';
 import { authMiddleware, graphqlUpload } from './middlewares';
@@ -33,13 +32,6 @@ app.use(bodyParser.json());
 phonePeRoutes(app);
 iciciRoutes(app);
 typeformRoute(app);
-
-const newrelicApolloPlugin = createNewrelicApolloPlugin({
-  captureScalars: true,
-  captureIntrospectionQueries: true,
-  captureServiceDefinitionQueries: true,
-  captureHealthCheckQueries: true,
-});
 
 const path = `/graphql/${application}`;
 
@@ -88,7 +80,6 @@ const server = new ApolloServer({
       'editor.theme': 'light',
     },
   },
-  plugins: [newrelicApolloPlugin],
   debug: true,
   uploads: false,
   cache: new BaseRedisCache({

@@ -1,12 +1,12 @@
 const assignmentType = `
   type AssignmentType {
-   assignmentQuestion: AssignmentQuestion @relation(name: "UserAssignmentQuestion", direction: "OneWay")
-   assignmentQuestionDisplayOrder: Int
-   isAttempted: Boolean @defaultValue(value: "false")
-   userAnswerCodeSnippet: String @trim
-   result: EvaluationResult @defaultValue(value: "pending")
-   startTime: Date
-   endTime: Date
+    assignmentQuestion: AssignmentQuestion @relation(name: "UserAssignmentQuestion", direction: "OneWay")
+    assignmentQuestionDisplayOrder: Int
+    isAttempted: Boolean @defaultValue(value: "false")
+    userAnswerCodeSnippet: String @trim
+    startTime: Date
+    endTime: Date
+    evaluation: Evaluation @relation(name: "UserAssignmentEvaluation")
  }`;
 
 const UserAssignment = `
@@ -16,7 +16,7 @@ const UserAssignment = `
     assignment: [AssignmentType]
     topic: Topic! @relation(name: "TopicUserAssignment", direction: "OneWay")
     course: Course @relation(name: "UserAssignmentCourse", direction: "OneWay")
-    evaluationStatus: TaskCompletionStatus
+    evaluationStatus: TaskCompletionStatus @defaultValue(value: "incomplete")
   }
 `;
 
