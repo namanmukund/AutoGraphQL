@@ -11,8 +11,7 @@ import {
 } from '../../../../../../constants/errors';
 // import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
-import getUserIdandAppNameAfterValidation
-  from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
+import getUserIdandAppNameAfterValidation from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import { log } from '../../../../../../utils';
 
 // query to get current component status of user
@@ -344,7 +343,7 @@ const getQuizReportMutationResolver = async (
   //   currentRunningTopic = batchCurrentComponentInfo && batchCurrentComponentInfo.currentTopic;
   // } else {
   //   currentRunningTopic = currentTopicComponentInfo && currentTopicComponentInfo.currentTopic;
-  // } 
+  // }
 
   // if (topicInfo.order > currentRunningTopic.order) {
   //   throw new ComponentLockedError();

@@ -1,8 +1,7 @@
 import { QueryController } from '../controllers';
 import { randomNumberRangeForUsername, TLA } from '../../../../constants';
 import { getRandomNumber } from '../../../../utils';
-import getUserIdandAppNameAfterValidation
-  from '../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
+import getUserIdandAppNameAfterValidation from '../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 
 const generateUsername = (input, context) => {
   // calling method to get app name, we will use app name to determine how username will generate
