@@ -344,7 +344,7 @@ const getQuizReportMutationResolver = async (
   //   currentRunningTopic = batchCurrentComponentInfo && batchCurrentComponentInfo.currentTopic;
   // } else {
   //   currentRunningTopic = currentTopicComponentInfo && currentTopicComponentInfo.currentTopic;
-  // }
+  // } 
 
   // if (topicInfo.order > currentRunningTopic.order) {
   //   throw new ComponentLockedError();

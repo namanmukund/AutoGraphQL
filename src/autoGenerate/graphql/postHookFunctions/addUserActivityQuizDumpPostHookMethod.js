@@ -886,42 +886,42 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
   called component is equal to current component and user has just consumed(next action) it
   And current component status will not get changed when it is already consumed in past
   */
-  const currentTopicComponentInfo = get(context, `${mutationName}.userCurrentTopicComponentStatuses`);
+  // const currentTopicComponentInfo = get(context, `${mutationName}.userCurrentTopicComponentStatuses`);
   const { quizAction, quizQuestions } = input;
   /*
   Calling method to update current user Topic Component status
-  */
-  if (!courseId || (courseId === OLD_COURSE_ID)) {
-    await updateCurrentComponentStatus(
-      currentTopicComponentInfo,
-      quizAction,
-      topicId,
-      '',
-      'quiz',
-      '',
-      '',
-      '',
-      learningObjectiveConnectId,
-      nextTopicId,
-    );
-  } else {
-    const topicComponentRule = get(userQuizInfo, 'topic.topicComponentRule', []);
-    const topicOrder = get(userQuizInfo, 'topic.order');
+  // */
+  // if (!courseId || (courseId === OLD_COURSE_ID)) {
+  //   await updateCurrentComponentStatus(
+  //     currentTopicComponentInfo,
+  //     quizAction,
+  //     topicId,
+  //     '',
+  //     'quiz',
+  //     '',
+  //     '',
+  //     '',
+  //     learningObjectiveConnectId,
+  //     nextTopicId,
+  //   );
+  // } else {
+  //   const topicComponentRule = get(userQuizInfo, 'topic.topicComponentRule', []);
+  //   const topicOrder = get(userQuizInfo, 'topic.order');
 
-    await updateCurrentComponentStatusOfNewCourse(
-      userId,
-      courseId,
-      currentTopicComponentInfo,
-      quizAction,
-      topicId,
-      '',
-      '',
-      '',
-      'quiz',
-      topicComponentRule,
-      topicOrder,
-    );
-  }
+  //   await updateCurrentComponentStatusOfNewCourse(
+  //     userId,
+  //     courseId,
+  //     currentTopicComponentInfo,
+  //     quizAction,
+  //     topicId,
+  //     '',
+  //     '',
+  //     '',
+  //     'quiz',
+  //     topicComponentRule,
+  //     topicOrder,
+  //   );
+  // }
 
   // getting user role from context. We will allow updating mentorMenteeSession isQuizSubmitted if logged in user is mentee
   const userInfo = validateTokenAndExtractInformation(context, false);
@@ -1014,13 +1014,13 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
       quizReportId: addUserQuizReportId,
     });
     // calling method to evaluate scholarship of user if he is attempting quiz for the first time
-    await evaluateUserScholarship(
-      currentTopicComponentInfo,
-      userId,
-      topicId,
-      quizReport,
-      context,
-    );
+    // await evaluateUserScholarship(
+    //   currentTopicComponentInfo,
+    //   userId,
+    //   topicId,
+    //   quizReport,
+    //   context,
+    // );
   }
   return true;
 };

@@ -23,6 +23,12 @@ const getFileTypeName = (type) => {
     fileType = 'css';
   } else if (includes(type, 'javascript')) {
     fileType = 'javascript';
+  } else if (includes(type, 'accdb')) {
+    fileType = 'accdb';
+  } else if (includes(type, 'mdb')) {
+    fileType = 'mdb';
+  } else if (includes(type, 'accdt')) {
+    fileType = 'accdt';
   } else {
     // if invalid fileType then graphql will give the required error
     log('File Type is not defined, setting others as default');

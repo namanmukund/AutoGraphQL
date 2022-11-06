@@ -16,10 +16,10 @@ jobs:
       timeout-minutes: 20
       uses: porter-dev/porter-update-action@v0.1.0
       with:
-        app: tekie-internal-scheduler
-        cluster: "1424"
+        app: tekie-backend-prod
+        cluster: "2424"
         host: https://dashboard.getporter.dev
         namespace: default
-        project: "2707"
+        project: "6647"
         tag: ${{ steps.vars.outputs.sha_short }}
-        token: ${{ secrets.PORTER_TOKEN_2707 }}
+        token: ${{ secrets.PORTER_TOKEN_6647 }}
