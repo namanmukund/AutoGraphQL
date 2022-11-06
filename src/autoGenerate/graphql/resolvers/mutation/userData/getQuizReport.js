@@ -11,8 +11,7 @@ import {
 } from '../../../../../../constants/errors';
 // import callGraphqlApi from '../../../../../api/callGraphqlApi';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
-import getUserIdandAppNameAfterValidation
-  from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
+import getUserIdandAppNameAfterValidation from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import { log } from '../../../../../../utils';
 
 // query to get current component status of user
