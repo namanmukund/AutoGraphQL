@@ -44,6 +44,7 @@ const googleApisCustomQueries = `
     gsuitDuplicateFileOrFolder(id: String!, name: String, parentId: String, permission: PermissionInput): GSuitResponse
     gsuitDeleteFileOrFolder(id: String!): GSuitResponse
     gsuitGettingChildFileOrFolder(id: String!): GSuitResponse
+    gsuitGetFileOrFolderDetails(id: String!): GSuitResponse
 `;
 
 const customQueryString = customQueries + cacheCustomQueries + googleApisCustomQueries;

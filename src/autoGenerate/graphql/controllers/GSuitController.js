@@ -180,11 +180,15 @@ class GSuitController {
 
     updateParentDirectory = async (childId, parentId) => {
       const drives = this.getClientInstanceByType('drive', 'v3');
-      return drives.files.update({
-        fileId: childId,
-        addParents: parentId,
-        fields: 'id, parents',
-      });
+      try {
+        return drives.files.update({
+          fileId: childId,
+          addParents: parentId,
+          fields: 'id, parents',
+        });
+      } catch (err) {
+        throw new Error(err);
+      }
     }
 
     duplicateFileOrFolder = async (ID_OF_THE_FILE, name, parentId) => {
@@ -244,6 +248,18 @@ class GSuitController {
         fields: '*',
         fileId: id,
       });
+    }
+
+    getFileOrFolderDetails = async (id) => {
+      const drives = this.getClientInstanceByType('drive', 'v3');
+      try {
+        return drives.files.get({
+          fields: '*',
+          fileId: id,
+        });
+      } catch (err) {
+        throw new Error('Not enough access permission');
+      }
     }
 }
 
