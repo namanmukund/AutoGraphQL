@@ -549,6 +549,11 @@ const dbControllerModes = {
   cascade: 'cascade',
 };
 
+const DATABASE_DIALECTS = {
+  mongodb: 'mdb',
+  postgres: 'pg',
+};
+
 const DEFAULT_CLAMP_VALUE = {
   MIN: 0,
   MAX: 100,
@@ -720,4 +725,5 @@ export {
   ALLOWED_HEADERS,
   ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER,
   HEADER_VARIABLES,
+  DATABASE_DIALECTS,
 };
