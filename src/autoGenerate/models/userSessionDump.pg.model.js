@@ -1,4 +1,5 @@
 import { DataTypes } from 'sequelize';
+import cuid from 'cuid';
 import db from '../../db';
 
 const { sequelize } = db;
@@ -7,8 +8,8 @@ const UserSessionDump = sequelize.define(
   'UserSessionDump',
   {
     id: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
+      type: DataTypes.STRING,
+      defaultValue: cuid(),
       primaryKey: true,
     },
     userId: {

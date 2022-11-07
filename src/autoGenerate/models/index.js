@@ -13,7 +13,7 @@ import getDirectiveArgumentValue, { getTypeDirectiveArgumentValue } from '../uti
 import {
   getEnumTypeMongooseSchema, visitField, hasDirective, getEnumDefinitionTypeObject,
 } from '../utils';
-import { DATABASE_DIALECTS } from '../../../constants';
+import { DATABASE_DIALECTS, PG_MODEL_SUFFIX } from '../../../constants';
 
 const basename = path.basename(__filename);
 
@@ -161,7 +161,7 @@ const createMongooseModelsFromSchema = (allModelsSchema, typesSchema) => {
   const sqlModels = {};
   fs.readdirSync(__dirname)
     .filter((file) => (
-      file.indexOf('.') !== 0 && file !== basename && file.slice(-9) === '.model.js'
+      file.indexOf('.') !== 0 && file !== basename && file.slice(-12) === PG_MODEL_SUFFIX
     ))
     .forEach((file) => {
       const model = require(path.join(__dirname, file)).default;
@@ -169,7 +169,7 @@ const createMongooseModelsFromSchema = (allModelsSchema, typesSchema) => {
     });
 
   Object.keys(sqlModels).forEach((model) => {
-    log(`SQL Model generated for: ${model}`);
+    log(`PG SQL Model generated for: ${model}`);
   });
 
   return { ...mongooseModels, ...sqlModels };

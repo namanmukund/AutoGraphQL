@@ -1,7 +1,6 @@
 import { log } from '../../utils';
 import getDbNAme from '../../utils/getDbName';
 
-/* eslint-disable import/no-mutable-exports */
 const DATABASE_HOST = process.env.PG_DATABASE_HOST || 'localhost';
 const DATABASE_PORT = process.env.PG_DATABASE_PORT || '5432';
 const DATABASE_NAME = process.env.PG_DATABASE_NAME || getDbNAme();

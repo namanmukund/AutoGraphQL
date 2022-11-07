@@ -607,6 +607,8 @@ const ALLOWED_HEADERS = [
   ...ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER.map((VAR) => VAR.headerLabel),
 ];
 
+const PG_MODEL_SUFFIX = '.pg.model.js';
+
 export {
   scalarTypes,
   defaultFields,
@@ -726,4 +728,5 @@ export {
   ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER,
   HEADER_VARIABLES,
   DATABASE_DIALECTS,
+  PG_MODEL_SUFFIX,
 };
