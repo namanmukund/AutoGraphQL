@@ -38,13 +38,13 @@ const cacheCustomQueries = `
 `;
 
 const googleApisCustomQueries = `
-    gsuitCreateFileOrFolder(name: String!, mimeType: String!, parentId: String, permission: PermissionInput): GSuitResponse
-    gsuitUpdatePermissionOfFileOrFolder(id: String!, permission: PermissionInput): GSuitResponse
-    gsuitUpdateParentFolderOfFileOrFolder(childId: String!, parentId: String!): GSuitResponse
-    gsuitDuplicateFileOrFolder(id: String!, name: String, parentId: String, permission: PermissionInput): GSuitResponse
-    gsuitDeleteFileOrFolder(id: String!): GSuitResponse
-    gsuitGettingChildFileOrFolder(id: String!): GSuitResponse
-    gsuitGetFileOrFolderDetails(id: String!): GSuitResponse
+    createGsuitFileOrFolder(name: String!, mimeType: String!, parentId: String, permission: PermissionInput): GSuitResponse
+    updatePermissionOfGsuitFileOrFolder(id: String!, permission: PermissionInput): GSuitResponse
+    updateParentFolderOfGsuitFileOrFolder(childId: String!, parentId: String!): GSuitResponse
+    duplicateGsuitFileOrFolder(id: String!, name: String, parentId: String, permission: PermissionInput): GSuitResponse
+    deleteGsuitFileOrFolder(id: String!): String
+    gettingGsuitChildFileOrFolder(id: String!): [GSuitResponse]
+    getGsuitFileOrFolderDetails(id: String!): GSuitResponse
 `;
 
 const customQueryString = customQueries + cacheCustomQueries + googleApisCustomQueries;

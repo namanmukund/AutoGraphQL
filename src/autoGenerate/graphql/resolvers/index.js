@@ -733,12 +733,13 @@ resolvers.Query.cacheKeys = redisUtils.cacheKeys;
 resolvers.Query.purgeCache = redisUtils.purgeCache;
 resolvers.Query.getCache = redisUtils.getCache;
 // GSuit utility queries
-resolvers.Query.gsuitCreateFileOrFolder = gsuitUtils.gsuitCreateFileOrFolder;
-resolvers.Query.gsuitUpdatePermissionOfFileOrFolder = gsuitUtils.gsuitUpdatePermissionOfFileOrFolder;
-resolvers.Query.gsuitUpdateParentFolderOfFileOrFolder = gsuitUtils.gsuitUpdateParentFolderOfFileOrFolder;
-resolvers.Query.gsuitDuplicateFileOrFolder = gsuitUtils.gsuitDuplicateFileOrFolder;
-resolvers.Query.gsuitDeleteFileOrFolder = gsuitUtils.gsuitDeleteFileOrFolder;
-resolvers.Query.gsuitGettingChildFileOrFolder = gsuitUtils.gsuitGettingChildFileOrFolder;
+resolvers.Query.createGsuitFileOrFolder = gsuitUtils.createGsuitFileOrFolder;
+resolvers.Query.updatePermissionOfGsuitFileOrFolder = gsuitUtils.updatePermissionOfGsuitFileOrFolder;
+resolvers.Query.updateParentFolderOfGsuitFileOrFolder = gsuitUtils.updateParentFolderOfGsuitFileOrFolder;
+resolvers.Query.duplicateGsuitFileOrFolder = gsuitUtils.duplicateGsuitFileOrFolder;
+resolvers.Query.deleteGsuitFileOrFolder = gsuitUtils.deleteGsuitFileOrFolder;
+resolvers.Query.gettingGsuitChildFileOrFolder = gsuitUtils.gettingGsuitChildFileOrFolder;
+resolvers.Query.getGsuitFileOrFolderDetails = gsuitUtils.getGsuitFileOrFolderDetails;
 
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;

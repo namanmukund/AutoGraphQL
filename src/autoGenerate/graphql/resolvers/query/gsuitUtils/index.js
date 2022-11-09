@@ -1,68 +1,74 @@
 import GSuitController from '../../../controllers/GSuitController';
 
-const gsuitCreateFileOrFolder = async (_root, params) => {
-  try {
-    const {
-      name, mimeType, parentId, permission,
-    } = params;
-    const gsuitController = new GSuitController();
-    const creatingFileOrFolder = await gsuitController.createFileOrFolder(name, mimeType, parentId);
-    if (permission) {
-      await gsuitController.updatePermission(creatingFileOrFolder.data.id, permission);
-    }
-  } catch (e) {
-    throw new Error(e);
+const createGsuitFileOrFolder = async (_root, params) => {
+  const {
+    name, mimeType, parentId, permission,
+  } = params;
+  const gsuitController = new GSuitController();
+  const creatingFileOrFolder = await gsuitController.createFileOrFolder(name, mimeType, parentId);
+  if (permission) {
+    const updatingPermissionResponse = await gsuitController.updatePermission(creatingFileOrFolder.data.id, permission);
+    if (!updatingPermissionResponse) throw new Error('Not able to update the permission');
   }
-  return creatingFileOrFolder.data;
+  if (creatingFileOrFolder) return creatingFileOrFolder.data;
+  throw new Error('Not able to create the file or folder');
 };
 
-const gsuitUpdatePermissionOfFileOrFolder = async (root, params) => {
+const updatePermissionOfGsuitFileOrFolder = async (root, params) => {
   const { id, permission } = params;
   const gsuitController = new GSuitController();
   const updatingPermission = await gsuitController.updatePermission(id, permission);
-  return updatingPermission.data;
+  if (updatingPermission) return updatingPermission.data;
+  throw new Error('Not able to update the permission');
 };
 
-const gsuitUpdateParentFolderOfFileOrFolder = async (root, params) => {
+const updateParentFolderOfGsuitFileOrFolder = async (root, params) => {
   const { childId, parentId } = params;
   const gsuitController = new GSuitController();
   const updatingParentFolder = await gsuitController.updateParentDirectory(childId, parentId);
-  return updatingParentFolder.data;
+  if (updatingParentFolder) return updatingParentFolder.data;
+  throw new Error('Not able to update the directory');
 };
 
-const gsuitDuplicateFileOrFolder = async (root, params) => {
+const duplicateGsuitFileOrFolder = async (root, params) => {
   const {
     id, name, parentId, permission,
   } = params;
   const gsuitController = new GSuitController();
   const duiplicatingFileOrFolderResponse = await gsuitController.duplicateFileOrFolder(id, name, parentId);
   if (permission) {
-    await gsuitController.updatePermission(creatingFileOrFolder.data.id, permission);
+    const updatingPermissionResponse = await gsuitController.updatePermission(creatingFileOrFolder.data.id, permission);
+    if (!updatingPermissionResponse) throw new Error('Not able to fetch the data');
   }
   return duiplicatingFileOrFolderResponse.data;
 };
 
-const gsuitDeleteFileOrFolder = async (_root, params) => {
+const deleteGsuitFileOrFolder = async (_root, params) => {
   const { id } = params;
   const gsuitController = new GSuitController();
   const deletingFileOrFolder = await gsuitController.deleteFileOrFolder(id);
-  return deletingFileOrFolder.data;
+  if (deletingFileOrFolder) return 'File or folder deleted successfuly.';
+  throw new Error('Not able to fetch the data');
 };
 
-const gsuitGettingChildFileOrFolder = async (_root, params) => {
+const gettingGsuitChildFileOrFolder = async (_root, params) => {
   const { id } = params;
   const gsuitController = new GSuitController();
   const childFileOrFolder = await gsuitController.getDriveFiles(id);
-  return childFileOrFolder.data;
+  if (childFileOrFolder) {
+    return childFileOrFolder.data.files;
+  }
+  throw new Error('Not able to fetch the data');
 };
 
-const gsuitGetFileOrFolderDetails = async (_root, params) => {
+const getGsuitFileOrFolderDetails = async (_root, params) => {
   const { id } = params;
   const gsuitController = new GSuitController();
   const fileOrFolderDetails = await gsuitController.getFileOrFolderDetails(id);
-  return fileOrFolderDetails.data;
+  if (fileOrFolderDetails) return fileOrFolderDetails.data;
+  throw new Error('Not able tp fetch the data');
 };
 
 export default {
-  gsuitCreateFileOrFolder, gsuitUpdatePermissionOfFileOrFolder, gsuitUpdateParentFolderOfFileOrFolder, gsuitDuplicateFileOrFolder, gsuitDeleteFileOrFolder, gsuitGettingChildFileOrFolder, gsuitGetFileOrFolderDetails,
+  createGsuitFileOrFolder, updatePermissionOfGsuitFileOrFolder, updateParentFolderOfGsuitFileOrFolder, duplicateGsuitFileOrFolder, deleteGsuitFileOrFolder, gettingGsuitChildFileOrFolder, getGsuitFileOrFolderDetails,
 };

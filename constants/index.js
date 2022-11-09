@@ -602,6 +602,8 @@ const ALLOWED_HEADERS = [
   ...ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER.map((VAR) => VAR.headerLabel),
 ];
 
+const GDRIVE_BASE_ID = '10F9f2lE_Sjb7u7Gge-kBECt7aSzt83UK';
+
 export {
   scalarTypes,
   defaultFields,
@@ -720,4 +722,5 @@ export {
   ALLOWED_HEADERS,
   ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER,
   HEADER_VARIABLES,
+  GDRIVE_BASE_ID,
 };

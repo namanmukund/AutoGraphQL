@@ -1,5 +1,5 @@
 import { get } from 'lodash';
-import { userTopicTypeStatus } from '../../../../constants';
+import { userTopicTypeStatus, GDRIVE_BASE_ID } from '../../../../constants';
 import getInfoFromParams from './utils/getInfoFromParams';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
@@ -84,63 +84,63 @@ const addUserBlockBasedPracticeMutation = (
 
 const findOrCreateParentFolder = async (
   fileOrFolderName,
-  gsuitParentFolderId,
+  parentFolderId,
 ) => {
-  const gsuitController = new GSuitController();
-  const gsuitData = await gsuitController.getDriveFiles(gsuitParentFolderId);
-  const searchData = gsuitData.data.files.find(
+  const gSuitController = new GSuitController();
+  const gsuitData = await gSuitController.getDriveFiles(parentFolderId);
+  if (!gsuitData) throw new Error('Not able to fetch the data');
+  const isFolderAlreadyExists = gsuitData.data.files.find(
     (search) => search.name === fileOrFolderName,
   );
-  if (searchData) {
-    return searchData.id;
-  // eslint-disable-next-line no-else-return
-  } else {
-    const creatingFileOrFolder = await gsuitController.createFileOrFolder(
-      fileOrFolderName,
-      'folder',
-      gsuitParentFolderId,
-    );
-    return creatingFileOrFolder.data.id;
+  if (isFolderAlreadyExists) {
+    return isFolderAlreadyExists.id;
   }
+  const creatingFileOrFolder = await gSuitController.createFileOrFolder(
+    fileOrFolderName,
+    'folder',
+    parentFolderId,
+  );
+  if (creatingFileOrFolder) return creatingFileOrFolder.data.id;
+  throw new Error('Not able to create file or folder');
 };
 
 const createGsuitFile = async (
   practiceResult,
   studentFileCreationName,
   schoolName,
-  gradeSection,
+  classroomTitle,
 ) => {
-  const gsuitController = new GSuitController();
+  const gSuitController = new GSuitController();
   let fileCreationResponse = {};
-  let gsuitType = '';
+  let gsuitFileType = '';
   if (practiceResult.gsuitTempleteURL) {
-    gsuitType = practiceResult.gsuitTempleteURL.split('/')[3];
+    gsuitFileType = practiceResult.gsuitTempleteURL.split('/')[3];
   } else {
-    gsuitType = practiceResult.gsuitFileType;
+    gsuitFileType = practiceResult.gsuitFileType;
   }
   const schoolFolderId = await findOrCreateParentFolder(
     schoolName,
-    '10F9f2lE_Sjb7u7Gge-kBECt7aSzt83UK',
+    GDRIVE_BASE_ID,
   );
   const clasroomsFolderId = await findOrCreateParentFolder(
-    `${gradeSection}`,
+    `${classroomTitle}`,
     schoolFolderId,
   );
   const gsuitFileTypeFolderId = await findOrCreateParentFolder(
-    gsuitType,
+    gsuitFileType,
     clasroomsFolderId,
   );
 
   if (practiceResult.gsuitTempleteURL) {
     const gsuitId = practiceResult.gsuitTempleteURL.split('/')[5];
-    fileCreationResponse = await gsuitController.duplicateFileOrFolder(
+    fileCreationResponse = await gSuitController.duplicateFileOrFolder(
       gsuitId,
       studentFileCreationName,
       gsuitFileTypeFolderId,
     );
   } else {
     // Creating File
-    fileCreationResponse = await gsuitController.createFileOrFolder(
+    fileCreationResponse = await gSuitController.createFileOrFolder(
       studentFileCreationName,
       practiceResult.gsuitFileType,
       gsuitFileTypeFolderId,
@@ -223,7 +223,7 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
     return input;
   }
 
-  const allPracticesResult = await callLocalGraphqlApi(
+  const blockBasedPracticesRes = await callLocalGraphqlApi(
     `
       {blockBasedProjects(filter:{
         id_in: [${getIdArrForQuery(blockBasedPracticeNotCreated)}]
@@ -242,28 +242,32 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
   // Get username classroom school grade
   const activeClassroom = await getUserActiveClassroom(context, { courseId });
   const getStudentProfileData = await getStudentProfile(context);
+  const classroomTitle = get(activeClassroom, 'classroomTitle');
   const schoolName = get(activeClassroom, 'school.name');
-  const userName = authenticateUser(context).name;
+  const userData = authenticateUser(context);
+  const userName = get(userData, 'name', '');
   const grade = get(getStudentProfileData, 'grade');
   const section = get(getStudentProfileData, 'section');
-  const gradeSection = `${grade} ${section}`;
+  let gradeSection;
+  if (grade && section) gradeSection = `${grade} ${section}`;
 
   /* eslint-disable no-restricted-syntax */
   /* eslint-disable no-await-in-loop */
   for (const practiceId of blockBasedPracticeNotCreated) {
-    // Step 3
     // Filter blockBasedProject
-    const practiceResult = allPracticesResult.data.blockBasedProjects.find(
+    const blockBasedProjects = get(blockBasedPracticesRes, 'data.blockBasedProjects', {});
+    const practiceResult = blockBasedProjects.find(
       (practiceResultData) => practiceResultData.id === practiceId,
     );
-    const studentFileCreationName = `${userName}-${gradeSection}-${practiceResult.title}`;
+    let studentFileCreationName = '';
+    if (userName && gradeSection && practiceResult && practiceResult.title) studentFileCreationName = `${userName}-${gradeSection}-${practiceResult.title}`;
     let fileCreationResponse = {};
-    if (practiceResult.layout === 'gsuit') {
+    if (practiceResult.layout === 'gsuit' && studentFileCreationName) {
       fileCreationResponse = await createGsuitFile(
         practiceResult,
         studentFileCreationName,
         schoolName,
-        gradeSection,
+        classroomTitle,
       );
     }
 
