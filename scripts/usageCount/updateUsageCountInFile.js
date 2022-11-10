@@ -40,6 +40,6 @@ const updateUsageCountInFile = async () => updateUsageCountToZeroInFile()
     process.exit(0);
   });
 
-db.once('open', () => {
+db.mongoose.once('open', () => {
   updateUsageCountInFile();
 });

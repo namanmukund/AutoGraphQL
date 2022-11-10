@@ -476,7 +476,9 @@ const ALLOWED_MIME_TYPES = ['html', 'css', 'javascript'];
 
 const MASTER_OTP = 1902;
 
-const MASTER_PASSWORD = 'tkInter2020';
+const TEACHER_MASTER_PASSWORD = 'tkInter2020';
+
+const STUDENT_MASTER_PASSWORD = 'Jupyter2014';
 
 const BLOCKED = 'blocked';
 
@@ -547,6 +549,11 @@ const dbControllerModes = {
   cascade: 'cascade',
 };
 
+const DATABASE_DIALECTS = {
+  mongodb: 'mdb',
+  postgres: 'pg',
+};
+
 const DEFAULT_CLAMP_VALUE = {
   MIN: 0,
   MAX: 100,
@@ -599,6 +606,8 @@ const ALLOWED_HEADERS = [
   'BatchSession-Id',
   ...ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER.map((VAR) => VAR.headerLabel),
 ];
+
+const PG_MODEL_SUFFIX = '.pg.model.js';
 
 export {
   scalarTypes,
@@ -712,9 +721,12 @@ export {
   LEAD_PARTNERS_TO_CHECK_FOR_DEMO,
   DEFAULT_CLAMP_VALUE,
   DB_AGGREGATION_MODE_STATUS,
-  MASTER_PASSWORD,
+  TEACHER_MASTER_PASSWORD,
+  STUDENT_MASTER_PASSWORD,
   ALLOWED_FILE_UPLOAD_TYPES,
   ALLOWED_HEADERS,
   ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER,
   HEADER_VARIABLES,
+  DATABASE_DIALECTS,
+  PG_MODEL_SUFFIX,
 };

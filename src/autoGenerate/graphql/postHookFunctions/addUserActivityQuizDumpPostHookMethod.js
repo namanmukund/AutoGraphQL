@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import {
-  OLD_COURSE_ID, topicTypes,
-  PUBLISHED, questionTypes, scholarshipThreshHolds,
+  OLD_COURSE_ID,
+  PUBLISHED, questionTypes,
   userActionType,
   userTopicTypeStatus,
 } from '../../../../constants';
@@ -10,12 +10,9 @@ import {
   DatabaseRecordNotFoundError,
   QuizQuestionsNotPresentError,
 } from '../../../../constants/errors';
-import updateCurrentComponentStatus from './utils/updateCurrentComponentStatus';
-import updateCurrentComponentStatusOfNewCourse from './utils/updateCurrentComponentStatusOfNewCourse';
 import getMasteryLevel from '../resolvers/utils/getMasteryLevel';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
-import validateTokenAndExtractInformation
-  from '../preHookFunctions/validation/utils/validateTokenAndExtractInformation';
+import validateTokenAndExtractInformation from '../preHookFunctions/validation/utils/validateTokenAndExtractInformation';
 import { MENTEE } from '../../../../constants/roles';
 import getNextComponent from './utils/getNextComponent';
 
@@ -187,54 +184,54 @@ const addUserQuizReport = (
   `;
 
 // query to get current user profile to get current scholarship status
-const userProfileQuery = (userId) => `
-  query{
-    userProfiles(filter:{
-      user_some:{
-        id: "${userId}"
-      }
-    }){
-      id
-      topicsCompleted
-      proficientTopicCount
-      freeProficientTopicCount
-      masteredTopicCount
-      freeMasteredTopicCount
-      familiarTopicCount
-      freeFamiliarTopicCount
-    }
-  }
-`;
+// const userProfileQuery = (userId) => `
+//   query{
+//     userProfiles(filter:{
+//       user_some:{
+//         id: "${userId}"
+//       }
+//     }){
+//       id
+//       topicsCompleted
+//       proficientTopicCount
+//       freeProficientTopicCount
+//       masteredTopicCount
+//       freeMasteredTopicCount
+//       familiarTopicCount
+//       freeFamiliarTopicCount
+//     }
+//   }
+// `;
 
 // query to update user profile if it exists already
-const updateUserProfile = (
-  userProfileId,
-  userProfileTopicConnectQuery,
-  topicsCompleted,
-  proficientTopicCount,
-  freeProficientTopicCount,
-  masteredTopicCount,
-  freeMasteredTopicCount,
-  familiarTopicCount,
-  freeFamiliarTopicCount,
-) => `
-  mutation{
-    updateUserProfile(id:"${userProfileId}"
-    ${userProfileTopicConnectQuery}
-      input:{
-        topicsCompleted: ${topicsCompleted}
-        proficientTopicCount: ${proficientTopicCount}
-        freeProficientTopicCount: ${freeProficientTopicCount}
-        masteredTopicCount: ${masteredTopicCount}
-        freeMasteredTopicCount: ${freeMasteredTopicCount}
-        familiarTopicCount: ${familiarTopicCount}
-        freeFamiliarTopicCount: ${freeFamiliarTopicCount}
-      }
-    ){
-     id 
-    }
-  }
-  `;
+// const updateUserProfile = (
+//   userProfileId,
+//   userProfileTopicConnectQuery,
+//   topicsCompleted,
+//   proficientTopicCount,
+//   freeProficientTopicCount,
+//   masteredTopicCount,
+//   freeMasteredTopicCount,
+//   familiarTopicCount,
+//   freeFamiliarTopicCount,
+// ) => `
+//   mutation{
+//     updateUserProfile(id:"${userProfileId}"
+//     ${userProfileTopicConnectQuery}
+//       input:{
+//         topicsCompleted: ${topicsCompleted}
+//         proficientTopicCount: ${proficientTopicCount}
+//         freeProficientTopicCount: ${freeProficientTopicCount}
+//         masteredTopicCount: ${masteredTopicCount}
+//         freeMasteredTopicCount: ${freeMasteredTopicCount}
+//         familiarTopicCount: ${familiarTopicCount}
+//         freeFamiliarTopicCount: ${freeFamiliarTopicCount}
+//       }
+//     ){
+//      id
+//     }
+//   }
+//   `;
 
 // getting mentee session id on basis of topic id and user id
 const menteeSessionQuery = (userId, topicId) => `
@@ -757,98 +754,98 @@ logic for evaluating scholarship of user
 and it will be done only on first attempt of quiz so we are checking if the called topic
 is current topic or not and current topic component should be quiz
 */
-const evaluateUserScholarship = async (
-  currentTopicComponentInfo,
-  userId,
-  topicId,
-  quizReport,
-  context,
-) => {
-  const { quiz } = topicTypes;
-  const {
-    currentTopicComponentType: currentTopicComponent,
-    currentTopic,
-  } = currentTopicComponentInfo;
-  const { id: currentTopicId } = currentTopic;
-  if (currentTopicComponent === quiz
-    && currentTopicId === topicId) {
-    // code for calculating total quiz report accuracy for scholarship
-    const { totalQuestionCount, correctQuestionCount } = quizReport;
-    let accuracy = 0;
-    if (totalQuestionCount > 0) {
-      accuracy = (correctQuestionCount / totalQuestionCount) * 100;
-    } else {
-      log('There are no questions in quiz. Something is wrong');
-    }
-    // getting userProfile Data to get current scholarship status of user
-    // there is logic in post hook of userProfile to create userProfile with
-    // default data if it was not present. So we will always get this
-    //
-    const userProfileResult = await callLocalGraphqlApi(userProfileQuery(userId), context);
-    const userProfileInfo = get(userProfileResult, 'data.userProfiles[0]');
-    const userProfileId = get(userProfileInfo, 'id');
-    if (!userProfileId) {
-      log('Not able to fetch userProfileInfo in addUserActivityQuizDumpPostHookMethod');
-    }
-    const {
-      topicsCompleted: topicsCompletedInUserProfile,
-      proficientTopicCount: proficientTopicCountInUserProfile,
-      freeProficientTopicCount: freeProficientTopicCountInUserProfile,
-      masteredTopicCount: masteredTopicCountInUserProfile,
-      freeMasteredTopicCount: freeMasteredTopicCountInUserProfile,
-      familiarTopicCount: familiarTopicCountInUserProfile,
-      freeFamiliarTopicCount: freeFamiliarTopicCountInUserProfile,
-    } = userProfileInfo;
-    // setting each field in let as they will be updated further
-    let topicsCompleted = topicsCompletedInUserProfile;
-    let proficientTopicCount = proficientTopicCountInUserProfile;
-    let freeProficientTopicCount = freeProficientTopicCountInUserProfile;
-    let masteredTopicCount = masteredTopicCountInUserProfile;
-    let freeMasteredTopicCount = freeMasteredTopicCountInUserProfile;
-    let familiarTopicCount = familiarTopicCountInUserProfile;
-    let freeFamiliarTopicCount = freeFamiliarTopicCountInUserProfile;
+// const evaluateUserScholarship = async (
+//   currentTopicComponentInfo,
+//   userId,
+//   topicId,
+//   quizReport,
+//   context,
+// ) => {
+//   const { quiz } = topicTypes;
+//   const {
+//     currentTopicComponentType: currentTopicComponent,
+//     currentTopic,
+//   } = currentTopicComponentInfo;
+//   const { id: currentTopicId } = currentTopic;
+//   if (currentTopicComponent === quiz
+//     && currentTopicId === topicId) {
+//     // code for calculating total quiz report accuracy for scholarship
+//     const { totalQuestionCount, correctQuestionCount } = quizReport;
+//     let accuracy = 0;
+//     if (totalQuestionCount > 0) {
+//       accuracy = (correctQuestionCount / totalQuestionCount) * 100;
+//     } else {
+//       log('There are no questions in quiz. Something is wrong');
+//     }
+//     // getting userProfile Data to get current scholarship status of user
+//     // there is logic in post hook of userProfile to create userProfile with
+//     // default data if it was not present. So we will always get this
+//     //
+//     const userProfileResult = await callLocalGraphqlApi(userProfileQuery(userId), context);
+//     const userProfileInfo = get(userProfileResult, 'data.userProfiles[0]');
+//     const userProfileId = get(userProfileInfo, 'id');
+//     if (!userProfileId) {
+//       log('Not able to fetch userProfileInfo in addUserActivityQuizDumpPostHookMethod');
+//     }
+//     const {
+//       topicsCompleted: topicsCompletedInUserProfile,
+//       proficientTopicCount: proficientTopicCountInUserProfile,
+//       freeProficientTopicCount: freeProficientTopicCountInUserProfile,
+//       masteredTopicCount: masteredTopicCountInUserProfile,
+//       freeMasteredTopicCount: freeMasteredTopicCountInUserProfile,
+//       familiarTopicCount: familiarTopicCountInUserProfile,
+//       freeFamiliarTopicCount: freeFamiliarTopicCountInUserProfile,
+//     } = userProfileInfo;
+//     // setting each field in let as they will be updated further
+//     let topicsCompleted = topicsCompletedInUserProfile;
+//     let proficientTopicCount = proficientTopicCountInUserProfile;
+//     let freeProficientTopicCount = freeProficientTopicCountInUserProfile;
+//     let masteredTopicCount = masteredTopicCountInUserProfile;
+//     let freeMasteredTopicCount = freeMasteredTopicCountInUserProfile;
+//     let familiarTopicCount = familiarTopicCountInUserProfile;
+//     let freeFamiliarTopicCount = freeFamiliarTopicCountInUserProfile;
 
-    // adding topic in total topics completed by user
-    let userProfileTopicConnectQuery = `totalTopicsConnectIds:["${topicId}"] `;
-    const { proficient, master, familiar } = scholarshipThreshHolds;
-    topicsCompleted += 1;
-    // proficient topic logic, proficient is 100 defined in config
-    if (accuracy === proficient) {
-      proficientTopicCount += 1;
-      userProfileTopicConnectQuery += `proficientTopicsConnectIds:["${topicId}"] `;
-    } else if (freeProficientTopicCount > 0) {
-      freeProficientTopicCount -= 1;
-    }
-    // mastered topic logic, master is 80 defined in config
-    if (accuracy >= master) {
-      masteredTopicCount += 1;
-      userProfileTopicConnectQuery += `masteredTopicsConnectIds:["${topicId}"] `;
-    } else if (freeMasteredTopicCount > 0) {
-      freeMasteredTopicCount -= 1;
-    }
-    // familiar topic logic, familiar is 60 defined in config
-    if (accuracy >= familiar) {
-      familiarTopicCount += 1;
-      userProfileTopicConnectQuery += `familiarTopicsConnectIds:["${topicId}"] `;
-    } else if (freeFamiliarTopicCount > 0) {
-      freeFamiliarTopicCount -= 1;
-    }
+//     // adding topic in total topics completed by user
+//     let userProfileTopicConnectQuery = `totalTopicsConnectIds:["${topicId}"] `;
+//     const { proficient, master, familiar } = scholarshipThreshHolds;
+//     topicsCompleted += 1;
+//     // proficient topic logic, proficient is 100 defined in config
+//     if (accuracy === proficient) {
+//       proficientTopicCount += 1;
+//       userProfileTopicConnectQuery += `proficientTopicsConnectIds:["${topicId}"] `;
+//     } else if (freeProficientTopicCount > 0) {
+//       freeProficientTopicCount -= 1;
+//     }
+//     // mastered topic logic, master is 80 defined in config
+//     if (accuracy >= master) {
+//       masteredTopicCount += 1;
+//       userProfileTopicConnectQuery += `masteredTopicsConnectIds:["${topicId}"] `;
+//     } else if (freeMasteredTopicCount > 0) {
+//       freeMasteredTopicCount -= 1;
+//     }
+//     // familiar topic logic, familiar is 60 defined in config
+//     if (accuracy >= familiar) {
+//       familiarTopicCount += 1;
+//       userProfileTopicConnectQuery += `familiarTopicsConnectIds:["${topicId}"] `;
+//     } else if (freeFamiliarTopicCount > 0) {
+//       freeFamiliarTopicCount -= 1;
+//     }
 
-    // updating user profile
-    await callLocalGraphqlApi(updateUserProfile(
-      userProfileId,
-      userProfileTopicConnectQuery,
-      topicsCompleted,
-      proficientTopicCount,
-      freeProficientTopicCount,
-      masteredTopicCount,
-      freeMasteredTopicCount,
-      familiarTopicCount,
-      freeFamiliarTopicCount,
-    ), context);
-  }
-  return true;
-};
+//     // updating user profile
+//     await callLocalGraphqlApi(updateUserProfile(
+//       userProfileId,
+//       userProfileTopicConnectQuery,
+//       topicsCompleted,
+//       proficientTopicCount,
+//       freeProficientTopicCount,
+//       masteredTopicCount,
+//       freeMasteredTopicCount,
+//       familiarTopicCount,
+//       freeFamiliarTopicCount,
+//     ), context);
+//   }
+//   return true;
+// };
 
 /*
 UserActivityQuizDump, current component topic status and
@@ -879,49 +876,49 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
   const quizQuestionsInUserQuiz = get(userQuizInfo, 'quiz');
   const nextTopicId = get(userQuizInfo, 'nextComponent.topic.id');
   const { id: userQuizId } = userQuizInfo;
-  const learningObjectiveConnectId = get(userQuizInfo, 'nextComponent.topic.learningObjectives[0].id');
+  // const learningObjectiveConnectId = get(userQuizInfo, 'nextComponent.topic.learningObjectives[0].id');
   /*
   Getting data for user current topic component status from context based on mutationName
   This will be used to cover the case that current component status will only get changed, if
   called component is equal to current component and user has just consumed(next action) it
   And current component status will not get changed when it is already consumed in past
   */
-  const currentTopicComponentInfo = get(context, `${mutationName}.userCurrentTopicComponentStatuses`);
+  // const currentTopicComponentInfo = get(context, `${mutationName}.userCurrentTopicComponentStatuses`);
   const { quizAction, quizQuestions } = input;
   /*
   Calling method to update current user Topic Component status
-  */
-  if (!courseId || (courseId === OLD_COURSE_ID)) {
-    await updateCurrentComponentStatus(
-      currentTopicComponentInfo,
-      quizAction,
-      topicId,
-      '',
-      'quiz',
-      '',
-      '',
-      '',
-      learningObjectiveConnectId,
-      nextTopicId,
-    );
-  } else {
-    const topicComponentRule = get(userQuizInfo, 'topic.topicComponentRule', []);
-    const topicOrder = get(userQuizInfo, 'topic.order');
+  // */
+  // if (!courseId || (courseId === OLD_COURSE_ID)) {
+  //   await updateCurrentComponentStatus(
+  //     currentTopicComponentInfo,
+  //     quizAction,
+  //     topicId,
+  //     '',
+  //     'quiz',
+  //     '',
+  //     '',
+  //     '',
+  //     learningObjectiveConnectId,
+  //     nextTopicId,
+  //   );
+  // } else {
+  //   const topicComponentRule = get(userQuizInfo, 'topic.topicComponentRule', []);
+  //   const topicOrder = get(userQuizInfo, 'topic.order');
 
-    await updateCurrentComponentStatusOfNewCourse(
-      userId,
-      courseId,
-      currentTopicComponentInfo,
-      quizAction,
-      topicId,
-      '',
-      '',
-      '',
-      'quiz',
-      topicComponentRule,
-      topicOrder,
-    );
-  }
+  //   await updateCurrentComponentStatusOfNewCourse(
+  //     userId,
+  //     courseId,
+  //     currentTopicComponentInfo,
+  //     quizAction,
+  //     topicId,
+  //     '',
+  //     '',
+  //     '',
+  //     'quiz',
+  //     topicComponentRule,
+  //     topicOrder,
+  //   );
+  // }
 
   // getting user role from context. We will allow updating mentorMenteeSession isQuizSubmitted if logged in user is mentee
   const userInfo = validateTokenAndExtractInformation(context, false);
@@ -982,7 +979,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
       pushManyQuery,
       quizReportQuery,
       learningObjectiveReportQuery,
-      quizReport,
+      // quizReport,
     } = await evaluateUserQuiz(
       quizQuestionsInUserQuiz,
       quizQuestions,
@@ -1014,13 +1011,13 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
       quizReportId: addUserQuizReportId,
     });
     // calling method to evaluate scholarship of user if he is attempting quiz for the first time
-    await evaluateUserScholarship(
-      currentTopicComponentInfo,
-      userId,
-      topicId,
-      quizReport,
-      context,
-    );
+    // await evaluateUserScholarship(
+    //   currentTopicComponentInfo,
+    //   userId,
+    //   topicId,
+    //   quizReport,
+    //   context,
+    // );
   }
   return true;
 };

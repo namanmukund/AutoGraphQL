@@ -1,14 +1,21 @@
+/* eslint-disable import/no-dynamic-require */
+/* eslint-disable global-require */
 /*
-  Auto generating mongoose model
+  Auto generating models
  */
+import fs from 'fs';
+import path from 'path';
 import mongoose from 'mongoose';
 import { has } from 'lodash';
 import getParsedASTMap from '../utils/getParsedASTMap';
 import { log, types } from '../../../utils';
-import getDirectiveArgumentValue from '../utils/getDirectiveArgumentValue';
+import getDirectiveArgumentValue, { getTypeDirectiveArgumentValue } from '../utils/getDirectiveArgumentValue';
 import {
   getEnumTypeMongooseSchema, visitField, hasDirective, getEnumDefinitionTypeObject,
 } from '../utils';
+import { DATABASE_DIALECTS, PG_MODEL_SUFFIX } from '../../../constants';
+
+const basename = path.basename(__filename);
 
 const { Schema } = mongoose;
 // uncomment below code to debug mongodb queries
@@ -119,7 +126,8 @@ const createMongooseModelsFromSchema = (allModelsSchema, typesSchema) => {
   const schemas = { ...allModelsSchema };
   // get all the enum types before attaching it with the respective schemas
   const allEnumTypesObject = getEnumDefinitionTypeObject(types);
-  const models = {};
+  const mongooseModels = {};
+  // Moongoose model creation
   Object.keys(schemas).forEach((modelName) => {
     const typeName = modelName;
     const model = schemas[typeName];
@@ -137,15 +145,41 @@ const createMongooseModelsFromSchema = (allModelsSchema, typesSchema) => {
 
     // create model from schema
     const createdModel = mongoose.model(typeName, modelSchema);
-    models[modelName] = createdModel;
+    mongooseModels[modelName] = createdModel;
   });
-  return models;
+
+  Object.keys(mongooseModels).forEach((model) => {
+    log(`Mongoose Model generated for: ${model}`);
+  });
+
+  /**
+   * @TODO Autogenerate SQL models from GraphQL schema
+   * SQL model creation
+   */
+
+  // Generating SQL models from filesystem if any.
+  const sqlModels = {};
+  fs.readdirSync(__dirname)
+    .filter((file) => (
+      file.indexOf('.') !== 0 && file !== basename && file.slice(-12) === PG_MODEL_SUFFIX
+    ))
+    .forEach((file) => {
+      const model = require(path.join(__dirname, file)).default;
+      sqlModels[model.name] = model;
+    });
+
+  Object.keys(sqlModels).forEach((model) => {
+    log(`PG SQL Model generated for: ${model}`);
+  });
+
+  return { ...mongooseModels, ...sqlModels };
 };
 
 // starts from here
 const parsedASTMap = getParsedASTMap(types);
 
 const modelTypesSchema = {};
+const sqlModelTypesSchema = {};
 const embeddedTypesSchema = {};
 const modelsToBeVersioned = [];
 Object.keys(parsedASTMap).forEach((type) => {
@@ -231,8 +265,12 @@ Object.keys(parsedASTMap).forEach((type) => {
    */
   // model directives logic
   const isModel = directives && hasDirective(directives, 'model');
+  const modelDatabase = getTypeDirectiveArgumentValue(directives, 'model', 'database');
+  const isSQLModel = modelDatabase === DATABASE_DIALECTS.postgres;
   const isModelVersioningToBeDone = directives && hasDirective(directives, 'history');
-  if (isModel) {
+  if (isSQLModel) {
+    sqlModelTypesSchema[typeName] = objectSchema;
+  } else if (isModel) {
     modelTypesSchema[typeName] = objectSchema;
   } else {
     /*
@@ -248,12 +286,7 @@ Object.keys(parsedASTMap).forEach((type) => {
 const models = createMongooseModelsFromSchema(
   modelTypesSchema,
   embeddedTypesSchema,
+  sqlModelTypesSchema,
   modelsToBeVersioned,
 );
-if (models) {
-  Object.keys(models).forEach((model) => {
-    log(`Mongoose Model generated for: ${model}`);
-  });
-}
-
 export default models;

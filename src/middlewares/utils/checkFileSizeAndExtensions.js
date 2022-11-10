@@ -12,6 +12,7 @@ const checkFileSizeAndExtensions = (fileType, size, ext, connectInput) => {
     pdf: pdfSizeLimit,
     programFiles: programFilesSizeLimit,
     others: othersSizeLimit,
+    accessFiles: accessFilesSizeLimit,
   } = fileSizeLimitInMB;
 
   const {
@@ -23,6 +24,7 @@ const checkFileSizeAndExtensions = (fileType, size, ext, connectInput) => {
     lottieExtensions,
     documentExtensions,
     programExtensions,
+    accessExtensions,
   } = fileExtensions;
 
   const operationTypeName = get(connectInput, 'type');
@@ -102,6 +104,17 @@ const checkFileSizeAndExtensions = (fileType, size, ext, connectInput) => {
         doc.isValidSize = true;
       }
       if (includes(programExtensions, caseInsensitiveExt)) {
+        doc.isValidExtension = true;
+      }
+      break;
+    }
+    case 'accdb':
+    case 'mdb':
+    case 'accdt': {
+      if (size < (accessFilesSizeLimit * 1024 * 1024)) {
+        doc.isValidSize = true;
+      }
+      if (includes(accessExtensions, caseInsensitiveExt)) {
         doc.isValidExtension = true;
       }
       break;

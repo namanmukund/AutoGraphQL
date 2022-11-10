@@ -1,8 +1,11 @@
+import { get } from 'lodash';
 import { TopicWithSimilarOrderAlreadyExist, TopicWithSimilarTitleAlreadyExist } from '../../../../../constants/errors';
 import { getTopicsData } from './addTopicValidation';
 
 const updateTopicValidation = async (params) => {
-  const { input: { title, order }, id: topicId, coursesConnectIds = [] } = params;
+  const { input, id: topicId, coursesConnectIds = [] } = params;
+  const title = get(input, 'title');
+  const order = get(input, 'order');
   if (title || order) {
     if (coursesConnectIds.length > 0) {
       let courseIds = '';

@@ -5,8 +5,7 @@ import {
   DatabaseRecordNotFoundError,
   ProductIdNotPresentError, UnauthenticatedUserError,
 } from '../../../../../../constants/errors';
-import getUserIdandAppNameAfterValidation
-  from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
+import getUserIdandAppNameAfterValidation from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { MENTEE } from '../../../../../../constants/roles';
 import payUConfig from '../../../../../../config/payment/payUConfig';
@@ -14,8 +13,7 @@ import {
   enrollmentTypes, GIFT_VOUCHER_AMOUNT, GLOBAL_COURSE_TITLE, PUBLISHED,
 } from '../../../../../../constants';
 import referralCredits from '../../../../../../constants/referralCredits';
-import updateReferrerCreditsPostSessionOrUserPayment
-  from '../../../postHookFunctions/utils/updateReferrerCreditsPostSessionOrUserPayment';
+import updateReferrerCreditsPostSessionOrUserPayment from '../../../postHookFunctions/utils/updateReferrerCreditsPostSessionOrUserPayment';
 import { COURSE_PURCHASED } from '../../../../../../constants/userCreditReason';
 import { log } from '../../../../../../utils';
 import { sendEmailInvoiceToUser } from '../utils/sendEmailInvoiceToUser';

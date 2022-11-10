@@ -215,6 +215,14 @@ const getBatchSessionAggregation = ({
             },
           },
           {
+            $lookup: {
+              from: 'Course',
+              localField: 'course.typeId',
+              foreignField: 'id',
+              as: 'course',
+            },
+          },
+          {
             $project: {
               id: 1,
               bookingDate: 1,
@@ -222,6 +230,10 @@ const getBatchSessionAggregation = ({
               endMinutes: 1,
               sessionStatus: 1,
               topic: {
+                id: 1,
+                title: 1,
+              },
+              course: {
                 id: 1,
                 title: 1,
               },
@@ -320,6 +332,8 @@ const getBatchDetails = async (
     batchStudents: batchStudentResult,
     sessionStatus: get(batchDetails, 'sessionStatus'),
     schoolDetail,
+    topicId: get(batchDetails, 'topic[0].id'),
+    courseId: get(batchDetails, 'course[0].id'),
   };
   return batchSessionData;
 };
