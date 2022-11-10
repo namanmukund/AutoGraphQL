@@ -2,6 +2,8 @@ const BatchDetailsResult = `
   type BatchDetailsResult {
     batchCode: String
     topicTitle: String
+    topicId: ID
+    courseId: ID
     sessionStartTime: String
     startTime: Date
     endTime: Date

@@ -144,6 +144,7 @@ import BlockBasedPracticeAnswerType from './BlockBasedPracticeAnswerType';
 import McqType from './McqType';
 import SessionFeedbackType from './sessionFeedbackType';
 import SessionFeedbackCategory from './SessionFeedbackCategory';
+import DatabaseDialect from './DatabaseDialect';
 
 export default [
   Status,
@@ -293,4 +294,5 @@ export default [
   McqType,
   SessionFeedbackType,
   SessionFeedbackCategory,
+  DatabaseDialect,
 ];

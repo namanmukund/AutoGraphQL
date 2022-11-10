@@ -3,6 +3,7 @@ import { authenticateUser, authenticateApp, ifAuthorized } from './ifAuthorized'
 import generateCuid from './generateCuid';
 import schema from '../graphqlSchema';
 import dbConfig from '../config/mongoDb';
+import sqlDBConfig from '../config/postgreSQL';
 import toObject from './toObject';
 import isErrorThrown from './isErrorThrown';
 import encodeToken from './encodeToken';
@@ -48,6 +49,7 @@ export {
   types,
   functions,
   dbConfig,
+  sqlDBConfig,
   isErrorThrown,
   formatToParamString,
   authenticateUser,

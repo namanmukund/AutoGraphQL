@@ -30,6 +30,11 @@ const schoolLiveClassLoginViaOtp = async (
     bypass: true,
   });
   const userModalQuery = new QueryController(USER_TYPE, authentication);
+  if (get(input, 'buddyLoginInput', []).length === 1) {
+    Object.assign(input, {
+      userId: get(input, 'buddyLoginInput[0].userId')
+    })
+  }
   if (get(input, 'userId')) {
     const userData = await getUserFromDBQuery({ id: get(input, 'userId') }, userModalQuery);
     const userTokenData = createUserTokenTypeData(userData, authentication);
