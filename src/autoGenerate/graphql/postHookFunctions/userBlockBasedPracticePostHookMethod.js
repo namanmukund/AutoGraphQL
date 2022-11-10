@@ -86,7 +86,7 @@ const findOrCreateParentFolder = async (
   fileOrFolderName,
   parentFolderId,
 ) => {
-  const gSuitController = new GSuitController();
+  const gSuitController = new GSuitController({ bypass: true });
   const gsuitData = await gSuitController.getDriveFiles(parentFolderId);
   if (!gsuitData) throw new Error('Not able to fetch the data');
   const isFolderAlreadyExists = gsuitData.data.files.find(
@@ -110,7 +110,7 @@ const createGsuitFile = async (
   schoolName,
   classroomTitle,
 ) => {
-  const gSuitController = new GSuitController();
+  const gSuitController = new GSuitController({ bypass: true });
   let fileCreationResponse = {};
   let gsuitFileType = '';
   if (practiceResult.gsuitTempleteURL) {
@@ -271,20 +271,24 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
       );
     }
 
-    //  if layout==gsuit => duplicateURL or create
-    // Step 4
-    // store in GsuitFile object
     let gsuitResponseString = '';
     if (fileCreationResponse) {
+      const responseToGsuitMappings = {
+        fileId: 'id',
+        name: 'name',
+        url: 'webViewLink',
+        mimeType: 'mimeType',
+        parentsId: 'parents',
+        iconLink: 'iconLink',
+        createdTime: 'createdTime',
+        thumbnailUrl: 'thumbnailUrl',
+      };
       gsuitResponseString = '{gsuitFile: {';
-      if (fileCreationResponse.id) gsuitResponseString += `fileId: '${fileCreationResponse.id}',`;
-      if (fileCreationResponse.name) gsuitResponseString += `name: '${fileCreationResponse.name}',`;
-      if (fileCreationResponse.webViewLink) gsuitResponseString += `url: '${fileCreationResponse.webViewLink}',`;
-      if (fileCreationResponse.hasThumbnail) gsuitResponseString += `thumbnailUrl: 'https://drive.google.com/thumbnail?sz=w640&id=${fileCreationResponse.id}',`;
-      if (fileCreationResponse.mimeType) gsuitResponseString += `mimeType : '${fileCreationResponse.mimeType}',`;
-      if (fileCreationResponse.parents) gsuitResponseString += `parentsId: '${fileCreationResponse.parents}',`;
-      if (fileCreationResponse.iconLink) gsuitResponseString += `iconLink: '${fileCreationResponse.iconLink}',`;
-      if (fileCreationResponse.createdTime) gsuitResponseString += `createdTime: '${fileCreationResponse.createdTime}'`;
+      Object.keys(responseToGsuitMappings).forEach((key) => {
+        if (key === 'thumbnailUrl' && fileCreationResponse.hasThumbnail) {
+          gsuitResponseString += `${key}: '${fileCreationResponse[`${responseToGsuitMappings[key]}`]}',`;
+        } else gsuitResponseString += `${key}: '${fileCreationResponse[`${responseToGsuitMappings[key]}`]}',`;
+      });
       gsuitResponseString += '}}';
     }
     const gsuitSuitMeta = fileCreationResponse;

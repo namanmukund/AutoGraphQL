@@ -604,6 +604,10 @@ const ALLOWED_HEADERS = [
 
 const GDRIVE_BASE_ID = '10F9f2lE_Sjb7u7Gge-kBECt7aSzt83UK';
 
+const SCOPES = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/drive.appdata', 'https://www.googleapis.com/auth/drive.photos.readonly'];
+
+const GSUIT_FILE_TYPES = ['drive', 'spreadsheet', 'presentation', 'document'];
+
 export {
   scalarTypes,
   defaultFields,
@@ -723,4 +727,6 @@ export {
   ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER,
   HEADER_VARIABLES,
   GDRIVE_BASE_ID,
+  SCOPES,
+  GSUIT_FILE_TYPES,
 };

@@ -1,43 +1,52 @@
 import { google } from 'googleapis';
+import { credentials } from '../../../../config/gsuitCredentials';
+import { SCOPES, GSUIT_FILE_TYPES } from '../../../../constants';
+import MasterController from './MasterController';
 
-class GSuitController {
-    #auth;
+class GSuitController extends MasterController {
+    #googleAuth;
 
-    constructor() {
-      this.#auth = new google.auth.GoogleAuth({
-        keyFile: './src/autoGenerate/graphql/controllers/credentials.json',
-        scopes: ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/drive.appdata', 'https://www.googleapis.com/auth/drive.photos.readonly'],
+    constructor(authentication) {
+      const model = '';
+      super(model, authentication);
+      this.#googleAuth = new google.auth.GoogleAuth({
+        credentials,
+        scopes: SCOPES,
       });
     }
 
     // eslint-disable-next-line class-methods-use-this
     validateType(type) {
-      if (['drive', 'spreadsheet', 'presentation', 'document'].includes(type)) return true;
+      if (GSUIT_FILE_TYPES.includes(type)) return true;
       return false;
     }
 
-    getClientInstanceByType = (type, version) => {
-      const auth = this.#auth;
-      if (!this.validateType(type)) throw Error(`[${type}]({ ${version}, ${auth} }) Invalid Instance Type`);
-      return google[type]({ version, auth });
+    getClientInstanceByType = (type) => {
+      const version = 'v3';
+      const googleAuth = this.#googleAuth;
+      if (!this.validateType(type)) throw Error(`[${type}]({ ${version}, ${googleAuth} }) Invalid Instance Type`);
+      return google[type]({ version, auth: googleAuth });
     }
 
-    getDriveFiles = (ID_OF_THE_FOLDER) => {
-      const drives = this.getClientInstanceByType('drive', 'v3');
-      if (ID_OF_THE_FOLDER) {
-        return drives.files.list({
+    getDriveFiles = (parentFolderId) => {
+      const driveController = this.getClientInstanceByType('drive');
+      let requestBody = {};
+      if (parentFolderId) {
+        requestBody = {
           fields: '*',
-          q: `'${ID_OF_THE_FOLDER}' in parents and trashed=false`,
-        });
+          q: `'${parentFolderId}' in parents and trashed=false`,
+        };
+      } else {
+        requestBody = {
+          fields: '*',
+        };
       }
-      return drives.files.list({
-        fields: '*',
-      });
+      return driveController.files.list(requestBody);
     }
 
     // ID_OF_THE_FOLDER is related to id of it's parent folder
     createFileOrFolder = async (name, mimeType, parentId) => {
-      const drives = this.getClientInstanceByType('drive', 'v3');
+      const driveController = this.getClientInstanceByType('drive');
       let requestBody = {};
       if (parentId) {
         requestBody = {
@@ -51,7 +60,7 @@ class GSuitController {
           name,
         };
       }
-      const newFolder = await drives.files.create({
+      const newFolder = await driveController.files.create({
         fields: '*',
         requestBody,
       });
@@ -59,12 +68,12 @@ class GSuitController {
       return newFolder;
     }
 
-    updateParentDirectory = async (childId, parentId) => {
-      const drives = this.getClientInstanceByType('drive', 'v3');
+    updateParentDirectory = async (currentFileId, parentFolderId) => {
+      const driveController = this.getClientInstanceByType('drive');
       try {
-        return drives.files.update({
-          fileId: childId,
-          addParents: parentId,
+        return driveController.files.update({
+          fileId: currentFileId,
+          addParents: parentFolderId,
           fields: 'id, parents',
         });
       } catch (err) {
@@ -73,7 +82,7 @@ class GSuitController {
     }
 
     duplicateFileOrFolder = async (ID_OF_THE_FILE, name, parentId) => {
-      const drives = this.getClientInstanceByType('drive', 'v3');
+      const driveController = this.getClientInstanceByType('drive');
       let requestBody = {};
       if (parentId) {
         requestBody = {
@@ -85,7 +94,7 @@ class GSuitController {
           name,
         };
       }
-      const newFile = await drives.files.copy({
+      const newFile = await driveController.files.copy({
         fields: '*',
         fileId: ID_OF_THE_FILE,
         requestBody,
@@ -95,10 +104,10 @@ class GSuitController {
 
     // properties are obj of {type,role,emailAddress,domain} if type is "user" or "group" must provide emailAddress and for "domain" provide domain
     updatePermission = async (id, properties) => {
-      const drives = this.getClientInstanceByType('drive', 'v3');
+      const driveController = this.getClientInstanceByType('drive');
       let resource = {};
 
-      if (properties.type === 'user' || properties.type === 'group') {
+      if (properties && (properties.type === 'user' || properties.type === 'group')) {
         resource = {
           role: properties.role,
           type: properties.type,
@@ -116,7 +125,7 @@ class GSuitController {
           type: 'anyone',
         };
       }
-      return drives.permission.create({
+      return driveController.permission.create({
         fields: '*',
         fileId: id,
         resource,
@@ -124,17 +133,17 @@ class GSuitController {
     }
 
     deleteFileOrFolder = async (id) => {
-      const drives = this.getClientInstanceByType('drive', 'v3');
-      return drives.files.delete({
+      const driveController = this.getClientInstanceByType('drive');
+      return driveController.files.delete({
         fields: '*',
         fileId: id,
       });
     }
 
     getFileOrFolderDetails = async (id) => {
-      const drives = this.getClientInstanceByType('drive', 'v3');
+      const driveController = this.getClientInstanceByType('drive');
       try {
-        return drives.files.get({
+        return driveController.files.get({
           fields: '*',
           fileId: id,
         });
