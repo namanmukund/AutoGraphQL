@@ -12,6 +12,7 @@ const UserSessionDump = sequelize.define(
       defaultValue: cuid(),
       primaryKey: true,
     },
+    studentId: { type: DataTypes.STRING, allowNull: false },
     studentName: { type: DataTypes.STRING, allowNull: false },
     userRole: { type: DataTypes.STRING, allowNull: false },
     studentEmail: { type: DataTypes.STRING, allowNull: false },
