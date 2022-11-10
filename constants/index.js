@@ -549,6 +549,11 @@ const dbControllerModes = {
   cascade: 'cascade',
 };
 
+const DATABASE_DIALECTS = {
+  mongodb: 'mdb',
+  postgres: 'pg',
+};
+
 const DEFAULT_CLAMP_VALUE = {
   MIN: 0,
   MAX: 100,
@@ -601,6 +606,8 @@ const ALLOWED_HEADERS = [
   'BatchSession-Id',
   ...ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER.map((VAR) => VAR.headerLabel),
 ];
+
+const PG_MODEL_SUFFIX = '.pg.model.js';
 
 export {
   scalarTypes,
@@ -720,4 +727,6 @@ export {
   ALLOWED_HEADERS,
   ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER,
   HEADER_VARIABLES,
+  DATABASE_DIALECTS,
+  PG_MODEL_SUFFIX,
 };
