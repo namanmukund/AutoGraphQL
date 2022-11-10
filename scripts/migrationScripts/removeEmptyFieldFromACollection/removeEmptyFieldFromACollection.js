@@ -25,7 +25,7 @@ const removeEmptyFieldFromACollection = async (targetedCollection, targetedField
   }
   process.exit(0);
 };
-db.once('open', () => {
+db.mongoose.once('open', () => {
   const targetedCollection = process.argv[2];
   const targetedField = process.argv[3];
   if (!targetedCollection || !targetedField) {

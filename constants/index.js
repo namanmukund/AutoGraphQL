@@ -549,6 +549,11 @@ const dbControllerModes = {
   cascade: 'cascade',
 };
 
+const DATABASE_DIALECTS = {
+  mongodb: 'mdb',
+  postgres: 'pg',
+};
+
 const DEFAULT_CLAMP_VALUE = {
   MIN: 0,
   MAX: 100,
@@ -607,6 +612,8 @@ const GDRIVE_BASE_ID = '10F9f2lE_Sjb7u7Gge-kBECt7aSzt83UK';
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/drive.appdata', 'https://www.googleapis.com/auth/drive.photos.readonly'];
 
 const GSUIT_FILE_TYPES = ['drive', 'spreadsheet', 'presentation', 'document'];
+
+const PG_MODEL_SUFFIX = '.pg.model.js';
 
 export {
   scalarTypes,
@@ -729,4 +736,6 @@ export {
   GDRIVE_BASE_ID,
   SCOPES,
   GSUIT_FILE_TYPES,
+  DATABASE_DIALECTS,
+  PG_MODEL_SUFFIX,
 };
