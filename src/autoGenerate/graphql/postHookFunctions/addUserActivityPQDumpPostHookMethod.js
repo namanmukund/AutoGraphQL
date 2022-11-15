@@ -13,7 +13,7 @@ import updateCurrentComponentStatusOfNewCourse from './utils/updateCurrentCompon
 import updateCurrentComponentStatus from './utils/updateCurrentComponentStatus';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import topicComponentRuleQuery from './utils/topicComponentRuleQuery';
-import sqlDump from './sqlDump';
+import reportDump from './reportDump';
 
 /* query to get userLO to check if document exists for userId and learningObjectiveId
 also we are doing computation for chatStatus and next component for this */
@@ -531,7 +531,7 @@ And current component status will not get changed when it is already consumed in
         input: pqReportInput,
       });
     }
-    sqlDump(input, mutationName, context);
+    reportDump(input, mutationName, context);
     return true;
   }
   // PQ report will be generated every time when user hits next
@@ -544,7 +544,7 @@ And current component status will not get changed when it is already consumed in
       input: pqReportInput,
     });
   }
-  sqlDump(input, mutationName, context);
+  reportDump(input, mutationName, context);
   return true;
 };
 

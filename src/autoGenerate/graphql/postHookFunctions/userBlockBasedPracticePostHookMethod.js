@@ -6,7 +6,7 @@ import getInfoFromParams from './utils/getInfoFromParams';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { MENTEE } from '../../../../constants/roles';
-import sqlDump from './sqlDump';
+import reportDump from './reportDump';
 
 const filterAndDeleteIfDupicate = (resultArray, context) => {
   const uniqueBlockBasedPractice = [];
@@ -159,7 +159,7 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context, muta
   }
 
   resultArray = filterAndDeleteIfDupicate(resultArray, context);
-  sqlDump(input, mutationName, context);
+  reportDump(input, mutationName, context);
   return resultArray;
 };
 

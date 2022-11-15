@@ -1,5 +1,11 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable no-unused-vars */
-const sqlDump = async (input, mutationOrQueryName, context) => {
+import cuid from 'cuid';
+import MasterController from '../../controllers/MasterController';
+
+const USER_SESSION_DUMP_TYPE = 'UserSessionDump';
+const reportDump = async (input, mutationOrQueryName, context) => {
+  const userSessionDumpController = new MasterController(USER_SESSION_DUMP_TYPE);
   switch (mutationOrQueryName) {
     case 'userQuiz':
       break;
@@ -34,6 +40,9 @@ const sqlDump = async (input, mutationOrQueryName, context) => {
     default:
       break;
   }
+  const docId = cuid();
+  input.id = docId;
+  const userSessionReport = await userSessionDumpController.Model.create({ ...input });
 };
 
-export default sqlDump;
+export default reportDump;

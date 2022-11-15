@@ -6,7 +6,7 @@ import {
 } from '../../../../constants';
 import { log } from '../../../../utils';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
-import sqlDump from './sqlDump';
+import reportDump from './reportDump';
 import updateCurrentComponentStatusOfNewCourse from './utils/updateCurrentComponentStatusOfNewCourse';
 
 // query to get userLO to check if document exists for userId, blockBasedProjectId and topicId
@@ -180,7 +180,7 @@ const addUserActivityBlockBasedProjectDumpPostHookMethod = async (input, mutatio
     startTime,
     endTime,
   ), context);
-  sqlDump(input, mutationName, context);
+  reportDump(input, mutationName, context);
   return true;
 };
 
