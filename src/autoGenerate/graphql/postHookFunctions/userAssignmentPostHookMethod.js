@@ -195,6 +195,7 @@ const userAssignmentPostHookMethod = async (input, params, mutationName, context
       resultArray.push(parseTopicComponentResultData(addUserAssignmentResult, 'assignment'));
     }
   }
+  sqlDump(input, mutationName, context);
   return resultArray;
 };
 

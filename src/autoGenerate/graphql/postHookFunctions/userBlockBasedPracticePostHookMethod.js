@@ -6,6 +6,7 @@ import getInfoFromParams from './utils/getInfoFromParams';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { MENTEE } from '../../../../constants/roles';
+import sqlDump from './sqlDump';
 
 const filterAndDeleteIfDupicate = (resultArray, context) => {
   const uniqueBlockBasedPractice = [];
@@ -78,7 +79,7 @@ It will be created and returned to tekie app.
 Document contains all the necessary information needed on page along
 with the next component.
 */
-const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
+const userBlockBasedPracticePostHookMethod = async (input, params, context, mutationName) => {
   if (typeof input === 'object' && get(input, 'id')) {
     return input;
   }
@@ -158,6 +159,7 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
   }
 
   resultArray = filterAndDeleteIfDupicate(resultArray, context);
+  sqlDump(input, mutationName, context);
   return resultArray;
 };
 

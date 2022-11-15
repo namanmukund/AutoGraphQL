@@ -7,6 +7,7 @@ import parseTopicComponentResultData from './utils/parseTopicComponentResultData
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { fetchAndCacheQueryRes } from '../resolvers/mutation/userData/menteeCourseSyllabus';
 import { topicAssignmentAndQuizQuery } from './userAssignmentPostHookMethod';
+import sqlDump from './sqlDump';
 
 // query to add UserQuiz if it is not already present for user and topic id
 const addUserQuizMutation = (
@@ -124,6 +125,7 @@ const userQuizPostHookMethod = async (input, params, mutationName, context) => {
       resultArray.push(parseTopicComponentResultData(addUserQuizResult, 'quiz'));
     }
   }
+  sqlDump(input, mutationName, context);
   return resultArray;
 };
 

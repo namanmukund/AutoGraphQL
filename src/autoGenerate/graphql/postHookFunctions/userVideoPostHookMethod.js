@@ -6,6 +6,7 @@ import {
 import getInfoFromParams from './utils/getInfoFromParams';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import sqlDump from './sqlDump';
 
 // query to get topic and it's Lo with order 1
 const topicQuery = (topicId) => `
@@ -136,6 +137,7 @@ const userVideoPostHookMethod = async (input, params, mutationName, context) => 
       resultArray.push(parseTopicComponentResultData(addUserVideoResult, 'video'));
     }
   }
+  sqlDump(input, mutationName, context);
   return resultArray;
 };
 
