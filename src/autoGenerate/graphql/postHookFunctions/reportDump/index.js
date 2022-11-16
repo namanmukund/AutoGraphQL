@@ -7,35 +7,29 @@ const USER_SESSION_DUMP_TYPE = 'UserSessionDump';
 const reportDump = async (input, mutationOrQueryName, context) => {
   const userSessionDumpController = new MasterController(USER_SESSION_DUMP_TYPE);
   switch (mutationOrQueryName) {
-    case 'userQuiz':
+    case 'addUserQuiz':
       break;
-    case 'userVideo':
+    case 'updateUserQuiz':
       break;
-    case 'userAssignment':
+    case 'addUserVideo':
       break;
-    case 'userBlockBasedProject':
+    case 'updateUserVideo':
       break;
-    case 'userLearningObjective':
+    case 'addUserAssignment':
       break;
-    case 'userBlockBasedPractice':
+    case 'updateUserAssignment':
       break;
-    case 'addUserActivityVideoDump':
+    case 'addUserBlockBasedPractice':
       break;
-    case 'addUserActivityChatDump':
+    case 'updateUserBlockBasedPractice':
       break;
-    case 'addUserActivityPQDump':
+    case 'addUserLearningObjective':
       break;
-    case 'addUserActivityQuizDump':
+    case 'updateUserLearningObjective':
       break;
-    case 'addUserActivityAssignmentDump':
+    case 'addUserBlockBasedProject':
       break;
-    case 'addUserActivityComicStripDump':
-      break;
-    case 'addUserActivityBlockBasedPracticeDump':
-      break;
-    case 'addUserActivityBlockBasedProjectDump':
-      break;
-    case 'addUserActivityLearningSlideDump':
+    case 'updateUserBlockBasedProject':
       break;
     default:
       break;

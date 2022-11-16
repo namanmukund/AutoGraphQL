@@ -7,7 +7,6 @@ import getInfoFromParams from './utils/getInfoFromParams';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { fetchAndCacheQueryRes } from '../resolvers/mutation/userData/menteeCourseSyllabus';
-import reportDump from './reportDump';
 
 // query to get learning objective and all the learning objectives of the topic associated
 const learningObjectiveQuery = (learningObjectiveId) => `
@@ -172,7 +171,6 @@ const userLearningObjectivePostHookMethod = async (input, params, _mutationName,
       resultArray.push(parseTopicComponentResultData(addUserLearningObjectiveResult, 'learningObjective'));
     }
   }
-  reportDump(input, _mutationName, context);
   return resultArray;
 };
 

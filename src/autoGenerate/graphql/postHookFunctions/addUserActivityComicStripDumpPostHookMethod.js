@@ -5,7 +5,6 @@ import {
 } from '../../../../constants';
 import { log } from '../../../../utils';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
-import reportDump from './reportDump';
 import topicComponentRuleQuery from './utils/topicComponentRuleQuery';
 import updateCurrentComponentStatusOfNewCourse from './utils/updateCurrentComponentStatusOfNewCourse';
 
@@ -145,7 +144,6 @@ const addUserActivityComicStripDumpPostHookMethod = async (input, mutationName, 
     isComicStripBookmarked,
     comicStripStatus,
   ), context);
-  reportDump(input, mutationName, context);
   return true;
 };
 

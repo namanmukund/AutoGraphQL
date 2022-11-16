@@ -8,7 +8,6 @@ import { log } from '../../../../utils';
 import updateCurrentComponentStatus from './utils/updateCurrentComponentStatus';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import updateCurrentComponentStatusOfNewCourse from './utils/updateCurrentComponentStatusOfNewCourse';
-import reportDump from './reportDump';
 
 /*
 query to get User video for given user and topic id
@@ -189,7 +188,6 @@ const addUserActivityVideoDumpPostHookMethod = async (input, mutationName, conte
     isBookmarked,
     isLiked,
     status), context);
-  reportDump(input, mutationName, context);
   return true;
 };
 

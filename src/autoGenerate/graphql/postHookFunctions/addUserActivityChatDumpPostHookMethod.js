@@ -9,7 +9,6 @@ import updateCurrentComponentStatus from './utils/updateCurrentComponentStatus';
 import updateCurrentComponentStatusOfNewCourse from './utils/updateCurrentComponentStatusOfNewCourse';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import topicComponentRuleQuery from './utils/topicComponentRuleQuery';
-import reportDump from './reportDump';
 
 // query to get userLO to check if document exists for userId and learningObjectiveId
 const userLearningObjectiveQuery = (userId, learningObjectiveId, courseId) => `
@@ -157,7 +156,6 @@ const addUserActivityChatDumpPostHookMethod = async (input, mutationName, contex
     isChatBookmarked,
     chatStatus,
   ), context);
-  reportDump(input, mutationName, context);
   return true;
 };
 

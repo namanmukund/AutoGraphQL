@@ -6,7 +6,6 @@ import getInfoFromParams from './utils/getInfoFromParams';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { MENTEE } from '../../../../constants/roles';
-import reportDump from './reportDump';
 
 // query to add UserBlockBasedProject if it is not already present for user, blockBasedProjectId and topic id
 const addUserBlockBasedProjectMutation = (
@@ -50,7 +49,7 @@ It will be created and returned to tekie app.
 Document contains all the necessary information needed on page along
 with the next component.
 */
-const userBlockBasedProjectPostHookMethod = async (input, params, context, mutationName) => {
+const userBlockBasedProjectPostHookMethod = async (input, params, context) => {
   /*
   checking if document is already present in collection for user and topic id,
   returning input in that case
@@ -96,7 +95,6 @@ const userBlockBasedProjectPostHookMethod = async (input, params, context, mutat
       resultArray.push(parseTopicComponentResultData(addUserBlockBasedProjectResult, 'blockBasedProject'));
     }
   }
-  reportDump(input, mutationName, context);
   return resultArray;
 };
 

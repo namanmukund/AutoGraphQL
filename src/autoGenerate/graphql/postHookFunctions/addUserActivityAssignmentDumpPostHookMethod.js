@@ -12,7 +12,6 @@ import {
 } from '../../../../constants/errors';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import updateCurrentComponentStatusOfNewCourse from './utils/updateCurrentComponentStatusOfNewCourse';
-import reportDump from './reportDump';
 
 // query to fetch user assignment info
 const userAssignmentQuery = (
@@ -247,11 +246,6 @@ const addUserActivityAssignmentDumpPostHookMethod = async (input, mutationName, 
       topicOrder,
     );
   }
-  const reportInputObj = {
-    topicId,
-    userId,
-  };
-  reportDump(reportInputObj, mutationName, context);
   return true;
 };
 

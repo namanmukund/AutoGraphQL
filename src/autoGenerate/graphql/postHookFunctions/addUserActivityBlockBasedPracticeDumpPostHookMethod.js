@@ -6,7 +6,6 @@ import {
 } from '../../../../constants';
 import { log } from '../../../../utils';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
-import reportDump from './reportDump';
 import updateCurrentComponentStatusOfNewCourse from './utils/updateCurrentComponentStatusOfNewCourse';
 
 // query to get userLO to check if document exists for userId, blockBasedPracticeId and topicId
@@ -180,7 +179,6 @@ const addUserActivityBlockBasedPracticeDumpPostHookMethod = async (input, mutati
     startTime,
     endTime,
   ), context);
-  reportDump(input, mutationName, context);
   return true;
 };
 

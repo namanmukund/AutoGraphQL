@@ -2,7 +2,6 @@ import { get, sortBy } from 'lodash';
 import { userActionType, userTopicTypeStatus } from '../../../../constants';
 import { log } from '../../../../utils';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
-import reportDump from './reportDump';
 import topicComponentRuleQuery from './utils/topicComponentRuleQuery';
 import updateCurrentComponentStatusOfNewCourse from './utils/updateCurrentComponentStatusOfNewCourse';
 
@@ -178,7 +177,6 @@ const addUserActivityLearningSlideDumpPostHookMethod = async (input, mutation, c
     startTime,
     endTime,
   ), context);
-  reportDump(input, mutation, context);
   return true;
 };
 

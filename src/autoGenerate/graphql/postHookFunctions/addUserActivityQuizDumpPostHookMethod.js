@@ -15,7 +15,6 @@ import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import validateTokenAndExtractInformation from '../preHookFunctions/validation/utils/validateTokenAndExtractInformation';
 import { MENTEE } from '../../../../constants/roles';
 import getNextComponent from './utils/getNextComponent';
-import reportDump from './reportDump';
 
 // query to fetch user quiz info
 const userQuizQuery = (
@@ -1020,7 +1019,6 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
     //   context,
     // );
   }
-  reportDump(input, mutationName, context);
   return true;
 };
 
