@@ -31,7 +31,6 @@ const getTypeQueryController = (
 ) => new QueryController(typeName, authentication);
 
 const reportDump = async (input, mutationOrQueryName, context) => {
-  const userSessionDumpController = new MasterController(documentTypes.USER_SESSION_DUMP_TYPE);
   let reportsInputObj = {};
   switch (mutationOrQueryName) {
     case 'addUserVideo':
@@ -213,15 +212,15 @@ const reportDump = async (input, mutationOrQueryName, context) => {
   if (Object.keys(reportsInputObj).length) {
     const activeClassroomId = getDataFromContext(context, 'activeClassroom');
     const activeSessionId = getDataFromContext(context, 'activeSessionId');
-    const docId = cuid();
     reportsInputObj = {
       ...reportsInputObj,
-      id: docId,
+      id: cuid(),
       sessionId: activeSessionId || '',
       classroomId: activeClassroomId || '',
       mongoDocCreatedAt: get(input, 'createdAt'),
       mongoDocUpdatedAt: get(input, 'updatedAt'),
     };
+    const userSessionDumpController = new MasterController(documentTypes.USER_SESSION_DUMP_TYPE);
     await userSessionDumpController.Model.create({ ...reportsInputObj });
   }
 };
