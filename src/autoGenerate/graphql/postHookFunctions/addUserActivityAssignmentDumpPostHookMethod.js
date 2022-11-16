@@ -247,7 +247,11 @@ const addUserActivityAssignmentDumpPostHookMethod = async (input, mutationName, 
       topicOrder,
     );
   }
-  reportDump(input, mutationName, context);
+  const reportInputObj = {
+    topicId,
+    userId,
+  };
+  reportDump(reportInputObj, mutationName, context);
   return true;
 };
 
