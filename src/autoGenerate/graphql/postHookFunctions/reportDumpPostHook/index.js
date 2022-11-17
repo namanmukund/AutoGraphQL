@@ -30,7 +30,7 @@ const getTypeQueryController = (
   },
 ) => new QueryController(typeName, authentication);
 
-const reportDump = async (input, mutationOrQueryName, context) => {
+const reportDumpPostHook = async (input, mutationOrQueryName, context) => {
   let reportsInputObj = {};
   switch (mutationOrQueryName) {
     case 'addUserVideo':
@@ -225,4 +225,4 @@ const reportDump = async (input, mutationOrQueryName, context) => {
   }
 };
 
-export default reportDump;
+export default reportDumpPostHook;
