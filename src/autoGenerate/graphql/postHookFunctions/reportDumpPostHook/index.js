@@ -5,6 +5,7 @@ import { childTopicComponents, operationName, topicComponents } from '../../../.
 import getDataFromContext from '../../../../../utils/getDataFromContext';
 import { QueryController } from '../../controllers';
 import MasterController from '../../controllers/MasterController';
+import { validateTokenAndExtractInformation } from '../../preHookFunctions/validation/utils';
 
 const {
   video, learningObjective, assignment, quiz, blockBasedProject,
@@ -13,7 +14,7 @@ const {
 
 const { practiceQuestion } = childTopicComponents;
 
-const { add, update } = operationName;
+const { add, update, delete: deleteOperation } = operationName;
 
 const documentTypes = {
   USER_SESSION_DUMP_TYPE: 'UserSessionDump',
@@ -205,6 +206,27 @@ const reportDumpPostHook = async (input, mutationOrQueryName, context) => {
           eventType: update,
         });
       }
+      break;
+    case 'addBatchSession':
+    case 'updateBatchSession':
+    case 'deleteBatchSession':
+      const userInfo = validateTokenAndExtractInformation(context, false);
+      let eventType = add;
+      if (mutationOrQueryName === 'updateBatchSession') eventType = update;
+      if (mutationOrQueryName === 'deleteBatchSession') eventType = deleteOperation;
+      reportsInputObj = {
+        topicId: get(input, 'topic.typeId'),
+        componentType: 'batchSession',
+        classroomId: get(input, 'batch.typeId'),
+        sessionId: get(input, 'id'),
+        componentId: get(input, 'id'),
+        eventType,
+        userId: get(userInfo, 'currentUser.id'),
+        recordRawDump: [{
+          sessionId: get(input, 'id'),
+          classroomId: get(input, 'batch.typeId'),
+        }],
+      };
       break;
     default:
       break;
