@@ -618,7 +618,9 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
       if (get(batchSession, 'id') === get(input, 'id')) {
         return {
           ...batchSession,
-          ...(input || {}),
+          sessionStartDate: get(input, 'sessionStartDate', get(batchSession, 'sessionStartDate')),
+          sessionEndDate: get(input, 'sessionEndDate', get(batchSession, 'sessionEndDate')),
+          sessionStatus: get(input, 'sessionStatus', get(batchSession, 'sessionStatus')),
         };
       }
       return batchSession;
