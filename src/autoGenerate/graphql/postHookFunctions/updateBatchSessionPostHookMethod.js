@@ -604,5 +604,29 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
       auditType: auditTypeValues.mentor,
     });
   }
+  if (get(params, 'input.logoutAllStudents') !== undefined && get(params, 'input.logoutAllStudents') === true) {
+    const scheduleDate = addMinutesToDate(new Date(), 5);
+    addToSchedule('updateLogoutAllStudents', scheduleDate, { batchSessionId, context });
+  }
+
+  const cacheController = new CacheController({ bypass: true });
+  const cachedBatchSessions = await cacheController.get(`batchSessions::${get(input, 'batch.typeId')}`);
+  if (cachedBatchSessions && cachedBatchSessions.length) {
+    const updatedBatchSessions = cachedBatchSessions.map((batchSession) => {
+      if (get(batchSession, 'id') === get(input, 'id')) {
+        return {
+          ...batchSession,
+          sessionStartDate: get(input, 'sessionStartDate', get(batchSession, 'sessionStartDate')),
+          sessionEndDate: get(input, 'sessionEndDate', get(batchSession, 'sessionEndDate')),
+          sessionStatus: get(input, 'sessionStatus', get(batchSession, 'sessionStatus')),
+        };
+      }
+      return batchSession;
+    });
+    await cacheController.set(updatedBatchSessions, {
+      hkey: `batchSessions::${get(input, 'batch.typeId')}`,
+      maxAge: 24 * 60 * 60,
+    });
+  }
 };
 export default updateBatchSessionPostHookMethod;
