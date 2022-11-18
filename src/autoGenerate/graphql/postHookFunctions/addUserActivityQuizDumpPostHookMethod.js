@@ -1025,7 +1025,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
   if (quizAction === next) {
     // calling method to evaluate quiz and generate report
     const userQuizReportRes = await callLocalGraphqlApi(fetchUserQuizReport(userId, topicId, courseId));
-    const existingUserQuizReportId = get(userQuizReportRes, 'data.userQuizReports[0].id');
+    let userQuizReportId = get(userQuizReportRes, 'data.userQuizReports[0].id', '');
     const {
       pushManyQuery,
       quizReportQuery,
@@ -1036,7 +1036,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
       quizQuestions,
       courseId,
       context,
-      existingUserQuizReportId,
+      userQuizReportId,
     );
     if (!userQuizId) {
       log('Not able to fetch userQuizId in addUserActivityQuizDumpPostHookMethod');
@@ -1048,10 +1048,8 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
       nextTopicId,
       'quiz',
     );
-    let userQuizReportId = '';
-    if (existingUserQuizReportId) {
-      userQuizReportId = existingUserQuizReportId;
-      await callLocalGraphqlApi(updateUserQuizReport(existingUserQuizReportId,
+    if (userQuizReportId) {
+      await callLocalGraphqlApi(updateUserQuizReport(userQuizReportId,
         userId,
         topicId,
         quizReportQuery,
