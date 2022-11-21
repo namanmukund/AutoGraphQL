@@ -18,6 +18,7 @@ const UserSessionDump = sequelize.define(
     componentId: { type: DataTypes.STRING, allowNull: false },
     recordRawDump: { type: DataTypes.ARRAY(DataTypes.JSONB), allowNull: false },
     componentType: { type: DataTypes.STRING, allowNull: false },
+    eventType: { type: DataTypes.STRING, allowNull: false },
     mongoDocCreatedAt: { type: DataTypes.DATE, allowNull: false },
     mongoDocUpdatedAt: { type: DataTypes.DATE, allowNull: false },
     sessionId: { type: DataTypes.STRING },

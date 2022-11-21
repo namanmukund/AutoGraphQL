@@ -1,10 +1,6 @@
-/* eslint-disable import/no-dynamic-require */
-/* eslint-disable global-require */
 /*
   Auto generating models
  */
-import fs from 'fs';
-import path from 'path';
 import mongoose from 'mongoose';
 import { has } from 'lodash';
 import getParsedASTMap from '../utils/getParsedASTMap';
@@ -13,9 +9,9 @@ import getDirectiveArgumentValue, { getTypeDirectiveArgumentValue } from '../uti
 import {
   getEnumTypeMongooseSchema, visitField, hasDirective, getEnumDefinitionTypeObject,
 } from '../utils';
-import { DATABASE_DIALECTS, PG_MODEL_SUFFIX } from '../../../constants';
-
-const basename = path.basename(__filename);
+import { DATABASE_DIALECTS } from '../../../constants';
+import UserSessionDumpModel from './userSessionDump.pg.model';
+import UserSessionReportModel from './userSessionReport.pg.model';
 
 const { Schema } = mongoose;
 // uncomment below code to debug mongodb queries
@@ -159,12 +155,8 @@ const createMongooseModelsFromSchema = (allModelsSchema, typesSchema) => {
 
   // Generating SQL models from filesystem if any.
   const sqlModels = {};
-  fs.readdirSync(__dirname)
-    .filter((file) => (
-      file.indexOf('.') !== 0 && file !== basename && file.slice(-12) === PG_MODEL_SUFFIX
-    ))
-    .forEach((file) => {
-      const model = require(path.join(__dirname, file)).default;
+  [UserSessionDumpModel, UserSessionReportModel]
+    .forEach((model) => {
       sqlModels[model.name] = model;
     });
 

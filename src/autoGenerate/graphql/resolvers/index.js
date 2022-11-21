@@ -740,6 +740,7 @@ resolvers.Query.duplicateGsuitFileOrFolder = gsuitUtils.duplicateGsuitFileOrFold
 resolvers.Query.deleteGsuitFileOrFolder = gsuitUtils.deleteGsuitFileOrFolder;
 resolvers.Query.gettingGsuitChildFileOrFolder = gsuitUtils.gettingGsuitChildFileOrFolder;
 resolvers.Query.getGsuitFileOrFolderDetails = gsuitUtils.getGsuitFileOrFolderDetails;
+resolvers.Query.createGsuitLastRevisionFile = gsuitUtils.createGsuitLastRevisionFile;
 
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;

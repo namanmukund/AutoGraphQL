@@ -1,3 +1,4 @@
+import { GDRIVE_BASE_ID } from '../../../../../../constants';
 import GSuitController from '../../../controllers/GSuitController';
 
 const createGsuitFileOrFolder = async (_root, params) => {
@@ -52,8 +53,8 @@ const deleteGsuitFileOrFolder = async (_root, params) => {
   const gSuitController = new GSuitController({ bypass: true });
 
   const deletingFileOrFolder = await gSuitController.deleteFileOrFolder(id);
-  if (deletingFileOrFolder) return 'File or folder deleted successfuly.';
-  throw new Error('Not able to fetch the data');
+  if (deletingFileOrFolder) return { result: true };
+  throw new Error({ error: 'Not able to fetch the data' });
 };
 
 const gettingGsuitChildFileOrFolder = async (_root, params) => {
@@ -75,6 +76,73 @@ const getGsuitFileOrFolderDetails = async (_root, params) => {
   throw new Error('Not able to fetch the data');
 };
 
+const findOrCreateParentFolder = async (
+  fileOrFolderName,
+  parentFolderId,
+) => {
+  const gSuitController = new GSuitController({ bypass: true });
+  const gsuitData = await gSuitController.getDriveFiles(parentFolderId);
+  if (!gsuitData) throw new Error('Not able to fetch the data');
+  const isFolderAlreadyExists = gsuitData.data.files.find(
+    (search) => search.name === fileOrFolderName,
+  );
+  if (isFolderAlreadyExists) {
+    return isFolderAlreadyExists.id;
+  }
+  const creatingFileOrFolder = await gSuitController.createFileOrFolder(
+    fileOrFolderName,
+    'folder',
+    parentFolderId,
+  );
+  if (creatingFileOrFolder) return creatingFileOrFolder.data.id;
+  throw new Error('Not able to create file or folder');
+};
+
+const createGsuitLastRevisionFile = async (_root, params) => {
+  const {
+    gsuitTempleteUrlOrFile, gsuitFileType, studentFileCreationName, schoolName, classroomTitle,
+  } = params;
+  const gSuitController = new GSuitController({ bypass: true });
+  let fileCreationResponse = {};
+  let mimeType = '';
+  if (gsuitTempleteUrlOrFile !== 'null') {
+    mimeType = gsuitTempleteUrlOrFile.split('/')[3];
+  }
+  if (gsuitFileType !== 'null') {
+    mimeType = gsuitFileType;
+  }
+  const schoolFolderId = await findOrCreateParentFolder(
+    schoolName,
+    GDRIVE_BASE_ID,
+  );
+  const clasroomsFolderId = await findOrCreateParentFolder(
+    `${classroomTitle}`,
+    schoolFolderId,
+  );
+  const gsuitFileTypeFolderId = await findOrCreateParentFolder(
+    mimeType,
+    clasroomsFolderId,
+  );
+
+  if (gsuitTempleteUrlOrFile !== 'null' && gsuitFileTypeFolderId) {
+    const gsuitId = gsuitTempleteUrlOrFile.split('/')[5];
+    fileCreationResponse = await gSuitController.duplicateFileOrFolder(
+      gsuitId,
+      studentFileCreationName,
+      gsuitFileTypeFolderId,
+    );
+  } else if (gsuitFileTypeFolderId !== 'null') {
+    // Creating File
+    fileCreationResponse = await gSuitController.createFileOrFolder(
+      studentFileCreationName,
+      mimeType,
+      gsuitFileTypeFolderId,
+    );
+  }
+  if (fileCreationResponse) return fileCreationResponse.data;
+  throw new Error('Not able to create file or folder');
+};
+
 export default {
-  createGsuitFileOrFolder, updatePermissionOfGsuitFileOrFolder, updateParentFolderOfGsuitFileOrFolder, duplicateGsuitFileOrFolder, deleteGsuitFileOrFolder, gettingGsuitChildFileOrFolder, getGsuitFileOrFolderDetails,
+  createGsuitFileOrFolder, updatePermissionOfGsuitFileOrFolder, updateParentFolderOfGsuitFileOrFolder, duplicateGsuitFileOrFolder, deleteGsuitFileOrFolder, gettingGsuitChildFileOrFolder, getGsuitFileOrFolderDetails, createGsuitLastRevisionFile,
 };

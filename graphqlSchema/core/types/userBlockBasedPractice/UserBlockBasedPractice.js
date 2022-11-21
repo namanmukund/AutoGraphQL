@@ -19,6 +19,7 @@ const UserBlockBasedPractice = `
     savedBlocks: String
     gsuitFile: GsuitFile
     gsuitLastRevision: GsuitFile
+    isGsuitFileVisited: Boolean
     attachments: [File] @relation(name: "UserBlockBasedPracticeAttachment", direction: "OneWay")
     topic: Topic! @relation(name: "TopicUserBlockBasedPractice", direction: "OneWay")
     course: Course @relation(name: "UserBlockBasedPracticeCourse", direction: "OneWay")

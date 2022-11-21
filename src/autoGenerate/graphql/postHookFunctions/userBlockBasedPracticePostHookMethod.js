@@ -58,7 +58,7 @@ const addUserBlockBasedPracticeMutation = (
     ${blockBasedPracticeId ? `blockBasedPracticeConnectId:"${blockBasedPracticeId}"` : ''}
     input:{
         status: ${userTopicTypeStatus.incomplete}
-        ${gsuitResponse && gsuitResponse.webViewLink ? `answerLink: ${gsuitResponse.webViewLink}` : ''}
+        ${gsuitResponse && gsuitResponse.webViewLink ? `answerLink: "${gsuitResponse.webViewLink}"` : ''}
         ${gsuitResponseString}
     }
     ){
@@ -78,6 +78,16 @@ const addUserBlockBasedPracticeMutation = (
         uri
       }
       savedBlocks
+      gsuitFile {
+        fileId
+        name
+        url
+        thumbnailUrl
+        mimeType
+        parentsId
+        iconLink
+        createdTime
+      }
     }
   }
 `;
@@ -131,14 +141,14 @@ const createGsuitFile = async (
     clasroomsFolderId,
   );
 
-  if (practiceResult.gsuitTempleteURL) {
+  if (practiceResult.gsuitTempleteURL && gsuitFileTypeFolderId) {
     const gsuitId = practiceResult.gsuitTempleteURL.split('/')[5];
     fileCreationResponse = await gSuitController.duplicateFileOrFolder(
       gsuitId,
       studentFileCreationName,
       gsuitFileTypeFolderId,
     );
-  } else {
+  } else if (gsuitFileTypeFolderId) {
     // Creating File
     fileCreationResponse = await gSuitController.createFileOrFolder(
       studentFileCreationName,
@@ -242,12 +252,12 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
   // Get username classroom school grade
   const activeClassroom = await getUserActiveClassroom(context, { courseId });
   const getStudentProfileData = await getStudentProfile(context);
-  const classroomTitle = get(activeClassroom, 'classroomTitle');
-  const schoolName = get(activeClassroom, 'school.name');
+  const classroomTitle = get(activeClassroom, 'classroomTitle', '');
+  const schoolName = get(activeClassroom, 'school.name', '');
   const userData = authenticateUser(context);
   const userName = get(userData, 'name', '');
-  const grade = get(getStudentProfileData, 'grade');
-  const section = get(getStudentProfileData, 'section');
+  const grade = get(getStudentProfileData, 'grade', '');
+  const section = get(getStudentProfileData, 'section', '');
   let gradeSection;
   if (grade && section) gradeSection = `${grade} ${section}`;
 
@@ -283,13 +293,19 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
         createdTime: 'createdTime',
         thumbnailUrl: 'thumbnailUrl',
       };
-      gsuitResponseString = '{gsuitFile: {';
+      gsuitResponseString = 'gsuitFile: {';
       Object.keys(responseToGsuitMappings).forEach((key) => {
-        if (key === 'thumbnailUrl' && fileCreationResponse.hasThumbnail) {
-          gsuitResponseString += `${key}: '${fileCreationResponse[`${responseToGsuitMappings[key]}`]}',`;
-        } else gsuitResponseString += `${key}: '${fileCreationResponse[`${responseToGsuitMappings[key]}`]}',`;
+        if (key === 'thumbnailUrl') {
+          if (fileCreationResponse.hasThumbnail && fileCreationResponse.thumbnailUrl) gsuitResponseString += `${key}: "https://drive.google.com/thumbnail?sz=w640&id=${fileCreationResponse[`${responseToGsuitMappings[key]}`]}" `;
+          return;
+        }
+        if (key === 'parents') {
+          gsuitResponseString += `${key}: ["${fileCreationResponse[`${responseToGsuitMappings[key]}`]}"] `;
+          return;
+        }
+        gsuitResponseString += `${key}: "${fileCreationResponse[`${responseToGsuitMappings[key]}`]}" `;
       });
-      gsuitResponseString += '}}';
+      gsuitResponseString += '}';
     }
     const gsuitSuitMeta = fileCreationResponse;
     /*
