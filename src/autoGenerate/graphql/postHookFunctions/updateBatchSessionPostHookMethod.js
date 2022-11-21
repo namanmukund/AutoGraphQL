@@ -33,6 +33,7 @@ import { MENTEE } from '../../../../constants/roles';
 import { getTopicsFromCoursePackage } from './utils/updateBatchPostHookQueries';
 import getSortedTopics from '../../../../utils/getSortedTopicsFromCoursePackageOrder';
 import { CacheController } from '../controllers';
+import addMinutesToDate from '../../../../utils/addMinutesToDate';
 // import extractBatchSessionAndSendB2B from './utils/extractBatchSessionAndSendB2B';
 
 // query to get chapters and topics belomngin to a course
@@ -605,6 +606,10 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
       auditType: auditTypeValues.mentor,
     });
   }
+  if (get(params, 'input.logoutAllStudents') !== undefined && get(params, 'input.logoutAllStudents') === true) {
+    const scheduleDate = addMinutesToDate(new Date(), 5);
+    addToSchedule('updateLogoutAllStudents', scheduleDate, { batchSessionId, context });
+  }
 
   const cacheController = new CacheController({ bypass: true });
   const cachedBatchSessions = await cacheController.get(`batchSessions::${get(input, 'batch.typeId')}`);
@@ -613,7 +618,9 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
       if (get(batchSession, 'id') === get(input, 'id')) {
         return {
           ...batchSession,
-          ...(input || {}),
+          sessionStartDate: get(input, 'sessionStartDate', get(batchSession, 'sessionStartDate')),
+          sessionEndDate: get(input, 'sessionEndDate', get(batchSession, 'sessionEndDate')),
+          sessionStatus: get(input, 'sessionStatus', get(batchSession, 'sessionStatus')),
         };
       }
       return batchSession;
