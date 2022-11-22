@@ -34,6 +34,7 @@ import { getTopicsFromCoursePackage } from './utils/updateBatchPostHookQueries';
 import getSortedTopics from '../../../../utils/getSortedTopicsFromCoursePackageOrder';
 import { CacheController } from '../controllers';
 import addMinutesToDate from '../../../../utils/addMinutesToDate';
+import { log } from '../../../../utils';
 // import extractBatchSessionAndSendB2B from './utils/extractBatchSessionAndSendB2B';
 
 // query to get chapters and topics belomngin to a course
@@ -607,7 +608,8 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     });
   }
   if (get(params, 'input.logoutAllStudents') !== undefined && get(params, 'input.logoutAllStudents') === true) {
-    const scheduleDate = addMinutesToDate(new Date(), 5);
+    const scheduleDate = addMinutesToDate(new Date(), 1);
+    log('Updating Logout students', scheduleDate);
     addToSchedule('updateLogoutAllStudents', scheduleDate, { batchSessionId, context });
   }
 

@@ -1,6 +1,7 @@
 import { get } from 'lodash';
 import { callLocalGraphqlApi } from '../../../src/api';
 import pubsub from '../../../src/pubsub';
+import { log } from '../../log';
 
 // const updateBatchSessionQuery = (batchSessionId) => ;
 
@@ -20,7 +21,7 @@ const updateLogoutAllStudents = async ({ batchSessionId, context = {} }, deleteJ
       id
     }
   }
-  `, context);
+  `, context).catch((e) => log(e));
   deleteJob();
 };
 
