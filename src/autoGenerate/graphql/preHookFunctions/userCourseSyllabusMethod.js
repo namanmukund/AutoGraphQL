@@ -7,8 +7,7 @@ import {
 } from '../../../../constants/errors';
 import getFirstTopicAndLearningObjective from '../../utils/getFirstTopicAndLearningObjective';
 import addUserCurrentTopicComponentStatus from '../../utils/addUserCurrentTopicComponentStatus';
-import getUserIdandAppNameAfterValidation
-from './validation/utils/getUserIdandAppNameAfterValidation';
+import getUserIdandAppNameAfterValidation from './validation/utils/getUserIdandAppNameAfterValidation';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import getFirstTopicComponents from '../../utils/getFirstTopicComponents';
 import addUserCurrentTopicComponentStatusForNewCourse from '../../utils/addUserCurrentTopicComponentStatusForNewCourse';

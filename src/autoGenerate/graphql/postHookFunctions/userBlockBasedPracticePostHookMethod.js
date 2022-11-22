@@ -7,6 +7,34 @@ import parseTopicComponentResultData from './utils/parseTopicComponentResultData
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { MENTEE } from '../../../../constants/roles';
 
+const filterAndDeleteIfDupicate = (resultArray, context) => {
+  const uniqueBlockBasedPractice = [];
+  const uniqueIds = [];
+  const blockbasedPracticeToBeDeleted = [];
+  resultArray.forEach((result) => {
+    if (!uniqueIds.includes(result.blockBasedPractice.typeId)) {
+      uniqueBlockBasedPractice.push(result);
+      uniqueIds.push(result.blockBasedPractice.typeId);
+    } else {
+      blockbasedPracticeToBeDeleted.push(result.id);
+    }
+  });
+  blockbasedPracticeToBeDeleted.forEach((id) => {
+    callLocalGraphqlApi({
+      query: `
+        mutation {
+          deleteUserBlockBasedPractice(
+            id: "${id}"
+          ) {
+            id
+          }
+        }
+      `,
+    }, context);
+  });
+  return uniqueBlockBasedPractice;
+};
+
 // query to add UserBlockBasedPractice if it is not already present for user, blockBasedProjectId and topic id
 const addUserBlockBasedPracticeMutation = (
   userId,
@@ -41,8 +69,8 @@ const addUserBlockBasedPracticeMutation = (
       }
       savedBlocks
     }
-    }
-    `;
+  }
+`;
 
 /*
 If userBlockBasedPractice document does not exist for provided combination of user id, topic id & blockBasedProjectId.
@@ -51,51 +79,85 @@ Document contains all the necessary information needed on page along
 with the next component.
 */
 const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
-  /*
-  checking if document is already present in collection for user and topic id,
-  returning input in that case
-  if it is not already present, we will add a new document with default data
-  */
-  if ((input && input.length) || (typeof input === 'object' && get(input, 'id'))) {
+  if (typeof input === 'object' && get(input, 'id')) {
     return input;
   }
+  /* eslint-disable prefer-const */
+  let {
+    userId,
+    topicId,
+    courseId,
+    blockBasedPracticeId,
+    blockBasedPracticeIds,
+  } = getInfoFromParams(params, 'blockBasedPractice');
+
+  let resultArray = [];
+
+  // In case there is no topic id or blockBasedPracticeId/blockBasedPracticeIds,
+  // empty data will be sent
+  if ((!topicId || !(blockBasedPracticeId || blockBasedPracticeIds.length > 0))) {
+    return input || resultArray;
+  }
+
+  if (blockBasedPracticeId) {
+    blockBasedPracticeIds = [blockBasedPracticeId];
+  }
+
+  let blockBasedPracticeNotCreated = [];
+
+  /*
+    checking if document is already present in collection for user and topic id,
+    returning input in that case
+    if it is not already present, we will add a new document with default data
+  */
+  if (input && input.length) {
+    const inputArray = Array.isArray(input) ? input : [input];
+    const userBlockBasedPracticeIdsInInput = inputArray.map((item) => get(item, 'blockBasedPractice.typeId'));
+    blockBasedPracticeNotCreated = blockBasedPracticeIds.filter((blockBasedPracticeIdInParam) => !userBlockBasedPracticeIdsInInput.includes(blockBasedPracticeIdInParam));
+    if (blockBasedPracticeNotCreated.length === 0) {
+      const uniqueBlockBasedPractice = filterAndDeleteIfDupicate(inputArray, context);
+      return uniqueBlockBasedPractice;
+    }
+  } else {
+    blockBasedPracticeNotCreated = blockBasedPracticeIds;
+  }
+
   if (get(context, 'userRoleFromContext') && get(context, 'userRoleFromContext') !== MENTEE) {
     return input;
   }
-  const resultArray = [];
-  const {
-    userId,
-    topicId,
-    courseId,
-    blockBasedPracticeId,
-  } = getInfoFromParams(params, 'blockBasedPractice');
-  // In case there is no topic id, empty data will be sent
-  if (!topicId || !blockBasedPracticeId) {
-    return resultArray;
-  }
 
-  /*
-    adding UserBlockBasedPractice document
-    */
-  const result = await callLocalGraphqlApi(addUserBlockBasedPracticeMutation(
-    userId,
-    topicId,
-    courseId,
-    blockBasedPracticeId,
-  ), context);
-  if (result) {
+  /* eslint-disable no-restricted-syntax */
+  /* eslint-disable no-await-in-loop */
+  for (const practiceId of blockBasedPracticeNotCreated) {
     /*
-      parsing data 'addUserBlockBasedPractice' so that the logic implemented ahead can read data is
-      desired format and return the same.
-      Example: suppose client has asked for title and order of topic,
-      In that case he will get title and order only. And this is happening when we parse
-      data as below. If parsing is not done, it is returning empty data.
-      */
-    const addUserBlockBasedPracticeResult = get(result, 'data.addUserBlockBasedPractice');
-    if (addUserBlockBasedPracticeResult) {
-      resultArray.push(parseTopicComponentResultData(addUserBlockBasedPracticeResult, 'blockBasedPractice'));
+      adding UserBlockBasedPractice document
+    */
+    const result = await callLocalGraphqlApi(addUserBlockBasedPracticeMutation(
+      userId,
+      topicId,
+      courseId,
+      practiceId,
+    ), context);
+    if (result) {
+      /*
+        parsing data 'addUserBlockBasedPractice' so that the logic implemented ahead can read data is
+        desired format and return the same.
+        Example: suppose client has asked for title and order of topic,
+        In that case he will get title and order only. And this is happening when we parse
+        data as below. If parsing is not done, it is returning empty data.
+        */
+      const addUserBlockBasedPracticeResult = get(result, 'data.addUserBlockBasedPractice');
+      if (addUserBlockBasedPracticeResult) {
+        resultArray.push(parseTopicComponentResultData(addUserBlockBasedPracticeResult, 'blockBasedPractice'));
+      }
     }
   }
+
+  if (input && input.length) {
+    resultArray = [...resultArray, ...input];
+  }
+
+  resultArray = filterAndDeleteIfDupicate(resultArray, context);
   return resultArray;
 };
 

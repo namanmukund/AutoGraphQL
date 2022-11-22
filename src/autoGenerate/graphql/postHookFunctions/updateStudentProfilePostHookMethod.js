@@ -1,7 +1,9 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import { CacheController } from '../controllers';
 import addUpdateSchoolClass from './utils/addUpdateSchoolClass';
 import purgeUserActiveProfileCache from './utils/purgeUserActiveProfileCache';
+import { addStudentToBatch, removeStudentFromBatch } from './utils/updateStudentBatchUtils';
 
 const updateUserApprovedCodeQuery = async (userApprovedCodeID, input, context) => {
   const query = `
@@ -56,9 +58,14 @@ const removeOldLinkAndAddUpdateSchoolClass = async (previousSchoolClassId, input
   return addUpdateSchoolClass(input, studentSchoolId, studentProfileId, context);
 };
 
+const removeOldLinkAndAddUpdateNewBatch = async (prevBatchId, input, studentSchoolId, studentProfileId, context) => {
+  await removeStudentFromBatch(studentProfileId, prevBatchId, context);
+  return addStudentToBatch(input, studentSchoolId, studentProfileId, context);
+};
+
 const updateStudentProfilePostHookMethod = async (input, params, mutationName, context) => {
+  const userId = get(context, 'previousDocument.user.id');
   if (get(params, 'input.profileAvatarCode') !== get(context, 'previousDocument.profileAvatarCode')) {
-    const userId = get(context, 'previousDocument.user.id');
     const userApprovedCodes = await userApprovedCodeQuery(userId, context);
     const updateObj = {
       studentAvatar: get(input, 'profileAvatarCode', 'theo'),
@@ -119,8 +126,27 @@ const updateStudentProfilePostHookMethod = async (input, params, mutationName, c
       Object.assign(input, { schoolClass: { type: 'SchoolClass', typeId: schoolClassId } });
     }
   }
+  if (schoolId) {
+    let isGradeOrSectionUpdated = false;
+    if (currentGrade && previousGrade !== currentGrade) {
+      isGradeOrSectionUpdated = true;
+    }
+    if (currentSection && previousSection !== currentSection) {
+      isGradeOrSectionUpdated = true;
+    }
+    if (isGradeOrSectionUpdated) {
+      const studentBatchId = get(context, 'previousDocument.batch.id');
+      removeOldLinkAndAddUpdateNewBatch(studentBatchId, {
+        grade: currentGrade, section: currentSection,
+      }, schoolId, get(input, 'id'), context);
+    }
+  }
 
   await purgeUserActiveProfileCache(context);
+  if (get(params, 'batchConnectId') || get(params, 'batchesConnectIds', []).length) {
+    const cacheController = new CacheController({ bypass: true });
+    cacheController.destroy(`user::studentProfile::batches::${userId}`);
+  }
 };
 
 export default updateStudentProfilePostHookMethod;

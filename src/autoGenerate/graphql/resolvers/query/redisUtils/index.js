@@ -1,11 +1,11 @@
-import { RedisController } from '../../../controllers';
+import { CacheController } from '../../../controllers';
 
 const cacheKeys = async (_root, params) => {
   const { pattern } = params;
-  const redisClient = new RedisController({
+  const cacheClient = new CacheController({
     bypass: true,
   });
-  const cachKeys = await redisClient.keys(pattern);
+  const cachKeys = await cacheClient.keys(pattern);
   return {
     meta: cachKeys.length || 0,
     keys: cachKeys,
@@ -14,25 +14,25 @@ const cacheKeys = async (_root, params) => {
 
 const getCache = async (_root, params) => {
   const { key } = params;
-  const redisClient = new RedisController({
+  const cacheClient = new CacheController({
     bypass: true,
   });
-  const cacheData = await redisClient.get(key);
+  const cacheData = await cacheClient.get(key);
   return JSON.stringify(cacheData);
 };
 
 const purgeCache = async (_root, params) => {
   try {
     const { pattern } = params;
-    const redisClient = new RedisController({
+    const cacheClient = new CacheController({
       bypass: true,
     });
     let keysToFlush = [];
     if (pattern) {
-      keysToFlush = await redisClient.keys(pattern);
-      await redisClient.destroy(keysToFlush);
+      keysToFlush = await cacheClient.keys(pattern);
+      await cacheClient.destroy(keysToFlush);
     } else {
-      await redisClient.flushall();
+      await cacheClient.flushall();
     }
     return {
       result: true,

@@ -59,12 +59,16 @@ export const replaceErrors = (key, value) => {
 
 const log = (string, type = 'status', isSentry = false, isError = false) => {
   let dstring = string;
+  let logType = type;
   if (typeof string !== 'string') {
     dstring = JSON.stringify(string, replaceErrors);
   }
+  if ((typeof type === 'object') && type.dialect) {
+    logType = type.dialect || 'status';
+  }
   const formattedString = pe.render(dstring);
   /* eslint-disable no-console */
-  console.log(`${type}: ${formattedString}`);
+  console.log(`${logType}: ${formattedString}`);
   /* eslint-enable no-console */
   if (isSentry && isSentryAppAndEnv(application, env)) {
     if (isError) {

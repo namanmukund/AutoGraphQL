@@ -27,6 +27,7 @@ const userQuizValidation = async (params, context) => {
       '',
       '',
       courseId,
+      false,
     );
   }
   return true;

@@ -1,45 +1,19 @@
 import { get } from 'lodash';
 import {
-  OLD_COURSE_ID,
   PUBLISHED,
   topicTypes,
 } from '../../../../constants';
 import getInfoFromParams from './utils/getInfoFromParams';
-import getNextComponent from './utils/getNextComponent';
-import { DatabaseRecordNotFoundError } from '../../../../constants/errors';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import { fetchAndCacheQueryRes } from '../resolvers/mutation/userData/menteeCourseSyllabus';
 
 // query to get learning objective and all the learning objectives of the topic associated
-const learningObjectiveQuery = (learningObjectiveId, courseId) => `
+const learningObjectiveQuery = (learningObjectiveId) => `
   query{
     learningObjective(id:"${learningObjectiveId}"){
       id
       order
-      topic{
-        id
-        learningObjectives(
-          filter:{
-            status: ${PUBLISHED}
-          }
-          orderBy:order_ASC,
-        ){
-          id
-        }
-      }
-      topics(filter:{and:[
-        ${courseId ? `{courses_some:{id:"${courseId}"}}` : ''}
-      ]}) {
-        id
-        learningObjectives(
-          filter:{
-            status: ${PUBLISHED}
-          }
-          orderBy:order_ASC,
-        ){
-          id
-        }
-      }
       questionBank(filter:{
         and:[
           {
@@ -63,7 +37,6 @@ const learningObjectiveQuery = (learningObjectiveId, courseId) => `
 const addUserLearningObjectiveMutation = (
   userId,
   learningObjectiveId,
-  restQuery,
   practiceQuestionsQuery,
   courseId,
   learningSlidesQuery,
@@ -74,7 +47,6 @@ const addUserLearningObjectiveMutation = (
     learningObjectiveConnectId:"${learningObjectiveId}"
     ${courseId ? `courseConnectId:"${courseId}"` : ''}
     input:{
-        ${restQuery}
         ${practiceQuestionsQuery}
         ${learningSlidesQuery}
     }
@@ -107,15 +79,6 @@ const addUserLearningObjectiveMutation = (
       isChatBookmarked
       practiceQuestionStatus
       isPracticeQuestionBookmarked
-      nextComponent{
-        learningObjective{
-          id
-        }
-        topic{
-          id
-        }
-        nextComponentType
-      }
     }
     }
     `;
@@ -149,24 +112,16 @@ const userLearningObjectivePostHookMethod = async (input, params, _mutationName,
   if (!learningObjectiveId) {
     return resultArray;
   }
-  const learningObjectiveQueryRes = await callLocalGraphqlApi(
-    learningObjectiveQuery(learningObjectiveId, courseId),
-    context,
-  );
+  const learningObjectiveQueryRes = await fetchAndCacheQueryRes({
+    hkey: `static::learningObjective::${learningObjectiveId}`,
+    maxAge: 604800,
+    dbCallback: () => callLocalGraphqlApi(learningObjectiveQuery(learningObjectiveId), context),
+  });
   const learningObjectiveInfo = get(learningObjectiveQueryRes, 'data.learningObjective');
   const {
     questionBank: practiceQuestionsInLO,
     learningSlides: learningSlidesInLO,
   } = learningObjectiveInfo;
-  const topicInfo = get(learningObjectiveInfo, 'topics[0]', null) || get(learningObjectiveInfo, 'topic');
-  if (!topicInfo) {
-    throw new DatabaseRecordNotFoundError({
-      data: {
-        error: 'LearningObjective.topic: is not present',
-      },
-    });
-  }
-  const { id: topicId } = topicInfo;
   // adding PQs to the userLearningObjective document
   let practiceQuestionsQuery = '';
   if (learningObjectiveInfo && practiceQuestionsInLO && practiceQuestionsInLO.length) {
@@ -187,28 +142,6 @@ const userLearningObjectivePostHookMethod = async (input, params, _mutationName,
     learningSlidesQuery += ']';
   }
 
-  // obtaining next LO
-  // next component will be chat of first published LO
-  let restQuery = '';
-  if (!courseId || (courseId === OLD_COURSE_ID)) {
-    const learningObjectivesInTopic = get(topicInfo, 'learningObjectives');
-    let currentLearningObjectiveIndex;
-    learningObjectivesInTopic.forEach((learningObjective, index) => {
-      if (learningObjective.id === learningObjectiveId) {
-        currentLearningObjectiveIndex = index;
-      }
-    });
-    let nextLearningObjectiveId = '';
-    if (currentLearningObjectiveIndex + 1 < learningObjectivesInTopic.length) {
-      nextLearningObjectiveId = learningObjectivesInTopic[currentLearningObjectiveIndex + 1].id;
-    }
-
-    restQuery = getNextComponent(
-      nextLearningObjectiveId,
-      topicId,
-      'learningObjective',
-    );
-  }
   /*
     adding addUserLearningObjective document on the basis of
     restQuery(next component data), practiceQuestionsQuery(published practice questions of LO)
@@ -217,7 +150,6 @@ const userLearningObjectivePostHookMethod = async (input, params, _mutationName,
     addUserLearningObjectiveMutation(
       userId,
       learningObjectiveId,
-      restQuery,
       practiceQuestionsQuery,
       courseId,
       learningSlidesQuery,

@@ -1,8 +1,6 @@
 import remoteConnectDisconnectRelationHandler from './remoteRelation';
-import getQueryForResendValidateAndFinishForgotPassword
-from './getQueryForResendValidateAndFinishForgotPassword';
-import sendEmailSmsForSendResendForgotPasswordOTP
-from './sendEmailSmsForSendResendForgotPasswordOTP';
+import getQueryForResendValidateAndFinishForgotPassword from './getQueryForResendValidateAndFinishForgotPassword';
+import sendEmailSmsForSendResendForgotPasswordOTP from './sendEmailSmsForSendResendForgotPasswordOTP';
 import updateAndIncreaseUsageCountInFile from './updateAndIncreaseUsageCountInFile';
 import updateAndDecreaseUsageCountInFile from './updateAndDecreaseUsageCountInFile';
 import validateSignupExistingUserStatus from './validateSignupExistingUserStatus';

@@ -15,6 +15,7 @@ import scheduleB2BSessionReminder from './scheduleB2BSessionReminder';
 import scheduleB2BSessionHomeworkRemainder from './scheduleB2BSessionHomeworkRemainder';
 import eventNewRegistrationReminder from './jobs/eventNewRegistrationReminder';
 import sendEventCommunication from './jobs/sendEventCommunication';
+import updateLogoutAllStudents from './jobs/updateLogoutAllStudents';
 // import addStudentToEventSession from './jobs/addStudentsToEventSession';
 
 const FETCH_JOBS = `{
@@ -309,6 +310,20 @@ const reRunJobsFromDB = async () => {
               commsVariables,
               templateName,
               isEmailRule,
+            }, deleteJob);
+          });
+        }
+        break;
+      }
+      case 'updateLogoutAllStudents': {
+        if (isPast) {
+          updateLogoutAllStudents({
+            batchSessionId,
+          }, deleteJob);
+        } else {
+          schedule.scheduleJob(new Date(scheduledDate), () => {
+            updateLogoutAllStudents({
+              batchSessionId,
             }, deleteJob);
           });
         }

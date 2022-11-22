@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { get } from 'lodash';
 import {
   learningObjectiveQuizReportThreshHolds,
@@ -7,15 +8,14 @@ import {
   OLD_COURSE_ID,
 } from '../../../../../../constants';
 import {
-  ComponentLockedError,
   DatabaseRecordNotFoundError, UnauthenticatedUserError,
 } from '../../../../../../constants/errors';
 import getUserIdandAppNameAfterValidation
-from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
+  from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import { QueryController } from '../../../controllers';
-import getUserActiveClassroom from '../../../../../../utils/getUserActiveClassroom';
+// import getUserActiveClassroom from '../../../../../../utils/getUserActiveClassroom';
 
 // query to get current component status of user
 // const getUserCurrentTopicComponentStatus = (userId, courseId) => `
@@ -758,12 +758,12 @@ const userFirstAndLatestQuizReportMutationResolver = async (
     //   '',
     // );
 
-    const userActiveClassroom = await getUserActiveClassroom(
-      context,
-      { courseId, studentProfile: batchRes[0] },
-      get(batchRes, '0.batch.id'),
-    );
-    const batchCurrentComponentInfo = get(userActiveClassroom, 'currentComponent');
+    // const userActiveClassroom = await getUserActiveClassroom(
+    //   context,
+    //   { courseId, studentProfile: batchRes[0] },
+    //   get(batchRes, '0.batch.id'),
+    // );
+    // const batchCurrentComponentInfo = get(userActiveClassroom, 'currentComponent');
     /* eslint no-await-in-loop:0 */
     // const res = await callLocalGraphqlApi(
     //   getUserCurrentTopicComponentStatus(userId, courseId),
@@ -777,11 +777,9 @@ const userFirstAndLatestQuizReportMutationResolver = async (
     if (userReceivedFromContext) {
       // calling method to validate user current topic component status
       validateCurrentTopicComponent(currentTopicComponentInfo, mutationName);
-    } else {
-      if (!currentTopicComponentInfo) {
-        /* eslint no-continue:0 */
-        continue;
-      }
+    } else if (!currentTopicComponentInfo) {
+      /* eslint no-continue:0 */
+      continue;
     }
 
     // calling API to get data of fetched topic
@@ -807,37 +805,37 @@ const userFirstAndLatestQuizReportMutationResolver = async (
         continue;
       }
     }
-    let currentRunningTopic;
+    // let currentRunningTopic;
     // let currentRunningTopicComponentType;
 
     // if user belongs to a batch, quiz report will be calculated on basis of batchCurrentComponentStatus
-    if (batchCurrentComponentInfo) {
-      currentRunningTopic = batchCurrentComponentInfo && batchCurrentComponentInfo.currentTopic;
-    } else {
-      currentRunningTopic = currentTopicComponentInfo && currentTopicComponentInfo.currentTopic;
-      // currentRunningTopicComponentType = currentTopicComponentInfo && currentTopicComponentInfo.currentTopicComponentType;
-    }
-    if (!courseId || courseId === OLD_COURSE_ID) {
-      /* eslint no-lonely-if:0 */
-      if (topicInfo.order >= currentRunningTopic.order) {
-        if (userReceivedFromContext) {
-          throw new ComponentLockedError();
-        } else {
-          /* eslint no-continue:0 */
-          continue;
-        }
-      }
-    } else {
-      /* eslint no-lonely-if:0 */
-      if (topicInfo.order > currentRunningTopic.order) {
-        if (userReceivedFromContext) {
-          throw new ComponentLockedError();
-        } else {
-          /* eslint no-continue:0 */
-          continue;
-        }
-      }
-    }
+    // if (batchCurrentComponentInfo) {
+    //   currentRunningTopic = batchCurrentComponentInfo && batchCurrentComponentInfo.currentTopic;
+    // } else {
+    //   currentRunningTopic = currentTopicComponentInfo && currentTopicComponentInfo.currentTopic;
+    //   // currentRunningTopicComponentType = currentTopicComponentInfo && currentTopicComponentInfo.currentTopicComponentType;
+    // }
+    // if (!courseId || courseId === OLD_COURSE_ID) {
+    //   /* eslint no-lonely-if:0 */
+    //   if (topicInfo.order >= currentRunningTopic.order) {
+    //     if (userReceivedFromContext) {
+    //       throw new ComponentLockedError();
+    //     } else {
+    //       /* eslint no-continue:0 */
+    //       continue;
+    //     }
+    //   }
+    // } else {
+    //   /* eslint no-lonely-if:0 */
+    //   if (topicInfo.order > currentRunningTopic.order) {
+    //     if (userReceivedFromContext) {
+    //       throw new ComponentLockedError();
+    //     } else {
+    //       /* eslint no-continue:0 */
+    //       continue;
+    //     }
+    //   }
+    // }
     // else {
     //   if (topicInfo.order > currentRunningTopic.order) {
     //     throw new ComponentLockedError();

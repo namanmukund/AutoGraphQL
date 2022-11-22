@@ -1,6 +1,5 @@
 import { get } from 'lodash';
-import parsedHtmlFromTemplateFileAndObject
-from '../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
+import parsedHtmlFromTemplateFileAndObject from '../../../../../services/email/utils/parsedHtmlFromTemplateFileAndObject';
 import getEmailObject from '../../../../../services/email/utils/getEmailObject';
 import sendEmail from '../../../../../services/email/utils/sendEmail';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';

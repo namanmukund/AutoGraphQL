@@ -1,14 +1,17 @@
 import { callLocalGraphqlApi } from '../../../../api';
 
-const purgeUserActiveProfileCache = async (context) => {
+const purgeCache = async (context, pattern) => {
   try {
-    await callLocalGraphqlApi(`
-            query{
-              purgeCache(pattern: "userProfile::activeClassroom::*") {
-                result
-              }
-            }
-          `, context);
+    await callLocalGraphqlApi(
+      `
+        query{
+          purgeCache(pattern: "${pattern}") {
+            result
+          }
+        }
+      `,
+      context,
+    );
     return {
       result: true,
     };
@@ -18,6 +21,11 @@ const purgeUserActiveProfileCache = async (context) => {
       error: e,
     };
   }
+};
+
+const purgeUserActiveProfileCache = async (context) => {
+  const res = await purgeCache(context, 'userProfile::activeClassroom::*');
+  return res;
 };
 
 export default purgeUserActiveProfileCache;

@@ -15,6 +15,10 @@ const sessionDetailType = `
    slotTime: Int
    isAccessible: Boolean
    course: Course
+   sessionStatus: SessionStatus
+   batchSession: BatchSession
+   previousHomeworkExists: Boolean @defaultValue(value: false)
+   previousHomeworkComponent: String
  }`;
 
 const completedSessionDetailType = `
@@ -36,6 +40,10 @@ const completedSessionDetailType = `
    mentorName: String
    mentorProfilePic: File
    course: Course
+   sessionStatus: SessionStatus
+   batchSession: BatchSession
+   previousHomeworkExists: Boolean @defaultValue(value: false)
+   previousHomeworkComponent: String
  }`;
 
 const menteeCourseSyllabusSkills = `
@@ -110,6 +118,7 @@ const MenteeCourseSyllabus = `
     totalTopics: Int
     isPaid: Boolean @defaultValue(value: "false")
     course: MenteeCourseSyllabusCourse
+    coursePackage: CoursePackage
     skills: [MenteeCourseSyllabusSkills]
     mentor: MenteeCourseSyllabusMentor
     projects: [MenteeCourseSyllabusProject]

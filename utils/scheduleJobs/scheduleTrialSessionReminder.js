@@ -1,7 +1,6 @@
 import { get, startCase, toLower } from 'lodash';
 import callLocalGraphqlApi from '../../src/api/callLocalGraphqlApi';
-import getSelectedSlotsStringArray
-from '../../src/autoGenerate/graphql/postHookFunctions/utils/getSelectedSlotsStringArray';
+import getSelectedSlotsStringArray from '../../src/autoGenerate/graphql/postHookFunctions/utils/getSelectedSlotsStringArray';
 import getFormatedDate from '../getFormatedDate';
 import sendWhatsAppTemplateMessage from '../../src/autoGenerate/utils/sendWhatsAppTemplateMessage';
 import getLongDate from '../getLongDate';

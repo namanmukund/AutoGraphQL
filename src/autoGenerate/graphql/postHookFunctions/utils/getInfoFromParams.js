@@ -9,6 +9,8 @@ const getInfoFromParams = (params, page) => {
   let videoId;
   let blockBasedPracticeId;
   let blockBasedProjectId;
+  let blockBasedPracticeIds;
+  let blockBasedProjectIds;
   const filterArray = get(params, 'filter.and');
   if (filterArray) {
     const userSome = filterArray.find((filterElem) => filterElem.user_some);
@@ -25,6 +27,9 @@ const getInfoFromParams = (params, page) => {
     videoId = get(videoSome, 'video_some.id');
     blockBasedPracticeId = get(blockBasedPracticeSome, 'blockBasedPractice_some.id');
     blockBasedProjectId = get(blockBasedProjectSome, 'blockBasedProject_some.id');
+
+    blockBasedPracticeIds = get(blockBasedPracticeSome, 'blockBasedPractice_some.id_in', []);
+    blockBasedProjectIds = get(blockBasedProjectSome, 'blockBasedProject_some.id_in', []);
     if (!userId) {
       log('userId is missing in input of postHook');
     }
@@ -46,6 +51,8 @@ const getInfoFromParams = (params, page) => {
     videoId,
     blockBasedPracticeId,
     blockBasedProjectId,
+    blockBasedPracticeIds,
+    blockBasedProjectIds,
   };
 };
 

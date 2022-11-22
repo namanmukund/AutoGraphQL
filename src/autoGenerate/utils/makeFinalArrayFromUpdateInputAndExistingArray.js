@@ -1,5 +1,4 @@
-import getArrayFieldsFromDocumentInput
-from '../graphql/resolvers/mutation/utils/getArrayFieldsFromDocumentInput';
+import getArrayFieldsFromDocumentInput from '../graphql/resolvers/mutation/utils/getArrayFieldsFromDocumentInput';
 import arrayOperationFunctions from '../graphql/controllers/utils/arrayOperationUtil';
 
 // get final array from existing db array and the updation input

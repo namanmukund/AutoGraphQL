@@ -10,7 +10,7 @@ process.env.SOCKET_PORT = 2030;
 process.env.IO_SOCKET_PORT = 2040;
 require('../src/serverCloud');
 
-db.once('open', async () => {
+db.mongoose.once('open', async () => {
   console.log('Starting the index syncing process...............');
   const promiseArray = [];
   const modelKeys = Object.keys(models);

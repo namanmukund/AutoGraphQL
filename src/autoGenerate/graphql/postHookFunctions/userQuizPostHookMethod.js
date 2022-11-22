@@ -1,72 +1,17 @@
 import { get } from 'lodash';
 import {
-  topicTypes, PUBLISHED, OLD_COURSE_ID,
+  PUBLISHED,
 } from '../../../../constants';
 import getInfoFromParams from './utils/getInfoFromParams';
-import getNextComponent from './utils/getNextComponent';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
-
-// query to get quiz questions associated with topic
-const topicQuery = (topicId) => `
-  query{
-    topic(id:"${topicId}"){
-      id
-      order
-      topicQuestions {
-        question {
-          id
-          order
-          assessmentType
-          status
-        }
-        order
-      }
-      questions(filter:{
-        and:[
-          {
-            assessmentType:${topicTypes.quiz}
-          },
-          {
-            status: ${PUBLISHED}
-          }
-        ]
-      }){
-        id
-        order
-      }
-    }
-  }
-  `;
-
-// query to get published topic list
-const nextTopicQuery = () => `
-query{
-  topics(
-    filter:{
-      and:[
-        {
-          status: published
-        },
-        {
-          courses_some:{
-            id: "${OLD_COURSE_ID}"
-          }
-        }
-      ]
-    }
-    orderBy:order_ASC,
-  ){
-    id
-  }
-}
-  `;
+import { fetchAndCacheQueryRes } from '../resolvers/mutation/userData/menteeCourseSyllabus';
+import { topicAssignmentAndQuizQuery } from './userAssignmentPostHookMethod';
 
 // query to add UserQuiz if it is not already present for user and topic id
 const addUserQuizMutation = (
   userId,
   topicId,
-  restQuery,
   quizQuery,
   courseId,
 ) => `
@@ -76,8 +21,7 @@ const addUserQuizMutation = (
     topicConnectId:"${topicId}"
     ${courseId ? `courseConnectId:"${courseId}"` : ''}
     input:{
-        ${restQuery}
-        ${quizQuery}
+      ${quizQuery}
     }
     ){
       id
@@ -119,7 +63,6 @@ const userQuizPostHookMethod = async (input, params, mutationName, context) => {
   if (input && input.length) {
     return input;
   }
-  let restQuery = '';
   const resultArray = [];
   const {
     userId,
@@ -134,23 +77,22 @@ const userQuizPostHookMethod = async (input, params, mutationName, context) => {
     we are getting below fields in topicQuery:
     -all published quiz questions of the topic
     */
-  const topicQueryRes = await callLocalGraphqlApi(topicQuery(topicId), context);
+  const topicQueryRes = await fetchAndCacheQueryRes({
+    hkey: `static::topic::userQuizOrAssignment::${topicId}`,
+    maxAge: 604800,
+    dbCallback: () => callLocalGraphqlApi(topicAssignmentAndQuizQuery(topicId), context),
+  });
   const topicInfo = get(topicQueryRes, 'data.topic');
   // adding quiz questions in the document
   // this logic will be changed based on question sets
   let quizQuery = 'quiz:[';
   if (topicInfo) {
-    let quizQuestionsinTopic;
-    if (courseId && courseId !== OLD_COURSE_ID) {
-      quizQuestionsinTopic = get(topicInfo, 'topicQuestions', [])
-        .filter((topicQ) => ((get(topicQ, 'question.status') === PUBLISHED) && get(topicQ, 'question.assessmentType') === 'quiz'))
-        .map((topicQ) => ({
-          ...get(topicQ, 'question', {}),
-          order: get(topicQ, 'order'),
-        }));
-    } else {
-      quizQuestionsinTopic = get(topicInfo, 'questions');
-    }
+    const quizQuestionsinTopic = get(topicInfo, 'topicQuestions', [])
+      .filter((topicQ) => ((get(topicQ, 'question.status') === PUBLISHED) && get(topicQ, 'question.assessmentType') === 'quiz'))
+      .map((topicQ) => ({
+        ...get(topicQ, 'question', {}),
+        order: get(topicQ, 'order'),
+      }));
     quizQuestionsinTopic.forEach((quizQuestion) => {
       const {
         id: quizQuestionId,
@@ -162,36 +104,10 @@ const userQuizPostHookMethod = async (input, params, mutationName, context) => {
     });
   }
   quizQuery += ']';
-  /*
-    We are getting published topics list through this query.
-    Then we will get next published topic
-    */
-  const nextTopicQueryRes = await callLocalGraphqlApi(nextTopicQuery(), context);
-  const topicsList = get(nextTopicQueryRes, 'data.topics');
-
-  let currentTopicIndex;
-  topicsList.forEach((topic, index) => {
-    if (topic.id === topicId) {
-      currentTopicIndex = index;
-    }
-  });
-  let nextTopicId = '';
-  if (currentTopicIndex + 1 < topicsList.length) {
-    nextTopicId = topicsList[currentTopicIndex + 1].id;
-  }
-
-  if (!courseId || (courseId === OLD_COURSE_ID)) {
-    restQuery = getNextComponent(
-      '',
-      nextTopicId,
-      'quiz',
-    );
-  }
 
   const result = await callLocalGraphqlApi(addUserQuizMutation(
     userId,
     topicId,
-    restQuery,
     quizQuery,
     courseId,
   ), context);

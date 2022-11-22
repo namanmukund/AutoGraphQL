@@ -21,6 +21,7 @@ import generateOtpForBatchSession from './utils/generateOtpForBatchSession';
 import getSlotDifference from './utils/getTimeDifference';
 import { getTopicsFromCoursePackage } from './utils/updateBatchPostHookQueries';
 import getSortedTopics from '../../../../utils/getSortedTopicsFromCoursePackageOrder';
+import { CacheController } from '../controllers';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `

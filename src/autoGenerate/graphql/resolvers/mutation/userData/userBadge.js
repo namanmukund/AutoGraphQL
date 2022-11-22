@@ -8,8 +8,7 @@ import {
 import {
   DatabaseRecordNotFoundError,
 } from '../../../../../../constants/errors';
-import getUserIdandAppNameAfterValidation
-from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
+import getUserIdandAppNameAfterValidation from '../../../preHookFunctions/validation/utils/getUserIdandAppNameAfterValidation';
 import validateCurrentTopicComponent from '../../utils/validateCurrentTopicComponent';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 

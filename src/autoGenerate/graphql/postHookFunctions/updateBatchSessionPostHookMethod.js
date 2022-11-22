@@ -32,6 +32,8 @@ import generateOtpForBatchSession from './utils/generateOtpForBatchSession';
 import { MENTEE } from '../../../../constants/roles';
 import { getTopicsFromCoursePackage } from './utils/updateBatchPostHookQueries';
 import getSortedTopics from '../../../../utils/getSortedTopicsFromCoursePackageOrder';
+import { CacheController } from '../controllers';
+import addMinutesToDate from '../../../../utils/addMinutesToDate';
 // import extractBatchSessionAndSendB2B from './utils/extractBatchSessionAndSendB2B';
 
 // query to get chapters and topics belomngin to a course
