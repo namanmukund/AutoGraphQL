@@ -13,7 +13,7 @@ const updateLogoutAllStudents = async ({ batchSessionId, context = {} }, deleteJ
       pubsub,
     });
   }
-
+  log('Updating LogoutAllStudents in scheduler=============');
   await callLocalGraphqlApi(`mutation {
     updateBatchSession(
       id: "${batchSessionId}"
