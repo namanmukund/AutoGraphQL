@@ -39,7 +39,7 @@ const cacheCustomQueries = `
 
 const googleApisCustomQueries = `
     createGsuitFileOrFolder(name: String!, mimeType: String!, parentId: String, permission: PermissionInput): GSuitResponse
-    updatePermissionOfGsuitFileOrFolder(id: String!, permission: PermissionInput): GSuitResponse
+    updatePermissionOfGsuitFileOrFolder(permission: PermissionInput): GSuitResponse
     updateParentFolderOfGsuitFileOrFolder(childId: String!, parentId: String!): GSuitResponse
     duplicateGsuitFileOrFolder(id: String!, name: String, parentId: String, permission: PermissionInput): GSuitResponse
     deleteGsuitFileOrFolder(id: String!): BooleanResult

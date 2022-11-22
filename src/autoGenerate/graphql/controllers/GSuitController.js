@@ -103,7 +103,7 @@ class GSuitController extends MasterController {
     }
 
     // properties are obj of {type,role,emailAddress,domain} if type is "user" or "group" must provide emailAddress and for "domain" provide domain
-    updatePermission = async (id, properties) => {
+    updatePermission = async (properties) => {
       const driveController = this.getClientInstanceByType('drive');
       let resource = {};
 
@@ -125,9 +125,9 @@ class GSuitController extends MasterController {
           type: 'anyone',
         };
       }
-      return driveController.permission.create({
+      return driveController.permissions.create({
         fields: '*',
-        fileId: id,
+        fileId: properties.id,
         resource,
       });
     }
