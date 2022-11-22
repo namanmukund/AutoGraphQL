@@ -183,6 +183,48 @@ const addUserQuizReport = (
   }
   `;
 
+const updateUserQuizReport = (
+  userQuizReportId,
+  userId,
+  topicId,
+  quizReportQuery,
+  learningObjectiveReportQuery,
+  pushManyQuery,
+  nextComponentQuery,
+  courseId,
+) => `
+mutation{
+  updateUserQuizReport(
+  id:"${userQuizReportId}"
+  userConnectId: "${userId}"
+  topicConnectId: "${topicId}"
+  ${courseId ? `courseConnectId:"${courseId}"` : ''}
+  input:{
+    ${quizReportQuery}
+    ${learningObjectiveReportQuery}
+    ${pushManyQuery}
+    ${nextComponentQuery}
+  }){
+    id
+  }
+}
+`;
+
+const fetchUserQuizReport = (userId, topicId, courseId) => `{
+  userQuizReports(
+    filter: {
+      and: [
+        { user_some: { id: "${userId}" } }
+        { topic_some: { id: "${topicId}" } }
+        ${courseId ? `{ course_some: { id: "${courseId}" } }` : ''}
+      ]
+    }
+  ) {
+    id
+  }
+}
+`;
+
 // query to get current user profile to get current scholarship status
 // const userProfileQuery = (userId) => `
 //   query{
@@ -571,6 +613,7 @@ const evaluateUserQuiz = async (
   quizQuestions,
   courseId,
   context,
+  existingUserQuizReportId,
 ) => {
   const totalQuestions = quizQuestionsInUserQuiz.length;
   // code to evaluate report of quiz
@@ -611,6 +654,7 @@ const evaluateUserQuiz = async (
   And it will get generated for each report(when user hits next)
   */
   let pushManyQuery = 'quizAnswers:[';
+  if (existingUserQuizReportId) pushManyQuery = 'quizAnswers: { replace: [';
   /*
   Iterating over each quiz question from input and will update question in
   userQuizReport on basis of input(isCorrect, isAttempted etc.)
@@ -723,6 +767,7 @@ const evaluateUserQuiz = async (
                                     masteryLevel: ${masteryLevel}
                                   }`;
   let learningObjectiveReportQuery = 'learningObjectiveReport: [';
+  if (existingUserQuizReportId) learningObjectiveReportQuery = 'learningObjectiveReport: { replace: [';
   // creating lo report query on basis of objects in learningObjectiveReportObject
   loArray.forEach((loIdInArray) => {
     const {
@@ -739,8 +784,12 @@ const evaluateUserQuiz = async (
                                     learningObjectiveConnectId: "${loIdInArray}"
                                   }, `;
   });
-  learningObjectiveReportQuery += ']';
-  pushManyQuery += ']';
+  if (existingUserQuizReportId) {
+    learningObjectiveReportQuery += ']}';
+  } else learningObjectiveReportQuery += ']';
+  if (existingUserQuizReportId) {
+    pushManyQuery += ']}';
+  } else pushManyQuery += ']';
   return {
     pushManyQuery,
     quizReportQuery,
@@ -975,6 +1024,8 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
   */
   if (quizAction === next) {
     // calling method to evaluate quiz and generate report
+    const userQuizReportRes = await callLocalGraphqlApi(fetchUserQuizReport(userId, topicId, courseId));
+    let userQuizReportId = get(userQuizReportRes, 'data.userQuizReports[0].id', '');
     const {
       pushManyQuery,
       quizReportQuery,
@@ -985,6 +1036,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
       quizQuestions,
       courseId,
       context,
+      userQuizReportId,
     );
     if (!userQuizId) {
       log('Not able to fetch userQuizId in addUserActivityQuizDumpPostHookMethod');
@@ -996,19 +1048,30 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
       nextTopicId,
       'quiz',
     );
-    // generating quiz report of user
-    const addUserQuizReportRes = await callLocalGraphqlApi(addUserQuizReport(
-      userId,
-      topicId,
-      quizReportQuery,
-      learningObjectiveReportQuery,
-      pushManyQuery,
-      nextComponentQuery,
-      courseId,
-    ), context);
-    const addUserQuizReportId = get(addUserQuizReportRes, 'data.addUserQuizReport.id');
+    if (userQuizReportId) {
+      await callLocalGraphqlApi(updateUserQuizReport(userQuizReportId,
+        userId,
+        topicId,
+        quizReportQuery,
+        learningObjectiveReportQuery,
+        pushManyQuery,
+        nextComponentQuery,
+        courseId), context);
+    } else {
+      // generating quiz report of user
+      const addUserQuizReportRes = await callLocalGraphqlApi(addUserQuizReport(
+        userId,
+        topicId,
+        quizReportQuery,
+        learningObjectiveReportQuery,
+        pushManyQuery,
+        nextComponentQuery,
+        courseId,
+      ), context);
+      userQuizReportId = get(addUserQuizReportRes, 'data.addUserQuizReport.id');
+    }
     Object.assign(input, {
-      quizReportId: addUserQuizReportId,
+      quizReportId: userQuizReportId,
     });
     // calling method to evaluate scholarship of user if he is attempting quiz for the first time
     // await evaluateUserScholarship(

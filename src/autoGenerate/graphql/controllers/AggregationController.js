@@ -206,7 +206,8 @@ class AggregationController {
           'directive.defaultValue.argument.value.value.value',
         );
         if (get(fieldParams, 'type.dataType') === 'Boolean') {
-          defaultFieldValue = Boolean(defaultFieldValue);
+          if (defaultFieldValue === 'false') defaultFieldValue = false;
+          else defaultFieldValue = Boolean(defaultFieldValue);
         }
         projectionMap[fieldInfo.name] = {
           $ifNull: [`$${fieldInfo.name}`, defaultFieldValue],
@@ -348,6 +349,7 @@ class AggregationController {
           }
           projectionMap[fieldInfo.name] = 1;
         });
+        projectionMap.id = 1;
         if (projectionMap && Object.keys(projectionMap).length) {
           aggregationBuilder.Project(projectionMap);
         }
