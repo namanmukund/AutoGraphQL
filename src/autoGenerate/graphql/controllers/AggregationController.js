@@ -349,6 +349,7 @@ class AggregationController {
           }
           projectionMap[fieldInfo.name] = 1;
         });
+        projectionMap.id = 1;
         if (projectionMap && Object.keys(projectionMap).length) {
           aggregationBuilder.Project(projectionMap);
         }

@@ -3,6 +3,7 @@ import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { CacheController } from '../controllers';
 import addUpdateSchoolClass from './utils/addUpdateSchoolClass';
 import purgeUserActiveProfileCache from './utils/purgeUserActiveProfileCache';
+import { addStudentToBatch, removeStudentFromBatch } from './utils/updateStudentBatchUtils';
 
 const updateUserApprovedCodeQuery = async (userApprovedCodeID, input, context) => {
   const query = `
@@ -55,6 +56,11 @@ const removeFromSchoolCLassStudentProfile = async (schoolClassId, studentProfile
 const removeOldLinkAndAddUpdateSchoolClass = async (previousSchoolClassId, input, studentSchoolId, studentProfileId, context) => {
   await removeFromSchoolCLassStudentProfile(previousSchoolClassId, studentProfileId, context);
   return addUpdateSchoolClass(input, studentSchoolId, studentProfileId, context);
+};
+
+const removeOldLinkAndAddUpdateNewBatch = async (prevBatchId, input, studentSchoolId, studentProfileId, context) => {
+  await removeStudentFromBatch(studentProfileId, prevBatchId, context);
+  return addStudentToBatch(input, studentSchoolId, studentProfileId, context);
 };
 
 const updateStudentProfilePostHookMethod = async (input, params, mutationName, context) => {
@@ -118,6 +124,21 @@ const updateStudentProfilePostHookMethod = async (input, params, mutationName, c
         context,
       );
       Object.assign(input, { schoolClass: { type: 'SchoolClass', typeId: schoolClassId } });
+    }
+  }
+  if (schoolId) {
+    let isGradeOrSectionUpdated = false;
+    if (currentGrade && previousGrade !== currentGrade) {
+      isGradeOrSectionUpdated = true;
+    }
+    if (currentSection && previousSection !== currentSection) {
+      isGradeOrSectionUpdated = true;
+    }
+    if (isGradeOrSectionUpdated) {
+      const studentBatchId = get(context, 'previousDocument.batch.id');
+      removeOldLinkAndAddUpdateNewBatch(studentBatchId, {
+        grade: currentGrade, section: currentSection,
+      }, schoolId, get(input, 'id'), context);
     }
   }
 
