@@ -1,6 +1,8 @@
+/* eslint-disable no-console */
 import { get } from 'lodash';
 import { callLocalGraphqlApi } from '../../../src/api';
 import pubsub from '../../../src/pubsub';
+import { log } from '../../log';
 
 // const updateBatchSessionQuery = (batchSessionId) => ;
 
@@ -11,7 +13,7 @@ const updateLogoutAllStudents = async ({ batchSessionId, context = {} }, deleteJ
       pubsub,
     });
   }
-
+  log('Updating LogoutAllStudents in scheduler=============');
   await callLocalGraphqlApi(`mutation {
     updateBatchSession(
       id: "${batchSessionId}"
@@ -20,7 +22,7 @@ const updateLogoutAllStudents = async ({ batchSessionId, context = {} }, deleteJ
       id
     }
   }
-  `, context);
+  `, context).catch((e) => console.log(e));
   deleteJob();
 };
 
