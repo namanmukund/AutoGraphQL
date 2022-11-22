@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { get } from 'lodash';
 import { callLocalGraphqlApi } from '../../../src/api';
 import pubsub from '../../../src/pubsub';
@@ -21,7 +22,7 @@ const updateLogoutAllStudents = async ({ batchSessionId, context = {} }, deleteJ
       id
     }
   }
-  `, context).catch((e) => log(e));
+  `, context).catch((e) => console.log(e));
   deleteJob();
 };
 
