@@ -5,7 +5,7 @@ import FirebaseController from './FirebaseController';
 import TokenController from './TokenController';
 import CacheController from './CacheController';
 import AggregationController from './AggregationController';
-import GSuitController from './GSuitController';
+import GSuiteController from './GSuiteController';
 
 export {
   MutationController,
@@ -15,5 +15,5 @@ export {
   TokenController,
   CacheController,
   AggregationController,
-  GSuitController,
+  GSuiteController,
 };

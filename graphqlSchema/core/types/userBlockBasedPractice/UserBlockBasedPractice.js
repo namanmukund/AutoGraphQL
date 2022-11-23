@@ -1,11 +1,11 @@
-const GsuitFile = `
-   type GsuitFile {
+const GsuiteFile = `
+   type GsuiteFile {
     fileId: String
     name: String
     url: String
     thumbnailUrl: String
     mimeType: String
-    parentsId: [String]
+    parentFolderIDs: [String]
     iconLink: String
     createdTime: String
    }
@@ -17,9 +17,9 @@ const UserBlockBasedPractice = `
     blockBasedPractice: BlockBasedProject! @relation(name: "PracticeUserBlockBasedPractice", direction: "OneWay")
     answerLink: String
     savedBlocks: String
-    gsuitFile: GsuitFile
-    gsuitLastRevision: GsuitFile
-    isGsuitFileVisited: Boolean
+    gsuiteFile: GsuiteFile
+    gsuiteLastRevision: GsuiteFile
+    isGsuiteFileVisited: Boolean
     attachments: [File] @relation(name: "UserBlockBasedPracticeAttachment", direction: "OneWay")
     topic: Topic! @relation(name: "TopicUserBlockBasedPractice", direction: "OneWay")
     course: Course @relation(name: "UserBlockBasedPracticeCourse", direction: "OneWay")
@@ -30,4 +30,4 @@ const UserBlockBasedPractice = `
   }
 `;
 
-export default [UserBlockBasedPractice, GsuitFile];
+export default [UserBlockBasedPractice, GsuiteFile];

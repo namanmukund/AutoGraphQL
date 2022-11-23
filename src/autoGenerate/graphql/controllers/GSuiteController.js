@@ -1,9 +1,9 @@
 import { google } from 'googleapis';
-import { credentials } from '../../../../config/gsuitCredentials';
-import { SCOPES, GSUIT_FILE_TYPES } from '../../../../constants';
+import { credentials } from '../../../../config/gsuite';
+import { GSUITE_ACCESS_SCOPES, GSUITE_FILE_TYPES } from '../../../../constants';
 import MasterController from './MasterController';
 
-class GSuitController extends MasterController {
+class GSuiteController extends MasterController {
     #googleAuth;
 
     constructor(authentication) {
@@ -11,21 +11,22 @@ class GSuitController extends MasterController {
       super(model, authentication);
       this.#googleAuth = new google.auth.GoogleAuth({
         credentials,
-        scopes: SCOPES,
+        scopes: GSUITE_ACCESS_SCOPES,
       });
     }
 
     // eslint-disable-next-line class-methods-use-this
     validateType(type) {
-      if (GSUIT_FILE_TYPES.includes(type)) return true;
+      if (GSUITE_FILE_TYPES.includes(type)) return true;
       return false;
     }
 
     getClientInstanceByType = (type) => {
       const version = 'v3';
       const googleAuth = this.#googleAuth;
-      if (!this.validateType(type)) throw Error(`[${type}]({ ${version}, ${googleAuth} }) Invalid Instance Type`);
-      return google[type]({ version, auth: googleAuth });
+      if (!this.validateType(type)) throw Error('Invalid Instance Type');
+      if (google[type]) return google[type]({ version, auth: googleAuth });
+      throw Error('Gsuite instance type does not exists');
     }
 
     getDriveFiles = (parentFolderId) => {
@@ -45,14 +46,14 @@ class GSuitController extends MasterController {
     }
 
     // ID_OF_THE_FOLDER is related to id of it's parent folder
-    createFileOrFolder = async (name, mimeType, parentId) => {
+    createFileOrFolder = async (name, mimeType, parentFolderIDs) => {
       const driveController = this.getClientInstanceByType('drive');
       let requestBody = {};
-      if (parentId) {
+      if (parentFolderIDs) {
         requestBody = {
           mimeType: `application/vnd.google-apps.${mimeType}`,
           name,
-          parents: [parentId],
+          parents: [parentFolderIDs],
         };
       } else {
         requestBody = {
@@ -81,13 +82,13 @@ class GSuitController extends MasterController {
       }
     }
 
-    duplicateFileOrFolder = async (ID_OF_THE_FILE, name, parentId) => {
+    duplicateFileOrFolder = async (ID_OF_THE_FILE, name, parentFolderIDs) => {
       const driveController = this.getClientInstanceByType('drive');
       let requestBody = {};
-      if (parentId) {
+      if (parentFolderIDs) {
         requestBody = {
           name,
-          parents: [parentId],
+          parents: [parentFolderIDs],
         };
       } else {
         requestBody = {
@@ -153,4 +154,4 @@ class GSuitController extends MasterController {
     }
 }
 
-export default GSuitController;
+export default GSuiteController;

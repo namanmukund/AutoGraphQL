@@ -25,8 +25,8 @@ const BlockBasedProject = `
     platFormLinkLabel: String
     fileUploadFormats: [String]
     layout: BlockBasedProjectLayout! @defaultValue(value: "externalPlatform")
-    gsuitFileType: String
-    gsuitTempleteURL: String
+    gsuiteFileType: String
+    gsuiteTempleteURL: String
     initialBlocks: String
     answerDescription: String @trim
     answerThumbnail: File @relation(name: "BlockBasedProjectAnswerThumbnail", direction: "OneWay")

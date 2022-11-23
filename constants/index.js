@@ -607,11 +607,11 @@ const ALLOWED_HEADERS = [
   ...ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER.map((VAR) => VAR.headerLabel),
 ];
 
-const GDRIVE_BASE_ID = '10F9f2lE_Sjb7u7Gge-kBECt7aSzt83UK';
+const GSUITE_BASE_FOLDER_ID = '10F9f2lE_Sjb7u7Gge-kBECt7aSzt83UK';
 
-const SCOPES = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/drive.appdata', 'https://www.googleapis.com/auth/drive.photos.readonly'];
+const GSUITE_ACCESS_SCOPES = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/drive.appdata', 'https://www.googleapis.com/auth/drive.photos.readonly'];
 
-const GSUIT_FILE_TYPES = ['drive', 'spreadsheet', 'presentation', 'document'];
+const GSUITE_FILE_TYPES = ['drive', 'spreadsheet', 'presentation', 'document'];
 
 const PG_MODEL_SUFFIX = '.pg.model.js';
 
@@ -733,9 +733,9 @@ export {
   ALLOWED_HEADERS,
   ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER,
   HEADER_VARIABLES,
-  GDRIVE_BASE_ID,
-  SCOPES,
-  GSUIT_FILE_TYPES,
+  GSUITE_BASE_FOLDER_ID,
+  GSUITE_ACCESS_SCOPES,
+  GSUITE_FILE_TYPES,
   DATABASE_DIALECTS,
   PG_MODEL_SUFFIX,
 };

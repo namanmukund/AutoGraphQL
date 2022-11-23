@@ -38,14 +38,14 @@ const cacheCustomQueries = `
 `;
 
 const googleApisCustomQueries = `
-    createGsuitFileOrFolder(name: String!, mimeType: String!, parentId: String, permission: PermissionInput): GSuitResponse
-    updatePermissionOfGsuitFileOrFolder(permission: PermissionInput): GSuitResponse
-    updateParentFolderOfGsuitFileOrFolder(childId: String!, parentId: String!): GSuitResponse
-    duplicateGsuitFileOrFolder(id: String!, name: String, parentId: String, permission: PermissionInput): GSuitResponse
-    deleteGsuitFileOrFolder(id: String!): BooleanResult
-    gettingGsuitChildFileOrFolder(id: String!): [GSuitResponse]
-    getGsuitFileOrFolderDetails(id: String!): GSuitResponse
-    createGsuitLastRevisionFile(gsuitTempleteUrlOrFile: String, gsuitFileType: String, studentFileCreationName: String, schoolName: String, classroomTitle: String): GSuitResponse
+    createGsuiteFileOrFolder(name: String!, mimeType: String!, parentFolderIDs: String, permission: PermissionInput): GSuiteResponse
+    updatePermissionOfGsuiteFileOrFolder(permission: PermissionInput): GSuiteResponse
+    updateParentFolderOfGsuiteFileOrFolder(childId: String!, parentFolderIDs: String!): GSuiteResponse
+    duplicateGsuiteFileOrFolder(id: String!, name: String, parentFolderIDs: String, permission: PermissionInput): GSuiteResponse
+    deleteGsuiteFileOrFolder(id: String!): BooleanResult
+    gettingGsuiteChildFileOrFolder(id: String!): [GSuiteResponse]
+    getGsuiteFileOrFolderDetails(id: String!): GSuiteResponse
+    createGsuiteLastRevisionFile(gsuiteTempleteUrlOrFile: String, gsuiteFileType: String, studentFileCreationName: String, schoolName: String, classroomTitle: String): GSuiteResponse
 `;
 
 const customQueryString = customQueries + cacheCustomQueries + googleApisCustomQueries;

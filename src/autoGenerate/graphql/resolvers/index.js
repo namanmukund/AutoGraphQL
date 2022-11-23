@@ -124,7 +124,7 @@ import generateBatchSessionOtp from './mutation/methods/generateBatchSessionOtp'
 import updateSchoolStudentEmail from './mutation/methods/updateSchoolStudentEmail';
 import removeBatchStudents from './mutation/methods/removeBatchStudents';
 import redisUtils from './query/redisUtils';
-import gsuitUtils from './query/gsuitUtils';
+import gsuiteUtils from './query/gsuiteUtils';
 import getSubmittedAssignmentsStudents from './query/methods/getSubmittedAssignmentsStudents';
 
 const parsedASTMap = getParsedASTMap(types);
@@ -732,15 +732,15 @@ resolvers.Query.getSubmittedAssignmentsStudents = getSubmittedAssignmentsStudent
 resolvers.Query.cacheKeys = redisUtils.cacheKeys;
 resolvers.Query.purgeCache = redisUtils.purgeCache;
 resolvers.Query.getCache = redisUtils.getCache;
-// GSuit utility queries
-resolvers.Query.createGsuitFileOrFolder = gsuitUtils.createGsuitFileOrFolder;
-resolvers.Query.updatePermissionOfGsuitFileOrFolder = gsuitUtils.updatePermissionOfGsuitFileOrFolder;
-resolvers.Query.updateParentFolderOfGsuitFileOrFolder = gsuitUtils.updateParentFolderOfGsuitFileOrFolder;
-resolvers.Query.duplicateGsuitFileOrFolder = gsuitUtils.duplicateGsuitFileOrFolder;
-resolvers.Query.deleteGsuitFileOrFolder = gsuitUtils.deleteGsuitFileOrFolder;
-resolvers.Query.gettingGsuitChildFileOrFolder = gsuitUtils.gettingGsuitChildFileOrFolder;
-resolvers.Query.getGsuitFileOrFolderDetails = gsuitUtils.getGsuitFileOrFolderDetails;
-resolvers.Query.createGsuitLastRevisionFile = gsuitUtils.createGsuitLastRevisionFile;
+// GSuite utility queries
+resolvers.Query.createGsuiteFileOrFolder = gsuiteUtils.createGsuiteFileOrFolder;
+resolvers.Query.updatePermissionOfGsuiteFileOrFolder = gsuiteUtils.updatePermissionOfGsuiteFileOrFolder;
+resolvers.Query.updateParentFolderOfGsuiteFileOrFolder = gsuiteUtils.updateParentFolderOfGsuiteFileOrFolder;
+resolvers.Query.duplicateGsuiteFileOrFolder = gsuiteUtils.duplicateGsuiteFileOrFolder;
+resolvers.Query.deleteGsuiteFileOrFolder = gsuiteUtils.deleteGsuiteFileOrFolder;
+resolvers.Query.gettingGsuiteChildFileOrFolder = gsuiteUtils.gettingGsuiteChildFileOrFolder;
+resolvers.Query.getGsuiteFileOrFolderDetails = gsuiteUtils.getGsuiteFileOrFolderDetails;
+resolvers.Query.createGsuiteLastRevisionFile = gsuiteUtils.createGsuiteLastRevisionFile;
 
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;

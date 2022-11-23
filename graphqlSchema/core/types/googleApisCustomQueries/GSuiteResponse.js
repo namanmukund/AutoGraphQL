@@ -1,13 +1,13 @@
-const GSuitResponse = `
-    type GSuitResponse{
+const GSuiteResponse = `
+    type GSuiteResponse{
         id: String
         name: String
         webViewLink: String
         thumbnailLink: String
         mimeType: String
-        parents: [String]
+        parentFolderIDs: [String]
         iconLink: String
-        createdTime: String
+        createdTime: Date
     }`;
 
-export default [GSuitResponse];
+export default [GSuiteResponse];
