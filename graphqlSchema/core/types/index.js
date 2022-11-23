@@ -171,6 +171,7 @@ import RemoveBatchStudents from './removeBatchStudents';
 import RetakeSession from './retakeSession';
 import Ebook from './ebook';
 import SessionFeedback from './sessionFeedback';
+import GSuiteResponse from './googleApisCustomQueries';
 
 export default [
   ...User,
@@ -346,4 +347,5 @@ export default [
   ...RetakeSession,
   ...Ebook,
   ...SessionFeedback,
+  ...GSuiteResponse,
 ];
