@@ -13,7 +13,7 @@ const updateLogoutAllStudents = async ({ batchSessionId, context = {} }, deleteJ
   }
   // Using MongoDB update as in graphql update is causing issue from postHook method;
   const modelMutations = new MutationController('BatchSession', { bypass: true });
-  modelMutations.update({ id: batchSessionId }, { logoutAllStudents: false });
+  if (modelMutations) modelMutations.update({ id: batchSessionId }, { logoutAllStudents: false });
   log('Updating LogoutAllStudents in scheduler=============');
   deleteJob();
 };
