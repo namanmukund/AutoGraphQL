@@ -1,10 +1,8 @@
 /* eslint-disable no-console */
 import { get } from 'lodash';
-import { callLocalGraphqlApi } from '../../../src/api';
+import { MutationController } from '../../../src/autoGenerate/graphql/controllers';
 import pubsub from '../../../src/pubsub';
 import { log } from '../../log';
-
-// const updateBatchSessionQuery = (batchSessionId) => ;
 
 const updateLogoutAllStudents = async ({ batchSessionId, context = {} }, deleteJob = () => {}) => {
   const newContext = context;
@@ -13,16 +11,10 @@ const updateLogoutAllStudents = async ({ batchSessionId, context = {} }, deleteJ
       pubsub,
     });
   }
+  // Using MongoDB update as in graphql update is causing issue from postHook method;
+  const modelMutations = new MutationController('BatchSession', { bypass: true });
+  modelMutations.update({ id: batchSessionId }, { logoutAllStudents: false });
   log('Updating LogoutAllStudents in scheduler=============');
-  await callLocalGraphqlApi(`mutation {
-    updateBatchSession(
-      id: "${batchSessionId}"
-      input: { logoutAllStudents: false }
-    ) {
-      id
-    }
-  }
-  `, context).catch((e) => console.log(e));
   deleteJob();
 };
 
