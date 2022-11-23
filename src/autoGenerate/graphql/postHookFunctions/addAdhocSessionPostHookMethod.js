@@ -39,6 +39,16 @@ const getBatchQuery = (batchId) => `
             }
           }
         }
+        batchStudents{
+          id
+          user{
+            id
+            source
+            studentProfile{
+              id
+            }
+          }
+        }
         currentComponent{
           id
           latestSessionStatus
