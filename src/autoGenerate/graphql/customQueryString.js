@@ -28,7 +28,7 @@ const customQueries = `
     getClassroomReport (batchId: String, topicId: String, isHomework: Boolean): ClassroomHomeworkReportOutput
     getPracticeQuestionReport (batchId: String, topicId: String, learningObjectiveId: String, learningSlideId: String, learningObjectiveComponent: String, userId: String): PracticeQuestionReportOutput
     getBuddyStatus (sessionId: ID!, userId: ID, systemId: String, action: String, password: String, studentIds: [ID]): BooleanResult
-    getSubmittedAssignmentsStudents (userIds: [ID], topicId: String, courseId: String, type: String): SubmittedAssignmentsOutput
+    getSubmittedAssignmentsStudents (userIds: [ID], topicId: String, courseId: String, type: String): SubmittedAssignmentsOutput   
 `;
 
 const cacheCustomQueries = `
@@ -37,6 +37,17 @@ const cacheCustomQueries = `
     purgeCache (pattern: String): BooleanResult
 `;
 
-const customQueryString = customQueries + cacheCustomQueries;
+const googleApisCustomQueries = `
+    createGsuiteFileOrFolder(name: String!, mimeType: String!, parentFolderIDs: String, permission: PermissionInput): GSuiteResponse
+    updatePermissionOfGsuiteFileOrFolder(permission: PermissionInput): GSuiteResponse
+    updateParentFolderOfGsuiteFileOrFolder(childId: String!, parentFolderIDs: String!): GSuiteResponse
+    duplicateGsuiteFileOrFolder(id: String!, name: String, parentFolderIDs: String, permission: PermissionInput): GSuiteResponse
+    deleteGsuiteFileOrFolder(id: String!): BooleanResult
+    gettingGsuiteChildFileOrFolder(id: String!): [GSuiteResponse]
+    getGsuiteFileOrFolderDetails(id: String!): GSuiteResponse
+    createGsuiteLastRevisionFile(gsuiteTempleteUrlOrFile: String, gsuiteFileType: String, studentFileCreationName: String, schoolName: String, classroomTitle: String): GSuiteResponse
+`;
+
+const customQueryString = customQueries + cacheCustomQueries + googleApisCustomQueries;
 
 export default customQueryString;
