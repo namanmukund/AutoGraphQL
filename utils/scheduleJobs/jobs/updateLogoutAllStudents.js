@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { get } from 'lodash';
 import { MutationController } from '../../../src/autoGenerate/graphql/controllers';
 import pubsub from '../../../src/pubsub';
