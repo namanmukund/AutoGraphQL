@@ -567,9 +567,9 @@ const classroomReport = (async (root, params, context) => {
         }),
       );
     }
-    let homeworkObj = { 'assignmentQuestion.isHomework': 'true' };
+    let homeworkObj = { 'assignmentQuestion.isHomework': true };
     if (!isHomework) {
-      homeworkObj = { 'assignmentQuestion.isHomework': { $not: { $eq: 'true' } } };
+      homeworkObj = { 'assignmentQuestion.isHomework': { $not: { $eq: true } } };
     }
     usersAssignmentRes = await userAssignmentModel.aggregate(
       getUserAssignmentAggregation({
