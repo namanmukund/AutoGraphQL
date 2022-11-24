@@ -6,6 +6,7 @@ import schedule from 'node-schedule';
 // import sendB2CSessionReminder from './jobs/sendB2CSessionReminder';
 import { callLocalGraphqlApi } from '../../src/api';
 import extractBatchSessionAndPostCarnival from '../../src/autoGenerate/graphql/postHookFunctions/utils/extractBatchSessionAndSendPostCarnival';
+import { log } from '../log';
 import updateLogoutAllStudents from './jobs/updateLogoutAllStudents';
 // import scheduleB2BSessionHomeworkRemainder from './scheduleB2BSessionHomeworkRemainder';
 // import scheduleB2BSessionReminder from './scheduleB2BSessionReminder';
@@ -452,6 +453,7 @@ const addToSchedule = async (jobType, scheduledDate, {
       }), context);
       const jobId = get(res, 'data.addScheduleJob.id');
       schedule.scheduleJob(scheduledDate, () => {
+        log('running after 1 min=======');
         updateLogoutAllStudents({
           batchSessionId,
           context,

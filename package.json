@@ -97,6 +97,7 @@
     "google-auth-library": "^6.0.0",
     "google-libphonenumber": "^3.2.15",
     "google-spreadsheet": "^3.0.13",
+    "googleapis": "^108.0.0",
     "graphql": "git+https://github.com/tekie-labs/graphql.git",
     "graphql-redis-subscriptions": "^2.4.2",
     "graphql-subscriptions": "^1.1.0",

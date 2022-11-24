@@ -46,8 +46,16 @@ const getBatchQuery = (batchId) => `
         type
         students{
           id
-          section
-          grade
+          user{
+            id
+            source
+            studentProfile{
+              id
+            }
+          }
+        }
+        batchStudents{
+          id
           user{
             id
             source
