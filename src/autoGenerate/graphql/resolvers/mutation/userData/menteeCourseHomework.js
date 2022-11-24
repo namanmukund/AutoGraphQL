@@ -434,7 +434,7 @@ const menteeCourseHomeworkMutationResolver = async (
         mentorMenteeSessions,
         topic.id,
       );
-      if (get(topic, 'order') > lastTopicBookedOrder) return;
+      if ((get(topic, 'order') > lastTopicBookedOrder) && !mentorMenteeSession) return;
       constructHomeworkArr(finalTopicBasedHomeworkArray, mentorMenteeSession, {
         ...topic,
         topicQuestions: (get(topic, 'topicQuestions', []) || []).map((topicQuestion) => ({ id: get(topicQuestion, 'typeId') })),
