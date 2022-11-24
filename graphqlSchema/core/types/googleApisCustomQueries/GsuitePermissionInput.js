@@ -1,5 +1,5 @@
 const GsuitePermissionRole = `
-enum Role{
+enum GsuitePermissionRole{
     owner
     organizer
     fileOrganizer
