@@ -1,4 +1,4 @@
-import PermissionInput from './PermissionInput';
+import GsuitePermissionInput from './GsuitePermissionInput';
 import GSuiteResponse from './GSuiteResponse';
 
-export default [...PermissionInput, ...GSuiteResponse];
+export default [...GsuitePermissionInput, ...GSuiteResponse];

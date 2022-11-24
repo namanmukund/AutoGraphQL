@@ -17,10 +17,10 @@ const createGsuiteFileOrFolder = async (_root, params) => {
 };
 
 const updatePermissionOfGsuiteFileOrFolder = async (root, params) => {
-  const { permission } = params;
+  const { id, permission } = params;
   const gSuiteController = new GSuiteController({ bypass: true });
 
-  const updatingPermission = await gSuiteController.updatePermission(permission);
+  const updatingPermission = await gSuiteController.updatePermission(id, permission);
   if (updatingPermission) return updatingPermission.data;
   throw new Error('Not able to update the permission');
 };
@@ -140,7 +140,7 @@ const createGsuiteLastRevisionFile = async (_root, params) => {
     );
   }
   if (fileCreationResponse) {
-    await gSuiteController.updatePermission({ id: fileCreationResponse.data.id, role: 'writer', type: 'anyone' });
+    await gSuiteController.updatePermission(fileCreationResponse.data.id, { role: 'writer', type: 'anyone' });
     return fileCreationResponse.data;
   }
   throw new Error('Not able to create file or folder');
