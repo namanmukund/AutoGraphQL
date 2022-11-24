@@ -156,7 +156,7 @@ const createGsuiteFile = async (
       gsuiteFileTypeFolderId,
     );
   }
-  await gSuiteController.updatePermission({ id: fileCreationResponse.data.id, role: 'writer', type: 'anyone' });
+  await gSuiteController.updatePermission(fileCreationResponse.data.id, { role: 'writer', type: 'anyone' });
   return fileCreationResponse.data;
 };
 

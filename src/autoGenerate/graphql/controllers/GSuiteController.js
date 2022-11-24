@@ -103,8 +103,9 @@ class GSuiteController extends MasterController {
       return newFile;
     }
 
-    // properties are obj of {type,role,emailAddress,domain} if type is "user" or "group" must provide emailAddress and for "domain" provide domain
-    updatePermission = async (properties) => {
+    // When creating a permission, if type is user or group, you must provide an emailAddress for the user or group. When type is domain,
+    // you must provide a domain. There isn't extra information required for a anyone type.
+    updatePermission = async (id, properties) => {
       const driveController = this.getClientInstanceByType('drive');
       let resource = {};
 
@@ -114,7 +115,7 @@ class GSuiteController extends MasterController {
           type: properties.type,
           emailAddress: properties.emailAddress,
         };
-      } else if (properties.type === 'domian') {
+      } else if (properties.type === 'domain') {
         resource = {
           role: properties.role,
           type: properties.type,
@@ -128,7 +129,7 @@ class GSuiteController extends MasterController {
       }
       return driveController.permissions.create({
         fields: '*',
-        fileId: properties.id,
+        fileId: id,
         resource,
       });
     }
