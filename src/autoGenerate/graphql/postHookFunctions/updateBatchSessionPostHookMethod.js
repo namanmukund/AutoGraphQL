@@ -608,7 +608,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     });
   }
   if (get(params, 'input.logoutAllStudents') !== undefined && get(params, 'input.logoutAllStudents') === true) {
-    const scheduleDate = addMinutesToDate(new Date(), 1);
+    const scheduleDate = addMinutesToDate(new Date(), 5);
     log('Updating Logout students', scheduleDate);
     addToSchedule('updateLogoutAllStudents', scheduleDate, { batchSessionId, context });
   }

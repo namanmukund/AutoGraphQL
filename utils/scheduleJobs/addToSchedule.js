@@ -453,7 +453,7 @@ const addToSchedule = async (jobType, scheduledDate, {
       }), context);
       const jobId = get(res, 'data.addScheduleJob.id');
       schedule.scheduleJob(scheduledDate, () => {
-        log('running after 1 min=======');
+        log('running after 5 min=======');
         updateLogoutAllStudents({
           batchSessionId,
           context,
