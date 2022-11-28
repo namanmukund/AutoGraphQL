@@ -271,7 +271,7 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
       (practiceResultData) => practiceResultData.id === practiceId,
     );
     let studentFileCreationName = '';
-    if (userName && gradeSection && practiceResult && practiceResult.title) studentFileCreationName = `${userName}-${gradeSection}-${practiceResult.title}`;
+    if (userName && gradeSection && practiceResult && practiceResult.title) studentFileCreationName = `${practiceResult.title}-${userName}-${gradeSection}`;
     let fileCreationResponse = {};
     if (practiceResult.layout === 'gsuite' && studentFileCreationName) {
       fileCreationResponse = await createGsuiteFile(
