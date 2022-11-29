@@ -3,6 +3,7 @@ import { get } from 'lodash';
 import { UnauthorizedOperationError } from '../../../../../../constants/errors';
 import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
 import { ifAuthorized } from '../../../../../../utils';
+import getStudentsCombinedArray from '../../../../../../utils/getStudentsCombinedArray';
 import { QueryController } from '../../../controllers';
 
 const getBatchSessionAggregation = ({ batchIds = [] }) => [
@@ -148,6 +149,7 @@ const getBatchAggregation = ({ batchIds = [] }) => [
       classroomTitle: 1,
       course: 1,
       students: 1,
+      batchStudents: 1,
       coursePackageTopicRule: 1,
       coursePackageTopicRuleArr: 1,
       coursePackage: {
@@ -183,22 +185,24 @@ const transformMongoResults = (batchSessions, batchDetail) => {
   }
 
   const topicIds = filteredTopics.map((topic) => get(topic, 'topic.typeId'));
-  if (batchSessions && batchSessions.length && filteredTopics.length) {
-    sessionProgress = Math.round((batchSessions.length / filteredTopics.length) * 100);
+  const filteredBatchSessions = (batchSessions || []).filter((session) => topicIds.includes(get(session, 'topic.typeId')));
+  if (filteredBatchSessions && filteredBatchSessions.length && filteredTopics.length) {
+    sessionProgress = Math.round((filteredBatchSessions.length / filteredTopics.length) * 100);
     let overallPresentStudents = 0;
     let totalStudents = 0;
-    batchSessions.filter((session) => topicIds.includes(get(session, 'topic.typeId'))).forEach((session) => {
+    filteredBatchSessions.forEach((session) => {
       const presentStudentsCount = get(session, 'attendance', []).filter((el) => get(el, 'status') === 'present').length;
       overallPresentStudents += presentStudentsCount;
       totalStudents += get(session, 'attendance', []).length;
     });
     averageAttendance = overallPresentStudents > 0 ? Math.round((overallPresentStudents / totalStudents) * 100) : 0;
   }
+  const students = getStudentsCombinedArray(batchDetail, true) || [];
   const returnedObj = {
     id: get(batchDetail, 'id'),
     code: get(batchDetail, 'code'),
     classroomTitle: get(batchDetail, 'classroomTitle', ''),
-    totalStudents: get(batchDetail, 'students', []).length,
+    totalStudents: students.length,
     sessionProgress,
     averageAttendance,
   };
