@@ -13,7 +13,7 @@ const getBatchSessionAggregation = ({ batchIds = [] }) => [
         $in: batchIds,
       },
       sessionStatus: {
-        $in: ['completed'],
+        $in: ['completed', 'started'],
       },
     },
   },
@@ -244,12 +244,12 @@ const getClassroomDetails = async (root, params, context) => {
       batchIds,
     }),
   );
-  const batchnRes = await batchModel.aggregate(
+  const batchesRes = await batchModel.aggregate(
     getBatchAggregation({
       batchIds,
     }),
   );
-  return getClassroomDetailsData(batchnRes, batchSessionRes);
+  return getClassroomDetailsData(batchesRes, batchSessionRes);
 };
 
 export default getClassroomDetails;
