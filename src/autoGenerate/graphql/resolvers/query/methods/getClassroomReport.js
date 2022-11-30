@@ -709,7 +709,7 @@ const classroomReport = (async (root, params, context) => {
         obj.assignmentSubmittedCount += 1;
       }
     }
-
+    let hasUserSubmittedPractice = false;
     for (const userbbPractice of userBlockbasedPracticeRes) {
       const previousBlockBasedObj = obj.blockBasedPractice.get(get(userbbPractice, 'blockBasedPractice.id'));
       const innerObj = {
@@ -739,7 +739,10 @@ const classroomReport = (async (root, params, context) => {
         }
       }
       if (get(userbbPractice, 'blockBasedPractice') && hasUserSubmittedPracticeLink) {
-        innerObj.pqSubmittedCount += 1;
+        if (!hasUserSubmittedPractice) {
+          hasUserSubmittedPractice = true;
+          innerObj.pqSubmittedCount += 1;
+        }
         innerObj.pqSubmissions.set(userId, {
           userId,
         });
