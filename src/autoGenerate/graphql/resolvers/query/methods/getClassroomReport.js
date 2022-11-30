@@ -596,12 +596,13 @@ const classroomReport = (async (root, params, context) => {
     userBlockbasedPracticeRes.forEach((practice) => {
       const findUserBBPractice = filteredUserBlockBasedPractice.find((bbPractice) => get(bbPractice, 'user.typeId') === get(practice, 'user.typeId')
         && get(bbPractice, 'blockBasedPractice.id') === get(practice, 'blockBasedPractice.id'));
-      const hasUserSubmittedPracticeLink = get(practice, 'blockBasedPractice.isSubmitAnswer', false) ? (get(practice, 'answerLink') || get(practice, 'savedBlocks') || get(practice, 'attachments', []).length) : true;
-      if (!!findUserBBPractice && !hasUserSubmittedPracticeLink) {
+      if (get(findUserBBPractice, 'id')) {
+        const hasUserSubmittedPracticeLink = get(practice, 'blockBasedPractice.isSubmitAnswer', false) ? (get(practice, 'answerLink') || get(practice, 'savedBlocks') || get(practice, 'attachments', []).length) : true;
         const hasUserSubmittedPracticeLinkInPrevDoc = get(findUserBBPractice, 'blockBasedPractice.isSubmitAnswer', false) ? (get(findUserBBPractice, 'answerLink') || get(findUserBBPractice, 'savedBlocks') || get(findUserBBPractice, 'attachments', []).length) : true;
-        if (hasUserSubmittedPracticeLinkInPrevDoc) {
-          filteredUserBlockBasedPractice = filteredUserBlockBasedPractice.filter((userBBPractice) => get(userBBPractice, 'id') === get(findUserBBPractice, 'id'));
-          filteredUserBlockBasedPractice.push({ ...findUserBBPractice });
+        if (!hasUserSubmittedPracticeLinkInPrevDoc && hasUserSubmittedPracticeLink) {
+          filteredUserBlockBasedPractice = filteredUserBlockBasedPractice.filter((bbPractice) => get(bbPractice, 'user.typeId') === get(practice, 'user.typeId')
+        && get(bbPractice, 'blockBasedPractice.id') === get(practice, 'blockBasedPractice.id'));
+          filteredUserBlockBasedPractice.push({ ...practice });
         }
       } else filteredUserBlockBasedPractice.push({ ...practice });
     });
