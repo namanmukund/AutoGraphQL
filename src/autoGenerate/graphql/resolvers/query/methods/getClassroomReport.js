@@ -592,7 +592,19 @@ const classroomReport = (async (root, params, context) => {
     const userQuizReportRes = (usersQuizReportRes || []).filter((quizReport) => get(quizReport, '_id') === userId);
     const userAssignmentRes = (usersAssignmentRes || []).filter((userAssignment) => get(userAssignment, 'user.typeId') === userId);
     const userBlockbasedPracticeRes = (usersBlockbasedPracticeRes || []).filter((userPractice) => get(userPractice, 'user.typeId') === userId);
-
+    let filteredUserBlockBasedPractice = [];
+    userBlockbasedPracticeRes.forEach((practice) => {
+      const findUserBBPractice = filteredUserBlockBasedPractice.find((bbPractice) => get(bbPractice, 'user.typeId') === get(practice, 'user.typeId')
+        && get(bbPractice, 'blockBasedPractice.id') === get(practice, 'blockBasedPractice.id'));
+      const hasUserSubmittedPracticeLink = get(practice, 'blockBasedPractice.isSubmitAnswer', false) ? (get(practice, 'answerLink') || get(practice, 'savedBlocks') || get(practice, 'attachments', []).length) : true;
+      if (!!findUserBBPractice && !hasUserSubmittedPracticeLink) {
+        const hasUserSubmittedPracticeLinkInPrevDoc = get(findUserBBPractice, 'blockBasedPractice.isSubmitAnswer', false) ? (get(findUserBBPractice, 'answerLink') || get(findUserBBPractice, 'savedBlocks') || get(findUserBBPractice, 'attachments', []).length) : true;
+        if (hasUserSubmittedPracticeLinkInPrevDoc) {
+          filteredUserBlockBasedPractice = filteredUserBlockBasedPractice.filter((userBBPractice) => get(userBBPractice, 'id') === get(findUserBBPractice, 'id'));
+          filteredUserBlockBasedPractice.push({ ...findUserBBPractice });
+        }
+      } else filteredUserBlockBasedPractice.push({ ...practice });
+    });
     let isMmsPresent = false;
 
     if (mentorMenteeSessionRes.length) {
@@ -709,60 +721,52 @@ const classroomReport = (async (root, params, context) => {
         obj.assignmentSubmittedCount += 1;
       }
     }
-    let hasUserSubmittedPractice = false;
-    const practiceQuestions = [];
-    for (const userbbPractice of userBlockbasedPracticeRes) {
+    for (const userbbPractice of filteredUserBlockBasedPractice) {
       const previousBlockBasedObj = obj.blockBasedPractice.get(get(userbbPractice, 'blockBasedPractice.id'));
-      if (!practiceQuestions.includes(get(userbbPractice, 'blockBasedPractice.id'))) {
-        practiceQuestions.push(get(userbbPractice, 'blockBasedPractice.id'));
-        const innerObj = {
-          title: '',
-          pqTotalQuestions: 1,
-          pqCorrectSum: 0,
-          pqIncorrectSum: 0,
-          pqPartiallyCorrectSum: 0,
-          pqUnevaluated: 0,
-          pqSubmittedCount: get(previousBlockBasedObj, 'pqSubmittedCount', 0) || 0,
-          pqUnattemptedCount: get(previousBlockBasedObj, 'pqUnattemptedCount', 0) || 0,
-          pqQuestions: new Map(),
-          pqSubmissions: get(previousBlockBasedObj, 'pqSubmissions', new Map()) || new Map(),
-        };
-        const hasUserSubmittedPracticeLink = get(userbbPractice, 'blockBasedPractice.isSubmitAnswer', false) ? (get(userbbPractice, 'answerLink') || get(userbbPractice, 'savedBlocks') || get(userbbPractice, 'attachments', []).length) : true;
-        innerObj.title = get(userbbPractice, 'blockBasedPractice.title', '');
-        // individual questions
-        if (innerObj.pqQuestions.has(get(userbbPractice, 'blockBasedPractice.id'))) {
-          if (get(userbbPractice, 'blockBasedPractice.isSubmitAnswer')) {
-            innerObj.pqQuestions.set(get(userbbPractice, 'blockBasedPractice.id'), innerObj.pqQuestions.get(get(userbbPractice, 'blockBasedPractice.id')) + 1);
-          }
-        } else {
-          if (get(userbbPractice, 'blockBasedPractice.isSubmitAnswer')) {
-            innerObj.pqQuestions.set(get(userbbPractice, 'blockBasedPractice.id'), 1);
-          } else {
-            innerObj.pqQuestions.set(get(userbbPractice, 'blockBasedPractice.id'), 0);
-          }
+      const innerObj = {
+        title: '',
+        pqTotalQuestions: 1,
+        pqCorrectSum: 0,
+        pqIncorrectSum: 0,
+        pqPartiallyCorrectSum: 0,
+        pqUnevaluated: 0,
+        pqSubmittedCount: get(previousBlockBasedObj, 'pqSubmittedCount', 0) || 0,
+        pqUnattemptedCount: get(previousBlockBasedObj, 'pqUnattemptedCount', 0) || 0,
+        pqQuestions: new Map(),
+        pqSubmissions: get(previousBlockBasedObj, 'pqSubmissions', new Map()) || new Map(),
+      };
+      const hasUserSubmittedPracticeLink = get(userbbPractice, 'blockBasedPractice.isSubmitAnswer', false) ? (get(userbbPractice, 'answerLink') || get(userbbPractice, 'savedBlocks') || get(userbbPractice, 'attachments', []).length) : true;
+      innerObj.title = get(userbbPractice, 'blockBasedPractice.title', '');
+      // individual questions
+      if (innerObj.pqQuestions.has(get(userbbPractice, 'blockBasedPractice.id'))) {
+        if (get(userbbPractice, 'blockBasedPractice.isSubmitAnswer')) {
+          innerObj.pqQuestions.set(get(userbbPractice, 'blockBasedPractice.id'), innerObj.pqQuestions.get(get(userbbPractice, 'blockBasedPractice.id')) + 1);
         }
-        if (get(userbbPractice, 'blockBasedPractice') && hasUserSubmittedPracticeLink) {
-          if (!hasUserSubmittedPractice) {
-            hasUserSubmittedPractice = true;
-            innerObj.pqSubmittedCount += 1;
-          }
-          innerObj.pqSubmissions.set(userId, {
-            userId,
-          });
-          if (get(userbbPractice, 'result') === 'correct') {
-            innerObj.pqCorrectSum += 1;
-          } else if (get(userbbPractice, 'result') === 'incorrect') {
-            innerObj.pqIncorrectSum += 1;
-          } else if (get(userbbPractice, 'result') === 'partiallyCorrect') {
-            innerObj.pqPartiallyCorrectSum += 1;
-          } else {
-            innerObj.pqUnevaluated += 1;
-          }
+      } else {
+        if (get(userbbPractice, 'blockBasedPractice.isSubmitAnswer')) {
+          innerObj.pqQuestions.set(get(userbbPractice, 'blockBasedPractice.id'), 1);
         } else {
-          innerObj.pqUnattemptedCount += 1;
+          innerObj.pqQuestions.set(get(userbbPractice, 'blockBasedPractice.id'), 0);
         }
-        obj.blockBasedPractice.set(get(userbbPractice, 'blockBasedPractice.id'), innerObj);
       }
+      if (get(userbbPractice, 'blockBasedPractice') && hasUserSubmittedPracticeLink) {
+        innerObj.pqSubmittedCount += 1;
+        innerObj.pqSubmissions.set(userId, {
+          userId,
+        });
+        if (get(userbbPractice, 'result') === 'correct') {
+          innerObj.pqCorrectSum += 1;
+        } else if (get(userbbPractice, 'result') === 'incorrect') {
+          innerObj.pqIncorrectSum += 1;
+        } else if (get(userbbPractice, 'result') === 'partiallyCorrect') {
+          innerObj.pqPartiallyCorrectSum += 1;
+        } else {
+          innerObj.pqUnevaluated += 1;
+        }
+      } else {
+        innerObj.pqUnattemptedCount += 1;
+      }
+      obj.blockBasedPractice.set(get(userbbPractice, 'blockBasedPractice.id'), innerObj);
     }
   }
 
