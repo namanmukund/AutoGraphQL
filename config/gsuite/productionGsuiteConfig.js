@@ -1,0 +1,14 @@
+const productionGsuiteCredentials = {
+  type: 'service_account',
+  project_id: 'gsuitintegration-370113',
+  private_key_id: 'ebd3149fed45eee79a49ae9d5289f39bb65561d2',
+  private_key: '-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQC4Qy2/xaFPPukW\nA2qUSV72JzmsHEUPNwdN6R+JM0jqYiVbokkjzzxkhV1wz2zbBNaIrlHQzXGzE/22\ndlL0IH0w2eqyaApcJ3b9V3bNsIW5K+QttcskmeQRSUpnGglDbIIzlOGDJOMbi9lQ\n3WVc4gEEmN2luImk01O0yP/Ijr6jmzQspT+HVDAXiAEohB0CL39oL6kFGiwuOXX1\nxTgRCsGLF+sYBnpt3RVvhafG8uM5mZytgTRXxKpfjni3FnQTCwjnOey9C8LbrFg1\nSBGkAf/JZWKs0zAJGmY0G3BJqmmuP7zNwey22kaqwk0B+VDH8ucTNMocNkeFkrKi\ni5GTPSpJAgMBAAECggEAWxV6K+35iz7B4YvWx25tbqh9LcLbsGW3SqAOYrfjN1lE\ntkNGfFkYtWfnhLhESw/dLLte3iRwK+GZ7PQYlWzp9ZgDGCWt2Vf4zcrKg2ra72nu\n5VmUDYe04YalLMoGAjpFMlJKF5XIXfmHdx252WwurKMUDbNm9v8vxZIGPpGxUxWx\n1GPP4SCVb2apK9iaiRG+kZj6zTdIxXLMsu+oK0hZOiEyL+oww62eQDK3May/qDbt\nTa+ePiy+0z4K6WLPuXMXN5A7dcm51wh6imB7t9D4PZZ/+5dkx8MT0KBaIWlNcOIj\n7IMeeGFwVp04vQFVwPK4H+Cd+WiThUa0N1IoNqrDMQKBgQDuOvt2WsTY4v/NgY+r\nO5W5rkwo/rJYZ1XXshk4NyY5kEzf95tyJjH397Dh/71U0y5M9d5rpySSi55aEsQC\nQsn5ZmXY/gINW1FRKKcCMhq3Sa8TeJaIXGHNn1mFUCkYOuQQrtyzp1oIcpvVo76t\nz/FBB8KDmi1NkBdrEXrnMJcQWwKBgQDGAa0KF1jDdzG/P6SlGGbyvghymwOMXeNR\nF+wkDTirfQi1tfTfhXn6z3mN5AFcCiHvbpSfrdoOSDhUMRgeFGFsOPxi2OJ0KPBV\n094MgMERUjyqiX2r4qWaOiI1TgAD9ceMBEnPbYGgzpB8yYZRZmF6Z2wY2UlzevK3\nsuZAC/QxKwKBgQCY3WYgMuxfE4H7F2jeAnT32bzrDUvZaC1wI8sFBHZVt59sk5C+\ndX3Y1Ko+yoBt3ri2D4qyX2UbV9W7jJETtlGt5CP0UkF02qTaRBCuWwJDnFdoUhed\n1lG3xMmHvsEv2BIiFmJuMTOXehs+wjyHgYgYJ2eMVLE/NPeh72yCzu4QQwKBgQCK\nSBdZyc5CzBZg8wiACBe1hQOPTjTfLZ6YPrW6w8UE9pBDnuyBwczbXVQNxOMyLR1g\nAoEnNxnnCYbVPWgTcbZMB0wzmDYmW4Tk287iOnUbLKyTiOvMQ7/Vgq3rPisCmP4g\nCcqmY1q5PClqDK+SX4bKHjo+7FjAnmet5PGqXu7N+wKBgQCqcPCaPXE/G0frxNwz\nhPPTC4fcp3L2t2G4krREfHmDe4SFEa5TUN6CUF5KH2MOPw5ece6XMxXiX0WZnonE\nwG82Zr9b6jhhNu1cAigoa6C7TB/lhQC9Re9PD3llCV0wRGAia8MfIjFt1nSbQkBb\nUf4iPTQYmqV+T7njrK/UEJsRpw==\n-----END PRIVATE KEY-----\n',
+  client_email: 'tekie-backend@gsuitintegration-370113.iam.gserviceaccount.com',
+  client_id: '111522108489741452874',
+  auth_uri: 'https://accounts.google.com/o/oauth2/auth',
+  token_uri: 'https://oauth2.googleapis.com/token',
+  auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
+  client_x509_cert_url: 'https://www.googleapis.com/robot/v1/metadata/x509/tekie-backend%40gsuitintegration-370113.iam.gserviceaccount.com',
+};
+
+export { productionGsuiteCredentials };

@@ -1,5 +1,5 @@
 import { google } from 'googleapis';
-import { credentials } from '../../../../config/gsuite';
+import gsuiteConfig from '../../../../config/gsuite';
 import { GSUITE_ACCESS_SCOPES, GSUITE_FILE_TYPES } from '../../../../constants';
 import MasterController from './MasterController';
 
@@ -9,6 +9,7 @@ class GSuiteController extends MasterController {
     constructor(authentication) {
       const model = '';
       super(model, authentication);
+      const credentials = gsuiteConfig[process.env.NODE_ENV || 'development'];
       this.#googleAuth = new google.auth.GoogleAuth({
         credentials,
         scopes: GSUITE_ACCESS_SCOPES,
