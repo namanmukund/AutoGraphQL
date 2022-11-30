@@ -2,7 +2,7 @@
   Auto generating models
  */
 import mongoose from 'mongoose';
-import { has } from 'lodash';
+import { capitalize, has } from 'lodash';
 import getParsedASTMap from '../utils/getParsedASTMap';
 import { log, types } from '../../../utils';
 import getDirectiveArgumentValue, { getTypeDirectiveArgumentValue } from '../utils/getDirectiveArgumentValue';
@@ -122,30 +122,41 @@ const createMongooseModelsFromSchema = (allModelsSchema, typesSchema) => {
   const schemas = { ...allModelsSchema };
   // get all the enum types before attaching it with the respective schemas
   const allEnumTypesObject = getEnumDefinitionTypeObject(types);
-  const mongooseModels = {};
+  const models = {};
   // Moongoose model creation
   Object.keys(schemas).forEach((modelName) => {
     const typeName = modelName;
-    const model = schemas[typeName];
-
-    Object.keys(model).forEach((fieldName) => {
-      // Converting every field of a model into mongoose schema
-      model[fieldName] = getFieldSchema(model[fieldName], typesSchema,
-        allModelsSchema, allEnumTypesObject);
-    });
-    // make model from schemas
-    /* using 'usePushEach : true' configuration in mongoose removes the error
-    for the deprecated $pushAll method in mongodb version > 3.4.9  */
-    const collectionObject = { collection: typeName, timestamps: true, usePushEach: true };
-    const modelSchema = new Schema(model, collectionObject);
-
-    // create model from schema
-    const createdModel = mongoose.model(typeName, modelSchema);
-    mongooseModels[modelName] = createdModel;
+    const { databaseType, schema: model } = schemas[typeName];
+    let createdModel;
+    switch (databaseType) {
+      case DATABASE_DIALECTS.postgres: {
+        break;
+      }
+      case DATABASE_DIALECTS.mongoose:
+      default: {
+        Object.keys(model).forEach((fieldName) => {
+          // Converting every field of a model into mongoose schema
+          model[fieldName] = getFieldSchema(model[fieldName], typesSchema,
+            allModelsSchema, allEnumTypesObject);
+        });
+        // make model from schemas
+        /* using 'usePushEach : true' configuration in mongoose removes the error
+        for the deprecated $pushAll method in mongodb version > 3.4.9  */
+        const collectionObject = { collection: typeName, timestamps: true, usePushEach: true };
+        const modelSchema = new Schema(model, collectionObject);
+        // create model from schema
+        createdModel = mongoose.model(typeName, modelSchema);
+        break;
+      }
+    }
+    models[modelName] = { databaseType, createdModel };
   });
 
-  Object.keys(mongooseModels).forEach((model) => {
-    log(`Mongoose Model generated for: ${model}`);
+  Object.keys(models).forEach((model) => {
+    const modelDatabaseType = models[model].databaseType;
+    // Re-assigning createdModel to models map to flat model structure.
+    models[model] = models[model].createdModel;
+    log(`${capitalize(modelDatabaseType)} Model generated for: ${model}`);
   });
 
   /**
@@ -154,24 +165,23 @@ const createMongooseModelsFromSchema = (allModelsSchema, typesSchema) => {
    */
 
   // Generating SQL models from filesystem if any.
-  const sqlModels = {};
+  const additionalModels = {};
   [UserSessionDumpModel, UserSessionReportModel]
     .forEach((model) => {
-      sqlModels[model.name] = model;
+      additionalModels[model.name] = model;
     });
 
-  Object.keys(sqlModels).forEach((model) => {
+  Object.keys(additionalModels).forEach((model) => {
     log(`PG SQL Model generated for: ${model}`);
   });
 
-  return { ...mongooseModels, ...sqlModels };
+  return { ...models, ...additionalModels };
 };
 
 // starts from here
 const parsedASTMap = getParsedASTMap(types);
 
 const modelTypesSchema = {};
-const sqlModelTypesSchema = {};
 const embeddedTypesSchema = {};
 const modelsToBeVersioned = [];
 Object.keys(parsedASTMap).forEach((type) => {
@@ -257,13 +267,25 @@ Object.keys(parsedASTMap).forEach((type) => {
    */
   // model directives logic
   const isModel = directives && hasDirective(directives, 'model');
-  const modelDatabase = getTypeDirectiveArgumentValue(directives, 'model', 'database');
-  const isSQLModel = modelDatabase === DATABASE_DIALECTS.postgres;
+  const modelDatabase = getTypeDirectiveArgumentValue(directives, 'model', 'database', DATABASE_DIALECTS.mongoose);
+  let skipModelCreation = false;
+
+  /**
+   * If type is model and SECONDARY_APPLICATION_NAME is configured
+   * then check if model/type is allowed to be indexed in this server.
+   *
+   * Please Note SECONDARY_APPLICATION_NAME should be either of the value
+   * located inside constants file in the variable SECONDARY_APPLICATIONS
+   */
+  if (isModel && process.env.SECONDARY_APPLICATION_NAME) {
+    const modelAppNames = getTypeDirectiveArgumentValue(directives, 'model', 'secondaryApplications');
+    if (!(modelAppNames || []).includes(process.env.SECONDARY_APPLICATION_NAME)) {
+      skipModelCreation = true;
+    }
+  }
   const isModelVersioningToBeDone = directives && hasDirective(directives, 'history');
-  if (isSQLModel) {
-    sqlModelTypesSchema[typeName] = objectSchema;
-  } else if (isModel) {
-    modelTypesSchema[typeName] = objectSchema;
+  if (isModel && !skipModelCreation) {
+    modelTypesSchema[typeName] = { databaseType: modelDatabase, schema: objectSchema };
   } else {
     /*
     Phone is an embedded type schema
@@ -278,7 +300,6 @@ Object.keys(parsedASTMap).forEach((type) => {
 const models = createMongooseModelsFromSchema(
   modelTypesSchema,
   embeddedTypesSchema,
-  sqlModelTypesSchema,
   modelsToBeVersioned,
 );
 export default models;

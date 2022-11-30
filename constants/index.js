@@ -15,6 +15,10 @@ const TLA = 'tekieLearningApp';
 const TWA = 'tekieWebApp';
 const TAA = 'tekieAffiliateApp';
 const TBA = 'core';
+const TAT = 'tekieAnalyticsApp';
+
+const SECONDARY_APPLICATIONS = { TAT };
+
 const backendApps = [TBA];
 const byPassMenteeValidationApps = [TBA];
 
@@ -550,8 +554,8 @@ const dbControllerModes = {
 };
 
 const DATABASE_DIALECTS = {
-  mongodb: 'mdb',
-  postgres: 'pg',
+  mongoose: 'mongoose',
+  postgres: 'postgresql',
 };
 
 const DEFAULT_CLAMP_VALUE = {
@@ -670,6 +674,7 @@ export {
   TWA,
   TAA,
   TBA,
+  TAT,
   loginType,
   masteryLevels,
   learningObjectiveQuizReportThreshHolds,
@@ -738,4 +743,5 @@ export {
   GSUITE_FILE_TYPES,
   DATABASE_DIALECTS,
   PG_MODEL_SUFFIX,
+  SECONDARY_APPLICATIONS,
 };
