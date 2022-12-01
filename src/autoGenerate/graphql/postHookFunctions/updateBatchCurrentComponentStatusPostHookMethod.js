@@ -6,6 +6,7 @@ import {
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 // import addMentorMenteeSessionForBatch from '../../utils/addMentorMenteeSessionForBatch';
 import { DatabaseRecordNotFoundError } from '../../../../constants/errors';
+import { CacheController } from '../controllers';
 
 // query to topics between 2 orders
 const getTopicSList = (topicStartOrder, topicEndOrder, courseId) => `
@@ -107,6 +108,8 @@ const updateBatchCurrentComponentStatusPostHookMethod = async (input, params, mu
       // }
     }
   }
+  const cacheController = new CacheController({ bypass: true });
+  cacheController.destroy(`batches::${get(input, 'batch.typeId')}`);
 };
 
 export default updateBatchCurrentComponentStatusPostHookMethod;
