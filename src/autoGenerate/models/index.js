@@ -268,23 +268,9 @@ Object.keys(parsedASTMap).forEach((type) => {
   // model directives logic
   const isModel = directives && hasDirective(directives, 'model');
   const modelDatabase = getTypeDirectiveArgumentValue(directives, 'model', 'database', DATABASE_DIALECTS.mongoose);
-  let skipModelCreation = false;
 
-  /**
-   * If type is model and SECONDARY_APPLICATION_NAME is configured
-   * then check if model/type is allowed to be indexed in this server.
-   *
-   * Please Note SECONDARY_APPLICATION_NAME should be either of the value
-   * located inside constants file in the variable SECONDARY_APPLICATIONS
-   */
-  if (isModel && process.env.SECONDARY_APPLICATION_NAME) {
-    const modelAppNames = getTypeDirectiveArgumentValue(directives, 'model', 'secondaryApplications');
-    if (!(modelAppNames || []).includes(process.env.SECONDARY_APPLICATION_NAME)) {
-      skipModelCreation = true;
-    }
-  }
   const isModelVersioningToBeDone = directives && hasDirective(directives, 'history');
-  if (isModel && !skipModelCreation) {
+  if (isModel) {
     modelTypesSchema[typeName] = { databaseType: modelDatabase, schema: objectSchema };
   } else {
     /*
