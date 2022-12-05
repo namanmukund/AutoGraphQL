@@ -161,6 +161,7 @@ const getBuddyStatus = async (
   }
   const project = {
     id: 1,
+    logoutAllStudents: 1,
   };
   if (action === 'markAttendance' && studentIds.length) {
     project.attendance = 1;
@@ -175,6 +176,8 @@ const getBuddyStatus = async (
       sessionId, project,
     }),
   );
+  let shouldRevertLogoutStatus = false;
+  if (get(batchSessionData, '[0].logoutAllStudents') === true) shouldRevertLogoutStatus = true;
   const addedStudentsArray = get(batchSessionData, '[0].loggedInUserStatus', []);
   let result = false;
   if (action === 'check') {
@@ -196,12 +199,18 @@ const getBuddyStatus = async (
             },
           },
         };
+        if (shouldRevertLogoutStatus) {
+          Object.assign(input.fields, { logoutAllStudents: false });
+        }
         updateBatchSession(input);
       } else {
         const input = {
           id: sessionId,
           fields: { loggedInUserStatus: { pushMany: [{ userConnectId: userId, systemId, isLoggedIn: true }] } },
         };
+        if (shouldRevertLogoutStatus) {
+          Object.assign(input.fields, { logoutAllStudents: false });
+        }
         updateBatchSession(input);
       }
     } else {
@@ -216,6 +225,9 @@ const getBuddyStatus = async (
             },
           },
         };
+        if (shouldRevertLogoutStatus) {
+          Object.assign(input.fields, { logoutAllStudents: false });
+        }
         updateBatchSession(input);
       }
     }
@@ -232,6 +244,9 @@ const getBuddyStatus = async (
         id: sessionId,
         fields: { loggedInUserStatus: { pop: { userReferenceId: userId } } },
       };
+      if (shouldRevertLogoutStatus) {
+        Object.assign(input.fields, { logoutAllStudents: false });
+      }
       updateBatchSession(input);
       result = true;
     }
@@ -274,6 +289,9 @@ const getBuddyStatus = async (
               },
             },
           };
+          if (shouldRevertLogoutStatus) {
+            Object.assign(input.fields, { logoutAllStudents: false });
+          }
           attendancePromiseArray.push(updateBatchSession(input));
           isUpdated = true;
         }
@@ -301,6 +319,9 @@ const getBuddyStatus = async (
             },
           };
           isUpdated = true;
+          if (logoutAllStudents) {
+            Object.assign(input.fields, { logoutAllStudents: false });
+          }
           updateLoginsPromiseArray.push(updateBatchSession(input));
         }
       }

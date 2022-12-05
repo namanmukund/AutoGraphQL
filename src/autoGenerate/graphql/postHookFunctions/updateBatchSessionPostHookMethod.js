@@ -192,13 +192,14 @@ const nextTopicQuery = (courseId) => `
 //   `;
 
 // update batch Session
-// const updateBatchSession = (batchSessionId, mentorSessionId) => `
-//   mutation{
-//     updateBatchSession(id: "${batchSessionId}", mentorSessionConnectId: "${mentorSessionId}") {
-//       id
-//     }
-//   }
-//   `;
+const updateBatchSession = (batchSessionId) => `
+mutation($input: BatchSessionUpdate) {
+  updateBatchSession(id: "${batchSessionId}", input: $input) {
+    id
+  }
+}
+
+  `;
 
 const getMentor = async (mentorSessionId, context) => {
   const mentorSession = await callLocalGraphqlApi(`{
@@ -246,7 +247,7 @@ const batchSessionQuery = (id) => `{
   Post hook of addBatchSession
 */
 const updateBatchSessionPostHookMethod = async (input, params, mutationName, context) => {
-  const { sessionStatus: sessionStatusFromInput, ...slots } = input;
+  const { sessionStatus: sessionStatusFromInput, logoutAllStudents, ...slots } = input;
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
   const mentorSessionId = get(input, 'mentorSession.typeId');
   const {
@@ -608,7 +609,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     });
   }
   if (get(params, 'input.logoutAllStudents') !== undefined && get(params, 'input.logoutAllStudents') === true) {
-    const scheduleDate = addMinutesToDate(new Date(), 1);
+    const scheduleDate = addMinutesToDate(new Date(), 2);
     log('Updating Logout students', scheduleDate);
     addToSchedule('updateLogoutAllStudents', scheduleDate, { batchSessionId, context });
   }
@@ -631,6 +632,10 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
       hkey: `batchSessions::${get(input, 'batch.typeId')}`,
       maxAge: 24 * 60 * 60,
     });
+  }
+  if (logoutAllStudents) {
+    await callLocalGraphqlApi(updateBatchSession(batchSessionId), context, { input: { logoutAllStudents: false } });
+    Object.assign(input, { logoutAllStudents: false });
   }
 };
 export default updateBatchSessionPostHookMethod;
