@@ -9,9 +9,8 @@ class GSuiteController extends MasterController {
     constructor(authentication) {
       const model = '';
       super(model, authentication);
-      const credentials = gsuiteConfig[process.env.NODE_ENV || 'development'];
       this.#googleAuth = new google.auth.GoogleAuth({
-        credentials,
+        credentials: gsuiteConfig,
         scopes: GSUITE_ACCESS_SCOPES,
       });
     }
