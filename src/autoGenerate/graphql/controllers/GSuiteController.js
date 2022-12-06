@@ -47,7 +47,7 @@ class GSuiteController extends MasterController {
     }
 
     // ID_OF_THE_FOLDER is related to id of it's parent folder
-    createFileOrFolder = async (name, mimeType, parentFolderIDs) => {
+    createFileOrFolder = async (name, mimeType, ignoreDefaultVisibility, parentFolderIDs) => {
       const driveController = this.getClientInstanceByType('drive');
       let requestBody = {};
       if (parentFolderIDs) {
@@ -65,6 +65,7 @@ class GSuiteController extends MasterController {
       const newFolder = await driveController.files.create({
         fields: '*',
         requestBody,
+        ignoreDefaultVisibility,
       });
 
       return newFolder;
@@ -83,7 +84,7 @@ class GSuiteController extends MasterController {
       }
     }
 
-    duplicateFileOrFolder = async (ID_OF_THE_FILE, name, parentFolderIDs) => {
+    duplicateFileOrFolder = async (ID_OF_THE_FILE, name, ignoreDefaultVisibility, parentFolderIDs) => {
       const driveController = this.getClientInstanceByType('drive');
       let requestBody = {};
       if (parentFolderIDs) {
@@ -100,6 +101,7 @@ class GSuiteController extends MasterController {
         fields: '*',
         fileId: ID_OF_THE_FILE,
         requestBody,
+        ignoreDefaultVisibility,
       });
       return newFile;
     }

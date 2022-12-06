@@ -3,13 +3,12 @@ import GSuiteController from '../../../controllers/GSuiteController';
 
 const createGsuiteFileOrFolder = async (_root, params) => {
   const {
-    name, mimeType, parentFolderIDs, permission,
+    name, mimeType, parentFolderIDs,
   } = params;
   const gSuiteController = new GSuiteController({ bypass: true });
-
-  const creatingFileOrFolder = await gSuiteController.createFileOrFolder(name, mimeType, parentFolderIDs);
+  const ignoreDefaultVisibility = true;
+  const creatingFileOrFolder = await gSuiteController.createFileOrFolder(name, mimeType, ignoreDefaultVisibility, parentFolderIDs);
   if (permission) {
-    const updatingPermissionResponse = await gSuiteController.updatePermission(creatingFileOrFolder.data.id, permission);
     if (!updatingPermissionResponse) throw new Error('Not able to update the permission');
   }
   if (creatingFileOrFolder) return creatingFileOrFolder.data;
@@ -36,11 +35,11 @@ const updateParentFolderOfGsuiteFileOrFolder = async (root, params) => {
 
 const duplicateGsuiteFileOrFolder = async (root, params) => {
   const {
-    id, name, parentFolderIDs, permission,
+    id, name, parentFolderIDs,
   } = params;
   const gSuiteController = new GSuiteController({ bypass: true });
-
-  const duiplicatingFileOrFolderResponse = await gSuiteController.duplicateFileOrFolder(id, name, parentFolderIDs);
+  const ignoreDefaultVisibility = true;
+  const duiplicatingFileOrFolderResponse = await gSuiteController.duplicateFileOrFolder(id, name, ignoreDefaultVisibility, parentFolderIDs);
   if (permission) {
     const updatingPermissionResponse = await gSuiteController.updatePermission(duiplicatingFileOrFolderResponse.data.id, permission);
     if (!updatingPermissionResponse) throw new Error('Not able to fetch the data');
@@ -89,9 +88,11 @@ const findOrCreateParentFolder = async (
   if (isFolderAlreadyExists) {
     return isFolderAlreadyExists.id;
   }
+  const ignoreDefaultVisibility = true;
   const creatingFileOrFolder = await gSuiteController.createFileOrFolder(
     fileOrFolderName,
     'folder',
+    ignoreDefaultVisibility,
     parentFolderId,
   );
   if (creatingFileOrFolder) return creatingFileOrFolder.data.id;
@@ -123,12 +124,14 @@ const createGsuiteLastRevisionFile = async (_root, params) => {
     mimeType,
     clasroomsFolderId,
   );
+  const ignoreDefaultVisibility = true;
 
   if (gsuiteTempleteUrlOrFile !== 'null' && gsuiteFileTypeFolderId) {
     const gsuiteId = gsuiteTempleteUrlOrFile.split('/')[5];
     fileCreationResponse = await gSuiteController.duplicateFileOrFolder(
       gsuiteId,
       studentFileCreationName,
+      ignoreDefaultVisibility,
       gsuiteFileTypeFolderId,
     );
   } else if (gsuiteFileTypeFolderId !== 'null') {
@@ -136,11 +139,11 @@ const createGsuiteLastRevisionFile = async (_root, params) => {
     fileCreationResponse = await gSuiteController.createFileOrFolder(
       studentFileCreationName,
       mimeType,
+      ignoreDefaultVisibility,
       gsuiteFileTypeFolderId,
     );
   }
   if (fileCreationResponse) {
-    await gSuiteController.updatePermission(fileCreationResponse.data.id, { role: 'writer', type: 'anyone' });
     return fileCreationResponse.data;
   }
   throw new Error('Not able to create file or folder');
