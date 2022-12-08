@@ -192,14 +192,13 @@ const nextTopicQuery = (courseId) => `
 //   `;
 
 // update batch Session
-const updateBatchSession = (batchSessionId) => `
-mutation($input: BatchSessionUpdate) {
-  updateBatchSession(id: "${batchSessionId}", input: $input) {
-    id
-  }
-}
-
-  `;
+// const updateBatchSession = (batchSessionId) => `
+// mutation($input: BatchSessionUpdate) {
+//   updateBatchSession(id: "${batchSessionId}", input: $input) {
+//     id
+//   }
+// }
+//   `;
 
 const getMentor = async (mentorSessionId, context) => {
   const mentorSession = await callLocalGraphqlApi(`{
@@ -247,7 +246,7 @@ const batchSessionQuery = (id) => `{
   Post hook of addBatchSession
 */
 const updateBatchSessionPostHookMethod = async (input, params, mutationName, context) => {
-  const { sessionStatus: sessionStatusFromInput, logoutAllStudents, ...slots } = input;
+  const { sessionStatus: sessionStatusFromInput, ...slots } = input;
   const slotTimeStringArray = getSelectedSlotsStringArray(slots);
   const mentorSessionId = get(input, 'mentorSession.typeId');
   const {
@@ -632,10 +631,6 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
       hkey: `batchSessions::${get(input, 'batch.typeId')}`,
       maxAge: 24 * 60 * 60,
     });
-  }
-  if (logoutAllStudents) {
-    await callLocalGraphqlApi(updateBatchSession(batchSessionId), context, { input: { logoutAllStudents: false } });
-    Object.assign(input, { logoutAllStudents: false });
   }
 };
 export default updateBatchSessionPostHookMethod;
