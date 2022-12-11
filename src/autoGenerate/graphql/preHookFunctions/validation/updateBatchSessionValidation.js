@@ -94,6 +94,7 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
     bookingDate,
     course,
     mentorSession,
+    logoutAllStudents: prevlogoutAllStudents,
     ...slots
   } = batchSession;
 
@@ -203,6 +204,11 @@ const updateBatchSessionValidation = async (params, mutationOrQueryName, context
         startSessionByMentee: new Date().toISOString(),
       });
     }
+  }
+  if (prevlogoutAllStudents) {
+    Object.assign(params.input, {
+      logoutAllStudents: false,
+    });
   }
 
   context.prevIsAudit = get(batchSession, 'isAudit', false);

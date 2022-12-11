@@ -192,12 +192,12 @@ const nextTopicQuery = (courseId) => `
 //   `;
 
 // update batch Session
-// const updateBatchSession = (batchSessionId, mentorSessionId) => `
-//   mutation{
-//     updateBatchSession(id: "${batchSessionId}", mentorSessionConnectId: "${mentorSessionId}") {
-//       id
-//     }
+// const updateBatchSession = (batchSessionId) => `
+// mutation($input: BatchSessionUpdate) {
+//   updateBatchSession(id: "${batchSessionId}", input: $input) {
+//     id
 //   }
+// }
 //   `;
 
 const getMentor = async (mentorSessionId, context) => {
@@ -608,7 +608,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     });
   }
   if (get(params, 'input.logoutAllStudents') !== undefined && get(params, 'input.logoutAllStudents') === true) {
-    const scheduleDate = addMinutesToDate(new Date(), 5);
+    const scheduleDate = addMinutesToDate(new Date(), 2);
     log('Updating Logout students', scheduleDate);
     addToSchedule('updateLogoutAllStudents', scheduleDate, { batchSessionId, context });
   }
