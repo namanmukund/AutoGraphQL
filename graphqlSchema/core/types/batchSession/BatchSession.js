@@ -1,4 +1,5 @@
 import { UPDATED } from '../../../../constants/subscriptionEvents';
+import getModelOptionsString from '../../../../src/autoGenerate/utils/getModelOptionsString';
 import getSlotTimeFields from '../../functions/getSlotTimeFields';
 
 const slotTimeFields = getSlotTimeFields('Boolean', false);
@@ -32,7 +33,7 @@ const b2bFormFields = `
 `;
 
 const BatchSession = `
-  type BatchSession @model @subscribe(events: [${UPDATED}])
+  type BatchSession @model(${getModelOptionsString('BatchSession')}) @subscribe(events: [${UPDATED}])
   {
     course: Course @relation(name: "BatchSessionCourse", direction: "OneWay")
     coursePackage: CoursePackage @relation(name: "BatchSessionCoursePackage", direction: "OneWay")

@@ -12,7 +12,10 @@ directive @unique on FIELD
 directive @uniqueOrEmpty on FIELD
 
 # model declaration for type
-directive @model(database: DatabaseDialect) on SCHEMA
+directive @model(
+  database: DatabaseDialect
+  secondaryApplications: [String]
+) on SCHEMA
 
 # field value come from a remote source
 directive @remote on FIELD

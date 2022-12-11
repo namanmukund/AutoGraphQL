@@ -3,6 +3,7 @@ import { log, dbConfig } from '../utils';
 import db from './db';
 import createScheduler from '../utils/createScheduler';
 import reRunJobsFromDB from '../utils/scheduleJobs/reRunJobsFromDB';
+import { TAT } from '../constants';
 
 const { mongoose, sequelize } = db;
 
@@ -40,5 +41,8 @@ mongoose.on('error', (err) => {
     createScheduler('autoCompleteThoeryClassroomSessions');
     createScheduler('b2cBatchSessionReport');
     reRunJobsFromDB();
+  }
+  if (process.env.NODE_ENV === 'production' && process.env.SECONDARY_APPLICATION_NAME === TAT) {
+    createScheduler(TAT);
   }
 });
