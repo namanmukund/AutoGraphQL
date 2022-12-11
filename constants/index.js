@@ -611,7 +611,11 @@ const ALLOWED_HEADERS = [
   ...ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER.map((VAR) => VAR.headerLabel),
 ];
 
-const GSUITE_BASE_FOLDER_ID = '10F9f2lE_Sjb7u7Gge-kBECt7aSzt83UK';
+const GSUITE_BASE_FOLDER_ID = {
+  production: '1lBo4KzCIyKeoxeQo6iisFOMPf9zCACFn',
+  development: '10F9f2lE_Sjb7u7Gge-kBECt7aSzt83UK',
+  staging: '10F9f2lE_Sjb7u7Gge-kBECt7aSzt83UK',
+};
 
 const GSUITE_ACCESS_SCOPES = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/drive.appdata', 'https://www.googleapis.com/auth/drive.photos.readonly'];
 
