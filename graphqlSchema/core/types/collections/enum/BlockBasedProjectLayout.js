@@ -3,6 +3,7 @@ const BlockBasedProjectLayout = `
     externalPlatform
     playground
     fileUpload
+    gsuite
   }`;
 
 export default BlockBasedProjectLayout;

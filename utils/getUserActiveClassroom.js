@@ -10,7 +10,7 @@ export const activeCourseIdFromContext = (context) => get(context, 'activeCourse
 
 const userProfileCacheKey = (userId) => `userProfile::activeClassroom::${userId}`;
 
-const getStudentProfile = async (context) => {
+export const getStudentProfile = async (context) => {
   const { currentUser } = context;
   if (get(currentUser, 'id')) {
     const cacheCon = new CacheController({ bypass: true });
@@ -24,12 +24,18 @@ const getStudentProfile = async (context) => {
           }
         }) {
           id 
+          grade
+          section
           batches(orderBy:createdAt_DESC) {
             id
             type
             documentType
             code
             classroomTitle
+            school {
+              id
+              name
+            }
             coursePackageCourses {
               id
             }
@@ -49,6 +55,10 @@ const getStudentProfile = async (context) => {
             type
             documentType
             classroomTitle
+            school {
+              id
+              name
+            }
             batchCourse: course {
               id
             }

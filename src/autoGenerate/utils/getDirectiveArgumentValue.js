@@ -27,8 +27,9 @@ export const getTypeDirectiveArgumentValue = (
   directives,
   directiveToCheck,
   argumentName,
+  defaultValue = null,
 ) => {
-  let argumentValue = null;
+  let argumentValue = defaultValue;
   if (directives && directives.length) {
     directives.forEach((directive) => {
       const directiveName = directive && directive.name.value;
@@ -41,7 +42,11 @@ export const getTypeDirectiveArgumentValue = (
           (arg) => get(arg, 'name.value') === argumentName,
         )[0];
         if (argument) {
-          argumentValue = get(argument, 'value.value');
+          if (get(argument, 'value.values', []).length) {
+            argumentValue = get(argument, 'value.values', []).map((value) => value.value);
+          } else {
+            argumentValue = get(argument, 'value.value');
+          }
         }
       }
     });
