@@ -113,7 +113,8 @@ const getAggregationQueries = (documentIdsToFetch) => {
     .getPipeline();
 
   const topicAggregationQuery = new AggregationBuilder('Topic')
-    .Match({ id: { $in: Array.from(documentIdsToFetch.topicIds) } });
+    .Match({ id: { $in: Array.from(documentIdsToFetch.topicIds) } })
+    .getPipeline();
 
   const userAggregationQuery = new AggregationBuilder('User')
     .Match({ id: { $in: Array.from(documentIdsToFetch.userIds) } })
@@ -224,8 +225,8 @@ const getBaseDocumentAndCalculatedFields = ({
   const userRole = get(userDetails, 'studentProfile.mentor.typeId') ? 'Teacher' : 'Student';
 
   const sessionComponentRule = get(topicDoc, 'topicComponentRule') || get(sessionDetails, 'topic.topicComponentRule') || [];
-  const sessionClassworkComponents = sessionComponentRule.filter((component) => !['homeworkAssignment', 'quiz', 'homeworkPractice'].includes(component.type));
-  const sessionHomeworkComponents = sessionComponentRule.filter((component) => ['homeworkAssignment', 'quiz', 'homeworkPractice'].includes(component.type));
+  const sessionClassworkComponents = sessionComponentRule.filter((component) => !['homeworkAssignment', 'quiz', 'homeworkPractice'].includes(component.componentName));
+  const sessionHomeworkComponents = sessionComponentRule.filter((component) => ['homeworkAssignment', 'quiz', 'homeworkPractice'].includes(component.componentName));
 
   const baseDocument = {
     studentId,
@@ -469,7 +470,7 @@ const batchAndUpdateUserSessionReports = async () => {
   } = await getAllRequiredDataFromDatabase();
 
   // Here iterating over each batchedUserSessionDump to create User's Session Report.
-  if (batchedUserSessionDump && batchedUserSessionDump.length) {
+  if (batchedUserSessionDump && Object.keys(batchedUserSessionDump).length) {
     const userSessionReportUpdateDoc = [];
     Object.keys(batchedUserSessionDump).forEach((uniqueSessionRowKey) => {
       const sessionComponentsDump = batchedUserSessionDump[uniqueSessionRowKey];
@@ -545,7 +546,7 @@ const batchAndUpdateUserSessionReports = async () => {
 
       userSessionReportUpdateDoc.push({ ...baseDocument, ...calculatedFields });
     });
-    // add or update record in sql
+    // Add or Update record in PG SQL
     if (userSessionReportUpdateDoc && userSessionReportUpdateDoc.length) {
       await userSessionReportController.Model.bulkCreate(userSessionReportUpdateDoc, { updateOnDuplicate: ['id'] });
       log('Session Report Updated!!');
