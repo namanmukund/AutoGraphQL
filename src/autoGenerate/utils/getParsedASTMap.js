@@ -11,6 +11,8 @@ import {
 import getParsedField from './getParsedField';
 import { InvalidRuleValueError } from '../../../constants/errors';
 import { allEvents } from '../../../constants/subscriptionEvents';
+import { getTypeDirectiveArgumentValue } from './getDirectiveArgumentValue';
+import { scalarTypes } from '../../../constants';
 
 const getAllowedOperationsOnType = (
   definition,
@@ -214,6 +216,75 @@ const getAppAndUserPermissionsFromDirective = (
   permissionRuleObject.rule = rule;
   return permissionRuleObject;
 };
+
+const setNestedFieldDefinitions = (definition, definitions, allowedASTDefinitions, allowedDefinitionsExceptCurrentAST = []) => {
+  const { fields: definitionFields, name: { value: definitionName } } = definition;
+  if (!allowedDefinitionsExceptCurrentAST.includes(definitionName)) {
+    definitionFields.forEach((field) => {
+      const { type: { name: fieldName, kind: fieldKind, type: fieldType } } = field;
+      let fieldTypeName = '';
+      // Checking if the field is a list or non-null.
+      if (fieldKind === 'ListType' || fieldKind === 'NonNullType') {
+        if (fieldType.kind === 'ListType') {
+          const { name: nestedFieldName } = fieldType.type;
+          fieldTypeName = get(nestedFieldName, 'value');
+        } else {
+          const { name: nestedFieldName } = fieldType;
+          fieldTypeName = get(nestedFieldName, 'value');
+        }
+      } else if (fieldName && get(fieldName, 'value')) {
+        fieldTypeName = get(fieldName, 'value');
+      }
+      const allowedASTExceptCurrentDefinition = [...allowedASTDefinitions];
+      if (fieldTypeName && !scalarTypes.includes(fieldTypeName)) {
+        // Allow all non-scalar types that are used in the root type.
+        allowedASTDefinitions.add(fieldTypeName);
+
+        // Check if there are more nested fields.
+        const fieldTypeDefinition = definitions.find((def) => get(def, 'name.value') === fieldTypeName);
+        if (!allowedASTExceptCurrentDefinition.includes(fieldTypeName) && fieldTypeDefinition && fieldTypeDefinition.fields && fieldTypeDefinition.fields.length) {
+          setNestedFieldDefinitions(fieldTypeDefinition, definitions, allowedASTDefinitions, allowedASTExceptCurrentDefinition);
+        }
+      }
+    });
+  }
+};
+
+const getModifiedASTDefinition = (definitions) => {
+  let updatedASTDefinition = definitions;
+  /**
+   * If SECONDARY_APPLICATION_NAME is configured
+   * then check if model/type is allowed to be indexed in this server.
+   *
+   * Please Note SECONDARY_APPLICATION_NAME should be either of the value
+   * located inside constants file in the variable SECONDARY_APPLICATIONS
+   */
+  if (process.env.SECONDARY_APPLICATION_NAME && definitions && definitions.length) {
+    const allowedASTDefinitions = new Set();
+    definitions
+      .filter((definition) => get(definition, 'kind') === 'ObjectTypeDefinition')
+      .forEach((definition) => {
+        const {
+          directives, name,
+        } = definition;
+        const modelAppNames = getTypeDirectiveArgumentValue(directives, 'model', 'secondaryApplications');
+        if ((modelAppNames || []).includes(process.env.SECONDARY_APPLICATION_NAME)) {
+          // Allow Nested Fields of root type.
+          setNestedFieldDefinitions(definition, definitions, allowedASTDefinitions);
+          // Allow root type
+          allowedASTDefinitions.add(name.value);
+        }
+      });
+    allowedASTDefinitions.add('GroupByAggregationResult');
+    updatedASTDefinition = definitions.filter((definition) => {
+      if (get(definition, 'kind') !== 'ObjectTypeDefinition') return true;
+      if (allowedASTDefinitions.has(definition.name.value)) return true;
+      return false;
+    });
+  }
+  return updatedASTDefinition;
+};
+
 const getParsedASTMap = (graphqlSchemaTypes) => {
   const initialAST = parse(concatenateTypeDefs(graphqlSchemaTypes));
   /*
@@ -221,10 +292,13 @@ const getParsedASTMap = (graphqlSchemaTypes) => {
   and contains other graphql properties like directives, fields, interfaces, and typeName
    */
   const { definitions } = initialAST;
+  const updatedASTDefinition = getModifiedASTDefinition(definitions);
   // To store final parsed AST Object.
   const parsedASTObject = {};
-  definitions.forEach((definition) => {
-    const { kind, fields, ...props } = definition;
+  updatedASTDefinition.forEach((definition) => {
+    const {
+      kind, fields, ...props
+    } = definition;
     // not making type ast for graphql input types(remove check if input types ast required)
     if (kind !== 'ObjectTypeDefinition' || !fields || !fields.length) {
       return null;

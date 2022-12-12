@@ -15,6 +15,10 @@ const TLA = 'tekieLearningApp';
 const TWA = 'tekieWebApp';
 const TAA = 'tekieAffiliateApp';
 const TBA = 'core';
+const TAT = 'tekieAnalyticsApp';
+
+const SECONDARY_APPLICATIONS = { TAT };
+
 const backendApps = [TBA];
 const byPassMenteeValidationApps = [TBA];
 
@@ -550,8 +554,8 @@ const dbControllerModes = {
 };
 
 const DATABASE_DIALECTS = {
-  mongodb: 'mdb',
-  postgres: 'pg',
+  mongoose: 'mongoose',
+  postgres: 'postgresql',
 };
 
 const DEFAULT_CLAMP_VALUE = {
@@ -583,6 +587,7 @@ const ALLOWED_FILE_UPLOAD_TYPES = [
 const HEADER_VARIABLES = {
   CLASSROOM_UID: 'x-classroom-uid',
   COURSE_UID: 'x-course-uid',
+  BATCHSESSION_UID: 'batchsession-id',
 };
 
 const ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER = [
@@ -594,6 +599,10 @@ const ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER = [
     contextLabel: 'activeCourse',
     headerLabel: HEADER_VARIABLES.COURSE_UID,
   },
+  {
+    contextLabel: 'activeSessionId',
+    headerLabel: HEADER_VARIABLES.BATCHSESSION_UID,
+  },
 ];
 
 const ALLOWED_HEADERS = [
@@ -603,7 +612,6 @@ const ALLOWED_HEADERS = [
   'X-Requested-With',
   'X-Forwarded-By',
   'User-Device-Id',
-  'BatchSession-Id',
   ...ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER.map((VAR) => VAR.headerLabel),
 ];
 
@@ -674,6 +682,7 @@ export {
   TWA,
   TAA,
   TBA,
+  TAT,
   loginType,
   masteryLevels,
   learningObjectiveQuizReportThreshHolds,
@@ -742,4 +751,5 @@ export {
   GSUITE_FILE_TYPES,
   DATABASE_DIALECTS,
   PG_MODEL_SUFFIX,
+  SECONDARY_APPLICATIONS,
 };

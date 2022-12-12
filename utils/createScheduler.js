@@ -10,6 +10,8 @@ import scheduleBatchSessionOtpGenerator from './scheduleJobs/secheduleBatchSessi
 // import scheduleUpdateLeadSource from './scheduleJobs/scheduleUpdateLeadSource';
 import scheduleUpdateTheoryClassStatus from './scheduleJobs/scheduleUpdateTheoryClassStatus';
 import scheduleB2cBatchSessionReport from './scheduleJobs/scheduleB2cBatchSessionReport';
+import batchAndUpdateUserSessionReports from './scheduleJobs/jobs/batchAndUpdateUserSessionReports';
+import { TAT } from '../constants';
 
 // create scheduler for different functionalities
 const createScheduler = (schedulerName) => {
@@ -136,6 +138,18 @@ const createScheduler = (schedulerName) => {
         // eslint-disable-next-line no-console
         console.log('scheduler started for: ', schedulerName);
         await scheduleB2cBatchSessionReport();
+      });
+      break;
+    case TAT:
+      // eslint-disable-next-line no-console
+      rule.tz = 'Asia/Kolkata';
+      rule.minute = 0;
+      rule.hour = new schedule.Range(0, 23, 8);
+      rule.dayOfWeek = new schedule.Range(0, 6);
+      schedule.scheduleJob(rule, async () => {
+        // eslint-disable-next-line no-console
+        console.log('scheduler started for: ', schedulerName);
+        await batchAndUpdateUserSessionReports();
       });
       break;
     default:
