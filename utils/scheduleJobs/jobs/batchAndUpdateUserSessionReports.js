@@ -173,6 +173,9 @@ const getAllRequiredDataFromDatabase = async () => {
     users,
     batchedUserSessionDump,
     userSessionReports,
+    userSessionReportController,
+    userSessionDumpController,
+    userSessionDumps,
   };
 };
 
@@ -247,7 +250,8 @@ const getBaseDocumentAndCalculatedFields = ({
 
   // If userSessionReport already exists, then use the id from it.
   if (existingSessionReport && get(existingSessionReport, 'id')) {
-    baseDocument[id] = get(existingSessionReport, 'id');
+    baseDocument.id = get(existingSessionReport, 'id');
+    baseDocument.previousLogs = [...get(existingSessionReport, 'previousLogs', []), existingSessionReport];
   }
 
   // Assigning Existing Report Values Or Default Values.
@@ -446,89 +450,95 @@ const batchAndUpdateUserSessionReports = async () => {
   // Fetching all required data from database
   const {
     batchedUserSessionDump,
+    userSessionDumpController,
+    userSessionReportController,
+    userSessionDumps,
     ...requiredDBData
   } = await getAllRequiredDataFromDatabase();
 
   // Here iterating over each batchedUserSessionDump to create User's Session Report.
-  const userSessionReportUpdateDoc = [];
-  Object.keys(batchedUserSessionDump).forEach((uniqueSessionRowKey) => {
-    const sessionComponentsDump = batchedUserSessionDump[uniqueSessionRowKey];
-
-    let classroomId; let topicId; let studentId;
-    // Desctructuring uniqueSessionRowKey to get classroomId, topicId and studentId
-    // eslint-disable-next-line prefer-const
-    [classroomId, topicId, studentId] = uniqueSessionRowKey.split('-');
-
-    // Filter and get base and caculatedFields Document.
-    let {
+  if (batchedUserSessionDump && batchedUserSessionDump.length) {
+    const userSessionReportUpdateDoc = [];
+    Object.keys(batchedUserSessionDump).forEach((uniqueSessionRowKey) => {
+      const sessionComponentsDump = batchedUserSessionDump[uniqueSessionRowKey];
+  
+      let classroomId; let topicId; let studentId;
+      // Desctructuring uniqueSessionRowKey to get classroomId, topicId and studentId
       // eslint-disable-next-line prefer-const
-      baseDocument, calculatedFields, sessionDetails,
-    } = getBaseDocumentAndCalculatedFields({
-      classroomId,
-      topicId,
-      studentId,
-      ...requiredDBData,
-    });
-
-    let componentCountsMeta = {
-      totalClassworkCount: 0,
-      totalClassworkVisitedCount: 0,
-      totalClassworkAttemptedCount: 0,
-      totalHomeworkCount: 0,
-      totalHomeworkVisitedCount: 0,
-      totalHomeworkAttemptedCount: 0,
-      pQ: {
-        totalCount: 0,
-        firstTryCount: 0,
-        secondTryCount: 0,
-        threeOrMoreTryCount: 0,
-      },
-    };
-    // Iterating over session's component rules to calculate progress.
-    const sessionComponentRule = get(sessionDetails, 'topic.topicComponentRule', []);
-    sessionComponentRule
-      .forEach((componentRule) => {
-        const { componentName } = componentRule;
-        const filteredComponentDumps = sessionComponentsDump.filter((componentDump) => get(componentDump, 'componentType') === componentName);
-
-        const { userSessionProgress, componentCounts } = calculateFieldsBasedOnComponentType(
-          componentName,
-          calculatedFields,
-          filteredComponentDumps,
-          componentRule,
-          componentCountsMeta,
-        );
-
-        calculatedFields = userSessionProgress;
-        componentCountsMeta = componentCounts;
+      [classroomId, topicId, studentId] = uniqueSessionRowKey.split('-');
+  
+      // Filter and get base and caculatedFields Document.
+      let {
+        // eslint-disable-next-line prefer-const
+        baseDocument, calculatedFields, sessionDetails,
+      } = getBaseDocumentAndCalculatedFields({
+        classroomId,
+        topicId,
+        studentId,
+        ...requiredDBData,
       });
-
-    const classworkScore = componentCountsMeta.pQ.totalCount !== 0 ? ((
-      ((componentCountsMeta.pQ.firstTryCount * 10) + (componentCountsMeta.pQ.secondTryCount * 8) + (componentCountsMeta.pQ.threeOrMoreTryCount * 6)) / (componentCountsMeta.pQ.totalCount * 10)
-    ) * 100) : 0;
-    calculatedFields.classworkScore = Number(classworkScore.toFixed(0));
-
-    calculatedFields.classworkVisited = (componentCountsMeta.totalClassworkCount !== 0 && componentCountsMeta.totalClassworkVisitedCount !== 0) ? Number(((componentCountsMeta.totalClassworkVisitedCount / componentCountsMeta.totalClassworkCount) * 100).toFixed(0)) : 0;
-
-    calculatedFields.classworkAttempted = (componentCountsMeta.totalClassworkCount !== 0 && componentCountsMeta.totalClassworkAttemptedCount !== 0) ? Number(((componentCountsMeta.totalClassworkAttemptedCount / componentCountsMeta.totalClassworkCount) * 100).toFixed(0)) : 0;
-
-    calculatedFields.homeworkVisited = (componentCountsMeta.totalHomeworkCount !== 0 && componentCountsMeta.totalHomeworkVisitedCount !== 0) ? Number(((componentCountsMeta.totalHomeworkVisitedCount / componentCountsMeta.totalHomeworkCount) * 100).toFixed(0)) : 0;
-
-    calculatedFields.homeworkAttempted = (componentCountsMeta.totalHomeworkCount !== 0 && componentCountsMeta.totalHomeworkAttemptedCount !== 0) ? Number(((componentCountsMeta.totalHomeworkAttemptedCount / componentCountsMeta.totalHomeworkCount) * 100).toFixed(0)) : 0;
-
-    calculatedFields.proficiency = Number(((0.5 * (calculatedFields.classworkScore || 0)) + (0.5 * (calculatedFields.homeworkScore || 0))).toFixed(0));
-
-    userSessionReportUpdateDoc.push({ ...baseDocument, ...calculatedFields });
-  });
-
-  log('End Reached!!');
-  // add or update record in sql
-  await userSessionDumpController.Model.bulkCreate(userSessionReportUpdateDoc, { updateOnDuplicate: ['id'] });
-  // delete record from sql dump
-  // eslint-disable-next-line no-constant-condition
-  if (false) {
-    const idsToDelete = userSessionDumps.map((dump) => dump.id);
-    await userSessionDumpController.Model.destroy({ where: { id: idsToDelete } });
+  
+      let componentCountsMeta = {
+        totalClassworkCount: 0,
+        totalClassworkVisitedCount: 0,
+        totalClassworkAttemptedCount: 0,
+        totalHomeworkCount: 0,
+        totalHomeworkVisitedCount: 0,
+        totalHomeworkAttemptedCount: 0,
+        pQ: {
+          totalCount: 0,
+          firstTryCount: 0,
+          secondTryCount: 0,
+          threeOrMoreTryCount: 0,
+        },
+      };
+      // Iterating over session's component rules to calculate progress.
+      const sessionComponentRule = get(sessionDetails, 'topic.topicComponentRule', []);
+      sessionComponentRule
+        .forEach((componentRule) => {
+          const { componentName } = componentRule;
+          const filteredComponentDumps = sessionComponentsDump.filter((componentDump) => get(componentDump, 'componentType') === componentName);
+  
+          const { userSessionProgress, componentCounts } = calculateFieldsBasedOnComponentType(
+            componentName,
+            calculatedFields,
+            filteredComponentDumps,
+            componentRule,
+            componentCountsMeta,
+          );
+  
+          calculatedFields = userSessionProgress;
+          componentCountsMeta = componentCounts;
+        });
+  
+      const classworkScore = componentCountsMeta.pQ.totalCount !== 0 ? ((
+        ((componentCountsMeta.pQ.firstTryCount * 10) + (componentCountsMeta.pQ.secondTryCount * 8) + (componentCountsMeta.pQ.threeOrMoreTryCount * 6)) / (componentCountsMeta.pQ.totalCount * 10)
+      ) * 100) : 0;
+      calculatedFields.classworkScore = Number(classworkScore.toFixed(0));
+  
+      calculatedFields.classworkVisited = (componentCountsMeta.totalClassworkCount !== 0 && componentCountsMeta.totalClassworkVisitedCount !== 0) ? Number(((componentCountsMeta.totalClassworkVisitedCount / componentCountsMeta.totalClassworkCount) * 100).toFixed(0)) : 0;
+  
+      calculatedFields.classworkAttempted = (componentCountsMeta.totalClassworkCount !== 0 && componentCountsMeta.totalClassworkAttemptedCount !== 0) ? Number(((componentCountsMeta.totalClassworkAttemptedCount / componentCountsMeta.totalClassworkCount) * 100).toFixed(0)) : 0;
+  
+      calculatedFields.homeworkVisited = (componentCountsMeta.totalHomeworkCount !== 0 && componentCountsMeta.totalHomeworkVisitedCount !== 0) ? Number(((componentCountsMeta.totalHomeworkVisitedCount / componentCountsMeta.totalHomeworkCount) * 100).toFixed(0)) : 0;
+  
+      calculatedFields.homeworkAttempted = (componentCountsMeta.totalHomeworkCount !== 0 && componentCountsMeta.totalHomeworkAttemptedCount !== 0) ? Number(((componentCountsMeta.totalHomeworkAttemptedCount / componentCountsMeta.totalHomeworkCount) * 100).toFixed(0)) : 0;
+  
+      calculatedFields.proficiency = Number(((0.5 * (calculatedFields.classworkScore || 0)) + (0.5 * (calculatedFields.homeworkScore || 0))).toFixed(0));
+  
+      userSessionReportUpdateDoc.push({ ...baseDocument, ...calculatedFields });
+    });
+    // add or update record in sql
+    if (userSessionReportUpdateDoc && userSessionReportUpdateDoc.length) {
+      await userSessionReportController.Model.bulkCreate(userSessionReportUpdateDoc, { updateOnDuplicate: ['id'] });
+      log('Session Report Updated!!');
+    }
+    // delete record from sql dump
+    // eslint-disable-next-line no-constant-condition
+    if (false) {
+      const idsToDelete = userSessionDumps.map((dump) => dump.id);
+      await userSessionDumpController.Model.destroy({ where: { id: idsToDelete } });
+    }
   }
 };
 

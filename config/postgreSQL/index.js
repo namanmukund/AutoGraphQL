@@ -14,7 +14,7 @@ const dbConfig = {
   username: process.env.PG_DATABASE_USERNAME,
   dialect: DATABASE_DIALECT,
   uri: process.env.PG_DATABASE_URI,
-  logging: process.env.PG_DATABASE_LOGGING === 'true' ? log : false,
+  logging: log,
 };
 
 export default dbConfig;
