@@ -30,6 +30,7 @@ const UserPracticeQuestionReport = `
     answerUsedCount: Int
     nextComponent: UserPracticeQuestionReportNextComponentType @readOnly
     course: Course @relation(name: "UserPracticeQuestionReportCourse", direction: "OneWay")
+    topic: Topic @relation(name: "UserPracticeQuestionReportTopic", direction: "OneWay")
     detailedReport: [PracticeQuestionDetailedReport]
   }
 `;
