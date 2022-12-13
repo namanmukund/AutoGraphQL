@@ -3,7 +3,7 @@ import { childTopicComponents, operationName } from '../../../../../constants';
 
 const { add, update } = operationName;
 
-const userPracticeQuestionReportDump = async (input, mutationOrQueryName) => {
+const userPracticeQuestionReportDump = async (input, mutationOrQueryName, learningObjData) => {
   let eventType = add;
   if (mutationOrQueryName === 'updateUserPracticeQuestionReport') {
     eventType = update;
@@ -26,11 +26,11 @@ const userPracticeQuestionReportDump = async (input, mutationOrQueryName) => {
       })),
     }],
   };
-  // if (get(learningObjData, 'topics', []).length) {
-  //   Object.assign(reportsInputObj, {
-  //     topicId: get(learningObjData, 'topics[0].id'),
-  //   });
-  // }
+  if (get(learningObjData, 'topics', []).length && !reportsInputObj.topicId) {
+    Object.assign(reportsInputObj, {
+      topicId: get(learningObjData, 'topics[0].id'),
+    });
+  }
   return reportsInputObj;
 };
 
