@@ -529,6 +529,7 @@ And current component status will not get changed when it is already consumed in
         userId,
         learningObjectiveId,
         courseId,
+        topicIdFromInput,
       ), context, {
         input: pqReportInput,
       });
