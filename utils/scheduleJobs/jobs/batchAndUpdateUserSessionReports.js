@@ -2,11 +2,13 @@ import { get, sortBy } from 'lodash';
 import { AggregationBuilder } from 'mongodb-aggregation-builder';
 import { ConditionPayload, EqualityPayload } from 'mongodb-aggregation-builder/helpers';
 import { ArrayElemAt } from 'mongodb-aggregation-builder/operators';
-import { Sequelize } from 'sequelize';
+import Sequelize from 'sequelize';
 import { topicComponents } from '../../../constants';
 import { QueryController } from '../../../src/autoGenerate/graphql/controllers';
 import MasterController from '../../../src/autoGenerate/graphql/controllers/MasterController';
 import { log } from '../../log';
+
+const SequelizeOperation = Sequelize.Op;
 
 const sqlColumnsToUpdate = ['studentId', 'studentName', 'userRole', 'studentGrade', 'studentSection', 'classroomId', 'classroomTitle', 'classroomStudentsCount', 'schoolId', 'schoolName', 'topicId', 'sessionId', 'sessionTitle', 'sessionType', 'courseId', 'courseTitle', 'courseCategory', 'sessionStart', 'sessionEnd', 'sessionDuration', 'sessionStatus', 'studentAttendance', 'sessionCreationDate', 'sessionUpdationAt', 'teacherName', 'teacherId', 'sessionClassworkComponents', 'sessionHomeworkComponents', 'previousLogs', 'classworkVisited', 'classworkAttempted', 'homeworkVisited', 'homeworkAttempted', 'classworkScore', 'homeworkScore', 'proficiency', 'homeworkExists', 'videoComponentLog', 'pqComponentLog', 'classworkAssignmentLog', 'homeworkAssignmentLog', 'classworkPracticeLog', 'homeworkPracticeLog', 'homeworkQuizLog'];
 
@@ -169,15 +171,17 @@ const getAllRequiredDataFromDatabase = async () => {
   const sessionReportFilterArray = Object.keys(batchedUserSessionDump).map((uniqueSessionRowKey) => {
     const sessionRowSplitArray = uniqueSessionRowKey.split('-');
     return {
-      classroomId: sessionRowSplitArray[0],
-      topicId: sessionRowSplitArray[1],
-      studentId: sessionRowSplitArray[2],
+      [SequelizeOperation.and]: [
+        { classroomId: sessionRowSplitArray[0] },
+        { topicId: sessionRowSplitArray[1] },
+        { studentId: sessionRowSplitArray[2] },
+      ],
     };
   });
 
   // Fetch Existing UserSessionReport from Postgres
   const userSessionReports = await userSessionReportController.Model.findAll({
-    where: Sequelize.or(sessionReportFilterArray),
+    where: { [SequelizeOperation.or]: sessionReportFilterArray },
     raw: true,
   });
 
