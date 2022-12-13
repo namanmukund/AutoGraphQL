@@ -151,49 +151,62 @@ const getAllRequiredDataFromDatabase = async () => {
   // Fetching All Dumps From Postgres.
   const userSessionDumps = await userSessionDumpController.Model.findAll({ raw: true });
 
-  // Batch User Session Dumps based on Classroom, Topic and UserId
-  const {
-    batchedUserSessionDump,
-    documentIdsToFetch,
-  } = getBatchedUserSessionDump(userSessionDumps);
+  if (userSessionDumps && userSessionDumps.length) {
+    // Batch User Session Dumps based on Classroom, Topic and UserId
+    const {
+      batchedUserSessionDump,
+      documentIdsToFetch,
+    } = getBatchedUserSessionDump(userSessionDumps);
 
-  const {
-    batchSessionAggregationQuery,
-    userAggregationQuery,
-    topicAggregationQuery,
-  } = getAggregationQueries(documentIdsToFetch);
+    const {
+      batchSessionAggregationQuery,
+      userAggregationQuery,
+      topicAggregationQuery,
+    } = getAggregationQueries(documentIdsToFetch);
 
-  // Fetching BatchSession and User Data from mongo.
-  const batchSessions = await batchSessionController.aggregate(batchSessionAggregationQuery);
-  const topics = await topicController.aggregate(topicAggregationQuery);
-  const users = await userController.aggregate(userAggregationQuery);
+    // Fetching BatchSession and User Data from mongo.
+    const batchSessions = await batchSessionController.aggregate(batchSessionAggregationQuery);
+    const topics = await topicController.aggregate(topicAggregationQuery);
+    const users = await userController.aggregate(userAggregationQuery);
 
-  // Creating Filter Array for fetching UserSessionReport
-  const sessionReportFilterArray = Object.keys(batchedUserSessionDump).map((uniqueSessionRowKey) => {
-    const sessionRowSplitArray = uniqueSessionRowKey.split('-');
+    // Creating Filter Array for fetching UserSessionReport
+    const sessionReportFilterArray = Object.keys(batchedUserSessionDump).map((uniqueSessionRowKey) => {
+      const sessionRowSplitArray = uniqueSessionRowKey.split('-');
+      return {
+        [SequelizeOperation.and]: [
+          { classroomId: sessionRowSplitArray[0] },
+          { topicId: sessionRowSplitArray[1] },
+          { studentId: sessionRowSplitArray[2] },
+        ],
+      };
+    });
+
+    // Fetch Existing UserSessionReport from Postgres
+    const userSessionReports = await userSessionReportController.Model.findAll({
+      where: { [SequelizeOperation.or]: sessionReportFilterArray },
+      raw: true,
+    });
+
     return {
-      [SequelizeOperation.and]: [
-        { classroomId: sessionRowSplitArray[0] },
-        { topicId: sessionRowSplitArray[1] },
-        { studentId: sessionRowSplitArray[2] },
-      ],
+      batchSessions,
+      users,
+      topics,
+      userSessionDumps,
+      userSessionReports,
+      batchedUserSessionDump,
+      topicAggregationQuery,
+      userSessionDumpController,
+      userSessionReportController,
     };
-  });
-
-  // Fetch Existing UserSessionReport from Postgres
-  const userSessionReports = await userSessionReportController.Model.findAll({
-    where: { [SequelizeOperation.or]: sessionReportFilterArray },
-    raw: true,
-  });
-
+  }
   return {
-    batchSessions,
-    users,
-    topics,
-    userSessionDumps,
-    userSessionReports,
-    batchedUserSessionDump,
-    topicAggregationQuery,
+    batchSessions: [],
+    users: [],
+    topics: [],
+    userSessionDumps: [],
+    userSessionReports: [],
+    batchedUserSessionDump: null,
+    topicAggregationQuery: [],
     userSessionDumpController,
     userSessionReportController,
   };

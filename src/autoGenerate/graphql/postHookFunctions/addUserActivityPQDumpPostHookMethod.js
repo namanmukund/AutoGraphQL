@@ -119,7 +119,7 @@ const addUserPracticeQuestionReportMutation = (
 const updateUserPracticeQuestionReportMutation = (pqReportId, topicIdFromInput) => `
   mutation($input: UserPracticeQuestionReportUpdate) {
   updateUserPracticeQuestionReport(id: "${pqReportId}", 
-  ${topicIdFromInput ? `topicConnectId:"${topicIdFromInput}",` : ""} input: $input) {
+  ${topicIdFromInput ? `topicConnectId:"${topicIdFromInput}",` : ''} input: $input) {
     id
   }
 }

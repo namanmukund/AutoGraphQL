@@ -28,7 +28,7 @@ const userPracticeQuestionReportDump = async (input, mutationOrQueryName, learni
   };
   if (get(learningObjData, 'topics', []).length && !reportsInputObj.topicId) {
     Object.assign(reportsInputObj, {
-      topicId: get(learningObjData, 'topics[0].id'),
+      topicId: get(learningObjData, 'topics[0].typeId'),
     });
   }
   return reportsInputObj;

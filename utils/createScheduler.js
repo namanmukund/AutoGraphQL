@@ -144,7 +144,7 @@ const createScheduler = (schedulerName) => {
       // eslint-disable-next-line no-console
       rule.tz = 'Asia/Kolkata';
       rule.minute = 0;
-      rule.hour = new schedule.Range(0, 23, 8);
+      rule.hour = new schedule.Range(0, 23, 4);
       rule.dayOfWeek = new schedule.Range(0, 6);
       schedule.scheduleJob(rule, async () => {
         // eslint-disable-next-line no-console
