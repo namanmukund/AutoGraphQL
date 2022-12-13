@@ -604,7 +604,7 @@ const batchAndUpdateUserSessionReports = async () => {
       log(`Session Report Built: ${userSessionReportUpdateDoc.length || 0}`);
       if (userSessionReportUpdateDoc && userSessionReportUpdateDoc.length) {
         await userSessionReportController.Model.bulkCreate(userSessionReportUpdateDoc, { updateOnDuplicate: sqlColumnsToUpdate }).then((response) => {
-          log(`Session Report Updated, Document Counts: ${(response || []).length}`);
+          log(`Session Report Updated, Total Count: ${(response || []).length}`);
         }).catch((error) => {
           throw new Error(error);
         });
