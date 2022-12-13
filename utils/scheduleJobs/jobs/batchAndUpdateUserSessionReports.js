@@ -623,17 +623,14 @@ const batchAndUpdateUserSessionReports = async () => {
         });
       }
       // delete record from sql dump
-      // eslint-disable-next-line no-constant-condition
-      if (false) {
-        const idsToDelete = new Set();
-        Object.keys(batchedUserSessionDump).forEach((uniqueSessionRowKey) => {
-          if (batchedUserSessionDump && batchedUserSessionDump[uniqueSessionRowKey].length) {
-            batchedUserSessionDump[uniqueSessionRowKey].forEach((dump) => idsToDelete.add(dump.id));
-          }
-        });
-        log('Deleting Previous Dumps..');
-        await userSessionDumpController.Model.destroy({ where: { id: Array.from(idsToDelete) } });
-      }
+      const idsToDelete = new Set();
+      Object.keys(batchedUserSessionDump).forEach((uniqueSessionRowKey) => {
+        if (batchedUserSessionDump && batchedUserSessionDump[uniqueSessionRowKey].length) {
+          batchedUserSessionDump[uniqueSessionRowKey].forEach((dump) => idsToDelete.add(dump.id));
+        }
+      });
+      log('Deleting Previous Dumps..');
+      await userSessionDumpController.Model.destroy({ where: { id: Array.from(idsToDelete) } });
     }
   } catch (e) {
     log(e, 'error');
