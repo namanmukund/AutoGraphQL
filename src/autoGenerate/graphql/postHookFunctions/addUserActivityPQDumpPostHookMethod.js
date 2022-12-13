@@ -116,11 +116,10 @@ const addUserPracticeQuestionReportMutation = (
   `;
 
 // mutation to update UserPracticeQuestionReport
-const updateUserPracticeQuestionReportMutation = (
-  pqReportId,
-) => `
+const updateUserPracticeQuestionReportMutation = (pqReportId, topicIdFromInput) => `
   mutation($input: UserPracticeQuestionReportUpdate) {
-  updateUserPracticeQuestionReport(id: "${pqReportId}", input: $input) {
+  updateUserPracticeQuestionReport(id: "${pqReportId}", 
+  ${topicIdFromInput ? `topicConnectId:"${topicIdFromInput}",` : ''} input: $input) {
     id
   }
 }
@@ -516,7 +515,7 @@ And current component status will not get changed when it is already consumed in
         },
         threeOrMoreTryCount: newThreeOrMoreTryCount,
       });
-      await callLocalGraphqlApi(updateUserPracticeQuestionReportMutation(get(pqReport, 'data.userPracticeQuestionReports[0].id')), context, {
+      await callLocalGraphqlApi(updateUserPracticeQuestionReportMutation(get(pqReport, 'data.userPracticeQuestionReports[0].id'), topicIdFromInput), context, {
         input: pqReportInput,
       });
     } else {

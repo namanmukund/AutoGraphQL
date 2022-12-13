@@ -40,12 +40,14 @@ const addUserLearningObjectiveMutation = (
   practiceQuestionsQuery,
   courseId,
   learningSlidesQuery,
+  topicId,
 ) => `
   mutation{
     addUserLearningObjective(
     userConnectId:"${userId}"
     learningObjectiveConnectId:"${learningObjectiveId}"
     ${courseId ? `courseConnectId:"${courseId}"` : ''}
+    ${topicId ? `topicConnectId:"${topicId}"` : ''}
     input:{
         ${practiceQuestionsQuery}
         ${learningSlidesQuery}
@@ -107,6 +109,7 @@ const userLearningObjectivePostHookMethod = async (input, params, _mutationName,
     userId,
     learningObjectiveId,
     courseId,
+    topicId,
   } = getInfoFromParams(params, 'learningObjective');
   // In case there is no learning objective id, empty data will be sent
   if (!learningObjectiveId) {
@@ -153,6 +156,7 @@ const userLearningObjectivePostHookMethod = async (input, params, _mutationName,
       practiceQuestionsQuery,
       courseId,
       learningSlidesQuery,
+      topicId,
     ),
     context,
   );
