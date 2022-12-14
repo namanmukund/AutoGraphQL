@@ -197,7 +197,7 @@ const transformMongoResults = (batchSessions, batchDetail) => {
     });
     averageAttendance = overallPresentStudents > 0 ? Math.round((overallPresentStudents / totalStudents) * 100) : 0;
   }
-  const students = getStudentsCombinedArray(batchDetail, true) || [];
+  const students = getStudentsCombinedArray(batchDetail) || [];
   const returnedObj = {
     id: get(batchDetail, 'id'),
     code: get(batchDetail, 'code'),
