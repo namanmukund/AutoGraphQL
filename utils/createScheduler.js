@@ -98,8 +98,7 @@ const createScheduler = (schedulerName) => {
     //   break;
     case 'batchSessionOtpGeneration':
       rule.tz = 'Asia/Kolkata';
-      rule.minute = 25;
-      rule.dayOfWeek = new schedule.Range(0, 6);
+      rule.minute = new schedule.Range(0, 59, 20);
       // eslint-disable-next-line no-unused-vars
       schedule.scheduleJob(rule, async () => {
         // eslint-disable-next-line no-console

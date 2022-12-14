@@ -100,12 +100,14 @@ const addUserPracticeQuestionReportMutation = (
   userId,
   learningObjectiveId,
   courseId,
+  topicIdFromInput,
 ) => `
   mutation addUserPracticeQuestionReport($input: UserPracticeQuestionReportInput!){
     addUserPracticeQuestionReport(
     userConnectId:"${userId}"
     learningObjectiveConnectId:"${learningObjectiveId}"
     ${courseId ? `courseConnectId:"${courseId}"` : ''}
+    ${topicIdFromInput ? `topicConnectId:"${topicIdFromInput}"` : ''}
     input: $input
   ){
       id
@@ -114,11 +116,10 @@ const addUserPracticeQuestionReportMutation = (
   `;
 
 // mutation to update UserPracticeQuestionReport
-const updateUserPracticeQuestionReportMutation = (
-  pqReportId,
-) => `
+const updateUserPracticeQuestionReportMutation = (pqReportId, topicIdFromInput) => `
   mutation($input: UserPracticeQuestionReportUpdate) {
-  updateUserPracticeQuestionReport(id: "${pqReportId}", input: $input) {
+  updateUserPracticeQuestionReport(id: "${pqReportId}", 
+  ${topicIdFromInput ? `topicConnectId:"${topicIdFromInput}",` : ''} input: $input) {
     id
   }
 }
@@ -175,6 +176,7 @@ UserLearningObjective(bookmark, practiceQuestionStatus etc) is updated based on-
 const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context) => {
   const userId = get(input, 'user.typeId');
   const learningObjectiveId = get(input, 'learningObjective.typeId');
+  const topicIdFromInput = get(input, 'topic.typeId');
   const courseId = get(input, 'course.typeId');
   if (!userId || !learningObjectiveId) {
     log('Either one of userId or learningObjectiveId is missing in input of addUserActivityPQDumpPostHookMethod');
@@ -513,7 +515,7 @@ And current component status will not get changed when it is already consumed in
         },
         threeOrMoreTryCount: newThreeOrMoreTryCount,
       });
-      await callLocalGraphqlApi(updateUserPracticeQuestionReportMutation(get(pqReport, 'data.userPracticeQuestionReports[0].id')), context, {
+      await callLocalGraphqlApi(updateUserPracticeQuestionReportMutation(get(pqReport, 'data.userPracticeQuestionReports[0].id'), topicIdFromInput), context, {
         input: pqReportInput,
       });
     } else {
@@ -526,6 +528,7 @@ And current component status will not get changed when it is already consumed in
         userId,
         learningObjectiveId,
         courseId,
+        topicIdFromInput,
       ), context, {
         input: pqReportInput,
       });
@@ -538,6 +541,7 @@ And current component status will not get changed when it is already consumed in
       userId,
       learningObjectiveId,
       courseId,
+      topicIdFromInput,
     ), context, {
       input: pqReportInput,
     });

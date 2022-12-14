@@ -10,6 +10,7 @@ const userPracticeQuestionReportDump = async (input, mutationOrQueryName, learni
   }
   const reportsInputObj = {
     userId: get(input, 'user.typeId'),
+    topicId: get(input, 'topic.typeId'),
     componentId: get(input, 'learningObjective.typeId'),
     componentType: childTopicComponents.practiceQuestion,
     eventType,
@@ -25,9 +26,9 @@ const userPracticeQuestionReportDump = async (input, mutationOrQueryName, learni
       })),
     }],
   };
-  if (get(learningObjData, 'topics', []).length) {
+  if (get(learningObjData, 'topics', []).length && !reportsInputObj.topicId) {
     Object.assign(reportsInputObj, {
-      topicId: get(learningObjData, 'topics[0].id'),
+      topicId: get(learningObjData, 'topics[0].typeId'),
     });
   }
   return reportsInputObj;

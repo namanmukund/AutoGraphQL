@@ -1,12 +1,17 @@
+import cuid from 'cuid';
 import { get, sortBy } from 'lodash';
 import { AggregationBuilder } from 'mongodb-aggregation-builder';
 import { ConditionPayload, EqualityPayload } from 'mongodb-aggregation-builder/helpers';
 import { ArrayElemAt } from 'mongodb-aggregation-builder/operators';
-import { Sequelize } from 'sequelize';
+import Sequelize from 'sequelize';
 import { topicComponents } from '../../../constants';
 import { QueryController } from '../../../src/autoGenerate/graphql/controllers';
 import MasterController from '../../../src/autoGenerate/graphql/controllers/MasterController';
 import { log } from '../../log';
+
+const SequelizeOperation = Sequelize.Op;
+
+const sqlColumnsToUpdate = ['studentId', 'studentName', 'userRole', 'studentGrade', 'studentSection', 'classroomId', 'classroomTitle', 'classroomStudentsCount', 'schoolId', 'schoolName', 'topicId', 'sessionId', 'sessionTitle', 'sessionType', 'courseId', 'courseTitle', 'courseCategory', 'sessionStart', 'sessionEnd', 'sessionDuration', 'sessionStatus', 'studentAttendance', 'sessionCreationDate', 'sessionUpdationAt', 'teacherName', 'teacherId', 'sessionClassworkComponents', 'sessionHomeworkComponents', 'previousLogs', 'classworkVisited', 'classworkAttempted', 'homeworkVisited', 'homeworkAttempted', 'classworkScore', 'homeworkScore', 'proficiency', 'homeworkExists', 'videoComponentLog', 'pqComponentLog', 'classworkAssignmentLog', 'homeworkAssignmentLog', 'classworkPracticeLog', 'homeworkPracticeLog', 'homeworkQuizLog'];
 
 const getBatchedUserSessionDump = (userSessionDumps) => {
   const batchedUserSessionDump = {};
@@ -28,7 +33,7 @@ const getBatchedUserSessionDump = (userSessionDumps) => {
       if (classroomId && topicId && userId && componentId) {
         // Adding Ids to Set to fetch from mongo
         documentIdsToFetch.classroomIds.add(classroomId);
-        documentIdsToFetch.topicIds.add(classroomId);
+        documentIdsToFetch.topicIds.add(topicId);
         documentIdsToFetch.userIds.add(userId);
         // Compiling filters object to fetch batch session details
         if (!documentIdsToFetch.batchSessionFilters[`${classroomId}-${topicId}`]) {
@@ -59,6 +64,8 @@ const getDatabaseControllers = () => {
 
   const batchSessionController = new QueryController('BatchSession', authentication);
 
+  const topicController = new QueryController('Topic', authentication);
+
   const userController = new QueryController('User', { bypass: true });
 
   const userSessionReportController = new MasterController('UserSessionReport', {
@@ -68,6 +75,7 @@ const getDatabaseControllers = () => {
   return {
     userSessionDumpController,
     batchSessionController,
+    topicController,
     userController,
     userSessionReportController,
   };
@@ -109,6 +117,10 @@ const getAggregationQueries = (documentIdsToFetch) => {
     })
     .getPipeline();
 
+  const topicAggregationQuery = new AggregationBuilder('Topic')
+    .Match({ id: { $in: Array.from(documentIdsToFetch.topicIds) } })
+    .getPipeline();
+
   const userAggregationQuery = new AggregationBuilder('User')
     .Match({ id: { $in: Array.from(documentIdsToFetch.userIds) } })
     .Lookup(EqualityPayload('StudentProfile', 'studentProfile', 'studentProfile.typeId', 'id'))
@@ -122,6 +134,7 @@ const getAggregationQueries = (documentIdsToFetch) => {
   return {
     batchSessionAggregationQuery,
     userAggregationQuery,
+    topicAggregationQuery,
   };
 };
 
@@ -130,6 +143,7 @@ const getAllRequiredDataFromDatabase = async () => {
   const {
     userSessionDumpController,
     batchSessionController,
+    topicController,
     userController,
     userSessionReportController,
   } = getDatabaseControllers();
@@ -137,47 +151,69 @@ const getAllRequiredDataFromDatabase = async () => {
   // Fetching All Dumps From Postgres.
   const userSessionDumps = await userSessionDumpController.Model.findAll({ raw: true });
 
-  // Batch User Session Dumps based on Classroom, Topic and UserId
-  const {
-    batchedUserSessionDump,
-    documentIdsToFetch,
-  } = getBatchedUserSessionDump(userSessionDumps);
+  if (userSessionDumps && userSessionDumps.length) {
+    // Batch User Session Dumps based on Classroom, Topic and UserId
+    const {
+      batchedUserSessionDump,
+      documentIdsToFetch,
+    } = getBatchedUserSessionDump(userSessionDumps);
 
-  const {
-    batchSessionAggregationQuery,
-    userAggregationQuery,
-  } = getAggregationQueries(documentIdsToFetch);
+    const {
+      batchSessionAggregationQuery,
+      userAggregationQuery,
+      topicAggregationQuery,
+    } = getAggregationQueries(documentIdsToFetch);
 
-  // Fetching BatchSession and User Data from mongo.
-  const batchSessions = await batchSessionController.aggregate(batchSessionAggregationQuery);
-  const users = await userController.aggregate(userAggregationQuery);
+    // Fetching BatchSession and User Data from mongo.
+    const batchSessions = await batchSessionController.aggregate(batchSessionAggregationQuery);
+    const topics = await topicController.aggregate(topicAggregationQuery);
+    const users = await userController.aggregate(userAggregationQuery);
 
-  // Creating Filter Array for fetching UserSessionReport
-  const sessionReportFilterArray = Object.keys(batchedUserSessionDump).map((uniqueSessionRowKey) => {
-    const sessionRowSplitArray = uniqueSessionRowKey.split('-');
+    // Creating Filter Array for fetching UserSessionReport
+    const sessionReportFilterArray = Object.keys(batchedUserSessionDump).map((uniqueSessionRowKey) => {
+      const sessionRowSplitArray = uniqueSessionRowKey.split('-');
+      return {
+        [SequelizeOperation.and]: [
+          { classroomId: sessionRowSplitArray[0] },
+          { topicId: sessionRowSplitArray[1] },
+          { studentId: sessionRowSplitArray[2] },
+        ],
+      };
+    });
+
+    // Fetch Existing UserSessionReport from Postgres
+    const userSessionReports = await userSessionReportController.Model.findAll({
+      where: { [SequelizeOperation.or]: sessionReportFilterArray },
+      raw: true,
+    });
+
     return {
-      classroomId: sessionRowSplitArray[0],
-      topicId: sessionRowSplitArray[1],
-      studentId: sessionRowSplitArray[2],
+      batchSessions,
+      users,
+      topics,
+      userSessionDumps,
+      userSessionReports,
+      batchedUserSessionDump,
+      topicAggregationQuery,
+      userSessionDumpController,
+      userSessionReportController,
     };
-  });
-
-  // Fetch Existing UserSessionReport from Postgres
-  const userSessionReports = await userSessionReportController.Model.findAll({
-    where: Sequelize.or(sessionReportFilterArray),
-    raw: true,
-  });
-
+  }
   return {
-    batchSessions,
-    users,
-    batchedUserSessionDump,
-    userSessionReports,
+    batchSessions: [],
+    users: [],
+    topics: [],
+    userSessionDumps: [],
+    userSessionReports: [],
+    batchedUserSessionDump: null,
+    topicAggregationQuery: [],
+    userSessionDumpController,
+    userSessionReportController,
   };
 };
 
 const getBaseDocumentAndCalculatedFields = ({
-  classroomId, studentId, topicId, userSessionReports, batchSessions, users,
+  classroomId, studentId, topicId, userSessionReports, topicDoc, batchSessions, users,
 }) => {
   // Check if userSessionReport already exists
   const existingSessionReport = userSessionReports.find((report) => (
@@ -198,29 +234,26 @@ const getBaseDocumentAndCalculatedFields = ({
 
   // Check if student is present in the session
   const studentAttendanceDoc = get(sessionDetails, 'attendance', []).find((attendance) => (get(attendance, 'student.typeId') === get(userDetails, 'studentProfile.id')));
-  const studentAttendance = studentAttendanceDoc ? get(studentAttendanceDoc, 'status') : 'Absent';
+  const studentAttendance = get(studentAttendanceDoc, 'status') === 'present';
 
-  // Calculating Session Duration
-  let sessinStartDate = '';
-  let sessionEndDate = '';
-  if (get(sessionDetails, 'sessionStartDate')) {
-    sessinStartDate = new Date(sessionDetails.sessionStartDate);
-    sessinStartDate.setHours(sessinStartDate.getHours() + 5);
-    sessinStartDate.setMinutes(sessinStartDate.getMinutes() + 30);
-  }
-  if (get(sessionDetails, 'sessionEndDate')) {
-    sessionEndDate = new Date(sessionDetails.sessionEndDate);
-    sessionEndDate.setHours(sessionEndDate.getHours() + 5);
-    sessionEndDate.setMinutes(sessionEndDate.getMinutes() + 30);
-  }
-  let diff = (new Date(sessionEndDate).getTime() - new Date(sessinStartDate).getTime()) / 1000;
-  diff /= (60 * 60);
-  const sessionDuration = (get(sessionDetails, 'sessionStartDate') && get(sessionDetails, 'sessionEndDate')) ? Math.abs(Math.round(diff)) : 0;
+  // Calculate Session Duration
+  const sessionStartDate = new Date(get(sessionDetails, 'sessionStartDate'));
+  const sessionEndDate = new Date(get(sessionDetails, 'sessionEndDate'));
+
+  const sessionDuration = (get(sessionDetails, 'sessionStartDate') && get(sessionDetails, 'sessionEndDate')) ? Math.abs(sessionStartDate.getTime() - sessionEndDate.getTime()) / 1000 : 0;
+
+  const userRole = get(userDetails, 'studentProfile.mentor.typeId') ? 'Teacher' : 'Student';
+
+  const sessionComponentRule = get(topicDoc, 'topicComponentRule') || get(sessionDetails, 'topic.topicComponentRule') || [];
+  const sessionClassworkComponents = sessionComponentRule.filter((component) => !['homeworkAssignment', 'quiz', 'homeworkPractice'].includes(component.componentName));
+  const sessionHomeworkComponents = sessionComponentRule.filter((component) => ['homeworkAssignment', 'quiz', 'homeworkPractice'].includes(component.componentName));
 
   const baseDocument = {
+    id: cuid(),
+    exists: !!existingSessionReport,
     studentId,
     studentName: get(userDetails, 'name', ''),
-    userRole: get(userDetails, 'studentProfile.mentor.typeId') ? 'Teacher' : 'Student',
+    userRole,
     studentGrade: get(userDetails, 'studentProfile.grade', ''),
     studentSection: get(userDetails, 'studentProfile.section', ''),
     classroomId,
@@ -230,10 +263,11 @@ const getBaseDocumentAndCalculatedFields = ({
     schoolName: get(sessionDetails, 'batch.school.name'),
     topicId,
     sessionId: get(sessionDetails, 'id'),
-    sessionTitle: get(sessionDetails, 'topic.title'),
-    sessionType: get(sessionDetails, 'topic.classType'),
-    courseTitle: get(sessionDetails, 'course.title'),
-    courseCategory: get(sessionDetails, 'course.category'),
+    sessionTitle: get(topicDoc, 'title') || get(sessionDetails, 'topic.title'),
+    sessionType: get(topicDoc, 'classType') || get(sessionDetails, 'topic.classType'),
+    courseId: get(topicDoc, 'courses[0].id') || get(sessionDetails, 'course.id'),
+    courseTitle: get(topicDoc, 'courses[0].title') || get(sessionDetails, 'course.title'),
+    courseCategory: get(topicDoc, 'courses[0].category') || get(sessionDetails, 'course.category'),
     sessionStart: get(sessionDetails, 'sessionStartDate'),
     sessionEnd: get(sessionDetails, 'sessionEndDate'),
     sessionDuration,
@@ -243,11 +277,14 @@ const getBaseDocumentAndCalculatedFields = ({
     sessionUpdationAt: get(sessionDetails, 'updatedAt'),
     teacherName: get(sessionDetails, 'batch.allottedMentor.name'),
     teacherId: get(sessionDetails, 'batch.allottedMentor.id'),
+    sessionClassworkComponents,
+    sessionHomeworkComponents,
   };
 
   // If userSessionReport already exists, then use the id from it.
   if (existingSessionReport && get(existingSessionReport, 'id')) {
-    baseDocument[id] = get(existingSessionReport, 'id');
+    baseDocument.id = get(existingSessionReport, 'id');
+    baseDocument.previousLogs = [...(get(existingSessionReport, 'previousLogs') || []), existingSessionReport];
   }
 
   // Assigning Existing Report Values Or Default Values.
@@ -278,15 +315,58 @@ const getBaseDocumentAndCalculatedFields = ({
   };
 };
 
-const getCombinedAndSortedDumps = (latestDumps = [], previousDumps = []) => {
-  const combinedComponentLogs = [...latestDumps, ...previousDumps];
+const transformPreviousReportDumpsIfRequired = (previousDumps = [], componentName) => {
+  if (previousDumps.length) {
+    return previousDumps.map((dump) => {
+      if (!get(dump, 'id')) {
+        const transformedDump = {
+          id: `transformed-${componentName}`,
+          componentType: componentName,
+          eventType: 'update',
+          recordRawDump: [dump],
+        };
+        switch (componentName) {
+          case topicComponents.video: {
+            transformedDump.componentId = get(dump, 'videoId');
+            break;
+          }
+          case topicComponents.homeworkAssignment: {
+            transformedDump.recordRawDump = [{
+              ...dump,
+              isHomework: true,
+            }];
+            break;
+          }
+          case topicComponents.homeworkPractice:
+          case topicComponents.blockBasedPractice: {
+            transformedDump.componentId = get(dump, 'practiceId');
+            break;
+          }
+          case topicComponents.learningObjective: {
+            transformedDump.componentId = get(dump, 'loId');
+            break;
+          }
+          default:
+            break;
+        }
+        return transformedDump;
+      }
+      return dump;
+    });
+  }
+  return previousDumps;
+};
+
+const getCombinedAndSortedDumps = (latestDumps = [], previousDumps = [], componentName) => {
+  const transformedPreviousDumps = transformPreviousReportDumpsIfRequired(previousDumps, componentName);
+  const combinedComponentLogs = [...latestDumps, ...transformedPreviousDumps];
   const sortedComponentDumps = sortBy(combinedComponentLogs, ['mongoDocCreatedAt']);
   return sortedComponentDumps;
 };
 
 const filterDuplicateComponentDumps = (componentDumps) => {
   if (componentDumps && componentDumps.length) {
-    return componentDumps.filter((doc, index, self) => (self.findIndex((o) => o.id === doc.id) === index));
+    return componentDumps.filter((doc, index, self) => (doc.id && self.findIndex((o) => o.id === doc.id) === index));
   }
   return [];
 };
@@ -298,12 +378,12 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
     case topicComponents.video: {
       componentCounts.totalClassworkCount += 1;
 
-      const sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'videoComponentLog', []));
+      const sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'videoComponentLog', []), componentName);
       const filteredVideoDumps = sortedComponentDumps.filter((doc) => (doc.componentId === get(componentRule, 'video.typeId')));
       if (filteredVideoDumps && filteredVideoDumps.length) {
         const latestComponentDump = filteredVideoDumps[filteredVideoDumps.length - 1];
         if (get(latestComponentDump, 'id')) {
-          userSessionProgress.videoComponentLog.push(...filteredVideoDumps);
+          userSessionProgress.videoComponentLog.push(...(filteredVideoDumps || []));
           componentCounts.totalClassworkVisitedCount += 1;
           componentCounts.totalClassworkAttemptedCount += 1;
         }
@@ -320,8 +400,8 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
         userSessionProgress.homeworkExists = true;
       } else { componentCounts.totalClassworkCount += 1; }
 
-      let sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'classworkAssigmentLog', []));
-      if (isHomework) sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'homeworkAssigmentLog', []));
+      let sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'classworkAssigmentLog', []), componentName);
+      if (isHomework) sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'homeworkAssignmentLog', []), componentName);
 
       if (sortedComponentDumps && sortedComponentDumps.length) {
         if (isHomework) componentCounts.totalHomeworkVisitedCount += 1;
@@ -346,10 +426,10 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
         }
 
         if (isHomework) {
-          userSessionProgress.homeworkAssignmentLog.push(...sortedComponentDumps);
+          userSessionProgress.homeworkAssignmentLog.push(...(sortedComponentDumps || []));
           userSessionProgress.homeworkAssignmentLog = filterDuplicateComponentDumps(userSessionProgress.homeworkAssignmentLog);
         } else {
-          userSessionProgress.classworkAssignmentLog.push(...sortedComponentDumps);
+          userSessionProgress.classworkAssignmentLog.push(...(sortedComponentDumps || []));
           userSessionProgress.classworkAssignmentLog = filterDuplicateComponentDumps(userSessionProgress.classworkAssignmentLog);
         }
       }
@@ -363,8 +443,8 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
         userSessionProgress.homeworkExists = true;
       } else { componentCounts.totalClassworkCount += 1; }
 
-      let sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'classworkPracticeLog', []));
-      if (isHomework) sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'homeworkPracticeLog', []));
+      let sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'classworkPracticeLog', []), componentName);
+      if (isHomework) sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'homeworkPracticeLog', []), componentName);
 
       if (sortedComponentDumps && sortedComponentDumps.length) {
         if (isHomework) componentCounts.totalHomeworkVisitedCount += 1;
@@ -382,10 +462,10 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
         }
 
         if (isHomework) {
-          userSessionProgress.homeworkPracticeLog.push(...filteredPracticeDumps);
+          userSessionProgress.homeworkPracticeLog.push(...(filteredPracticeDumps || []));
           userSessionProgress.homeworkPracticeLog = filterDuplicateComponentDumps(userSessionProgress.homeworkPracticeLog);
         } else {
-          userSessionProgress.classworkPracticeLog.push(...filteredPracticeDumps);
+          userSessionProgress.classworkPracticeLog.push(...(filteredPracticeDumps || []));
           userSessionProgress.classworkPracticeLog = filterDuplicateComponentDumps(userSessionProgress.classworkPracticeLog);
         }
       }
@@ -394,22 +474,22 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
     case topicComponents.learningObjective: {
       componentCounts.totalClassworkCount += 1;
 
-      const sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'pqComponentLog', []));
-      const filteredLoDumps = sortedComponentDumps.filter((doc) => (doc.componentId === get(componentRule, 'learningObjective.typeId')));
+      const sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'pqComponentLog', []), componentName);
+      const filteredLoDumps = sortedComponentDumps.filter((doc) => (doc.componentId === get(componentRule, 'learningObjective.typeId')), componentName);
       if (filteredLoDumps && filteredLoDumps.length) {
         componentCounts.totalClassworkVisitedCount += 1;
 
         const studentAttemptedLogs = filteredLoDumps.filter((doc) => get(doc, 'recordRawDump', []).length);
         if (studentAttemptedLogs && studentAttemptedLogs.length) {
           const latestDump = get(studentAttemptedLogs[studentAttemptedLogs.length - 1], 'recordRawDump', [])[0];
-          pQCounts.totalCount += get(latestDump, 'questions', []).length;
-          pQCounts.firstTryCount += get(latestDump, 'firstTryCount');
-          pQCounts.secondTryCount += get(latestDump, 'secondTryCount');
-          pQCounts.threeOrMoreTryCount += get(latestDump, 'threeOrMoreTryCount');
+          componentCounts.pQ.totalCount += get(latestDump, 'questions', []).length;
+          componentCounts.pQ.firstTryCount += get(latestDump, 'firstTryCount');
+          componentCounts.pQ.secondTryCount += get(latestDump, 'secondTryCount');
+          componentCounts.pQ.threeOrMoreTryCount += get(latestDump, 'threeOrMoreTryCount');
 
           componentCounts.totalClassworkAttemptedCount += 1;
         }
-        userSessionProgress.pqComponentLog.push(...filteredLoDumps);
+        userSessionProgress.pqComponentLog.push(...(filteredLoDumps || []));
         userSessionProgress.pqComponentLog = filterDuplicateComponentDumps(userSessionProgress.pqComponentLog);
       }
       break;
@@ -417,7 +497,7 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
     case topicComponents.quiz: {
       componentCounts.totalHomeworkCount += 1;
       userSessionProgress.homeworkExists = true;
-      const sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'homeworkQuizLog', []));
+      const sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'homeworkQuizLog', []), componentName);
 
       if (sortedComponentDumps && sortedComponentDumps.length) {
         componentCounts.totalHomeworkVisitedCount += 1;
@@ -425,12 +505,12 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
         const latestDump = get(sortedComponentDumps[sortedComponentDumps.length - 1], 'recordRawDump', [])[0];
 
         if (latestDump && get(latestDump, 'totalQuestionCount')) {
-          userSessionProgress.totalHomeworkAttemptedCount += 1;
+          componentCounts.totalHomeworkAttemptedCount += 1;
         }
         const homeworkScore = get(latestDump, 'totalQuestionCount', 0) !== 0 ? ((get(latestDump, 'correctQuestionCount', 0) / get(latestDump, 'totalQuestionCount', 0)) * 100) : 0;
         userSessionProgress.homeworkScore = Number(homeworkScore.toFixed(0));
 
-        userSessionProgress.homeworkQuizLog.push(...sortedComponentDumps);
+        userSessionProgress.homeworkQuizLog.push(...(sortedComponentDumps || []));
         userSessionProgress.homeworkQuizLog = filterDuplicateComponentDumps(userSessionProgress.homeworkQuizLog);
       }
       break;
@@ -444,91 +524,116 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
 
 const batchAndUpdateUserSessionReports = async () => {
   // Fetching all required data from database
-  const {
-    batchedUserSessionDump,
-    ...requiredDBData
-  } = await getAllRequiredDataFromDatabase();
+  try {
+    const {
+      batchedUserSessionDump,
+      userSessionDumpController,
+      userSessionReportController,
+      topicAggregationQuery,
+      userSessionDumps,
+      topics,
+      ...requiredDBData
+    } = await getAllRequiredDataFromDatabase();
 
-  // Here iterating over each batchedUserSessionDump to create User's Session Report.
-  const userSessionReportUpdateDoc = [];
-  Object.keys(batchedUserSessionDump).forEach((uniqueSessionRowKey) => {
-    const sessionComponentsDump = batchedUserSessionDump[uniqueSessionRowKey];
+    // Here iterating over each batchedUserSessionDump to create User's Session Report.
+    if (batchedUserSessionDump && Object.keys(batchedUserSessionDump).length) {
+      const userSessionReportUpdateDoc = [];
+      Object.keys(batchedUserSessionDump).forEach((uniqueSessionRowKey) => {
+        const sessionComponentsDump = batchedUserSessionDump[uniqueSessionRowKey];
 
-    let classroomId; let topicId; let studentId;
-    // Desctructuring uniqueSessionRowKey to get classroomId, topicId and studentId
-    // eslint-disable-next-line prefer-const
-    [classroomId, topicId, studentId] = uniqueSessionRowKey.split('-');
+        let classroomId; let topicId; let studentId;
+        // Desctructuring uniqueSessionRowKey to get classroomId, topicId and studentId
+        // eslint-disable-next-line prefer-const
+        [classroomId, topicId, studentId] = uniqueSessionRowKey.split('-');
+        const topicDoc = topics.find((topic) => get(topic, 'id') === topicId);
 
-    // Filter and get base and caculatedFields Document.
-    let {
-      // eslint-disable-next-line prefer-const
-      baseDocument, calculatedFields, sessionDetails,
-    } = getBaseDocumentAndCalculatedFields({
-      classroomId,
-      topicId,
-      studentId,
-      ...requiredDBData,
-    });
+        if (!topicDoc) { return; }
+        // Filter and get base and caculatedFields Document.
+        let {
+          // eslint-disable-next-line prefer-const
+          baseDocument, calculatedFields, sessionDetails,
+        } = getBaseDocumentAndCalculatedFields({
+          classroomId,
+          topicId,
+          studentId,
+          topicDoc,
+          ...requiredDBData,
+        });
 
-    let componentCountsMeta = {
-      totalClassworkCount: 0,
-      totalClassworkVisitedCount: 0,
-      totalClassworkAttemptedCount: 0,
-      totalHomeworkCount: 0,
-      totalHomeworkVisitedCount: 0,
-      totalHomeworkAttemptedCount: 0,
-      pQ: {
-        totalCount: 0,
-        firstTryCount: 0,
-        secondTryCount: 0,
-        threeOrMoreTryCount: 0,
-      },
-    };
-    // Iterating over session's component rules to calculate progress.
-    const sessionComponentRule = get(sessionDetails, 'topic.topicComponentRule', []);
-    sessionComponentRule
-      .forEach((componentRule) => {
-        const { componentName } = componentRule;
-        const filteredComponentDumps = sessionComponentsDump.filter((componentDump) => get(componentDump, 'componentType') === componentName);
+        let componentCountsMeta = {
+          totalClassworkCount: 0,
+          totalClassworkVisitedCount: 0,
+          totalClassworkAttemptedCount: 0,
+          totalHomeworkCount: 0,
+          totalHomeworkVisitedCount: 0,
+          totalHomeworkAttemptedCount: 0,
+          pQ: {
+            totalCount: 0,
+            firstTryCount: 0,
+            secondTryCount: 0,
+            threeOrMoreTryCount: 0,
+          },
+        };
+        // Iterating over session's component rules to calculate progress
+        let sessionComponentRule = get(sessionDetails, 'topic.topicComponentRule');
+        if (!sessionComponentRule && topicDoc && topicDoc.topicComponentRule && topicDoc.topicComponentRule.length) {
+          sessionComponentRule = get(topicDoc, 'topicComponentRule', []);
+        }
+        (sessionComponentRule || [])
+          .forEach((componentRule) => {
+            const { componentName } = componentRule;
+            const filteredComponentDumps = sessionComponentsDump.filter((componentDump) => get(componentDump, 'componentType') === componentName);
 
-        const { userSessionProgress, componentCounts } = calculateFieldsBasedOnComponentType(
-          componentName,
-          calculatedFields,
-          filteredComponentDumps,
-          componentRule,
-          componentCountsMeta,
-        );
+            const { userSessionProgress, componentCounts } = calculateFieldsBasedOnComponentType(
+              componentName,
+              calculatedFields,
+              filteredComponentDumps,
+              componentRule,
+              componentCountsMeta,
+            );
 
-        calculatedFields = userSessionProgress;
-        componentCountsMeta = componentCounts;
+            calculatedFields = userSessionProgress;
+            componentCountsMeta = componentCounts;
+          });
+
+        const classworkScore = componentCountsMeta.pQ.totalCount !== 0 ? ((
+          ((componentCountsMeta.pQ.firstTryCount * 10) + (componentCountsMeta.pQ.secondTryCount * 8) + (componentCountsMeta.pQ.threeOrMoreTryCount * 6)) / (componentCountsMeta.pQ.totalCount * 10)
+        ) * 100) : 0;
+        calculatedFields.classworkScore = Number(classworkScore.toFixed(0));
+
+        calculatedFields.classworkVisited = (componentCountsMeta.totalClassworkCount !== 0 && componentCountsMeta.totalClassworkVisitedCount !== 0) ? Number(((componentCountsMeta.totalClassworkVisitedCount / componentCountsMeta.totalClassworkCount) * 100).toFixed(0)) : 0;
+
+        calculatedFields.classworkAttempted = (componentCountsMeta.totalClassworkCount !== 0 && componentCountsMeta.totalClassworkAttemptedCount !== 0) ? Number(((componentCountsMeta.totalClassworkAttemptedCount / componentCountsMeta.totalClassworkCount) * 100).toFixed(0)) : 0;
+
+        calculatedFields.homeworkVisited = (componentCountsMeta.totalHomeworkCount !== 0 && componentCountsMeta.totalHomeworkVisitedCount !== 0) ? Number(((componentCountsMeta.totalHomeworkVisitedCount / componentCountsMeta.totalHomeworkCount) * 100).toFixed(0)) : 0;
+
+        calculatedFields.homeworkAttempted = (componentCountsMeta.totalHomeworkCount !== 0 && componentCountsMeta.totalHomeworkAttemptedCount !== 0) ? Number(((componentCountsMeta.totalHomeworkAttemptedCount / componentCountsMeta.totalHomeworkCount) * 100).toFixed(0)) : 0;
+
+        calculatedFields.proficiency = Number(((0.5 * (calculatedFields.classworkScore || 0)) + (0.5 * (calculatedFields.homeworkScore || 0))).toFixed(0));
+
+        userSessionReportUpdateDoc.push({ ...baseDocument, ...calculatedFields });
       });
-
-    const classworkScore = componentCountsMeta.pQ.totalCount !== 0 ? ((
-      ((componentCountsMeta.pQ.firstTryCount * 10) + (componentCountsMeta.pQ.secondTryCount * 8) + (componentCountsMeta.pQ.threeOrMoreTryCount * 6)) / (componentCountsMeta.pQ.totalCount * 10)
-    ) * 100) : 0;
-    calculatedFields.classworkScore = Number(classworkScore.toFixed(0));
-
-    calculatedFields.classworkVisited = (componentCountsMeta.totalClassworkCount !== 0 && componentCountsMeta.totalClassworkVisitedCount !== 0) ? Number(((componentCountsMeta.totalClassworkVisitedCount / componentCountsMeta.totalClassworkCount) * 100).toFixed(0)) : 0;
-
-    calculatedFields.classworkAttempted = (componentCountsMeta.totalClassworkCount !== 0 && componentCountsMeta.totalClassworkAttemptedCount !== 0) ? Number(((componentCountsMeta.totalClassworkAttemptedCount / componentCountsMeta.totalClassworkCount) * 100).toFixed(0)) : 0;
-
-    calculatedFields.homeworkVisited = (componentCountsMeta.totalHomeworkCount !== 0 && componentCountsMeta.totalHomeworkVisitedCount !== 0) ? Number(((componentCountsMeta.totalHomeworkVisitedCount / componentCountsMeta.totalHomeworkCount) * 100).toFixed(0)) : 0;
-
-    calculatedFields.homeworkAttempted = (componentCountsMeta.totalHomeworkCount !== 0 && componentCountsMeta.totalHomeworkAttemptedCount !== 0) ? Number(((componentCountsMeta.totalHomeworkAttemptedCount / componentCountsMeta.totalHomeworkCount) * 100).toFixed(0)) : 0;
-
-    calculatedFields.proficiency = Number(((0.5 * (calculatedFields.classworkScore || 0)) + (0.5 * (calculatedFields.homeworkScore || 0))).toFixed(0));
-
-    userSessionReportUpdateDoc.push({ ...baseDocument, ...calculatedFields });
-  });
-
-  log('End Reached!!');
-  // add or update record in sql
-  await userSessionDumpController.Model.bulkCreate(userSessionReportUpdateDoc, { updateOnDuplicate: ['id'] });
-  // delete record from sql dump
-  // eslint-disable-next-line no-constant-condition
-  if (false) {
-    const idsToDelete = userSessionDumps.map((dump) => dump.id);
-    await userSessionDumpController.Model.destroy({ where: { id: idsToDelete } });
+      // Add or Update record in PG SQL
+      log(`Session Report Built: ${userSessionReportUpdateDoc.length || 0}`);
+      if (userSessionReportUpdateDoc && userSessionReportUpdateDoc.length) {
+        await userSessionReportController.Model.bulkCreate(userSessionReportUpdateDoc, { updateOnDuplicate: sqlColumnsToUpdate }).then((response) => {
+          log(`Session Report Updated, Total Count: ${(response || []).length}`);
+        }).catch((error) => {
+          throw new Error(error);
+        });
+      }
+      // delete record from sql dump
+      const idsToDelete = new Set();
+      Object.keys(batchedUserSessionDump).forEach((uniqueSessionRowKey) => {
+        if (batchedUserSessionDump && batchedUserSessionDump[uniqueSessionRowKey].length) {
+          batchedUserSessionDump[uniqueSessionRowKey].forEach((dump) => idsToDelete.add(dump.id));
+        }
+      });
+      log('Deleting Previous Dumps..');
+      await userSessionDumpController.Model.destroy({ where: { id: Array.from(idsToDelete) } });
+    }
+  } catch (e) {
+    log(e, 'error');
   }
 };
 
