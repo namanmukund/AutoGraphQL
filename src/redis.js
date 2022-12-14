@@ -9,12 +9,14 @@ redisClient
     log(`Failed to connect to Redis client. Error being ${error}`);
     redisClient.quit();
   })
-  .on('reconnecting', () => {
-    log('Redis client reconnecting!');
-  })
-  .on('close', () => {
-    log('Redis client disconnected!');
-  })
-  .on('connect', () => log('Redis client connected'));
+  // .on('reconnecting', () => {
+  //   log('Redis client reconnecting!');
+  // })
+  // .on('close', () => {
+  //   log('Redis client disconnected!');
+  // })
+  .on('connect', () => {
+    if (!process.env.SECONDARY_APPLICATION_NAME) log('Redis client connected');
+  });
 
 export default redisClient;
