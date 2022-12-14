@@ -1,7 +1,10 @@
 import { READ } from '../../../../constants/graphqlOperations';
-import { TLA, TMS, TWA } from '../../../../constants';
+import {
+  TLA, TMS, TWA,
+} from '../../../../constants';
 import getSlotTimeFields from '../../functions/getSlotTimeFields';
 import getWeekDaysFields from '../../functions/getWeekDaysFields';
+import getModelOptionsString from '../../../../src/autoGenerate/utils/getModelOptionsString';
 
 const slotTimeFields = getSlotTimeFields('Boolean', false);
 const weekDaysFields = getWeekDaysFields('Boolean', false);
@@ -28,8 +31,9 @@ const AcademicDuration = `
    endDate: Date
  }`;
 
+const BATCH_TYPE_NAME = 'Batch';
 const Batch = `
-  type Batch @model
+  type ${BATCH_TYPE_NAME} @model(${getModelOptionsString(BATCH_TYPE_NAME)})
   @databaseController(mode: "aggregation")
   @appPermissions(
     permissions:[

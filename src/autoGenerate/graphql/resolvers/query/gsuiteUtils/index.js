@@ -113,7 +113,7 @@ const createGsuiteLastRevisionFile = async (_root, params) => {
   }
   const schoolFolderId = await findOrCreateParentFolder(
     schoolName,
-    GSUITE_BASE_FOLDER_ID,
+    GSUITE_BASE_FOLDER_ID[process.env.NODE_ENV],
   );
   const clasroomsFolderId = await findOrCreateParentFolder(
     `${classroomTitle}`,

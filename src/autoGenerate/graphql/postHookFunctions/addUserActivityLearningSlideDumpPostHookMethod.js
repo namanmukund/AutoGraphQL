@@ -71,11 +71,12 @@ const updateUserLearningObjectiveMutation = (userLearningObjectiveId,
   }
   `;
 
-const addUserActivityPQDumpQuery = (userId, courseId, learningObjectiveId) => `mutation ($input:UserActivityPQDumpInput!){
+const addUserActivityPQDumpQuery = (userId, courseId, learningObjectiveId, topicIdFromInput) => `mutation ($input:UserActivityPQDumpInput!){
         addUserActivityPQDump(
           userConnectId: "${userId}"
           learningObjectiveConnectId: "${learningObjectiveId}"
           ${courseId ? `courseConnectId: "${courseId}"` : ''}
+          ${topicIdFromInput ? `topicConnectId: "${topicIdFromInput}"` : ''}
           input: $input
         ) {
           id
@@ -86,6 +87,7 @@ const addUserActivityLearningSlideDumpPostHookMethod = async (input, mutation, c
   const userId = get(input, 'user.typeId');
   const learningObjectiveId = get(input, 'learningObjective.typeId');
   const courseId = get(input, 'course.typeId');
+  const topicIdFromInput = get(input, 'topic.typeId');
   const learningSlideId = get(input, 'learningSlide.typeId');
   if (!userId || !learningObjectiveId || !learningSlideId) {
     log('Either one of userId or learningObjectiveId or learningSlideId is missing in input of addUserActivityPQDumpPostHookMethod');
@@ -162,7 +164,7 @@ const addUserActivityLearningSlideDumpPostHookMethod = async (input, mutation, c
   const learningSlideType = get(learningSlideData, '[0].type');
   if (learningSlideType === 'practiceQuestion' && get(params, 'input.practiceQuestions', []).length) {
     context.fromAddUserLSDump = true;
-    await callLocalGraphqlApi(addUserActivityPQDumpQuery(userId, courseId, learningObjectiveId), context, {
+    await callLocalGraphqlApi(addUserActivityPQDumpQuery(userId, courseId, learningObjectiveId, topicIdFromInput), context, {
       input: {
         pqAction: 'next',
         practiceQuestionsDump: get(params, 'input.practiceQuestions'),

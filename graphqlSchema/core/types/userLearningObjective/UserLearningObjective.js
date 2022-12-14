@@ -40,6 +40,7 @@ const UserLearningObjective = `
     isLearningSlideBookmarked: Boolean @defaultValue(value: "false")
     nextComponent: UserLearningObjectiveNextComponentType
     course: Course @relation(name: "UserLearningObjectiveCourse", direction: "OneWay")
+    topic: Topic @relation(name: "UserLearningObjectiveTopic", direction: "OneWay")
     learningSlides: [UserLearningSlideType]
   }
 `;

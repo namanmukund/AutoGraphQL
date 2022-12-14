@@ -10,6 +10,7 @@ query{
       id 
       order
     }
+    logoutAllStudents
     attendance {
       student {
         id
