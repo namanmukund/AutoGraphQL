@@ -594,7 +594,7 @@ const practiceQuestionReport = (async (root, params, context) => {
       // since multiple userPracticeQuestionReports per user per lo, we get the latest one created
       const userPracticeQuestionReportRes = (usersPracticeQuestionReportRes || []).filter((el) => get(el, 'user.typeId') === studentUserId);
 
-      const hasStudentAttemptedAllQuestions = get(userPracticeQuestionReportRes, '0.detailedReport', []).length;
+      const hasStudentAttemptedAllQuestions = get(userPracticeQuestionReportRes, '0.detailedReport', []).length === loObj.questionsCount;
       if (userPracticeQuestionReportRes.length && hasStudentAttemptedAllQuestions) {
         loObj.submittedCountSum += 1;
 
