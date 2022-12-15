@@ -49,7 +49,7 @@ const UserSessionDump = sequelize.define(
     homeworkExists: { type: DataTypes.BOOLEAN, allowNull: false },
     videoComponentLog: { type: DataTypes.ARRAY(DataTypes.JSONB) },
     pqComponentLog: { type: DataTypes.ARRAY(DataTypes.JSONB) },
-    classworkAssigmentLog: { type: DataTypes.ARRAY(DataTypes.JSONB) },
+    classworkAssignmentLog: { type: DataTypes.ARRAY(DataTypes.JSONB) },
     homeworkAssignmentLog: { type: DataTypes.ARRAY(DataTypes.JSONB) },
     classworkPracticeLog: { type: DataTypes.ARRAY(DataTypes.JSONB) },
     homeworkPracticeLog: { type: DataTypes.ARRAY(DataTypes.JSONB) },

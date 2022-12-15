@@ -82,54 +82,64 @@ const getDatabaseControllers = () => {
 };
 
 const getAggregationQueries = (documentIdsToFetch) => {
-  const batchSessionAggregationQuery = new AggregationBuilder('BatchSession')
-    .Match({ $or: Object.values(documentIdsToFetch.batchSessionFilters) })
-    .Project({
-      id: 1, course: 1, batch: 1, topic: 1, sessionStartDate: 1, sessionEndDate: 1, sessionStatus: 1, attendance: 1, createdAt: 1, updatedAt: 1,
-    })
-    .Lookup(EqualityPayload('Topic', 'topic', 'topic.typeId', 'id'))
-    .Lookup(EqualityPayload('Course', 'course', 'course.typeId', 'id'))
-    .Lookup(ConditionPayload('Batch', 'batch',
-      {
-        variableList: [{
-          var: 'batchId',
-          source: 'batch.typeId',
-          key: 'primary',
-        }],
-        nestedAggregation: new AggregationBuilder('Batch')
-          .Lookup(EqualityPayload('School', 'school', 'school.typeId', 'id'))
-          .Lookup(EqualityPayload('User', 'allottedMentor', 'allottedMentor.typeId', 'id'))
-          .Project({
-            id: 1, classroomTitle: 1, code: 1, school: ArrayElemAt('$school', 0), allottedMentor: ArrayElemAt('$allottedMentor', 0), createdAt: 1, updatedAt: 1,
-          }),
-      }))
-    .Project({
-      id: 1,
-      sessionStartDate: 1,
-      sessionEndDate: 1,
-      sessionStatus: 1,
-      attendance: 1,
-      createdAt: 1,
-      updatedAt: 1,
-      course: ArrayElemAt('$course', 0),
-      batch: ArrayElemAt('$batch', 0),
-      topic: ArrayElemAt('$topic', 0),
-    })
-    .getPipeline();
+  let batchSessionAggregationQuery = [];
+  let topicAggregationQuery = [];
+  let userAggregationQuery = [];
+  if (Object.values(documentIdsToFetch.batchSessionFilters).length) {
+    batchSessionAggregationQuery = new AggregationBuilder('BatchSession')
+      .Match({ $or: Object.values(documentIdsToFetch.batchSessionFilters) })
+      .Project({
+        id: 1, course: 1, batch: 1, topic: 1, sessionStartDate: 1, sessionEndDate: 1, sessionStatus: 1, attendance: 1, createdAt: 1, updatedAt: 1,
+      })
+      .Lookup(EqualityPayload('Topic', 'topic', 'topic.typeId', 'id'))
+      .Lookup(EqualityPayload('Course', 'course', 'course.typeId', 'id'))
+      .Lookup(ConditionPayload('Batch', 'batch',
+        {
+          variableList: [{
+            var: 'batchId',
+            source: 'batch.typeId',
+            key: 'primary',
+          }],
+          nestedAggregation: new AggregationBuilder('Batch')
+            .Lookup(EqualityPayload('School', 'school', 'school.typeId', 'id'))
+            .Lookup(EqualityPayload('User', 'allottedMentor', 'allottedMentor.typeId', 'id'))
+            .Project({
+              id: 1, classroomTitle: 1, code: 1, school: ArrayElemAt('$school', 0), allottedMentor: ArrayElemAt('$allottedMentor', 0), createdAt: 1, updatedAt: 1,
+            }),
+        }))
+      .Project({
+        id: 1,
+        sessionStartDate: 1,
+        sessionEndDate: 1,
+        sessionStatus: 1,
+        attendance: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        course: ArrayElemAt('$course', 0),
+        batch: ArrayElemAt('$batch', 0),
+        topic: ArrayElemAt('$topic', 0),
+      })
+      .getPipeline();
+  }
 
-  const topicAggregationQuery = new AggregationBuilder('Topic')
-    .Match({ id: { $in: Array.from(documentIdsToFetch.topicIds) } })
-    .getPipeline();
+  if (documentIdsToFetch.topicIds && Array.from(documentIdsToFetch.topicIds).length) {
+    topicAggregationQuery = new AggregationBuilder('Topic')
+      .Match({ id: { $in: Array.from(documentIdsToFetch.topicIds) } })
+      .Lookup(EqualityPayload('Course', 'courses', 'courses.typeId', 'id'))
+      .getPipeline();
+  }
 
-  const userAggregationQuery = new AggregationBuilder('User')
-    .Match({ id: { $in: Array.from(documentIdsToFetch.userIds) } })
-    .Lookup(EqualityPayload('StudentProfile', 'studentProfile', 'studentProfile.typeId', 'id'))
-    .Project({
-      id: 1,
-      name: 1,
-      studentProfile: ArrayElemAt('$studentProfile', 0),
-    })
-    .getPipeline();
+  if (documentIdsToFetch.userIds && Array.from(documentIdsToFetch.userIds).length) {
+    userAggregationQuery = new AggregationBuilder('User')
+      .Match({ id: { $in: Array.from(documentIdsToFetch.userIds) } })
+      .Lookup(EqualityPayload('StudentProfile', 'studentProfile', 'studentProfile.typeId', 'id'))
+      .Project({
+        id: 1,
+        name: 1,
+        studentProfile: ArrayElemAt('$studentProfile', 0),
+      })
+      .getPipeline();
+  }
 
   return {
     batchSessionAggregationQuery,
@@ -165,27 +175,33 @@ const getAllRequiredDataFromDatabase = async () => {
     } = getAggregationQueries(documentIdsToFetch);
 
     // Fetching BatchSession and User Data from mongo.
-    const batchSessions = await batchSessionController.aggregate(batchSessionAggregationQuery);
-    const topics = await topicController.aggregate(topicAggregationQuery);
-    const users = await userController.aggregate(userAggregationQuery);
+    let batchSessions = [];
+    let topics = [];
+    let users = [];
+    if (batchSessionAggregationQuery.length) batchSessions = await batchSessionController.aggregate(batchSessionAggregationQuery);
+    if (topicAggregationQuery.length) topics = await topicController.aggregate(topicAggregationQuery);
+    if (userAggregationQuery.length) users = await userController.aggregate(userAggregationQuery);
 
+    let userSessionReports = [];
     // Creating Filter Array for fetching UserSessionReport
-    const sessionReportFilterArray = Object.keys(batchedUserSessionDump).map((uniqueSessionRowKey) => {
-      const sessionRowSplitArray = uniqueSessionRowKey.split('-');
-      return {
-        [SequelizeOperation.and]: [
-          { classroomId: sessionRowSplitArray[0] },
-          { topicId: sessionRowSplitArray[1] },
-          { studentId: sessionRowSplitArray[2] },
-        ],
-      };
-    });
+    if (batchedUserSessionDump && Object.keys(batchedUserSessionDump).length) {
+      const sessionReportFilterArray = Object.keys(batchedUserSessionDump).map((uniqueSessionRowKey) => {
+        const sessionRowSplitArray = uniqueSessionRowKey.split('-');
+        return {
+          [SequelizeOperation.and]: [
+            { classroomId: sessionRowSplitArray[0] },
+            { topicId: sessionRowSplitArray[1] },
+            { studentId: sessionRowSplitArray[2] },
+          ],
+        };
+      });
 
-    // Fetch Existing UserSessionReport from Postgres
-    const userSessionReports = await userSessionReportController.Model.findAll({
-      where: { [SequelizeOperation.or]: sessionReportFilterArray },
-      raw: true,
-    });
+      // Fetch Existing UserSessionReport from Postgres
+      userSessionReports = await userSessionReportController.Model.findAll({
+        where: { [SequelizeOperation.or]: sessionReportFilterArray },
+        raw: true,
+      });
+    }
 
     return {
       batchSessions,
@@ -216,7 +232,7 @@ const getBaseDocumentAndCalculatedFields = ({
   classroomId, studentId, topicId, userSessionReports, topicDoc, batchSessions, users,
 }) => {
   // Check if userSessionReport already exists
-  const existingSessionReport = userSessionReports.find((report) => (
+  const existingSessionReport = (userSessionReports || []).find((report) => (
     (report.topicId === topicId)
       && (report.studentId === studentId)
       && (report.classroomId === classroomId)
@@ -284,7 +300,7 @@ const getBaseDocumentAndCalculatedFields = ({
   // If userSessionReport already exists, then use the id from it.
   if (existingSessionReport && get(existingSessionReport, 'id')) {
     baseDocument.id = get(existingSessionReport, 'id');
-    baseDocument.previousLogs = [...(get(existingSessionReport, 'previousLogs') || []), existingSessionReport];
+    baseDocument.previousLogs = [...(get(existingSessionReport, 'previousLogs') || []), existingSessionReport].map(({ previousLogs: ignoringThis, ...requiredLogs }) => requiredLogs);
   }
 
   // Assigning Existing Report Values Or Default Values.
@@ -297,13 +313,13 @@ const getBaseDocumentAndCalculatedFields = ({
     homeworkScore: get(existingSessionReport, 'homeworkScore', 0),
     proficiency: get(existingSessionReport, 'proficiency', 0),
     homeworkExists: get(existingSessionReport, 'homeworkExists', false),
-    videoComponentLog: get(existingSessionReport, 'videoComponentLog', []),
-    pqComponentLog: get(existingSessionReport, 'pqComponentLog', []),
-    classworkAssignmentLog: get(existingSessionReport, 'classworkAssignmentLog', []),
-    homeworkAssignmentLog: get(existingSessionReport, 'homeworkAssignmentLog', []),
-    classworkPracticeLog: get(existingSessionReport, 'classworkPracticeLog', []),
-    homeworkPracticeLog: get(existingSessionReport, 'homeworkPracticeLog', []),
-    homeworkQuizLog: get(existingSessionReport, 'homeworkQuizLog', []),
+    videoComponentLog: get(existingSessionReport, 'videoComponentLog', []) || [],
+    pqComponentLog: get(existingSessionReport, 'pqComponentLog', []) || [],
+    classworkAssignmentLog: get(existingSessionReport, 'classworkAssignmentLog', []) || [],
+    homeworkAssignmentLog: get(existingSessionReport, 'homeworkAssignmentLog', []) || [],
+    classworkPracticeLog: get(existingSessionReport, 'classworkPracticeLog', []) || [],
+    homeworkPracticeLog: get(existingSessionReport, 'homeworkPracticeLog', []) || [],
+    homeworkQuizLog: get(existingSessionReport, 'homeworkQuizLog', []) || [],
   };
 
   return {
@@ -316,7 +332,7 @@ const getBaseDocumentAndCalculatedFields = ({
 };
 
 const transformPreviousReportDumpsIfRequired = (previousDumps = [], componentName) => {
-  if (previousDumps.length) {
+  if (previousDumps && previousDumps.length) {
     return previousDumps.map((dump) => {
       if (!get(dump, 'id')) {
         const transformedDump = {
@@ -354,7 +370,7 @@ const transformPreviousReportDumpsIfRequired = (previousDumps = [], componentNam
       return dump;
     });
   }
-  return previousDumps;
+  return previousDumps || [];
 };
 
 const getCombinedAndSortedDumps = (latestDumps = [], previousDumps = [], componentName) => {
@@ -400,7 +416,7 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
         userSessionProgress.homeworkExists = true;
       } else { componentCounts.totalClassworkCount += 1; }
 
-      let sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'classworkAssigmentLog', []), componentName);
+      let sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'classworkAssignmentLog', []), componentName);
       if (isHomework) sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'homeworkAssignmentLog', []), componentName);
 
       if (sortedComponentDumps && sortedComponentDumps.length) {
@@ -524,6 +540,7 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
 
 const batchAndUpdateUserSessionReports = async () => {
   // Fetching all required data from database
+  log('Generating User Session Reports');
   try {
     const {
       batchedUserSessionDump,
@@ -537,6 +554,7 @@ const batchAndUpdateUserSessionReports = async () => {
 
     // Here iterating over each batchedUserSessionDump to create User's Session Report.
     if (batchedUserSessionDump && Object.keys(batchedUserSessionDump).length) {
+      log(`Total Batched Dumps ${Object.keys(batchedUserSessionDump).length}`);
       const userSessionReportUpdateDoc = [];
       Object.keys(batchedUserSessionDump).forEach((uniqueSessionRowKey) => {
         const sessionComponentsDump = batchedUserSessionDump[uniqueSessionRowKey];
@@ -629,11 +647,18 @@ const batchAndUpdateUserSessionReports = async () => {
           batchedUserSessionDump[uniqueSessionRowKey].forEach((dump) => idsToDelete.add(dump.id));
         }
       });
-      log('Deleting Previous Dumps..');
+      log(`Deleting Previous Dumps, Total Count: ${idsToDelete.size}`);
       await userSessionDumpController.Model.destroy({ where: { id: Array.from(idsToDelete) } });
     }
+    return {
+      result: true,
+    };
   } catch (e) {
     log(e, 'error');
+    return {
+      result: false,
+      error: e,
+    };
   }
 };
 
