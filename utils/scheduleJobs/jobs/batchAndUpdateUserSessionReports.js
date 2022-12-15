@@ -15,6 +15,7 @@ const sqlColumnsToUpdate = ['studentId', 'studentName', 'userRole', 'studentGrad
 
 const getBatchedUserSessionDump = (userSessionDumps) => {
   const batchedUserSessionDump = {};
+  const batchedSessionDump = {};
   const documentIdsToFetch = {
     classroomIds: new Set(),
     topicIds: new Set(),
@@ -28,9 +29,15 @@ const getBatchedUserSessionDump = (userSessionDumps) => {
         topicId,
         userId,
         componentId,
+        componentType,
       } = userSessionDump;
 
-      if (classroomId && topicId && userId && componentId) {
+      if (componentType === 'batchSession') {
+        if (!batchedSessionDump[componentId]) {
+          batchedSessionDump[componentId] = [];
+        }
+        batchedSessionDump[componentId].push(userSessionDump);
+      } else if (classroomId && topicId && userId && componentId && (componentType !== 'batchSession')) {
         // Adding Ids to Set to fetch from mongo
         documentIdsToFetch.classroomIds.add(classroomId);
         documentIdsToFetch.topicIds.add(topicId);
@@ -55,6 +62,7 @@ const getBatchedUserSessionDump = (userSessionDumps) => {
   return {
     batchedUserSessionDump,
     documentIdsToFetch,
+    batchedSessionDump,
   };
 };
 
@@ -165,6 +173,7 @@ const getAllRequiredDataFromDatabase = async () => {
     // Batch User Session Dumps based on Classroom, Topic and UserId
     const {
       batchedUserSessionDump,
+      batchedSessionDump,
       documentIdsToFetch,
     } = getBatchedUserSessionDump(userSessionDumps);
 
@@ -213,6 +222,7 @@ const getAllRequiredDataFromDatabase = async () => {
       topicAggregationQuery,
       userSessionDumpController,
       userSessionReportController,
+      batchedSessionDump,
     };
   }
   return {
@@ -541,6 +551,7 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
 const batchAndUpdateUserSessionReports = async () => {
   // Fetching all required data from database
   log('Generating User Session Reports');
+  let queryMessageString = '';
   try {
     const {
       batchedUserSessionDump,
@@ -549,6 +560,7 @@ const batchAndUpdateUserSessionReports = async () => {
       topicAggregationQuery,
       userSessionDumps,
       topics,
+      batchedSessionDump,
       ...requiredDBData
     } = await getAllRequiredDataFromDatabase();
 
@@ -633,6 +645,8 @@ const batchAndUpdateUserSessionReports = async () => {
       });
       // Add or Update record in PG SQL
       log(`Session Report Built: ${userSessionReportUpdateDoc.length || 0}`);
+      queryMessageString += `Rows Affected: ${userSessionReportUpdateDoc.length || 0}`;
+
       if (userSessionReportUpdateDoc && userSessionReportUpdateDoc.length) {
         await userSessionReportController.Model.bulkCreate(userSessionReportUpdateDoc, { updateOnDuplicate: sqlColumnsToUpdate }).then((response) => {
           log(`Session Report Updated, Total Count: ${(response || []).length}`);
@@ -649,14 +663,20 @@ const batchAndUpdateUserSessionReports = async () => {
       });
       log(`Deleting Previous Dumps, Total Count: ${idsToDelete.size}`);
       await userSessionDumpController.Model.destroy({ where: { id: Array.from(idsToDelete) } });
+      queryMessageString += ` | Rows Deleted: ${idsToDelete.size}`;
+    }
+    if (batchedSessionDump && Object.keys(batchedSessionDump).length) {
+      // TODO : Add logic to update session report in PG SQL
     }
     return {
       result: true,
+      message: queryMessageString,
     };
   } catch (e) {
     log(e, 'error');
     return {
       result: false,
+      message: queryMessageString,
       error: e,
     };
   }
