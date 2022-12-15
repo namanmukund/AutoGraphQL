@@ -126,6 +126,7 @@ import removeBatchStudents from './mutation/methods/removeBatchStudents';
 import redisUtils from './query/redisUtils';
 import gsuiteUtils from './query/gsuiteUtils';
 import getSubmittedAssignmentsStudents from './query/methods/getSubmittedAssignmentsStudents';
+import syncUserSessionReports from '../../../../utils/scheduleJobs/jobs/batchAndUpdateUserSessionReports';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -742,6 +743,7 @@ resolvers.Query.gettingGsuiteChildFileOrFolder = gsuiteUtils.gettingGsuiteChildF
 resolvers.Query.getGsuiteFileOrFolderDetails = gsuiteUtils.getGsuiteFileOrFolderDetails;
 resolvers.Query.createGsuiteLastRevisionFile = gsuiteUtils.createGsuiteLastRevisionFile;
 
+resolvers.Query.syncUserSessionReports = syncUserSessionReports;
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
 
