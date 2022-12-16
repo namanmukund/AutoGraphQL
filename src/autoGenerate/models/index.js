@@ -10,8 +10,7 @@ import {
   getEnumTypeMongooseSchema, visitField, hasDirective, getEnumDefinitionTypeObject,
 } from '../utils';
 import { DATABASE_DIALECTS } from '../../../constants';
-import UserSessionDumpModel from './userSessionDump.pg.model';
-import UserSessionReportModel from './userSessionReport.pg.model';
+import POSTGRES_MODELS from './postgresModels';
 
 const { Schema } = mongoose;
 // uncomment below code to debug mongodb queries
@@ -166,10 +165,9 @@ const createMongooseModelsFromSchema = (allModelsSchema, typesSchema) => {
 
   // Generating SQL models from filesystem if any.
   const additionalModels = {};
-  [UserSessionDumpModel, UserSessionReportModel]
-    .forEach((model) => {
-      additionalModels[model.name] = model;
-    });
+  POSTGRES_MODELS.forEach((model) => {
+    additionalModels[model.name] = model;
+  });
 
   Object.keys(additionalModels).forEach((model) => {
     log(`PG SQL Model generated for: ${model}`);

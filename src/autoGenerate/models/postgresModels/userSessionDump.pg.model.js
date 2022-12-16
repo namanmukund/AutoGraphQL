@@ -1,6 +1,6 @@
 import { DataTypes } from 'sequelize';
 import cuid from 'cuid';
-import db from '../../db';
+import db from '../../../db';
 
 const { sequelize } = db;
 
