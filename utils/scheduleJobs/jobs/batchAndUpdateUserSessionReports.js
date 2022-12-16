@@ -296,7 +296,7 @@ const getBaseDocumentAndCalculatedFields = ({
     courseCategory: get(topicDoc, 'courses[0].category') || get(sessionDetails, 'course.category'),
     sessionStart: get(sessionDetails, 'sessionStartDate'),
     sessionEnd: get(sessionDetails, 'sessionEndDate'),
-    sessionDuration,
+    sessionDuration: Math.round(sessionDuration || 0),
     sessionStatus: get(sessionDetails, 'sessionStatus'),
     studentAttendance,
     sessionCreationDate: get(sessionDetails, 'createdAt'),

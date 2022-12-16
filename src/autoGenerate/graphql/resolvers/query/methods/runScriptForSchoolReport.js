@@ -153,7 +153,7 @@ const getReportObj = ({
   allUserBBPracticeCWs, allUserBBPracticeHWs, allUserBBProjectCWs, elem, student, sessionDetail,
 }) => {
   if (userId) {
-    const { sessinStartDate, sessionEndDate, sessionDurationInHr } = sessionDetail;
+    const { sessionStartDate, sessionEndDate, sessionDurationInHr } = sessionDetail;
     // console.log('----------------------userId---------------', userId);
     // eslint-disable-next-line no-await-in-loop
     // const mmsRes = await callLocalGraphqlApi(
@@ -245,7 +245,7 @@ const getReportObj = ({
             }
           } else if (el === 'blockBasedPractice') {
             isPracticeCWExistsForCourse = true;
-            const userBBPracticeCWData = (userBBPracticeCW || []).find((practice) => get(practice, 'blockBasedPractice.id') === get(el, 'blockBasedProject.id'));
+            const userBBPracticeCWData = (userBBPracticeCW || []).find((practice) => get(practice, 'blockBasedPractice.id') === get(tc, 'blockBasedProject.id'));
             if (userBBPracticeCWData) {
               classworkCompletionCount += 1;
               const isAttempted = get(userBBPracticeCWData, 'blockBasedPractice.isSubmitAnswer') ? get(userBBPracticeCWData, 'answerLink') || get(userBBPracticeCWData, 'savedBlocks') : true;
@@ -255,7 +255,7 @@ const getReportObj = ({
             }
           } else if (el === 'homeworkPractice') {
             isPracticeHWExistsForCourse = true;
-            const userBBPracticeHWData = (userBBPracticeHW || []).find((practice) => get(practice, 'blockBasedPractice.id') === get(el, 'blockBasedProject.id'));
+            const userBBPracticeHWData = (userBBPracticeHW || []).find((practice) => get(practice, 'blockBasedPractice.id') === get(tc, 'blockBasedProject.id'));
             if (userBBPracticeHWData) {
               homeworkCompletionCount += 1;
               const isAttempted = get(userBBPracticeHWData, 'blockBasedPractice.isSubmitAnswer') ? get(userBBPracticeHWData, 'answerLink') || get(userBBPracticeHWData, 'savedBlocks') : true;
@@ -458,9 +458,9 @@ const getReportObj = ({
       // 'Session Title': elem.topic && elem.topic.title,
       // 'Session Type': elem.topic && elem.topic.classType,
       courseCategory: elem.topic && elem.topic.courses && elem.topic.courses[0].category,
-      sessionStart: sessinStartDate ? new Date(sessinStartDate) : null,
+      sessionStart: sessionStartDate ? new Date(sessionStartDate) : null,
       sessionEnd: sessionEndDate ? new Date(sessionEndDate) : null,
-      sessionDuration: sessionDurationInHr,
+      sessionDuration: Math.round(sessionDurationInHr || 0),
       studentAttendance: (!!(student && student.status === 'present')),
       classroomStudentsCount: (get(elem, 'attendance', []) || []).length,
       classroomId: get(elem, 'batch.id'),
@@ -1134,7 +1134,7 @@ const runScriptForSchoolReport = async (root, params, context) => {
     const sessionStartDate = new Date(get(elem, 'sessionStartDate'));
     const sessionEndDate = new Date(get(elem, 'sessionEndDate'));
 
-    const sessionDurationInHr = (get(sessionDetails, 'sessionStartDate') && get(sessionDetails, 'sessionEndDate')) ? Math.abs(sessionStartDate.getTime() - sessionEndDate.getTime()) / 1000 : 0;
+    const sessionDurationInHr = (get(elem, 'sessionStartDate') && get(elem, 'sessionEndDate')) ? Math.abs(sessionStartDate.getTime() - sessionEndDate.getTime()) / 1000 : 0;
     let sessinBookingDate = '';
     if (elem.bookingDate) {
       sessinBookingDate = new Date(elem.bookingDate);
@@ -1257,7 +1257,7 @@ const runScriptForSchoolReport = async (root, params, context) => {
                 elem,
                 student,
                 sessionDetail: {
-                  sessinStartDate,
+                  sessionStartDate,
                   sessionDurationInHr,
                   sessionEndDate,
                 },
@@ -1303,7 +1303,7 @@ const runScriptForSchoolReport = async (root, params, context) => {
             allLos,
             elem,
             sessionDetail: {
-              sessinStartDate,
+              sessionStartDate,
               sessionDurationInHr,
               sessionEndDate,
             },
