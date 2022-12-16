@@ -11,7 +11,7 @@ import { log } from '../../log';
 
 const SequelizeOperation = Sequelize.Op;
 
-const sqlColumnsToUpdate = ['studentId', 'studentName', 'userRole', 'studentGrade', 'studentSection', 'classroomId', 'classroomTitle', 'classroomStudentsCount', 'schoolId', 'schoolName', 'topicId', 'sessionId', 'sessionTitle', 'sessionType', 'courseId', 'courseTitle', 'courseCategory', 'sessionStart', 'sessionEnd', 'sessionDuration', 'sessionStatus', 'studentAttendance', 'sessionCreationDate', 'sessionUpdationAt', 'teacherName', 'teacherId', 'sessionClassworkComponents', 'sessionHomeworkComponents', 'previousLogs', 'classworkVisited', 'classworkAttempted', 'homeworkVisited', 'homeworkAttempted', 'classworkScore', 'homeworkScore', 'proficiency', 'homeworkExists', 'videoComponentLog', 'pqComponentLog', 'classworkAssignmentLog', 'homeworkAssignmentLog', 'classworkPracticeLog', 'homeworkPracticeLog', 'homeworkQuizLog'];
+const sqlColumnsToUpdate = ['userId', 'userName', 'userRole', 'studentGrade', 'studentSection', 'classroomId', 'classroomTitle', 'schoolId', 'schoolName', 'topicId', 'sessionId', 'sessionTitle', 'sessionType', 'courseId', 'courseTitle', 'courseCategory', 'sessionStart', 'sessionEnd', 'sessionCreationDate', 'sessionUpdationAt', 'sessionDuration', 'sessionStatus', 'studentAttendance', 'classroomStudentsCount', 'teacherTaughtName', 'teacherTaughtId', 'sessionClassworkComponents', 'sessionHomeworkComponents', 'classworkVisited', 'classworkAttempted', 'homeworkVisited', 'homeworkAttempted', 'classworkScore', 'homeworkScore', 'proficiency', 'homeworkExists', 'videoComponentLog', 'pqComponentLog', 'classworkAssignmentLog', 'homeworkAssignmentLog', 'classworkPracticeLog', 'homeworkPracticeLog', 'homeworkQuizLog', 'previousLogs'];
 
 const getBatchedUserSessionDump = (userSessionDumps) => {
   const batchedUserSessionDump = {};
@@ -76,7 +76,7 @@ const getDatabaseControllers = () => {
 
   const userController = new QueryController('User', { bypass: true });
 
-  const userSessionReportController = new MasterController('UserSessionReport', {
+  const userSessionReportController = new MasterController('UserLevelSessionReport', {
     bypass: true,
   });
 
@@ -200,7 +200,7 @@ const getAllRequiredDataFromDatabase = async () => {
           [SequelizeOperation.and]: [
             { classroomId: sessionRowSplitArray[0] },
             { topicId: sessionRowSplitArray[1] },
-            { studentId: sessionRowSplitArray[2] },
+            { userId: sessionRowSplitArray[2] },
           ],
         };
       });
@@ -239,17 +239,17 @@ const getAllRequiredDataFromDatabase = async () => {
 };
 
 const getBaseDocumentAndCalculatedFields = ({
-  classroomId, studentId, topicId, userSessionReports, topicDoc, batchSessions, users,
+  classroomId, userId, topicId, userSessionReports, topicDoc, batchSessions, users,
 }) => {
   // Check if userSessionReport already exists
   const existingSessionReport = (userSessionReports || []).find((report) => (
     (report.topicId === topicId)
-      && (report.studentId === studentId)
+      && (report.userId === userId)
       && (report.classroomId === classroomId)
   ));
 
   // Get User Details
-  const userDetails = (users || []).find((user) => (user.id === studentId));
+  const userDetails = (users || []).find((user) => (user.id === userId));
 
   // Get Session Details
   const sessionDetails = (batchSessions || []).find(
@@ -277,11 +277,11 @@ const getBaseDocumentAndCalculatedFields = ({
   const baseDocument = {
     id: cuid(),
     exists: !!existingSessionReport,
-    studentId,
-    studentName: get(userDetails, 'name', ''),
-    userRole,
-    studentGrade: get(userDetails, 'studentProfile.grade', ''),
-    studentSection: get(userDetails, 'studentProfile.section', ''),
+    userId,
+    userName: get(userDetails, 'name') || get(existingSessionReport, 'userName', ''),
+    userRole: userRole || get(existingSessionReport, 'userRole', ''),
+    studentGrade: get(userDetails, 'studentProfile.grade') || get(existingSessionReport, 'studentGrade', ''),
+    studentSection: get(userDetails, 'studentProfile.section') || get(existingSessionReport, 'studentSection', ''),
     classroomId,
     classroomTitle: get(sessionDetails, 'batch.classroomTitle'),
     classroomStudentsCount: get(sessionDetails, 'attendance', []).length,
@@ -296,13 +296,13 @@ const getBaseDocumentAndCalculatedFields = ({
     courseCategory: get(topicDoc, 'courses[0].category') || get(sessionDetails, 'course.category'),
     sessionStart: get(sessionDetails, 'sessionStartDate'),
     sessionEnd: get(sessionDetails, 'sessionEndDate'),
-    sessionDuration,
+    sessionDuration: Math.round(sessionDuration || 0),
     sessionStatus: get(sessionDetails, 'sessionStatus'),
     studentAttendance,
     sessionCreationDate: get(sessionDetails, 'createdAt'),
     sessionUpdationAt: get(sessionDetails, 'updatedAt'),
-    teacherName: get(sessionDetails, 'batch.allottedMentor.name'),
-    teacherId: get(sessionDetails, 'batch.allottedMentor.id'),
+    teacherTaughtName: get(existingSessionReport, 'teacherTaughtName') || get(sessionDetails, 'batch.allottedMentor.name'),
+    teacherTaughtId: get(existingSessionReport, 'teacherTaughtId') || get(sessionDetails, 'batch.allottedMentor.id'),
     sessionClassworkComponents,
     sessionHomeworkComponents,
   };
@@ -310,7 +310,9 @@ const getBaseDocumentAndCalculatedFields = ({
   // If userSessionReport already exists, then use the id from it.
   if (existingSessionReport && get(existingSessionReport, 'id')) {
     baseDocument.id = get(existingSessionReport, 'id');
-    baseDocument.previousLogs = [...(get(existingSessionReport, 'previousLogs') || []), existingSessionReport].map(({ previousLogs: ignoringThis, ...requiredLogs }) => requiredLogs);
+    baseDocument.previousLogs = [...(get(existingSessionReport, 'previousLogs') || []), existingSessionReport].map(({
+      previousLogs, videoComponentLog, pqComponentLog, classworkAssignmentLog, homeworkAssignmentLog, classworkPracticeLog, homeworkPracticeLog, homeworkQuizLog, ...requiredLogs
+    }) => requiredLogs);
   }
 
   // Assigning Existing Report Values Or Default Values.
@@ -571,10 +573,10 @@ const batchAndUpdateUserSessionReports = async () => {
       Object.keys(batchedUserSessionDump).forEach((uniqueSessionRowKey) => {
         const sessionComponentsDump = batchedUserSessionDump[uniqueSessionRowKey];
 
-        let classroomId; let topicId; let studentId;
-        // Desctructuring uniqueSessionRowKey to get classroomId, topicId and studentId
+        let classroomId; let topicId; let userId;
+        // Desctructuring uniqueSessionRowKey to get classroomId, topicId and userId
         // eslint-disable-next-line prefer-const
-        [classroomId, topicId, studentId] = uniqueSessionRowKey.split('-');
+        [classroomId, topicId, userId] = uniqueSessionRowKey.split('-');
         const topicDoc = topics.find((topic) => get(topic, 'id') === topicId);
 
         if (!topicDoc) { return; }
@@ -585,7 +587,7 @@ const batchAndUpdateUserSessionReports = async () => {
         } = getBaseDocumentAndCalculatedFields({
           classroomId,
           topicId,
-          studentId,
+          userId,
           topicDoc,
           ...requiredDBData,
         });
