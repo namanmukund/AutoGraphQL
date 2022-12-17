@@ -503,7 +503,7 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
       componentCounts.totalClassworkCount += 1;
 
       const sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'pqComponentLog', []), componentName);
-      const filteredLoDumps = sortedComponentDumps.filter((doc) => (doc.componentId === get(componentRule, 'learningObjective.typeId')), componentName);
+      const filteredLoDumps = sortedComponentDumps.filter((doc) => (doc.componentId === get(componentRule, 'learningObjective.typeId')));
       if (filteredLoDumps && filteredLoDumps.length) {
         componentCounts.totalClassworkVisitedCount += 1;
 
@@ -614,7 +614,11 @@ const batchAndUpdateUserSessionReports = async () => {
         (sessionComponentRule || [])
           .forEach((componentRule) => {
             const { componentName } = componentRule;
-            const filteredComponentDumps = sessionComponentsDump.filter((componentDump) => get(componentDump, 'componentType') === componentName);
+            let filteredComponentDumps = sessionComponentsDump.filter((componentDump) => get(componentDump, 'componentType') === componentName);
+            if (componentName === topicComponents.learningObjective) {
+              const practiceDumps = sessionComponentsDump.filter((componentDump) => get(componentDump, 'componentType') === 'practiceQuestion');
+              filteredComponentDumps = [...(filteredComponentDumps || []), ...(practiceDumps || [])];
+            }
 
             const { userSessionProgress, componentCounts } = calculateFieldsBasedOnComponentType(
               componentName,
