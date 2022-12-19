@@ -627,6 +627,12 @@ const GSUITE_FILE_TYPES = ['drive', 'spreadsheet', 'presentation', 'document'];
 
 const PG_MODEL_SUFFIX = '.pg.model.js';
 
+const NEW_RELIC_CONFIG = {
+  appName: process.env.NEW_RELIC_APP_NAME,
+  logAPIUrl: process.env.NEW_RELIC_LOG_API_URL,
+  isEnabled: process.env.NEW_RELIC_ENABLED,
+};
+
 export {
   scalarTypes,
   defaultFields,
@@ -752,4 +758,5 @@ export {
   DATABASE_DIALECTS,
   PG_MODEL_SUFFIX,
   SECONDARY_APPLICATIONS,
+  NEW_RELIC_CONFIG,
 };
