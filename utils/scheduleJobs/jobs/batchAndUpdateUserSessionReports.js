@@ -290,7 +290,7 @@ const getBaseDocumentAndCalculatedFields = ({
     topicId,
     sessionId: get(sessionDetails, 'id'),
     sessionTitle: get(topicDoc, 'title') || get(sessionDetails, 'topic.title'),
-    sessionType: get(topicDoc, 'classType') || get(sessionDetails, 'topic.classType'),
+    sessionType: get(topicDoc, 'classType') || get(sessionDetails, 'topic.classType') || 'lab',
     courseId: get(topicDoc, 'courses[0].id') || get(sessionDetails, 'course.id'),
     courseTitle: get(topicDoc, 'courses[0].title') || get(sessionDetails, 'course.title'),
     courseCategory: get(topicDoc, 'courses[0].category') || get(sessionDetails, 'course.category'),
