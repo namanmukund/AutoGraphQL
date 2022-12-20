@@ -84,9 +84,10 @@ const log = (string, type = 'status', isSentry = false, isError = false) => {
     && NEW_RELIC_CONFIG.logAPIUrl
     && (env === 'production')
   ) {
+    const secondaryApplicationName = process.env.SECONDARY_APPLICATION_NAME || 'core';
     const logAPIBody = JSON.stringify([{
-      message: `${logType}: ${dstring}`,
-      secondaryApplication: process.env.SECONDARY_APPLICATION_NAME || 'NA',
+      message: `[${secondaryApplicationName}] ${logType}: ${dstring}`,
+      secondaryApplication: secondaryApplicationName,
       entity: {
         name: NEW_RELIC_CONFIG.appName,
       },
