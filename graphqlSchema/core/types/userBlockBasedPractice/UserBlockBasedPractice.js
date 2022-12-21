@@ -20,6 +20,7 @@ const UserBlockBasedPractice = `
     gsuiteFile: GsuiteFile
     gsuiteLastRevision: GsuiteFile
     isGsuiteFileVisited: Boolean
+    authors: [User] @relation(name: "UserBlockBasedAuthor", direction: "OneWay")
     attachments: [File] @relation(name: "UserBlockBasedPracticeAttachment", direction: "OneWay")
     topic: Topic! @relation(name: "TopicUserBlockBasedPractice", direction: "OneWay")
     course: Course @relation(name: "UserBlockBasedPracticeCourse", direction: "OneWay")
