@@ -46,10 +46,10 @@ class GSuiteController extends MasterController {
     }
 
     // ID_OF_THE_FOLDER is related to id of it's parent folder
-    createFileOrFolder = async (name, mimeType, ignoreDefaultVisibility, parentFolderIDs) => {
+    createFileOrFolder = async (name, mimeType, parentFolderIDs, ignoreDefaultVisibility = true) => {
       const driveController = this.getClientInstanceByType('drive');
       let requestBody = {};
-      if (parentFolderIDs) {
+      if (parentFolderIDs && parentFolderIDs.length) {
         requestBody = {
           mimeType: `application/vnd.google-apps.${mimeType}`,
           name,
@@ -86,7 +86,7 @@ class GSuiteController extends MasterController {
     duplicateFileOrFolder = async (ID_OF_THE_FILE, name, ignoreDefaultVisibility, parentFolderIDs) => {
       const driveController = this.getClientInstanceByType('drive');
       let requestBody = {};
-      if (parentFolderIDs) {
+      if (parentFolderIDs && parentFolderIDs.length) {
         requestBody = {
           name,
           parents: [parentFolderIDs],

@@ -6,8 +6,7 @@ const createGsuiteFileOrFolder = async (_root, params) => {
     name, mimeType, parentFolderIDs,
   } = params;
   const gSuiteController = new GSuiteController({ bypass: true });
-  const ignoreDefaultVisibility = true;
-  const creatingFileOrFolder = await gSuiteController.createFileOrFolder(name, mimeType, ignoreDefaultVisibility, parentFolderIDs);
+  const creatingFileOrFolder = await gSuiteController.createFileOrFolder(name, mimeType, parentFolderIDs);
   if (permission) {
     if (!updatingPermissionResponse) throw new Error('Not able to update the permission');
   }
@@ -88,11 +87,9 @@ const findOrCreateParentFolder = async (
   if (isFolderAlreadyExists) {
     return isFolderAlreadyExists.id;
   }
-  const ignoreDefaultVisibility = true;
   const creatingFileOrFolder = await gSuiteController.createFileOrFolder(
     fileOrFolderName,
     'folder',
-    ignoreDefaultVisibility,
     parentFolderId,
   );
   if (creatingFileOrFolder) return creatingFileOrFolder.data.id;
@@ -139,7 +136,6 @@ const createGsuiteLastRevisionFile = async (_root, params) => {
     fileCreationResponse = await gSuiteController.createFileOrFolder(
       studentFileCreationName,
       mimeType,
-      ignoreDefaultVisibility,
       gsuiteFileTypeFolderId,
     );
   }
