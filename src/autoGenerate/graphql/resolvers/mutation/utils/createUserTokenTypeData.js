@@ -24,8 +24,11 @@ const saveUserTokenInDatabase = (user, token) => {
       },
     };
     // Checking if studentProfile is present
-    if (get(user, 'studentProfile')) {
-      userTokenObject.studentProfile = { type: 'StudentProfile', typeId: get(user, 'studentProfile.typeId') };
+    if (get(user, 'studentProfile.id') || get(user, 'studentProfile.typeId')) {
+      userTokenObject.studentProfile = {
+        type: 'StudentProfile',
+        typeId: get(user, 'studentProfile.typeId') || get(user, 'studentProfile.id'),
+      };
     }
 
     const userController = new MutationController('MenteeToken', { bypass: true });
