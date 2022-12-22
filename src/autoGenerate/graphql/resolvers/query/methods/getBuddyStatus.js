@@ -319,7 +319,7 @@ const getBuddyStatus = async (
             },
           };
           isUpdated = true;
-          if (logoutAllStudents) {
+          if (shouldRevertLogoutStatus) {
             Object.assign(input.fields, { logoutAllStudents: false });
           }
           updateLoginsPromiseArray.push(updateBatchSession(input));

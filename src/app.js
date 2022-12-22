@@ -2,6 +2,7 @@ import { get } from 'lodash';
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
+import createApolloNewRelicPlugin from '@newrelic/apollo-server-plugin';
 import { ApolloServer } from 'apollo-server-express';
 import { BaseRedisCache } from 'apollo-server-cache-redis';
 import { WebSocketServer } from 'ws';
@@ -110,7 +111,15 @@ const socketServerPlugin = {
     };
   },
 };
-  // using apollo-server
+
+const apolloNewRelicPlugin = createApolloNewRelicPlugin({
+  captureScalars: true,
+  captureIntrospectionQueries: false,
+  captureServiceDefinitionQueries: true,
+  captureHealthCheckQueries: true,
+});
+
+// using apollo-server
 const server = new ApolloServer({
   schema,
   introspection: process.env.ENABLE_GRAPHQL_INTROSPECTION,
@@ -120,7 +129,7 @@ const server = new ApolloServer({
       'editor.theme': 'light',
     },
   },
-  plugins: [socketServerPlugin],
+  plugins: [socketServerPlugin, apolloNewRelicPlugin],
   debug: true,
   uploads: false,
   cache: new BaseRedisCache({

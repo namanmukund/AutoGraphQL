@@ -21,7 +21,7 @@
   },
   "betterScripts": {
     "start:cloudBuild": {
-      "command": "node ./build/mainCloud.js"
+      "command": "node -r newrelic ./build/mainCloud.js"
     },
     "test:core": {
       "command": "nyc --clean=false --reporter=text --reporter=json --reporter=text-summary --report-dir=./coverage-core mocha  ./test --timeout 4000 --recursive --compilers js:babel-core/register --require @babel/polyfill",
@@ -70,11 +70,13 @@
   "dependencies": {
     "@babel/polyfill": "^7.8.7",
     "@babel/runtime-corejs2": "^7.9.2",
+    "@newrelic/apollo-server-plugin": "^2.1.0",
     "@pdf-lib/fontkit": "^1.1.1",
     "@sendgrid/mail": "^7.2.0",
     "apollo-errors": "^1.9.0",
     "apollo-fetch": "^0.7.0",
     "apollo-server-cache-redis": "^3.3.1",
+    "apollo-server-core": "^3.11.1",
     "apollo-server-express": "^2.11.0",
     "apollo-server-plugin-response-cache": "^3.5.1",
     "aws-cloudfront-sign": "^2.2.0",
@@ -113,6 +115,7 @@
     "mongodb": "^3.5.5",
     "mongodb-aggregation-builder": "^1.0.9",
     "mongoose": "^5.9.7",
+    "newrelic": "^9.7.4",
     "node-fetch": "^2.6.1",
     "node-schedule": "^1.3.2",
     "object-hash": "^2.2.0",
@@ -176,7 +179,7 @@
     "webpack-node-externals": "^1.7.2"
   },
   "engines": {
-    "node": "13.12.0",
+    "node": "14.x",
     "npm": "7.7.6"
   }
 }

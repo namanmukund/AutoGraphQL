@@ -1,5 +1,7 @@
+import fetch from 'node-fetch';
 import PrettyError from 'pretty-error';
 import Raven from 'raven';
+import { NEW_RELIC_CONFIG } from '../constants';
 import isSentryAppAndEnv from './isSentryAppAndEnv';
 
 const application = process.env.APPLICATION || 'core';
@@ -76,6 +78,26 @@ const log = (string, type = 'status', isSentry = false, isError = false) => {
     } else {
       Raven.captureMessage(`Message: ${formattedString}`);
     }
+  }
+  if (
+    NEW_RELIC_CONFIG.isEnabled
+    && NEW_RELIC_CONFIG.logAPIUrl
+    && (env === 'production')
+  ) {
+    const secondaryApplicationName = process.env.SECONDARY_APPLICATION_NAME || 'core';
+    const logAPIBody = JSON.stringify([{
+      message: `[${secondaryApplicationName}] ${logType}: ${dstring}`,
+      secondaryApplication: secondaryApplicationName,
+      entity: {
+        name: NEW_RELIC_CONFIG.appName,
+      },
+      timestamp: new Date().toISOString(),
+    }]);
+    fetch(NEW_RELIC_CONFIG.logAPIUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: logAPIBody,
+    });
   }
 };
 

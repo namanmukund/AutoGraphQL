@@ -1,23 +1,20 @@
 import { DataTypes } from 'sequelize';
 import cuid from 'cuid';
-import db from '../../db';
+import db from '../../../db';
 
 const { sequelize } = db;
 
-const UserSessionDump = sequelize.define(
-  'UserSessionReport',
+const UserLevelSessionReport = sequelize.define(
+  'UserLevelSessionReport',
   {
     id: {
       type: DataTypes.STRING,
       defaultValue: cuid(),
       primaryKey: true,
     },
-    studentId: { type: DataTypes.STRING, allowNull: false },
-    studentName: { type: DataTypes.STRING, allowNull: false },
-    teacherName: { type: DataTypes.STRING },
-    teacherId: { type: DataTypes.STRING },
+    userId: { type: DataTypes.STRING, allowNull: false },
+    userName: { type: DataTypes.STRING, allowNull: false },
     userRole: { type: DataTypes.STRING, allowNull: false },
-    studentEmail: { type: DataTypes.STRING, allowNull: true },
     studentGrade: { type: DataTypes.STRING, allowNull: true },
     studentSection: { type: DataTypes.STRING, allowNull: true },
     classroomId: { type: DataTypes.STRING, allowNull: true },
@@ -39,6 +36,10 @@ const UserSessionDump = sequelize.define(
     sessionStatus: { type: DataTypes.STRING, allowNull: true },
     studentAttendance: { type: DataTypes.BOOLEAN },
     classroomStudentsCount: { type: DataTypes.INTEGER },
+    teacherTaughtName: { type: DataTypes.STRING },
+    teacherTaughtId: { type: DataTypes.STRING },
+    sessionClassworkComponents: { type: DataTypes.ARRAY(DataTypes.JSONB) },
+    sessionHomeworkComponents: { type: DataTypes.ARRAY(DataTypes.JSONB) },
     classworkVisited: { type: DataTypes.INTEGER, allowNull: false },
     classworkAttempted: { type: DataTypes.INTEGER, allowNull: false },
     homeworkVisited: { type: DataTypes.INTEGER, allowNull: false },
@@ -46,25 +47,23 @@ const UserSessionDump = sequelize.define(
     classworkScore: { type: DataTypes.INTEGER, allowNull: false },
     homeworkScore: { type: DataTypes.INTEGER, allowNull: false },
     proficiency: { type: DataTypes.INTEGER, allowNull: false },
-    homeworkExists: { type: DataTypes.BOOLEAN, allowNull: false },
+    homeworkExists: { type: DataTypes.BOOLEAN },
     videoComponentLog: { type: DataTypes.ARRAY(DataTypes.JSONB) },
     pqComponentLog: { type: DataTypes.ARRAY(DataTypes.JSONB) },
-    classworkAssigmentLog: { type: DataTypes.ARRAY(DataTypes.JSONB) },
+    classworkAssignmentLog: { type: DataTypes.ARRAY(DataTypes.JSONB) },
     homeworkAssignmentLog: { type: DataTypes.ARRAY(DataTypes.JSONB) },
     classworkPracticeLog: { type: DataTypes.ARRAY(DataTypes.JSONB) },
     homeworkPracticeLog: { type: DataTypes.ARRAY(DataTypes.JSONB) },
     classworkProjectLog: { type: DataTypes.ARRAY(DataTypes.JSONB) },
     homeworkQuizLog: { type: DataTypes.ARRAY(DataTypes.JSONB) },
     previousLogs: { type: DataTypes.ARRAY(DataTypes.JSONB) },
-    sessionClassworkComponents: { type: DataTypes.ARRAY(DataTypes.JSONB) },
-    sessionHomeworkComponents: { type: DataTypes.ARRAY(DataTypes.JSONB) },
   },
   {
     sequelize,
     isPgModel: true,
-    tableName: 'userSessionReport',
-    modelName: 'UserSessionReport',
+    tableName: 'userLevelSessionReport',
+    modelName: 'UserLevelSessionReport',
   },
 );
 
-export default UserSessionDump;
+export default UserLevelSessionReport;

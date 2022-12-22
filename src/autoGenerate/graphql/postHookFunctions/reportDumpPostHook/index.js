@@ -19,6 +19,8 @@ const documentTypes = {
   LEARNING_OBJECTIVE: 'LearningObjective',
   ASSIGNMENT_QUESTION: 'AssignmentQuestion',
   BLOCK_BASED_PROJECT: 'BlockBasedProject',
+  USER: 'User',
+  STUDENT_PROFILE: 'StudentProfile',
 };
 
 const getTypeQueryController = (
@@ -87,11 +89,27 @@ const reportDumpPostHook = async (input, mutationOrQueryName, context) => {
   if (Object.keys(reportsInputObj).length) {
     const activeClassroomId = getDataFromContext(context, 'activeClassroom');
     const activeSessionId = getDataFromContext(context, 'activeSessionId');
+
+    if (!reportsInputObj.classroomId) {
+      reportsInputObj.classroomId = activeClassroomId;
+      if (!reportsInputObj.classroomId && reportsInputObj.userId) {
+        const studentProfileController = getTypeQueryController(documentTypes.STUDENT_PROFILE);
+        const studentProfileRes = await studentProfileController.fetchMultiple({ 'user.typeId': reportsInputObj.userId });
+        const studentProfile = studentProfileRes && studentProfileRes[0];
+        if (studentProfile && !get(studentProfile, 'mentor.typeId')) {
+          if (get(studentProfileRes[0], 'batch.typeId')) {
+            reportsInputObj.classroomId = get(studentProfileRes[0], 'batch.typeId');
+          } else if (get(studentProfileRes[0], 'batches', []).length) {
+            reportsInputObj.classroomId = get(studentProfileRes[0], 'batches[0].typeId');
+          }
+        }
+      }
+    }
     reportsInputObj = {
+      recordRawDump: [],
       ...reportsInputObj,
       id: cuid(),
       sessionId: activeSessionId || '',
-      classroomId: activeClassroomId || '',
       mongoDocCreatedAt: get(input, 'createdAt'),
       mongoDocUpdatedAt: get(input, 'updatedAt'),
     };
