@@ -10,6 +10,7 @@ import scheduleBatchSessionOtpGenerator from './scheduleJobs/secheduleBatchSessi
 // import scheduleUpdateLeadSource from './scheduleJobs/scheduleUpdateLeadSource';
 import scheduleUpdateTheoryClassStatus from './scheduleJobs/scheduleUpdateTheoryClassStatus';
 import scheduleB2cBatchSessionReport from './scheduleJobs/scheduleB2cBatchSessionReport';
+import deleteUserBlacklistedTokens from './scheduleJobs/deleteUserBlacklistedTokens';
 import batchAndUpdateUserSessionReports from './scheduleJobs/jobs/batchAndUpdateUserSessionReports';
 import { TAT } from '../constants';
 
@@ -150,6 +151,17 @@ const createScheduler = (schedulerName) => {
         // eslint-disable-next-line no-console
         console.log('scheduler started for: ', schedulerName);
         await batchAndUpdateUserSessionReports();
+      });
+      break;
+    case 'autoDeleteBlacklistedTokens':
+      rule.tz = 'Asia/Kolkata';
+      rule.minute = 0;
+      rule.hour = 10;
+      rule.dayOfWeek = 0;
+      schedule.scheduleJob(rule, async () => {
+        // eslint-disable-next-line no-console
+        console.log('scheduler started for: ', schedulerName);
+        await deleteUserBlacklistedTokens();
       });
       break;
     default:
