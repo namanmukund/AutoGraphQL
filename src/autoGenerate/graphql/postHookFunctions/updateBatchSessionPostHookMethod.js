@@ -2,6 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 import { get } from 'lodash';
 import moment from 'moment';
+import cuid from 'cuid';
 import {
   batchType,
   GLOBAL_COURSE_TITLE,
@@ -35,6 +36,7 @@ import getSortedTopics from '../../../../utils/getSortedTopicsFromCoursePackageO
 import { CacheController } from '../controllers';
 import addMinutesToDate from '../../../../utils/addMinutesToDate';
 import { log } from '../../../../utils';
+import MasterController from '../controllers/MasterController';
 // import extractBatchSessionAndSendB2B from './utils/extractBatchSessionAndSendB2B';
 
 // query to get chapters and topics belomngin to a course
@@ -241,6 +243,28 @@ const batchSessionQuery = (id) => `{
   }
 }`;
 
+const blacklistUserTokens = async (students) => {
+  const menteeTokenController = new MasterController('MenteeToken', { bypass: true });
+  const blacklistedTokenController = new MasterController('BlacklistedToken', { bypass: true });
+  if (menteeTokenController.Model && blacklistedTokenController.Model) {
+    // fetching all the tokens of the students who are in the batch.
+    const menteeTokens = await menteeTokenController.Model.find({ 'studentProfile.typeId': { $in: students } });
+    if (menteeTokens && menteeTokens.length) {
+      const blacklistedTokensArray = (menteeTokens || []).map((menteeToken) => ({
+        id: cuid(),
+        type: 'userToken',
+        encodedToken: menteeToken.token,
+      }));
+
+      // adding mentee tokens to blacklisted tokens
+      blacklistedTokenController.Model.create(blacklistedTokensArray);
+
+      // deleting all the tokens of the students who are in the batch.
+      const _res = await menteeTokenController.Model.deleteMany({ 'studentProfile.typeId': { $in: students } });
+      log(`Deleted Tokens: ${(_res && _res.deletedCount) || 0}`);
+    }
+  }
+};
 // mutation to update batch sessions
 /*
   Post hook of addBatchSession
@@ -610,6 +634,8 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
   if (get(params, 'input.logoutAllStudents') !== undefined && get(params, 'input.logoutAllStudents') === true) {
     const scheduleDate = addMinutesToDate(new Date(), 2);
     log('Updating Logout students', scheduleDate);
+    const studentProfileIds = get(input, 'attendance', []).map((attendance) => get(attendance, 'student.typeId'));
+    blacklistUserTokens(studentProfileIds);
     addToSchedule('updateLogoutAllStudents', scheduleDate, { batchSessionId, context });
   }
 
