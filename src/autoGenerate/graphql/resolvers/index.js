@@ -117,7 +117,7 @@ import advanceBatchCurrentSession from './mutation/methods/advanceBatchCurrentSe
 import getBatchDetails from './query/methods/getBatchDetails';
 import getBatchStudent from './query/methods/getBatchStudent';
 import getSessionComponentMeta from './query/methods/getSessionComponentMeta';
-import getClassroomReport from './query/methods/getClassroomReport';
+// import getClassroomReport from './query/methods/getClassroomReport';
 import getPracticeQuestionReport from './query/methods/getPracticeQuestionReport';
 import getBuddyStatus from './query/methods/getBuddyStatus';
 import generateBatchSessionOtp from './mutation/methods/generateBatchSessionOtp';
@@ -722,7 +722,7 @@ resolvers.Query.getBatchStudent = getBatchStudent;
 // Resolver to get classroom session Details
 resolvers.Query.getSessionComponentMeta = getSessionComponentMeta;
 // Resolver to get classroom homework report
-resolvers.Query.getClassroomReport = getClassroomReport;
+resolvers.Query.getClassroomReport = () => {};
 // Resolver to get classroom homework report
 resolvers.Query.getPracticeQuestionReport = getPracticeQuestionReport;
 // Resolver to check for the loggedIn status of buddies in buddy login flow
