@@ -4,11 +4,6 @@ import getInfoFromParams from './utils/getInfoFromParams';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { MENTEE } from '../../../../constants/roles';
-// import getUserActiveClassroom, {
-//   getStudentProfile,
-// } from '../../../../utils/getUserActiveClassroom';
-// import { authenticateUser } from '../../../../utils';
-// import { GSuiteController } from '../controllers';
 
 const filterAndDeleteIfDupicate = (resultArray, context) => {
   const uniqueBlockBasedPractice = [];
@@ -47,8 +42,6 @@ const addUserBlockBasedPracticeMutation = (
   topicId,
   courseId,
   blockBasedPracticeId,
-  // gsuiteResponse,
-  // gsuiteResponseString,
 ) => `
   mutation{
     addUserBlockBasedPractice(
@@ -89,87 +82,6 @@ const addUserBlockBasedPracticeMutation = (
     }
   }
 `;
-
-// const findOrCreateParentFolder = async (
-//   fileOrFolderName,
-//   parentFolderId,
-// ) => {
-//   const gSuiteController = new GSuiteController({ bypass: true });
-//   const gsuiteData = await gSuiteController.getDriveFiles(parentFolderId);
-//   if (!gsuiteData) throw new Error('Not able to fetch the data');
-//   const isFolderAlreadyExists = gsuiteData.data.files.find(
-//     (search) => search.name === fileOrFolderName,
-//   );
-//   if (isFolderAlreadyExists) {
-//     return isFolderAlreadyExists.id;
-//   }
-//   const creatingFileOrFolder = await gSuiteController.createFileOrFolder(
-//     fileOrFolderName,
-//     'folder',
-//     parentFolderId,
-//   );
-//   if (creatingFileOrFolder) return creatingFileOrFolder.data.id;
-//   throw new Error('Not able to create file or folder');
-// };
-
-// const createGsuiteFile = async (
-//   practiceResult,
-//   studentFileCreationName,
-//   schoolName,
-//   classroomTitle,
-// ) => {
-//   const gSuiteController = new GSuiteController({ bypass: true });
-//   let fileCreationResponse = {};
-//   let gsuiteFileType = '';
-//   if (practiceResult.gsuiteTempleteURL) {
-//     gsuiteFileType = practiceResult.gsuiteTempleteURL.split('/')[3];
-//   } else {
-//     gsuiteFileType = practiceResult.gsuiteFileType;
-//   }
-//   const schoolFolderId = await findOrCreateParentFolder(
-//     schoolName,
-//     GSUITE_BASE_FOLDER_ID,
-//   );
-//   const clasroomsFolderId = await findOrCreateParentFolder(
-//     `${classroomTitle}`,
-//     schoolFolderId,
-//   );
-//   const gsuiteFileTypeFolderId = await findOrCreateParentFolder(
-//     gsuiteFileType,
-//     clasroomsFolderId,
-//   );
-
-//   if (practiceResult.gsuiteTempleteURL && gsuiteFileTypeFolderId) {
-//     const gsuiteId = practiceResult.gsuiteTempleteURL.split('/')[5];
-//     fileCreationResponse = await gSuiteController.duplicateFileOrFolder(
-//       gsuiteId,
-//       studentFileCreationName,
-//       gsuiteFileTypeFolderId,
-//     );
-//   } else if (gsuiteFileTypeFolderId) {
-//     // Creating File
-//     fileCreationResponse = await gSuiteController.createFileOrFolder(
-//       studentFileCreationName,
-//       practiceResult.gsuiteFileType,
-//       gsuiteFileTypeFolderId,
-//     );
-//   }
-//   await gSuiteController.updatePermission(fileCreationResponse.data.id, { role: 'writer', type: 'anyone' });
-//   return fileCreationResponse.data;
-// };
-
-// const getIdArrForQuery = (idArr) => {
-//   let arr = '';
-//   if (idArr) {
-//     idArr.forEach((id) => {
-//       arr += `"${id}",`;
-//     });
-//     if (arr.length && arr[arr.length - 1] === ',') {
-//       arr.substring(0, arr.length - 1);
-//     }
-//   }
-//   return arr;
-// };
 
 /*
 If userBlockBasedPractice document does not exist for provided combination of user id, topic id & blockBasedProjectId.
@@ -232,81 +144,9 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
     return input;
   }
 
-  // const blockBasedPracticesRes = await callLocalGraphqlApi(
-  //   `
-  //     {blockBasedProjects(filter:{
-  //       id_in: [${getIdArrForQuery(blockBasedPracticeNotCreated)}]
-  //     }){
-  //       gsuiteFileType
-  //       gsuiteTempleteURL
-  //       layout
-  //       id
-  //       title
-  //     }
-  //   }
-  //   `,
-  //   context,
-  // );
-
-  // Get username classroom school grade
-  // const activeClassroom = await getUserActiveClassroom(context, { courseId });
-  // const getStudentProfileData = await getStudentProfile(context);
-  // const classroomTitle = get(activeClassroom, 'classroomTitle', '');
-  // const schoolName = get(activeClassroom, 'school.name', '');
-  // const userData = authenticateUser(context);
-  // const userName = get(userData, 'name', '');
-  // const grade = get(getStudentProfileData, 'grade', '');
-  // const section = get(getStudentProfileData, 'section', '');
-  // let gradeSection;
-  // if (grade && section) gradeSection = `${grade} ${section}`;
-
   /* eslint-disable no-restricted-syntax */
   /* eslint-disable no-await-in-loop */
   for (const practiceId of blockBasedPracticeNotCreated) {
-    // Filter blockBasedProject
-    // const blockBasedProjects = get(blockBasedPracticesRes, 'data.blockBasedProjects', {});
-    // const practiceResult = blockBasedProjects.find(
-    //   (practiceResultData) => practiceResultData.id === practiceId,
-    // );
-    // let studentFileCreationName = '';
-    // if (userName && gradeSection && practiceResult && practiceResult.title) studentFileCreationName = `${practiceResult.title}-${userName}-${gradeSection}`;
-    // let fileCreationResponse = {};
-    // if (practiceResult.layout === 'gsuite' && studentFileCreationName) {
-    //   fileCreationResponse = await createGsuiteFile(
-    //     practiceResult,
-    //     studentFileCreationName,
-    //     schoolName,
-    //     classroomTitle,
-    //   );
-    // }
-
-    // let gsuiteResponseString = '';
-    // if (fileCreationResponse) {
-    //   const responseToGsuiteMappings = {
-    //     fileId: 'id',
-    //     name: 'name',
-    //     url: 'webViewLink',
-    //     mimeType: 'mimeType',
-    //     parentFolderIDs: 'parents',
-    //     iconLink: 'iconLink',
-    //     createdTime: 'createdTime',
-    //     thumbnailUrl: 'thumbnailUrl',
-    //   };
-    //   gsuiteResponseString = 'gsuiteFile: {';
-    //   Object.keys(responseToGsuiteMappings).forEach((key) => {
-    //     if (key === 'thumbnailUrl') {
-    //       if (fileCreationResponse.hasThumbnail && fileCreationResponse.thumbnailUrl) gsuiteResponseString += `${key}: "https://drive.google.com/thumbnail?sz=w640&id=${fileCreationResponse[`${responseToGsuiteMappings[key]}`]}" `;
-    //       return;
-    //     }
-    //     if (key === 'parents') {
-    //       gsuiteResponseString += `${key}: ["${fileCreationResponse[`${responseToGsuiteMappings[key]}`]}"] `;
-    //       return;
-    //     }
-    //     gsuiteResponseString += `${key}: "${fileCreationResponse[`${responseToGsuiteMappings[key]}`]}" `;
-    //   });
-    //   gsuiteResponseString += '}';
-    // }
-    // const gsuiteSuitMeta = fileCreationResponse;
     /*
       adding UserBlockBasedPractice document
     */
@@ -316,8 +156,6 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
         topicId,
         courseId,
         practiceId,
-        // gsuiteSuitMeta,
-        // gsuiteResponseString,
       ),
       context,
     );
