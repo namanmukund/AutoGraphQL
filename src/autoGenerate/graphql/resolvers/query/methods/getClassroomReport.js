@@ -542,235 +542,235 @@ const classroomReport = async (_root, params, context) => {
     blockBasedPractice: new Map(),
   };
 
-  const userIds = (students || []).map((student) => get(student, 'user.id'));
-  let mentorMenteeSessionsRes = [];
-  let usersAssignmentRes = [];
-  let usersQuizReportRes = [];
-  let usersBlockbasedPracticeRes = [];
-  if (userIds && userIds.length) {
-    mentorMenteeSessionsRes = await mentorMenteeSessionModel.aggregate(
-      getMentorMenteeSessionAggregation({
-        userIds,
-        topicId,
-      }),
-    );
-    if (isHomework) {
-      usersQuizReportRes = await userQuizReportModel.aggregate(
-        getUserQuizReportAggregation({
-          userIds,
-          topicId,
-        }),
-      );
-    }
-    let homeworkObj = { 'assignmentQuestion.isHomework': true };
-    if (!isHomework) {
-      homeworkObj = { 'assignmentQuestion.isHomework': { $not: { $eq: true } } };
-    }
-    usersAssignmentRes = await userAssignmentModel.aggregate(
-      getUserAssignmentAggregation({
-        userIds,
-        topicId,
-        homeworkObj,
-      }),
-    );
-    usersBlockbasedPracticeRes = await userBlockBasedPracticeModel.aggregate(
-      getUserBlockBasedPracticeAggregation({
-        userIds,
-        topicId,
-        isHomework,
-      }),
-    );
-  }
-  for (const student of students) {
-    const userId = get(student, 'user.id');
-    const mentorMenteeSessionRes = (mentorMenteeSessionsRes || []).filter((mms) => get(mms, 'menteeSession.user.typeId') === userId);
-    const userQuizReportRes = (usersQuizReportRes || []).filter((quizReport) => get(quizReport, '_id') === userId);
-    const userAssignmentRes = (usersAssignmentRes || []).filter((userAssignment) => get(userAssignment, 'user.typeId') === userId);
-    const userBlockbasedPracticeRes = (usersBlockbasedPracticeRes || []).filter((userPractice) => get(userPractice, 'user.typeId') === userId);
-    let filteredUserBlockBasedPractice = [];
-    userBlockbasedPracticeRes.forEach((practice) => {
-      const findUserBBPractice = filteredUserBlockBasedPractice.find((bbPractice) => get(bbPractice, 'blockBasedPractice.id') === get(practice, 'blockBasedPractice.id'));
-      if (get(findUserBBPractice, 'id')) {
-        const hasUserSubmittedPracticeLink = get(practice, 'blockBasedPractice.isSubmitAnswer', false) ? (get(practice, 'answerLink') || get(practice, 'savedBlocks') || get(practice, 'attachments', []).length) : true;
-        const hasUserSubmittedPracticeLinkInPrevDoc = get(findUserBBPractice, 'blockBasedPractice.isSubmitAnswer', false) ? (get(findUserBBPractice, 'answerLink') || get(findUserBBPractice, 'savedBlocks') || get(findUserBBPractice, 'attachments', []).length) : true;
-        if (!hasUserSubmittedPracticeLinkInPrevDoc && hasUserSubmittedPracticeLink) {
-          filteredUserBlockBasedPractice = filteredUserBlockBasedPractice.filter((bbPractice) => get(bbPractice, 'blockBasedPractice.id') === get(practice, 'blockBasedPractice.id'));
-          filteredUserBlockBasedPractice.push({ ...practice });
-        }
-      } else filteredUserBlockBasedPractice.push({ ...practice });
-    });
-    let isMmsPresent = false;
+  // const userIds = (students || []).map((student) => get(student, 'user.id'));
+  // let mentorMenteeSessionsRes = [];
+  // let usersAssignmentRes = [];
+  // let usersQuizReportRes = [];
+  // let usersBlockbasedPracticeRes = [];
+  // if (userIds && userIds.length) {
+  //   mentorMenteeSessionsRes = await mentorMenteeSessionModel.aggregate(
+  //     getMentorMenteeSessionAggregation({
+  //       userIds,
+  //       topicId,
+  //     }),
+  //   );
+  //   if (isHomework) {
+  //     usersQuizReportRes = await userQuizReportModel.aggregate(
+  //       getUserQuizReportAggregation({
+  //         userIds,
+  //         topicId,
+  //       }),
+  //     );
+  //   }
+  //   let homeworkObj = { 'assignmentQuestion.isHomework': true };
+  //   if (!isHomework) {
+  //     homeworkObj = { 'assignmentQuestion.isHomework': { $not: { $eq: true } } };
+  //   }
+  //   usersAssignmentRes = await userAssignmentModel.aggregate(
+  //     getUserAssignmentAggregation({
+  //       userIds,
+  //       topicId,
+  //       homeworkObj,
+  //     }),
+  //   );
+  //   usersBlockbasedPracticeRes = await userBlockBasedPracticeModel.aggregate(
+  //     getUserBlockBasedPracticeAggregation({
+  //       userIds,
+  //       topicId,
+  //       isHomework,
+  //     }),
+  //   );
+  // }
+  // for (const student of students) {
+  //   const userId = get(student, 'user.id');
+  //   const mentorMenteeSessionRes = (mentorMenteeSessionsRes || []).filter((mms) => get(mms, 'menteeSession.user.typeId') === userId);
+  //   const userQuizReportRes = (usersQuizReportRes || []).filter((quizReport) => get(quizReport, '_id') === userId);
+  //   const userAssignmentRes = (usersAssignmentRes || []).filter((userAssignment) => get(userAssignment, 'user.typeId') === userId);
+  //   const userBlockbasedPracticeRes = (usersBlockbasedPracticeRes || []).filter((userPractice) => get(userPractice, 'user.typeId') === userId);
+  //   let filteredUserBlockBasedPractice = [];
+  //   userBlockbasedPracticeRes.forEach((practice) => {
+  //     const findUserBBPractice = filteredUserBlockBasedPractice.find((bbPractice) => get(bbPractice, 'blockBasedPractice.id') === get(practice, 'blockBasedPractice.id'));
+  //     if (get(findUserBBPractice, 'id')) {
+  //       const hasUserSubmittedPracticeLink = get(practice, 'blockBasedPractice.isSubmitAnswer', false) ? (get(practice, 'answerLink') || get(practice, 'savedBlocks') || get(practice, 'attachments', []).length) : true;
+  //       const hasUserSubmittedPracticeLinkInPrevDoc = get(findUserBBPractice, 'blockBasedPractice.isSubmitAnswer', false) ? (get(findUserBBPractice, 'answerLink') || get(findUserBBPractice, 'savedBlocks') || get(findUserBBPractice, 'attachments', []).length) : true;
+  //       if (!hasUserSubmittedPracticeLinkInPrevDoc && hasUserSubmittedPracticeLink) {
+  //         filteredUserBlockBasedPractice = filteredUserBlockBasedPractice.filter((bbPractice) => get(bbPractice, 'blockBasedPractice.id') === get(practice, 'blockBasedPractice.id'));
+  //         filteredUserBlockBasedPractice.push({ ...practice });
+  //       }
+  //     } else filteredUserBlockBasedPractice.push({ ...practice });
+  //   });
+  //   let isMmsPresent = false;
 
-    if (mentorMenteeSessionRes.length) {
-      isMmsPresent = true;
-      const mms = get(mentorMenteeSessionRes, '[0]');
-      if (get(mms, 'isSubmittedForReview')) {
-        obj.submittedCount += 1;
-      } else if (get(mms, 'isQuizSubmitted')
-        || get(mms, 'isAssignmentSubmitted')
-        || get(mms, 'isPracticeSubmitted')) {
-        obj.attemptedCount += 1;
-      } else {
-        obj.unattemptedCount += 1;
-      }
-      if (get(mms, 'isQuizSubmitted')) {
-        obj.quizSubmittedCount += 1;
-      } else {
-        obj.quizUnattemptedCount += 1;
-      }
-    } else {
-      // check if mms is absent
-      obj.unattemptedCount += 1;
-    }
+  //   if (mentorMenteeSessionRes.length) {
+  //     isMmsPresent = true;
+  //     const mms = get(mentorMenteeSessionRes, '[0]');
+  //     if (get(mms, 'isSubmittedForReview')) {
+  //       obj.submittedCount += 1;
+  //     } else if (get(mms, 'isQuizSubmitted')
+  //       || get(mms, 'isAssignmentSubmitted')
+  //       || get(mms, 'isPracticeSubmitted')) {
+  //       obj.attemptedCount += 1;
+  //     } else {
+  //       obj.unattemptedCount += 1;
+  //     }
+  //     if (get(mms, 'isQuizSubmitted')) {
+  //       obj.quizSubmittedCount += 1;
+  //     } else {
+  //       obj.quizUnattemptedCount += 1;
+  //     }
+  //   } else {
+  //     // check if mms is absent
+  //     obj.unattemptedCount += 1;
+  //   }
 
-    if (userQuizReportRes.length && get(userQuizReportRes, '[0].latest')) {
-      const userQuizReport = get(userQuizReportRes, '[0].latest');
-      obj.quizTotalQuestions = get(userQuizReport, 'quizReport.totalQuestionCount');
-      obj.quizCorrectSum += get(userQuizReport, 'quizReport.correctQuestionCount');
-      obj.quizIncorrectSum += get(userQuizReport, 'quizReport.inCorrectQuestionCount');
-      obj.quizSubmissions.set(userId, {
-        userId,
-        quizScore: get(userQuizReport, 'quizReport.correctQuestionCount'),
-      });
-      const quizAnswers = get(userQuizReport, 'quizAnswers', []);
-      for (const quizAnswer of quizAnswers) {
-        if (obj.quizQuestions.has(get(quizAnswer, 'question.typeId'))) {
-          if (!get(quizAnswer, 'isAttempted')) {
-            obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
-              ...obj.quizQuestions.get(get(quizAnswer, 'question.typeId')),
-              unattempted: get(obj.quizQuestions.get(get(quizAnswer, 'question.typeId')), 'unattempted', 0) + 1,
-            });
-          } else if (get(quizAnswer, 'isCorrect')) {
-            obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
-              ...obj.quizQuestions.get(get(quizAnswer, 'question.typeId')),
-              correct: get(obj.quizQuestions.get(get(quizAnswer, 'question.typeId')), 'correct', 0) + 1,
-            });
-          } else {
-            obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
-              ...obj.quizQuestions.get(get(quizAnswer, 'question.typeId')),
-              incorrect: get(obj.quizQuestions.get(get(quizAnswer, 'question.typeId')), 'incorrect', 0) + 1,
-            });
-          }
-        } else if (!get(quizAnswer, 'isAttempted')) {
-          obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
-            unattempted: 1,
-          });
-        } else if (get(quizAnswer, 'isCorrect')) {
-          obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
-            correct: 1,
-          });
-        } else {
-          obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
-            incorrect: 1,
-          });
-        }
-      }
-      // for each LO
-      for (const loReport of get(userQuizReport, 'learningObjectiveReport', [])) {
-        obj.quizLearningObjectiveReport.set(get(loReport, 'learningObjective.typeId'), loReport);
-      }
-    }
+  //   if (userQuizReportRes.length && get(userQuizReportRes, '[0].latest')) {
+  //     const userQuizReport = get(userQuizReportRes, '[0].latest');
+  //     obj.quizTotalQuestions = get(userQuizReport, 'quizReport.totalQuestionCount');
+  //     obj.quizCorrectSum += get(userQuizReport, 'quizReport.correctQuestionCount');
+  //     obj.quizIncorrectSum += get(userQuizReport, 'quizReport.inCorrectQuestionCount');
+  //     obj.quizSubmissions.set(userId, {
+  //       userId,
+  //       quizScore: get(userQuizReport, 'quizReport.correctQuestionCount'),
+  //     });
+  //     const quizAnswers = get(userQuizReport, 'quizAnswers', []);
+  //     for (const quizAnswer of quizAnswers) {
+  //       if (obj.quizQuestions.has(get(quizAnswer, 'question.typeId'))) {
+  //         if (!get(quizAnswer, 'isAttempted')) {
+  //           obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
+  //             ...obj.quizQuestions.get(get(quizAnswer, 'question.typeId')),
+  //             unattempted: get(obj.quizQuestions.get(get(quizAnswer, 'question.typeId')), 'unattempted', 0) + 1,
+  //           });
+  //         } else if (get(quizAnswer, 'isCorrect')) {
+  //           obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
+  //             ...obj.quizQuestions.get(get(quizAnswer, 'question.typeId')),
+  //             correct: get(obj.quizQuestions.get(get(quizAnswer, 'question.typeId')), 'correct', 0) + 1,
+  //           });
+  //         } else {
+  //           obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
+  //             ...obj.quizQuestions.get(get(quizAnswer, 'question.typeId')),
+  //             incorrect: get(obj.quizQuestions.get(get(quizAnswer, 'question.typeId')), 'incorrect', 0) + 1,
+  //           });
+  //         }
+  //       } else if (!get(quizAnswer, 'isAttempted')) {
+  //         obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
+  //           unattempted: 1,
+  //         });
+  //       } else if (get(quizAnswer, 'isCorrect')) {
+  //         obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
+  //           correct: 1,
+  //         });
+  //       } else {
+  //         obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
+  //           incorrect: 1,
+  //         });
+  //       }
+  //     }
+  //     // for each LO
+  //     for (const loReport of get(userQuizReport, 'learningObjectiveReport', [])) {
+  //       obj.quizLearningObjectiveReport.set(get(loReport, 'learningObjective.typeId'), loReport);
+  //     }
+  //   }
 
-    if (userAssignmentRes.length) {
-      let isAtleastOneAssignmentSubmitted = false;
-      obj.assignmentTotalQuestions = userAssignmentRes.length;
-      let isAssignmentAttemptedAndSubmitted = 0;
-      for (const assignmentQuestion of userAssignmentRes) {
-        if (get(assignmentQuestion, 'assignment.result') === 'correct') {
-          obj.assignmentCorrectSum += 1;
-        } else if (get(assignmentQuestion, 'assignment.result') === 'incorrect') {
-          obj.assignmentIncorrectSum += 1;
-        } else if (get(assignmentQuestion, 'assignment.result') === 'partiallyCorrect') {
-          obj.assignmentPartiallyCorrectSum += 1;
-        } else {
-          obj.assignmentUnevaluated += 1;
-        }
-        // individual questions
-        if (obj.assignmentQuestions.has(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''))) {
-          if (get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '') !== 'null' && get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '')) {
-            obj.assignmentQuestions.set(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''), obj.assignmentQuestions.get(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', '')) + 1);
-            isAssignmentAttemptedAndSubmitted += 1;
-          }
-        } else if (get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '') !== 'null' && get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '')) {
-          obj.assignmentQuestions.set(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''), 1);
-          isAtleastOneAssignmentSubmitted = true;
-          isAssignmentAttemptedAndSubmitted += 1;
-        } else {
-          obj.assignmentQuestions.set(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''), 0);
-        }
-      }
-      if (isAssignmentAttemptedAndSubmitted) {
-        obj.assignmentSubmittedCount += 1;
-        obj.assignmentSubmissions.set(userId, {
-          userId,
-        });
-      } else {
-        obj.assignmentUnattemptedCount += 1;
-      }
-      if (!isMmsPresent && isAtleastOneAssignmentSubmitted) {
-        obj.assignmentSubmittedCount += 1;
-      }
-    }
-    for (const userbbPractice of filteredUserBlockBasedPractice) {
-      const previousBlockBasedObj = obj.blockBasedPractice.get(get(userbbPractice, 'blockBasedPractice.id'));
-      const courseIdFromTopicPractice = get(userbbPractice, 'topic.courses[0].typeId');
-      const courseIdFromPractice = get(userbbPractice, 'course.typeId');
-      if (!courseIdFromPractice || (courseIdFromTopicPractice === courseIdFromPractice)) {
-        const innerObj = {
-          title: '',
-          pqTotalQuestions: 1,
-          pqCorrectSum: 0,
-          pqIncorrectSum: 0,
-          pqPartiallyCorrectSum: 0,
-          pqUnevaluated: 0,
-          pqSubmittedCount: get(previousBlockBasedObj, 'pqSubmittedCount', 0) || 0,
-          pqUnattemptedCount: get(previousBlockBasedObj, 'pqUnattemptedCount', 0) || 0,
-          pqQuestions: new Map(),
-          pqSubmissions: get(previousBlockBasedObj, 'pqSubmissions', new Map()) || new Map(),
-        };
-        let hasUserSubmittedPracticeLink = false;
-        if (get(userbbPractice, 'blockBasedPractice.isSubmitAnswer')) {
-          const bbPracticeLayout = get(userbbPractice, 'blockBasedPractice.layout');
-          if (bbPracticeLayout === 'externalPlatform') {
-            if (get(userbbPractice, 'answerLink')) hasUserSubmittedPracticeLink = true;
-          } else if (get(userbbPractice, 'savedBlocks') || get(userbbPractice, 'attachments', []).length) {
-            hasUserSubmittedPracticeLink = true;
-          }
-        } else {
-          hasUserSubmittedPracticeLink = true;
-        }
-        innerObj.title = get(userbbPractice, 'blockBasedPractice.title', '');
-        // individual questions
-        if (innerObj.pqQuestions.has(get(userbbPractice, 'blockBasedPractice.id'))) {
-          if (get(userbbPractice, 'blockBasedPractice.isSubmitAnswer')) {
-            innerObj.pqQuestions.set(get(userbbPractice, 'blockBasedPractice.id'), innerObj.pqQuestions.get(get(userbbPractice, 'blockBasedPractice.id')) + 1);
-          }
-        } else if (get(userbbPractice, 'blockBasedPractice.isSubmitAnswer')) {
-          innerObj.pqQuestions.set(get(userbbPractice, 'blockBasedPractice.id'), 1);
-        } else {
-          innerObj.pqQuestions.set(get(userbbPractice, 'blockBasedPractice.id'), 0);
-        }
-        if (get(userbbPractice, 'blockBasedPractice') && hasUserSubmittedPracticeLink) {
-          innerObj.pqSubmittedCount += 1;
-          innerObj.pqSubmissions.set(userId, {
-            userId,
-          });
-          if (get(userbbPractice, 'result') === 'correct') {
-            innerObj.pqCorrectSum += 1;
-          } else if (get(userbbPractice, 'result') === 'incorrect') {
-            innerObj.pqIncorrectSum += 1;
-          } else if (get(userbbPractice, 'result') === 'partiallyCorrect') {
-            innerObj.pqPartiallyCorrectSum += 1;
-          } else {
-            innerObj.pqUnevaluated += 1;
-          }
-        } else {
-          innerObj.pqUnattemptedCount += 1;
-        }
-        obj.blockBasedPractice.set(get(userbbPractice, 'blockBasedPractice.id'), innerObj);
-      }
-    }
-  }
+  //   if (userAssignmentRes.length) {
+  //     let isAtleastOneAssignmentSubmitted = false;
+  //     obj.assignmentTotalQuestions = userAssignmentRes.length;
+  //     let isAssignmentAttemptedAndSubmitted = 0;
+  //     for (const assignmentQuestion of userAssignmentRes) {
+  //       if (get(assignmentQuestion, 'assignment.result') === 'correct') {
+  //         obj.assignmentCorrectSum += 1;
+  //       } else if (get(assignmentQuestion, 'assignment.result') === 'incorrect') {
+  //         obj.assignmentIncorrectSum += 1;
+  //       } else if (get(assignmentQuestion, 'assignment.result') === 'partiallyCorrect') {
+  //         obj.assignmentPartiallyCorrectSum += 1;
+  //       } else {
+  //         obj.assignmentUnevaluated += 1;
+  //       }
+  //       // individual questions
+  //       if (obj.assignmentQuestions.has(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''))) {
+  //         if (get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '') !== 'null' && get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '')) {
+  //           obj.assignmentQuestions.set(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''), obj.assignmentQuestions.get(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', '')) + 1);
+  //           isAssignmentAttemptedAndSubmitted += 1;
+  //         }
+  //       } else if (get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '') !== 'null' && get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '')) {
+  //         obj.assignmentQuestions.set(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''), 1);
+  //         isAtleastOneAssignmentSubmitted = true;
+  //         isAssignmentAttemptedAndSubmitted += 1;
+  //       } else {
+  //         obj.assignmentQuestions.set(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''), 0);
+  //       }
+  //     }
+  //     if (isAssignmentAttemptedAndSubmitted) {
+  //       obj.assignmentSubmittedCount += 1;
+  //       obj.assignmentSubmissions.set(userId, {
+  //         userId,
+  //       });
+  //     } else {
+  //       obj.assignmentUnattemptedCount += 1;
+  //     }
+  //     if (!isMmsPresent && isAtleastOneAssignmentSubmitted) {
+  //       obj.assignmentSubmittedCount += 1;
+  //     }
+  //   }
+  //   for (const userbbPractice of filteredUserBlockBasedPractice) {
+  //     const previousBlockBasedObj = obj.blockBasedPractice.get(get(userbbPractice, 'blockBasedPractice.id'));
+  //     const courseIdFromTopicPractice = get(userbbPractice, 'topic.courses[0].typeId');
+  //     const courseIdFromPractice = get(userbbPractice, 'course.typeId');
+  //     if (!courseIdFromPractice || (courseIdFromTopicPractice === courseIdFromPractice)) {
+  //       const innerObj = {
+  //         title: '',
+  //         pqTotalQuestions: 1,
+  //         pqCorrectSum: 0,
+  //         pqIncorrectSum: 0,
+  //         pqPartiallyCorrectSum: 0,
+  //         pqUnevaluated: 0,
+  //         pqSubmittedCount: get(previousBlockBasedObj, 'pqSubmittedCount', 0) || 0,
+  //         pqUnattemptedCount: get(previousBlockBasedObj, 'pqUnattemptedCount', 0) || 0,
+  //         pqQuestions: new Map(),
+  //         pqSubmissions: get(previousBlockBasedObj, 'pqSubmissions', new Map()) || new Map(),
+  //       };
+  //       let hasUserSubmittedPracticeLink = false;
+  //       if (get(userbbPractice, 'blockBasedPractice.isSubmitAnswer')) {
+  //         const bbPracticeLayout = get(userbbPractice, 'blockBasedPractice.layout');
+  //         if (bbPracticeLayout === 'externalPlatform') {
+  //           if (get(userbbPractice, 'answerLink')) hasUserSubmittedPracticeLink = true;
+  //         } else if (get(userbbPractice, 'savedBlocks') || get(userbbPractice, 'attachments', []).length) {
+  //           hasUserSubmittedPracticeLink = true;
+  //         }
+  //       } else {
+  //         hasUserSubmittedPracticeLink = true;
+  //       }
+  //       innerObj.title = get(userbbPractice, 'blockBasedPractice.title', '');
+  //       // individual questions
+  //       if (innerObj.pqQuestions.has(get(userbbPractice, 'blockBasedPractice.id'))) {
+  //         if (get(userbbPractice, 'blockBasedPractice.isSubmitAnswer')) {
+  //           innerObj.pqQuestions.set(get(userbbPractice, 'blockBasedPractice.id'), innerObj.pqQuestions.get(get(userbbPractice, 'blockBasedPractice.id')) + 1);
+  //         }
+  //       } else if (get(userbbPractice, 'blockBasedPractice.isSubmitAnswer')) {
+  //         innerObj.pqQuestions.set(get(userbbPractice, 'blockBasedPractice.id'), 1);
+  //       } else {
+  //         innerObj.pqQuestions.set(get(userbbPractice, 'blockBasedPractice.id'), 0);
+  //       }
+  //       if (get(userbbPractice, 'blockBasedPractice') && hasUserSubmittedPracticeLink) {
+  //         innerObj.pqSubmittedCount += 1;
+  //         innerObj.pqSubmissions.set(userId, {
+  //           userId,
+  //         });
+  //         if (get(userbbPractice, 'result') === 'correct') {
+  //           innerObj.pqCorrectSum += 1;
+  //         } else if (get(userbbPractice, 'result') === 'incorrect') {
+  //           innerObj.pqIncorrectSum += 1;
+  //         } else if (get(userbbPractice, 'result') === 'partiallyCorrect') {
+  //           innerObj.pqPartiallyCorrectSum += 1;
+  //         } else {
+  //           innerObj.pqUnevaluated += 1;
+  //         }
+  //       } else {
+  //         innerObj.pqUnattemptedCount += 1;
+  //       }
+  //       obj.blockBasedPractice.set(get(userbbPractice, 'blockBasedPractice.id'), innerObj);
+  //     }
+  //   }
+  // }
 
   /**
    * Transforming aggregation result into required format i.e ClassroomSessionResult Type
