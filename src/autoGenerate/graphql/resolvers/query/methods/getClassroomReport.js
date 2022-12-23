@@ -1,10 +1,4 @@
-/* eslint-disable no-lonely-if */
-/* eslint-disable arrow-body-style */
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable no-unreachable */
-/* eslint-disable implicit-arrow-linebreak */
-/* eslint-disable no-plusplus */
+/* eslint-disable */
 import { get } from 'lodash';
 import { UnauthorizedOperationError } from '../../../../../../constants/errors';
 import { ifAuthorized } from '../../../../../../utils';
@@ -12,241 +6,238 @@ import { QueryController } from '../../../controllers';
 import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
 import getStudentsCombinedArray from '../../../../../../utils/getStudentsCombinedArray';
 
-const getBatchSessionAggregation = ({ batchId, topicId }) =>
-  [{
-    $match: {
-      'batch.typeId': batchId,
-      'topic.typeId': topicId,
+const getBatchSessionAggregation = ({ batchId, topicId }) => [{
+  $match: {
+    'batch.typeId': batchId,
+    'topic.typeId': topicId,
+  },
+}, {
+  $lookup: {
+    from: 'Batch',
+    let: {
+      batchId: '$batch.typeId',
     },
-  }, {
-    $lookup: {
-      from: 'Batch',
-      let: {
-        batchId: '$batch.typeId',
+    pipeline: [
+      {
+        $match: {
+          $expr: {
+            $eq: [
+              '$id',
+              '$$batchId',
+            ],
+          },
+        },
       },
-      pipeline: [
-        {
-          $match: {
-            $expr: {
-              $eq: [
-                '$id',
-                '$$batchId',
-              ],
-            },
+      {
+        $lookup: {
+          from: 'StudentProfile',
+          let: {
+            studentId: '$students.typeId',
           },
-        },
-        {
-          $lookup: {
-            from: 'StudentProfile',
-            let: {
-              studentId: '$students.typeId',
-            },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $in: [
-                      '$id',
-                      '$$studentId',
-                    ],
-                  },
-                },
-              },
-              {
-                $lookup: {
-                  from: 'User',
-                  let: {
-                    userId: '$user.typeId',
-                  },
-                  pipeline: [
-                    {
-                      $match: {
-                        $expr: {
-                          $eq: [
-                            '$id',
-                            '$$userId',
-                          ],
-                        },
-                      },
-                    },
-                    {
-                      $project: {
-                        id: 1,
-                      },
-                    },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $in: [
+                    '$id',
+                    '$$studentId',
                   ],
-                  as: 'user',
                 },
-              },
-              {
-                $project: {
-                  id: 1,
-                  user: {
-                    $arrayElemAt: [
-                      '$user',
-                      0,
-                    ],
-                  },
-                },
-              },
-            ],
-            as: 'students',
-          },
-        },
-        {
-          $lookup: {
-            from: 'StudentProfile',
-            let: {
-              batchstudentProfileId: {
-                $ifNull: ['$batchStudents.typeId', []],
               },
             },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $in: ['$id', '$$batchstudentProfileId'],
-                  },
+            {
+              $lookup: {
+                from: 'User',
+                let: {
+                  userId: '$user.typeId',
                 },
-              },
-              {
-                $lookup: {
-                  from: 'User',
-                  let: {
-                    userId: '$user.typeId',
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $eq: [
+                          '$id',
+                          '$$userId',
+                        ],
+                      },
+                    },
                   },
-                  pipeline: [
-                    {
-                      $match: {
-                        $expr: {
-                          $eq: [
-                            '$id',
-                            '$$userId',
-                          ],
-                        },
-                      },
+                  {
+                    $project: {
+                      id: 1,
                     },
-                    {
-                      $project: {
-                        id: 1,
-                      },
-                    },
+                  },
+                ],
+                as: 'user',
+              },
+            },
+            {
+              $project: {
+                id: 1,
+                user: {
+                  $arrayElemAt: [
+                    '$user',
+                    0,
                   ],
-                  as: 'user',
                 },
               },
-              {
-                $project: {
-                  id: 1,
-                  user: {
-                    $arrayElemAt: [
-                      '$user',
-                      0,
-                    ],
+            },
+          ],
+          as: 'students',
+        },
+      },
+      {
+        $lookup: {
+          from: 'StudentProfile',
+          let: {
+            batchstudentProfileId: {
+              $ifNull: ['$batchStudents.typeId', []],
+            },
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $in: ['$id', '$$batchstudentProfileId'],
+                },
+              },
+            },
+            {
+              $lookup: {
+                from: 'User',
+                let: {
+                  userId: '$user.typeId',
+                },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $eq: [
+                          '$id',
+                          '$$userId',
+                        ],
+                      },
+                    },
                   },
+                  {
+                    $project: {
+                      id: 1,
+                    },
+                  },
+                ],
+                as: 'user',
+              },
+            },
+            {
+              $project: {
+                id: 1,
+                user: {
+                  $arrayElemAt: [
+                    '$user',
+                    0,
+                  ],
                 },
               },
-            ],
-            as: 'batchStudents',
-          },
+            },
+          ],
+          as: 'batchStudents',
         },
-        {
-          $project: {
-            id: 1,
-            students: 1,
-            batchStudents: 1,
-          },
+      },
+      {
+        $project: {
+          id: 1,
+          students: 1,
+          batchStudents: 1,
         },
+      },
+    ],
+    as: 'batch',
+  },
+}, {
+  $project: {
+    id: 1,
+    batch: {
+      $arrayElemAt: [
+        '$batch',
+        0,
       ],
-      as: 'batch',
-    },
-  }, {
-    $project: {
-      id: 1,
-      batch: {
-        $arrayElemAt: [
-          '$batch',
-          0,
-        ],
-      },
     },
   },
-  ];
+},
+];
 
-const getMentorMenteeSessionAggregation = ({ userIds = [], topicId }) =>
-  [{
-    $match: {
-      'topic.typeId': topicId,
+const getMentorMenteeSessionAggregation = ({ userIds = [], topicId }) => [{
+  $match: {
+    'topic.typeId': topicId,
+  },
+}, {
+  $lookup: {
+    from: 'MenteeSession',
+    let: {
+      menteeSessionId: '$menteeSession.typeId',
     },
-  }, {
-    $lookup: {
-      from: 'MenteeSession',
-      let: {
-        menteeSessionId: '$menteeSession.typeId',
+    pipeline: [
+      {
+        $match: {
+          $expr: {
+            $eq: [
+              '$id',
+              '$$menteeSessionId',
+            ],
+          },
+        },
       },
-      pipeline: [
-        {
-          $match: {
-            $expr: {
-              $eq: [
-                '$id',
-                '$$menteeSessionId',
-              ],
-            },
-          },
+      {
+        $project: {
+          id: 1,
+          user: 1,
         },
-        {
-          $project: {
-            id: 1,
-            user: 1,
-          },
-        },
+      },
+    ],
+    as: 'menteeSession',
+  },
+}, {
+  $project: {
+    id: 1,
+    menteeSession: {
+      $arrayElemAt: [
+        '$menteeSession',
+        0,
       ],
-      as: 'menteeSession',
     },
-  }, {
-    $project: {
-      id: 1,
-      menteeSession: {
-        $arrayElemAt: [
-          '$menteeSession',
-          0,
-        ],
-      },
-      isAssignmentAttempted: 1,
-      isAssignmentSubmitted: 1,
-      isSubmittedForReview: 1,
-      isQuizSubmitted: 1,
-      isPracticeSubmitted: 1,
+    isAssignmentAttempted: 1,
+    isAssignmentSubmitted: 1,
+    isSubmittedForReview: 1,
+    isQuizSubmitted: 1,
+    isPracticeSubmitted: 1,
+  },
+}, {
+  $match: {
+    'menteeSession.user.typeId': {
+      $in: userIds,
     },
-  }, {
-    $match: {
-      'menteeSession.user.typeId': {
-        $in: userIds,
-      },
-    },
-  }];
+  },
+}];
 
-const getUserQuizReportAggregation = ({ userIds, topicId }) =>
-  [{
-    $match: {
-      'user.typeId': {
-        $in: userIds || [],
-      },
-      'topic.typeId': topicId,
+const getUserQuizReportAggregation = ({ userIds, topicId }) => [{
+  $match: {
+    'user.typeId': {
+      $in: userIds || [],
     },
-  }, {
-    $sort: {
-      createdAt: -1,
+    'topic.typeId': topicId,
+  },
+}, {
+  $sort: {
+    createdAt: -1,
+  },
+}, {
+  $group: {
+    _id: '$user.typeId',
+    latest: {
+      $first: '$$ROOT',
     },
-  }, {
-    $group: {
-      _id: '$user.typeId',
-      latest: {
-        $first: '$$ROOT',
-      },
-    },
-  }];
+  },
+}];
 
 const getUserAssignmentAggregation = ({
   userIds,
@@ -427,49 +418,39 @@ const transformMongoResults = (obj) => {
       questions: [],
     },
     // eslint-disable-next-line no-unused-vars
-    blockBasedPractice: Array.from(obj.blockBasedPractice.entries(), ([k, v]) => {
-      return {
-        blockBasedPracticeTitle: get(v, 'title'),
-        submittedPercentage: v.pqTotalQuestions === 0 ? 0 : ((v.pqSubmittedCount * 100) / obj.studentsCount).toFixed(),
-        unattemptedPercentage: v.pqTotalQuestions === 0 ? 0 : ((v.pqUnattemptedCount * 100) / obj.studentsCount).toFixed(),
-        totalQuestions: v.pqTotalQuestions,
-        averageScore: (v.pqTotalQuestions === 0 || v.pqSubmittedCount === 0) ? 0 : ((v.pqCorrectSum * 100) / (v.pqSubmittedCount * v.pqTotalQuestions)).toFixed(),
-        averageCorrect: (v.pqTotalQuestions === 0 || v.pqSubmittedCount === 0) ? 0 : (v.pqCorrectSum / v.pqSubmittedCount).toFixed(),
-        averageIncorrect: (v.pqTotalQuestions === 0 || v.pqSubmittedCount === 0) ? 0 : (v.pqIncorrectSum / v.pqSubmittedCount).toFixed(),
-        averagePartiallyCorrect: (v.pqTotalQuestions === 0 || v.pqSubmittedCount === 0) ? 0 : (v.pqPartiallyCorrectSum / v.pqSubmittedCount).toFixed(),
-        notEvaluatedCount: (v.pqTotalQuestions === 0 || v.pqSubmittedCount === 0) ? 0 : v.pqUnevaluated / v.pqTotalQuestions,
-        questions: Array.from(v.pqQuestions.entries(), ([key, value]) => {
-          return {
-            questionId: key,
-            percentageCorrect: v.pqSubmittedCount === 0 ? 0 : ((value * 100) / v.pqSubmittedCount).toFixed(),
-          };
-        }),
-        submissions: Array.from(v.pqSubmissions.values()),
-      };
-    }),
+    blockBasedPractice: Array.from(obj.blockBasedPractice.entries(), ([k, v]) => ({
+      blockBasedPracticeTitle: get(v, 'title'),
+      submittedPercentage: v.pqTotalQuestions === 0 ? 0 : ((v.pqSubmittedCount * 100) / obj.studentsCount).toFixed(),
+      unattemptedPercentage: v.pqTotalQuestions === 0 ? 0 : ((v.pqUnattemptedCount * 100) / obj.studentsCount).toFixed(),
+      totalQuestions: v.pqTotalQuestions,
+      averageScore: (v.pqTotalQuestions === 0 || v.pqSubmittedCount === 0) ? 0 : ((v.pqCorrectSum * 100) / (v.pqSubmittedCount * v.pqTotalQuestions)).toFixed(),
+      averageCorrect: (v.pqTotalQuestions === 0 || v.pqSubmittedCount === 0) ? 0 : (v.pqCorrectSum / v.pqSubmittedCount).toFixed(),
+      averageIncorrect: (v.pqTotalQuestions === 0 || v.pqSubmittedCount === 0) ? 0 : (v.pqIncorrectSum / v.pqSubmittedCount).toFixed(),
+      averagePartiallyCorrect: (v.pqTotalQuestions === 0 || v.pqSubmittedCount === 0) ? 0 : (v.pqPartiallyCorrectSum / v.pqSubmittedCount).toFixed(),
+      notEvaluatedCount: (v.pqTotalQuestions === 0 || v.pqSubmittedCount === 0) ? 0 : v.pqUnevaluated / v.pqTotalQuestions,
+      questions: Array.from(v.pqQuestions.entries(), ([key, value]) => ({
+        questionId: key,
+        percentageCorrect: v.pqSubmittedCount === 0 ? 0 : ((value * 100) / v.pqSubmittedCount).toFixed(),
+      })),
+      submissions: Array.from(v.pqSubmissions.values()),
+    })),
   };
-  finalResult.quiz.questions = Array.from(obj.quizQuestions.entries(), ([k, v]) => {
-    return {
-      questionId: k,
-      percentageCorrect: obj.quizSubmittedCount === 0 ? 0 : ((get(v, 'correct', 0) * 100) / obj.quizSubmittedCount).toFixed(),
-      percentageIncorrect: obj.quizSubmittedCount === 0 ? 0 : ((get(v, 'incorrect', 0) * 100) / obj.quizSubmittedCount).toFixed(),
-      percentageUnattempted: obj.quizSubmittedCount === 0 ? 0 : ((get(v, 'unattempted', 0) * 100) / obj.quizSubmittedCount).toFixed(),
-      submissionsCount: obj.quizSubmittedCount,
-    };
-  });
-  finalResult.coding.questions = Array.from(obj.assignmentQuestions.entries(), ([k, v]) => {
-    return {
-      questionId: k,
-      percentageCorrect: obj.assignmentSubmittedCount === 0 ? 0 : ((v * 100) / obj.studentsCount).toFixed(),
-    };
-  });
-  finalResult.quiz.learningObjectiveReport = Array.from(obj.quizLearningObjectiveReport.entries(), ([k, v]) => {
-    return {
-      questionId: k,
-      percentageCorrect: ((get(v, 'correctQuestionCount', 0) * 100) / get(v, 'totalQuestionCount', 1)),
-      title: (get(v, 'learningObjective.title', '')),
-    };
-  });
+  finalResult.quiz.questions = Array.from(obj.quizQuestions.entries(), ([k, v]) => ({
+    questionId: k,
+    percentageCorrect: obj.quizSubmittedCount === 0 ? 0 : ((get(v, 'correct', 0) * 100) / obj.quizSubmittedCount).toFixed(),
+    percentageIncorrect: obj.quizSubmittedCount === 0 ? 0 : ((get(v, 'incorrect', 0) * 100) / obj.quizSubmittedCount).toFixed(),
+    percentageUnattempted: obj.quizSubmittedCount === 0 ? 0 : ((get(v, 'unattempted', 0) * 100) / obj.quizSubmittedCount).toFixed(),
+    submissionsCount: obj.quizSubmittedCount,
+  }));
+  finalResult.coding.questions = Array.from(obj.assignmentQuestions.entries(), ([k, v]) => ({
+    questionId: k,
+    percentageCorrect: obj.assignmentSubmittedCount === 0 ? 0 : ((v * 100) / obj.studentsCount).toFixed(),
+  }));
+  finalResult.quiz.learningObjectiveReport = Array.from(obj.quizLearningObjectiveReport.entries(), ([k, v]) => ({
+    questionId: k,
+    percentageCorrect: ((get(v, 'correctQuestionCount', 0) * 100) / get(v, 'totalQuestionCount', 1)),
+    title: (get(v, 'learningObjective.title', '')),
+  }));
 
   finalResult.quiz.submissions = Array.from(obj.quizSubmissions.values());
   finalResult.coding.submissions = Array.from(obj.assignmentSubmissions.values());
@@ -670,20 +651,18 @@ const classroomReport = (async (_root, params, context) => {
               incorrect: get(obj.quizQuestions.get(get(quizAnswer, 'question.typeId')), 'incorrect', 0) + 1,
             });
           }
+        } else if (!get(quizAnswer, 'isAttempted')) {
+          obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
+            unattempted: 1,
+          });
+        } else if (get(quizAnswer, 'isCorrect')) {
+          obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
+            correct: 1,
+          });
         } else {
-          if (!get(quizAnswer, 'isAttempted')) {
-            obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
-              unattempted: 1,
-            });
-          } else if (get(quizAnswer, 'isCorrect')) {
-            obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
-              correct: 1,
-            });
-          } else {
-            obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
-              incorrect: 1,
-            });
-          }
+          obj.quizQuestions.set(get(quizAnswer, 'question.typeId'), {
+            incorrect: 1,
+          });
         }
       }
       // for each LO
@@ -712,14 +691,12 @@ const classroomReport = (async (_root, params, context) => {
             obj.assignmentQuestions.set(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''), obj.assignmentQuestions.get(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', '')) + 1);
             isAssignmentAttemptedAndSubmitted += 1;
           }
+        } else if (get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '') !== 'null' && get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '')) {
+          obj.assignmentQuestions.set(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''), 1);
+          isAtleastOneAssignmentSubmitted = true;
+          isAssignmentAttemptedAndSubmitted += 1;
         } else {
-          if (get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '') !== 'null' && get(assignmentQuestion, 'assignment.userAnswerCodeSnippet', '')) {
-            obj.assignmentQuestions.set(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''), 1);
-            isAtleastOneAssignmentSubmitted = true;
-            isAssignmentAttemptedAndSubmitted += 1;
-          } else {
-            obj.assignmentQuestions.set(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''), 0);
-          }
+          obj.assignmentQuestions.set(get(assignmentQuestion, 'assignment.assignmentQuestion.typeId', ''), 0);
         }
       }
       if (isAssignmentAttemptedAndSubmitted) {
@@ -768,12 +745,10 @@ const classroomReport = (async (_root, params, context) => {
           if (get(userbbPractice, 'blockBasedPractice.isSubmitAnswer')) {
             innerObj.pqQuestions.set(get(userbbPractice, 'blockBasedPractice.id'), innerObj.pqQuestions.get(get(userbbPractice, 'blockBasedPractice.id')) + 1);
           }
+        } else if (get(userbbPractice, 'blockBasedPractice.isSubmitAnswer')) {
+          innerObj.pqQuestions.set(get(userbbPractice, 'blockBasedPractice.id'), 1);
         } else {
-          if (get(userbbPractice, 'blockBasedPractice.isSubmitAnswer')) {
-            innerObj.pqQuestions.set(get(userbbPractice, 'blockBasedPractice.id'), 1);
-          } else {
-            innerObj.pqQuestions.set(get(userbbPractice, 'blockBasedPractice.id'), 0);
-          }
+          innerObj.pqQuestions.set(get(userbbPractice, 'blockBasedPractice.id'), 0);
         }
         if (get(userbbPractice, 'blockBasedPractice') && hasUserSubmittedPracticeLink) {
           innerObj.pqSubmittedCount += 1;
