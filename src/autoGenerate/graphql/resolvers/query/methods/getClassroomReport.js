@@ -712,11 +712,10 @@ const classroomReport = async (_root, params, context) => {
       }
     }
     for (const userbbPractice of filteredUserBlockBasedPractice) {
-      const previousBlockBasedObj = obj.blockBasedPractice.get(get(userbbPractice, 'blockBasedPractice.id'));
-      const courseIdFromTopicPractice = null;
-      const courseIdFromPractice = '';
-      // const courseIdFromTopicPractice = get(userbbPractice, 'topic.courses[0].typeId');
-      // const courseIdFromPractice = get(userbbPractice, 'course.typeId');
+      const previousBlockBasedObj = '';
+      // const previousBlockBasedObj = obj.blockBasedPractice.get(get(userbbPractice, 'blockBasedPractice.id'));
+      const courseIdFromTopicPractice = get(userbbPractice, 'topic.courses[0].typeId');
+      const courseIdFromPractice = get(userbbPractice, 'course.typeId');
       if (!courseIdFromPractice || (courseIdFromTopicPractice === courseIdFromPractice)) {
         const innerObj = {
           title: '',
