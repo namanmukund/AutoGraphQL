@@ -10,6 +10,8 @@ const UserSavedCode = `
     hasRequestedByMentor: Boolean @defaultValue(value: "false")
     isApprovedForDisplay: UserSavedCodeStatus @defaultValue(value: "pending")
     userApprovedCode: UserApprovedCode @relation(name: "UserApprovedCodeUserSavedCode")
+    languageType: EditorMode
+    codeTags: [UserApprovedCodeTag] @relation(name: "UserSavedCodeUserApprovedCodeTag", direction: "OneWay")
   }
 `;
 
