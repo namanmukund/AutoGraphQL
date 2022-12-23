@@ -477,7 +477,7 @@ const transformMongoResults = (obj) => {
   return finalResult;
 };
 
-const classroomReport = (async (root, params, context) => {
+const classroomReport = (async (_root, params, context) => {
   const authentication = ifAuthorized(context);
 
   if (!(authentication && authentication.app && authentication.user)) {
