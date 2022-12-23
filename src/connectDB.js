@@ -40,6 +40,7 @@ mongoose.on('error', (err) => {
     createScheduler('batchSessionOtpGeneration');
     createScheduler('autoCompleteThoeryClassroomSessions');
     createScheduler('b2cBatchSessionReport');
+    createScheduler('autoDeleteBlacklistedTokens');
     reRunJobsFromDB();
   }
   if (process.env.NODE_ENV === 'production' && process.env.SECONDARY_APPLICATION_NAME === TAT) {

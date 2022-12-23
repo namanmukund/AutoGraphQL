@@ -55,8 +55,6 @@ const verifyIfStaticTokenIsValidOrNot = async (appToken) => {
 
 // Validate if token is blackListed or not
 const validateForBlackListedToken = (encodedToken) => {
-  // Bypass BlacklistedToken validation for now.
-  return true;
   // eslint-disable-next-line no-unreachable
   const typeName = 'BlacklistedToken';
   const newAuthentication = {
@@ -146,10 +144,10 @@ const authMiddleware = async (req, res, next) => {
   // authorization header set is base64 encoded by adding
   // app token and user token, separated by ::
   const { authorization } = req.headers;
-  let isValidToken = false;
+  const isValidToken = true;
   // this is to ensure that only allowed tokens are permitted further
   if (authorization) {
-    isValidToken = await validateForBlackListedToken(authorization);
+    // isValidToken = await validateForBlackListedToken(authorization);
     req.authorization = authorization;
   }
   let decodeAuth = '';
@@ -169,6 +167,7 @@ const authMiddleware = async (req, res, next) => {
   // Second token is for user token
   const userToken = authorizationArray && authorizationArray[1];
   // Verify App
+  const isUserTokenValid = await validateForBlackListedToken(userToken, true);
   if (appToken && isValidToken) {
     try {
       const decoded = verifyAppToken(appToken, application);
@@ -195,7 +194,7 @@ const authMiddleware = async (req, res, next) => {
     }
   }
   // Verify User
-  if (userToken && isValidToken) {
+  if (userToken && isValidToken && isUserTokenValid) {
     await extractAndUpdateUserTokenInfoInRequest(req, userToken, 'currentUser');
   }
   const userDeviceId = req.headers['user-device-id'];
