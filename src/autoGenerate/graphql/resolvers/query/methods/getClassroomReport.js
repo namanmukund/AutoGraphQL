@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { UnauthorizedOperationError } from '../../../../../../constants/errors';
 import { ifAuthorized } from '../../../../../../utils';
 import { QueryController } from '../../../controllers';
