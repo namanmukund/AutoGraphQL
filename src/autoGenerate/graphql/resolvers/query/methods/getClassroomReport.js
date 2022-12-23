@@ -712,80 +712,80 @@ const classroomReport = async (_root, params, context) => {
       }
     }
     if (filteredUserBlockBasedPractice && filteredUserBlockBasedPractice.length) {
-      for (const userbbPractice of filteredUserBlockBasedPractice) {
+      filteredUserBlockBasedPractice.forEach((userbbPractice) => {
         const previousBlockBasedObj = obj.blockBasedPractice.get(
-          get(userbbPractice, "blockBasedPractice.id")
+          get(userbbPractice, 'blockBasedPractice.id')
         );
         const courseIdFromTopicPractice = get(
           userbbPractice,
-          "topic.courses[0].typeId"
+          'topic.courses[0].typeId'
         );
-        const courseIdFromPractice = get(userbbPractice, "course.typeId");
+        const courseIdFromPractice = get(userbbPractice, 'course.typeId');
         if (
           !courseIdFromPractice ||
           courseIdFromTopicPractice === courseIdFromPractice
         ) {
           const innerObj = {
-            title: "",
+            title: '',
             pqTotalQuestions: 1,
             pqCorrectSum: 0,
             pqIncorrectSum: 0,
             pqPartiallyCorrectSum: 0,
             pqUnevaluated: 0,
             pqSubmittedCount:
-              get(previousBlockBasedObj, "pqSubmittedCount", 0) || 0,
+              get(previousBlockBasedObj, 'pqSubmittedCount', 0) || 0,
             pqUnattemptedCount:
-              get(previousBlockBasedObj, "pqUnattemptedCount", 0) || 0,
+              get(previousBlockBasedObj, 'pqUnattemptedCount', 0) || 0,
             pqQuestions: new Map(),
             pqSubmissions:
-              get(previousBlockBasedObj, "pqSubmissions") || new Map(),
+              get(previousBlockBasedObj, 'pqSubmissions') || new Map(),
           };
           let hasUserSubmittedPracticeLink = false;
-          if (get(userbbPractice, "blockBasedPractice.isSubmitAnswer")) {
+          if (get(userbbPractice, 'blockBasedPractice.isSubmitAnswer')) {
             const bbPracticeLayout = get(
               userbbPractice,
-              "blockBasedPractice.layout"
+              'blockBasedPractice.layout'
             );
-            if (bbPracticeLayout === "externalPlatform") {
-              if (get(userbbPractice, "answerLink"))
+            if (bbPracticeLayout === 'externalPlatform') {
+              if (get(userbbPractice, 'answerLink'))
                 hasUserSubmittedPracticeLink = true;
             } else if (
-              get(userbbPractice, "savedBlocks") ||
-              get(userbbPractice, "attachments", []).length
+              get(userbbPractice, 'savedBlocks') ||
+              get(userbbPractice, 'attachments', []).length
             ) {
               hasUserSubmittedPracticeLink = true;
             }
           } else {
             hasUserSubmittedPracticeLink = true;
           }
-          innerObj.title = get(userbbPractice, "blockBasedPractice.title", "");
+          innerObj.title = get(userbbPractice, 'blockBasedPractice.title', '');
           // individual questions
           if (
             innerObj.pqQuestions.has(
-              get(userbbPractice, "blockBasedPractice.id")
+              get(userbbPractice, 'blockBasedPractice.id')
             )
           ) {
-            if (get(userbbPractice, "blockBasedPractice.isSubmitAnswer")) {
+            if (get(userbbPractice, 'blockBasedPractice.isSubmitAnswer')) {
               innerObj.pqQuestions.set(
-                get(userbbPractice, "blockBasedPractice.id"),
+                get(userbbPractice, 'blockBasedPractice.id'),
                 innerObj.pqQuestions.get(
-                  get(userbbPractice, "blockBasedPractice.id")
+                  get(userbbPractice, 'blockBasedPractice.id')
                 ) + 1
               );
             }
-          } else if (get(userbbPractice, "blockBasedPractice.isSubmitAnswer")) {
+          } else if (get(userbbPractice, 'blockBasedPractice.isSubmitAnswer')) {
             innerObj.pqQuestions.set(
-              get(userbbPractice, "blockBasedPractice.id"),
+              get(userbbPractice, 'blockBasedPractice.id'),
               1
             );
           } else {
             innerObj.pqQuestions.set(
-              get(userbbPractice, "blockBasedPractice.id"),
+              get(userbbPractice, 'blockBasedPractice.id'),
               0
             );
           }
           if (
-            get(userbbPractice, "blockBasedPractice") &&
+            get(userbbPractice, 'blockBasedPractice') &&
             hasUserSubmittedPracticeLink
           ) {
             innerObj.pqSubmittedCount += 1;
@@ -796,11 +796,13 @@ const classroomReport = async (_root, params, context) => {
             innerObj.pqUnattemptedCount += 1;
           }
           obj.blockBasedPractice.set(
-            get(userbbPractice, "blockBasedPractice.id"),
+            get(userbbPractice, 'blockBasedPractice.id'),
             innerObj
           );
         }
-      }
+      })
+      // for (const userbbPractice of filteredUserBlockBasedPractice) {
+      // }
     }
   }
 
