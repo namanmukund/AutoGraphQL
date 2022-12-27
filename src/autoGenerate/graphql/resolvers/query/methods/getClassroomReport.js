@@ -355,6 +355,7 @@ const getUserBlockBasedPracticeAggregation = ({
     answerLink: 1,
     attachments: 1,
     savedBlocks: 1,
+    gsuiteFile: 1,
     topic: {
       $arrayElemAt: [
         '$topic',
@@ -758,6 +759,10 @@ const classroomReport = (async (root, params, context) => {
             if (get(userbbPractice, 'answerLink')) hasUserSubmittedPracticeLink = true;
           } else if (get(userbbPractice, 'savedBlocks') || get(userbbPractice, 'attachments', []).length) {
             hasUserSubmittedPracticeLink = true;
+          } else if (bbPracticeLayout === 'gsuite') {
+            if (get(userbbPractice, 'answerLink') && get(userbbPractice, 'gsuiteFile.fileId')) {
+              hasUserSubmittedPracticeLink = true;
+            }
           }
         } else {
           hasUserSubmittedPracticeLink = true;
