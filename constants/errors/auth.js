@@ -54,6 +54,10 @@ export const InvalidToken = createError('InvalidToken', {
   message: 'User Token is invalid.',
 });
 
+export const BlacklistedUserToken = createError('BlacklistedUserToken', {
+  message: 'User Token is blacklisted.',
+});
+
 export const SomethingWentWrongError = createError('SomethingWentWrongError', {
   message: 'Something went wrong',
 });

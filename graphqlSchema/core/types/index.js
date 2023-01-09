@@ -172,6 +172,7 @@ import RetakeSession from './retakeSession';
 import Ebook from './ebook';
 import SessionFeedback from './sessionFeedback';
 import GSuiteResponse from './googleApisCustomQueries';
+import MenteeToken from './menteeToken';
 
 export default [
   ...User,
@@ -348,4 +349,5 @@ export default [
   ...Ebook,
   ...SessionFeedback,
   ...GSuiteResponse,
+  ...MenteeToken,
 ];

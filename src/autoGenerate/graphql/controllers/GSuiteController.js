@@ -9,9 +9,8 @@ class GSuiteController extends MasterController {
     constructor(authentication) {
       const model = '';
       super(model, authentication);
-      const credentials = gsuiteConfig[process.env.NODE_ENV || 'development'];
       this.#googleAuth = new google.auth.GoogleAuth({
-        credentials,
+        credentials: gsuiteConfig,
         scopes: GSUITE_ACCESS_SCOPES,
       });
     }
@@ -47,10 +46,10 @@ class GSuiteController extends MasterController {
     }
 
     // ID_OF_THE_FOLDER is related to id of it's parent folder
-    createFileOrFolder = async (name, mimeType, parentFolderIDs) => {
+    createFileOrFolder = async (name, mimeType, parentFolderIDs, ignoreDefaultVisibility = true) => {
       const driveController = this.getClientInstanceByType('drive');
       let requestBody = {};
-      if (parentFolderIDs) {
+      if (parentFolderIDs && parentFolderIDs.length) {
         requestBody = {
           mimeType: `application/vnd.google-apps.${mimeType}`,
           name,
@@ -65,6 +64,7 @@ class GSuiteController extends MasterController {
       const newFolder = await driveController.files.create({
         fields: '*',
         requestBody,
+        ignoreDefaultVisibility,
       });
 
       return newFolder;
@@ -83,10 +83,10 @@ class GSuiteController extends MasterController {
       }
     }
 
-    duplicateFileOrFolder = async (ID_OF_THE_FILE, name, parentFolderIDs) => {
+    duplicateFileOrFolder = async (ID_OF_THE_FILE, name, ignoreDefaultVisibility, parentFolderIDs) => {
       const driveController = this.getClientInstanceByType('drive');
       let requestBody = {};
-      if (parentFolderIDs) {
+      if (parentFolderIDs && parentFolderIDs.length) {
         requestBody = {
           name,
           parents: [parentFolderIDs],
@@ -100,6 +100,7 @@ class GSuiteController extends MasterController {
         fields: '*',
         fileId: ID_OF_THE_FILE,
         requestBody,
+        ignoreDefaultVisibility,
       });
       return newFile;
     }

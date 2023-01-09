@@ -1,6 +1,8 @@
 const TokenType = `
-  type TokenType {
-    token: String!
+  enum TokenType {
+    appToken
+    userToken
+    encodedAppAndUserToken
   }
 `;
 

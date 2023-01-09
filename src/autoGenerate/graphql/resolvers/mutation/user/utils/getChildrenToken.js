@@ -19,6 +19,9 @@ const getChildrenToken = async (context, userId, role) => {
               id 
               name
               role
+              studentProfile{
+                id
+              }
             }
           }
         }
@@ -30,6 +33,9 @@ const getChildrenToken = async (context, userId, role) => {
               id
               name
               role
+              studentProfile{
+                id
+              }
             }
           }
         }

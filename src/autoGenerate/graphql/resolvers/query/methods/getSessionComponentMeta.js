@@ -273,7 +273,7 @@ const transformMongoResults = async (batchSessions) => {
       topicId: get(batchSession, 'topic.typeId', null),
       classroomId: get(batchSession, 'classroom.id', null),
       classroomTitle: get(batchSession, 'classroom.classroomTitle', ''),
-      totalStudents: (getStudentsCombinedArray(get(batchSession, 'classroom')) || [], true).length,
+      totalStudents: (getStudentsCombinedArray(get(batchSession, 'classroom')) || []).length,
       completedHomeworkMeta: get(homeworkMeta, 'homeworkCompletedCount', 0),
       completedQuizMeta: get(homeworkMeta, 'quizSubmittedCount', 0),
       completedPQMeta: PQMeta || 0,

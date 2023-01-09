@@ -39,10 +39,10 @@ const cacheCustomQueries = `
 `;
 
 const googleApisCustomQueries = `
-    createGsuiteFileOrFolder(name: String!, mimeType: String!, parentFolderIDs: String, permission: GsuitePermissionInput): GSuiteResponse
+    createGsuiteFileOrFolder(name: String!, mimeType: String!, parentFolderIDs: String): GSuiteResponse
     updatePermissionOfGsuiteFileOrFolder(id: String!, permission: GsuitePermissionInput): GSuiteResponse
     updateParentFolderOfGsuiteFileOrFolder(childId: String!, parentFolderIDs: String!): GSuiteResponse
-    duplicateGsuiteFileOrFolder(id: String!, name: String, parentFolderIDs: String, permission: GsuitePermissionInput): GSuiteResponse
+    duplicateGsuiteFileOrFolder(id: String!, name: String, parentFolderIDs: String): GSuiteResponse
     deleteGsuiteFileOrFolder(id: String!): BooleanResult
     gettingGsuiteChildFileOrFolder(id: String!): [GSuiteResponse]
     getGsuiteFileOrFolderDetails(id: String!): GSuiteResponse
