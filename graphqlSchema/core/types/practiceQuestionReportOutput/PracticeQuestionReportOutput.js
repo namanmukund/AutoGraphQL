@@ -19,6 +19,8 @@ const StudentSubmissions = `
     updatedAt: Date
     averageTries: Float
     quizScore: Int
+    unansweredQuestionCount: Int
+    inCorrectQuestionCount: Int
   }
 `;
 
