@@ -750,7 +750,11 @@ const classroomReport = async (_root, params, context) => {
             if (bbPracticeLayout === 'externalPlatform') {
               if (get(userbbPractice, 'answerLink'))
                 hasUserSubmittedPracticeLink = true;
-            } else if (
+            } else if (bbPracticeLayout === 'gsuite') {
+            if (get(userbbPractice, 'answerLink') && get(userbbPractice, 'gsuiteFile.fileId')) {
+              hasUserSubmittedPracticeLink = true;
+            }
+          } else if (
               get(userbbPractice, 'savedBlocks') ||
               get(userbbPractice, 'attachments', []).length
             ) {
@@ -758,10 +762,6 @@ const classroomReport = async (_root, params, context) => {
             }
           } else {
             hasUserSubmittedPracticeLink = true;
-          } else if (bbPracticeLayout === 'gsuite') {
-            if (get(userbbPractice, 'answerLink') && get(userbbPractice, 'gsuiteFile.fileId')) {
-              hasUserSubmittedPracticeLink = true;
-            }
           }
           innerObj.title = get(userbbPractice, 'blockBasedPractice.title', '');
           // individual questions
