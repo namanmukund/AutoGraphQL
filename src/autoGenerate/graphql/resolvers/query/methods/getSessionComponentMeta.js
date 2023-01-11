@@ -176,29 +176,24 @@ const getTypeQueryController = (
 const getHomeworkCompletedMeta = async (session, model) => {
   const topicId = get(session, 'topic.typeId');
   const userIds = get(session, 'classroom.students', []).map((el) => get(el, 'user.typeId'));
-  let homeworkCompletedCount = 0;
-  let quizSubmittedCount = 0;
-  let assignmentSubmittedCount = 0;
-  let practiceSubmittedCount = 0;
+  const completedAssignmentDetailsByUser = [];
   if (topicId && userIds.length) {
     const mmsData = await model.aggregate(mentorMentorMenteeSessionAggregation(topicId, userIds));
     if (mmsData && mmsData.length) {
-      const filteredResult = mmsData.filter((el) => get(el, 'isSubmittedForReview') === true);
-      const filteredQuizResult = mmsData.filter((el) => get(el, 'isQuizSubmitted') === true);
-      const filteredAssignmentResult = mmsData.filter((el) => get(el, 'isAssignmentSubmitted') === true);
-      const filteredPracticeResult = mmsData.filter((el) => get(el, 'isPracticeSubmitted') === true);
-      homeworkCompletedCount = filteredResult.length || 0;
-      quizSubmittedCount = filteredQuizResult.length || 0;
-      assignmentSubmittedCount = filteredAssignmentResult.length || 0;
-      practiceSubmittedCount = filteredPracticeResult.length || 0;
+      mmsData.forEach((mms) => {
+        const obj = {
+          userId: get(mms, 'menteeSession.user.id'),
+          username: get(mms, 'menteeSession.user.name'),
+          isHomeworkSubmitted: get(mms, 'isSubmittedForReview'),
+          isQuizSubmitted: get(mms, 'isQuizSubmitted'),
+          isAssignmentSubmitted: get(mms, 'isAssignmentSubmitted'),
+          isPracticeSubmitted: get(mms, 'isPracticeSubmitted'),
+        };
+        completedAssignmentDetailsByUser.push(obj);
+      });
     }
   }
-  return {
-    homeworkCompletedCount,
-    quizSubmittedCount,
-    practiceSubmittedCount,
-    assignmentSubmittedCount,
-  };
+  return completedAssignmentDetailsByUser;
 };
 
 const getPQCompletedMeta = async (session, model, loId) => {
@@ -263,7 +258,7 @@ const transformMongoResults = async (batchSessions) => {
     const batchSession = batchSessions[0] || {};
     const topic = get(batchSession, 'topic', null);
     const loId = await getLearningObjectiveIdIfPQExists(topic);
-    const homeworkMeta = await getHomeworkCompletedMeta(batchSession, mentorMenteeSessionModel);
+    const completedAssignmentDetailsByUser = await getHomeworkCompletedMeta(batchSession, mentorMenteeSessionModel);
     let PQMeta = 0;
     if (loId) {
       PQMeta = await getPQCompletedMeta(batchSession, UserPracticeQuestionReportModel, loId);
@@ -274,13 +269,10 @@ const transformMongoResults = async (batchSessions) => {
       classroomId: get(batchSession, 'classroom.id', null),
       classroomTitle: get(batchSession, 'classroom.classroomTitle', ''),
       totalStudents: (getStudentsCombinedArray(get(batchSession, 'classroom')) || []).length,
-      completedHomeworkMeta: get(homeworkMeta, 'homeworkCompletedCount', 0),
-      completedQuizMeta: get(homeworkMeta, 'quizSubmittedCount', 0),
       completedPQMeta: PQMeta || 0,
       isPQComponentExists: !!loId,
-      completedAssignmentMeta: get(homeworkMeta, 'assignmentSubmittedCount', 0),
-      completedPracticeMeta: get(homeworkMeta, 'practiceSubmittedCount', 0),
       sessionStatus: get(batchSession, 'sessionStatus', 'allotted'),
+      completedAssignmentDetailsByUser,
     });
   }
   return finalResult[0] || {};
