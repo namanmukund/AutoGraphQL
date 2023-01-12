@@ -2,6 +2,7 @@ const CompletedAssignmentDetailsByUser = `
   type CompletedAssignmentDetailsByUser {
     userId: ID
     username: String
+    rollNo: String
     isHomeworkSubmitted: Boolean @defaultValue(value: "false")
     isQuizSubmitted: Boolean @defaultValue(value: "false")
     isAssignmentSubmitted: Boolean @defaultValue(value: "false")

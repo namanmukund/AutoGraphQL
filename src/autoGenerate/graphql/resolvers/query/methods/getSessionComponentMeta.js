@@ -115,6 +115,14 @@ const mentorMentorMenteeSessionAggregation = (topicId, userIds) => [
           },
         },
         {
+          $lookup: {
+            from: 'StudentProfile',
+            localField: 'user.studentProfile.typeId',
+            foreignField: 'id',
+            as: 'studentProfile',
+          },
+        },
+        {
           $project: {
             user: {
               id: 1,
@@ -122,6 +130,7 @@ const mentorMentorMenteeSessionAggregation = (topicId, userIds) => [
               email: 1,
               username: 1,
             },
+            studentProfile: 1,
           },
         },
       ],
@@ -184,6 +193,7 @@ const getHomeworkCompletedMeta = async (session, model) => {
         const obj = {
           userId: get(mms, 'menteeSession.user.id'),
           username: get(mms, 'menteeSession.user.name'),
+          rollNo: get(mms, 'menteeSession.studentProfile[0].rollNo'),
           isHomeworkSubmitted: get(mms, 'isSubmittedForReview'),
           isQuizSubmitted: get(mms, 'isQuizSubmitted'),
           isAssignmentSubmitted: get(mms, 'isAssignmentSubmitted'),
