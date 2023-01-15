@@ -632,6 +632,8 @@ const classroomReport = async (_root, params, context) => {
       obj.quizSubmissions.set(userId, {
         userId,
         quizScore: get(userQuizReport, 'quizReport.correctQuestionCount'),
+        unansweredQuestionCount: get(userQuizReport, 'quizReport.unansweredQuestionCount'),
+        inCorrectQuestionCount: get(userQuizReport, 'quizReport.inCorrectQuestionCount'),
       });
       const quizAnswers = get(userQuizReport, 'quizAnswers', []);
       for (const quizAnswer of quizAnswers) {
