@@ -173,6 +173,7 @@ import Ebook from './ebook';
 import SessionFeedback from './sessionFeedback';
 import GSuiteResponse from './googleApisCustomQueries';
 import MenteeToken from './menteeToken';
+import LabInspection from './labInspection';
 
 export default [
   ...User,
@@ -210,6 +211,7 @@ export default [
   ...StickerEmoji,
   ...StudentProfile,
   ...ParentProfile,
+  ...LabInspection,
   ...School,
   ...AssignmentQuestion,
   ...UserAssignment,
