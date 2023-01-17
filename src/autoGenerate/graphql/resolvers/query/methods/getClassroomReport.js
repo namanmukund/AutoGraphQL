@@ -346,6 +346,7 @@ const getUserBlockBasedPracticeAggregation = ({
     answerLink: 1,
     attachments: 1,
     savedBlocks: 1,
+    gsuiteFile: 1,
     topic: {
       $arrayElemAt: [
         '$topic',
@@ -631,6 +632,8 @@ const classroomReport = async (_root, params, context) => {
       obj.quizSubmissions.set(userId, {
         userId,
         quizScore: get(userQuizReport, 'quizReport.correctQuestionCount'),
+        unansweredQuestionCount: get(userQuizReport, 'quizReport.unansweredQuestionCount'),
+        inCorrectQuestionCount: get(userQuizReport, 'quizReport.inCorrectQuestionCount'),
       });
       const quizAnswers = get(userQuizReport, 'quizAnswers', []);
       for (const quizAnswer of quizAnswers) {
@@ -749,7 +752,11 @@ const classroomReport = async (_root, params, context) => {
             if (bbPracticeLayout === 'externalPlatform') {
               if (get(userbbPractice, 'answerLink'))
                 hasUserSubmittedPracticeLink = true;
-            } else if (
+            } else if (bbPracticeLayout === 'gsuite') {
+            if (get(userbbPractice, 'answerLink') && get(userbbPractice, 'gsuiteFile.fileId')) {
+              hasUserSubmittedPracticeLink = true;
+            }
+          } else if (
               get(userbbPractice, 'savedBlocks') ||
               get(userbbPractice, 'attachments', []).length
             ) {
