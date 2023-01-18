@@ -55,7 +55,7 @@ const LabInspectionChecks = `
 
 const LabInspectedDevice = `
   type LabInspectedDevice @model {
-    serialNo: String
+    serialNo: Int
     uniqueDeviceId: String
     status: String
     basicChecks: [LabInspectionChecks]
