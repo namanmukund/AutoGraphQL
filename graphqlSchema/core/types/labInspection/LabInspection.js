@@ -36,7 +36,7 @@ const LabInspection = `
     labName: String
     description: String
     inspectionBy: User @relation(name: "LabInspectionByUser", direction: "OneWay")
-    inpectionDate: Date
+    inspectionDate: Date
     schoolCoordinator: User @relation(name: "LabInspectionSchoolCoordinator", direction: "OneWay")
     labConfiguration: LabConfiguration
     systems: [LabInspectedDevice] @relation(name: "LabInspectedDevices")
@@ -58,6 +58,7 @@ const LabInspectedDevice = `
     serialNo: Int
     uniqueDeviceId: String
     status: String
+    inspectionMode: String @defaultValue(value: "online")
     basicChecks: [LabInspectionChecks]
     applicationChecks: [LabInspectionChecks]
     firewallChecks: [LabInspectionChecks]
