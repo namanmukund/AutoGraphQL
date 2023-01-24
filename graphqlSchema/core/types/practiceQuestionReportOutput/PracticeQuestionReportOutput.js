@@ -16,6 +16,11 @@ const PracticeQuestionOverallReport = `
 const StudentSubmissions = `
   type StudentSubmissions {
     userId: String
+    userName: String
+    rollNo: String
+    firstTry: Boolean
+    secondTry: Boolean
+    thirdTry: Boolean
     updatedAt: Date
     averageTries: Float
     quizScore: Int
