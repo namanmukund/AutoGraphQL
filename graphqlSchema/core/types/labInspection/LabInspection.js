@@ -20,14 +20,31 @@ const PowerBackup = `
     partial
   }
 `;
+const PowerBackupType = `
+  enum PowerBackupType {
+    centralised
+    individual
+    none
+  }
+`;
+const InternetConnectionEnum = `
+  enum InternetConnectionEnum {
+    hotspot
+    lan
+    wifi
+    none
+  }
+`;
 
 const LabConfiguration = `
   type LabConfiguration {
     totalNumberOfComputers: Int
-    avgNumberOfStudents: Int
+    totalNumberOfWorkingComputers: Int
     projectInteractivePanel: ProjectInteractivePanel @defaultValue(value: "none")
     speakers: LabSpeaker @defaultValue(value: "none")
+    powerBackupType: PowerBackupType
     powerBackup: PowerBackup @defaultValue(value: "no")
+    internetConnection: InternetConnectionEnum @defaultValue(value: "lan")
   }
 `;
 
@@ -39,6 +56,7 @@ const LabInspection = `
     inspectionDate: Date
     schoolCoordinator: User @relation(name: "LabInspectionSchoolCoordinator", direction: "OneWay")
     labConfiguration: LabConfiguration
+    media: [File] @relation(name: "LabConfigurationMedia", direction: "OneWay")
     systems: [LabInspectedDevice] @relation(name: "LabInspectedDevices")
     school: School @relation(name:"LabInspectionLab")
   }
@@ -59,9 +77,7 @@ const LabInspectedDevice = `
     uniqueDeviceId: String
     status: String
     inspectionMode: String @defaultValue(value: "online")
-    basicChecks: [LabInspectionChecks]
-    applicationChecks: [LabInspectionChecks]
-    firewallChecks: [LabInspectionChecks]
+    inspectionChecks: [LabInspectionChecks]
     systemInformation: String
     previousLogs: [String]
     inspection: LabInspection @relation(name: "LabInspectedDevices")
@@ -77,4 +93,6 @@ export default [
   LabSpeaker,
   LabInspection,
   LabInspectedDevice,
+  PowerBackupType,
+  InternetConnectionEnum,
 ];
