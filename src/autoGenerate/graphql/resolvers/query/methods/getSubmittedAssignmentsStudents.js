@@ -65,7 +65,12 @@ const getSubmittedAssignmentsStudents = async (
     })
     .getPipeline();
   const userBlockBasedPracticeModelData = await userBlockBasedPracticeModel.aggregate(UserBlockBasedPracticePipeline);
-  const userBlockBasedPracticeModelDataFiltered = userBlockBasedPracticeModelData && userBlockBasedPracticeModelData.filter((userBlockBasedData) => (get(userBlockBasedData, 'answerLink', null) !== null || get(userBlockBasedData, 'attachments', []).length));
+  const userBlockBasedPracticeModelDataFiltered = userBlockBasedPracticeModelData && userBlockBasedPracticeModelData.filter((userBlockBasedData) => {
+    const layout = get(userBlockBasedData, 'blockBasedPractice[0].layout', '');
+    const answerLink = get(userBlockBasedData, 'answerLink', null);
+    const attachments = get(userBlockBasedData, 'attachments', []);
+    return (layout === 'fileUpload' && attachments.length) || ((layout === 'externalPlatform' || layout === 'gsuite') && answerLink);
+  });
   const userBlockBasedPracticeDataToSend = [];
   // eslint-disable-next-line no-unused-expressions
   userBlockBasedPracticeModelDataFiltered && userBlockBasedPracticeModelDataFiltered.forEach((practice) => {

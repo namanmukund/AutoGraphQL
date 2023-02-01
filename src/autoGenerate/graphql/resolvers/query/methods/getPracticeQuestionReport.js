@@ -78,10 +78,20 @@ const getBatchSessionAggregation = ({ batchId, topicId }) =>
                     {
                       $project: {
                         id: 1,
+                        name: 1,
+                        studentProfile: 1,
                       },
                     },
                   ],
                   as: 'user',
+                },
+              },
+              {
+                $lookup: {
+                  from: 'StudentProfile',
+                  localField: 'user.studentProfile.typeId',
+                  foreignField: 'id',
+                  as: 'studentProfile',
                 },
               },
               {
@@ -93,6 +103,7 @@ const getBatchSessionAggregation = ({ batchId, topicId }) =>
                       0,
                     ],
                   },
+                  studentProfile: 1,
                 },
               },
             ],
@@ -591,6 +602,8 @@ const practiceQuestionReport = (async (root, params, context) => {
 
     for (const student of students) {
       const studentUserId = get(student, 'user.id');
+      const userName = get(student, 'user.name');
+      const rollNo = get(student, 'studentProfile[0].rollNo');
       // since multiple userPracticeQuestionReports per user per lo, we get the latest one created
       const userPracticeQuestionReportRes = (usersPracticeQuestionReportRes || []).filter((el) => get(el, 'user.typeId') === studentUserId);
 
@@ -602,6 +615,11 @@ const practiceQuestionReport = (async (root, params, context) => {
         const studentObj = {
           userId: studentUserId,
           updatedAt: get(userPracticeQuestionReportRes, '[0].updatedAt', new Date().toISOString()),
+          rollNo,
+          userName,
+          firstTry: !!get(userPracticeQuestionReportRes, '[0].firstTryCount'),
+          secondTry: !!get(userPracticeQuestionReportRes, '[0].secondTryCount'),
+          thirdTry: !!get(userPracticeQuestionReportRes, '[0].threeOrMoreTryCount'),
           averageTries: withFallbackValue(((get(userPracticeQuestionReportRes, '[0].firstTryCount') + (2 * get(userPracticeQuestionReportRes, '[0].secondTryCount')) + (3 * get(userPracticeQuestionReportRes, '[0].threeOrMoreTryCount'))) / (get(userPracticeQuestionReportRes, '[0].firstTryCount') + get(userPracticeQuestionReportRes, '[0].secondTryCount') + get(userPracticeQuestionReportRes, '[0].threeOrMoreTryCount'))).toFixed()),
         };
         loObj.students.set(studentUserId, studentObj);
