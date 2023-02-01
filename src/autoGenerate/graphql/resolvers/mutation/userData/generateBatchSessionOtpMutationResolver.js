@@ -100,7 +100,7 @@ const generateBatchSessionOtp = async (root, params, authentication) => {
     const batchSessionId = batchIdsMap[batchId];
     const batchSessionOtp = finalOtpMap[batchId];
     addSchoolSessionOtpQuery += `schoolSessionOtp_${batchSessionId}: addSchoolSessionOtp(
-        input: { otp: ${batchSessionOtp} }
+        input: { otp: "${batchSessionOtp}" }
         batchSessionConnectId: "${batchSessionId}"
     ) {
         id

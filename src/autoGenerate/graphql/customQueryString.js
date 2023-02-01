@@ -22,7 +22,7 @@ const customQueries = `
     getNextOrPrevClassroomSessions (input: [NextOrPrevClassroomSessionInput]!): [NextOrPrevClassroomSessionResult]
     getClassroomDetails (batchIds: [String]): [ClassroomDetailResult]
     getSchoolAndBatchDetail (schoolId: String, batchId: String): BatchAndSchoolResult
-    getBatchDetails(otp: Int, schoolCode: String): BatchDetailsResult
+    getBatchDetails(otp: String, schoolCode: String): BatchDetailsResult
     getBatchStudent(batchId: ID, studentRoll: String): [BatchStudentResult]
     getSessionComponentMeta (sessionId: ID!): SessionComponentMetaResult
     getClassroomReport (batchId: String, topicId: String, isHomework: Boolean): ClassroomHomeworkReportOutput
