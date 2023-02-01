@@ -29,6 +29,7 @@ const finalOtp = async (otpMap = {}, grade = null) => {
   } else {
     otp = getRandomNumber(rangeOTP.min, rangeOTP.max);
   }
+  otp = otp.toString();
   const alreadyExists = await checkIfOtpPresent(otp);
   if (!Object.values(otpMap).includes(otp) && !alreadyExists) {
     return otp;
