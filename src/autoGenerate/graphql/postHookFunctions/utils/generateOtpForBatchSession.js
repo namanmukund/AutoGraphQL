@@ -12,7 +12,7 @@ const addSchoolSessionOtp = async ({
 }) => {
   const addQuery = `mutation {
     addSchoolSessionOtp(
-        input: { otp: ${otp} }
+        input: { otp: "${otp}" }
         batchSessionConnectId: "${batchSessionId}"
     ) {
         id
