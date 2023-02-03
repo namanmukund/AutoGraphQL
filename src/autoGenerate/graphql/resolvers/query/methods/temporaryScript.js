@@ -40,6 +40,7 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import updateUserNameEmailPassword from '../scriptMethods/updateUserNameEmailPassword';
 // import RemappingBatchStudentInSchool from './RemappingBatchStudentInSchool';
 // import mentorMenteeSessionSchemaMigration from './mentorMenteeSessionSchemaMigration';
+// import updateSessionOtpType from '../scriptMethods/updateSessionOtpType';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
@@ -103,6 +104,7 @@ const temporaryScript = (async (root, params, context) => {
   // await generateBulkBatchSession();
   // await mentorMenteeSessionSchemaMigration(root, params, context);
   // await updateUserLOWithLearningSlides(context);
+  // await updateSessionOtpType();
   return {
     result: true,
   };
