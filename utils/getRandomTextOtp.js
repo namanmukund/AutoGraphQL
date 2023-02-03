@@ -1,5 +1,5 @@
 function getRandomTextOtp() {
-  const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let result = '';
   const length = 4;
   // eslint-disable-next-line no-plusplus
