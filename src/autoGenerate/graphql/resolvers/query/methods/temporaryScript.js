@@ -1,4 +1,5 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+// import updateUserLOWithLearningSlides from '../scriptMethods/updateUserLOWithLearningSlides';
 // import generateBulkBatchSession from '../scriptMethods/generateBulkBatchSession';
 // import uploadUsersToMailModo from '../scriptMethods/uploadUsersToMailModo';
 // import updateNetPromoterScoresWithCourseAndMmSession from '../scriptMethods/updateNetPromoterScoresWithCourseAndMmSession';
@@ -101,6 +102,7 @@ const temporaryScript = (async (root, params, context) => {
   // await RemappingBatchStudentInSchool(root, params, context);
   // await generateBulkBatchSession();
   // await mentorMenteeSessionSchemaMigration(root, params, context);
+  // await updateUserLOWithLearningSlides(context);
   return {
     result: true,
   };
