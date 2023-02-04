@@ -68,9 +68,10 @@ const reportDumpPostHook = async (input, mutationOrQueryName, context) => {
       reportsInputObj = await addUserBlockBasedProjectReportDump(input, mutationOrQueryName);
       break;
     case 'addUserLearningObjective':
+    case 'updateUserLearningObjective':
       const loModal = getTypeQueryController(documentTypes.LEARNING_OBJECTIVE);
       const loData = await loModal.fetchOne({ id: get(input, 'learningObjective.typeId') });
-      reportsInputObj = await userLearningObjectiveReportDump(input, loData);
+      reportsInputObj = await userLearningObjectiveReportDump(input, loData, mutationOrQueryName);
       break;
     case 'addUserPracticeQuestionReport':
     case 'updateUserPracticeQuestionReport':
