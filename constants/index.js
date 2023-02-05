@@ -486,6 +486,8 @@ const STUDENT_MASTER_PASSWORD = 'Jupyter2014';
 
 const BLOCKED = 'blocked';
 
+const INACTIVE = 'inactive';
+
 const courseToGradeMapping = [
   {
     grade: [1, 2],
@@ -759,4 +761,5 @@ export {
   PG_MODEL_SUFFIX,
   SECONDARY_APPLICATIONS,
   NEW_RELIC_CONFIG,
+  INACTIVE,
 };
