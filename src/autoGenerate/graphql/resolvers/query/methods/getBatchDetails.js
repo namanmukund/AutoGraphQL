@@ -134,6 +134,7 @@ const getBatchSessionAggregation = ({
                           user: {
                             id: 1,
                             name: 1,
+                            status: 1,
                           },
                         },
                       },
@@ -175,6 +176,7 @@ const getBatchSessionAggregation = ({
                           user: {
                             id: 1,
                             name: 1,
+                            status: 1,
                           },
                         },
                       },
@@ -294,14 +296,16 @@ const getBatchDetails = async (
   const batchStudentResult = [];
   const students = getStudentsCombinedArray(get(batchDetails, 'batch'));
   students.forEach((studentData) => {
-    batchStudentResult.push({
-      userId: get(studentData, 'user[0].id'),
-      name: get(studentData, 'user[0].name'),
-      grade: get(studentData, 'grade'),
-      section: get(studentData, 'section'),
-      rollNo: get(studentData, 'rollNo', ''),
-      profileAvatar: get(studentData, 'profileAvatarCode'),
-    });
+    if (get(studentData, 'user[0].status') === 'active') {
+      batchStudentResult.push({
+        userId: get(studentData, 'user[0].id'),
+        name: get(studentData, 'user[0].name'),
+        grade: get(studentData, 'grade'),
+        section: get(studentData, 'section'),
+        rollNo: get(studentData, 'rollNo', ''),
+        profileAvatar: get(studentData, 'profileAvatarCode'),
+      });
+    }
   });
   const school = get(batchDetails, 'batch.school[0]');
   const schoolDetail = {
