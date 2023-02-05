@@ -15,7 +15,7 @@ import { getUserFromDBQuery } from './utils';
 import { checkPasswordAndReturnUserWithToken } from '../utils/checkPasswordAndReturnUserWithToken';
 import getChildrenToken from './utils/getChildrenToken';
 import { EmailOrUsernameRequired } from '../../../../../../constants/errors/db';
-import { BLOCKED } from '../../../../../../constants';
+import { BLOCKED, INACTIVE } from '../../../../../../constants';
 
 const USER_TYPE = 'User';
 
@@ -77,7 +77,7 @@ const loginViaPasswordMutationResolver = async (
   if (!userData || !userData.id) {
     throw new DatabaseRecordNotFoundError();
   }
-  if (get(userData, 'status') && get(userData, 'status') === BLOCKED) {
+  if (get(userData, 'status') && (get(userData, 'status') === BLOCKED || get(userData, 'status') === INACTIVE)) {
     throw new BlockedOperationError();
   }
   const { role, id: userId } = userData;
