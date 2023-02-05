@@ -1,3 +1,4 @@
+import { get } from 'lodash';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
 import { SINGULAR } from '../../../../../../constants/graphqlOperations';
