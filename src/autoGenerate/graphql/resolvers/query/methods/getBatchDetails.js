@@ -296,7 +296,7 @@ const getBatchDetails = async (
   const batchStudentResult = [];
   const students = getStudentsCombinedArray(get(batchDetails, 'batch'));
   students.forEach((studentData) => {
-    if (get(studentData, 'user[0].status') === 'active') {
+    if (get(studentData, 'user[0].status') && get(studentData, 'user[0].status') === 'active') {
       batchStudentResult.push({
         userId: get(studentData, 'user[0].id'),
         name: get(studentData, 'user[0].name'),

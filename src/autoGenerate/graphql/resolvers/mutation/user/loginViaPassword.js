@@ -77,7 +77,7 @@ const loginViaPasswordMutationResolver = async (
   if (!userData || !userData.id) {
     throw new DatabaseRecordNotFoundError();
   }
-  if (get(userData, 'status') === BLOCKED) {
+  if (get(userData, 'status') && get(userData, 'status') === BLOCKED) {
     throw new BlockedOperationError();
   }
   const { role, id: userId } = userData;
