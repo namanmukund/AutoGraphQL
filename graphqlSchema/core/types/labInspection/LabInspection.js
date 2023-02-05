@@ -2,6 +2,7 @@ const ProjectInteractivePanel = `
   enum ProjectInteractivePanel {
     smartBoard
     projector
+    smartTV
     none
   }
 `;
@@ -36,6 +37,16 @@ const InternetConnectionEnum = `
   }
 `;
 
+const ServiceProviderTypeEnum = `
+  enum ServiceProviderTypeEnum {
+    broadband
+    leasedLine
+    fiberOpticConnection
+    simDongle
+    none
+  }
+`;
+
 const LabConfiguration = `
   type LabConfiguration {
     totalNumberOfComputers: Int
@@ -45,12 +56,15 @@ const LabConfiguration = `
     powerBackupType: PowerBackupType
     powerBackup: PowerBackup @defaultValue(value: "no")
     internetConnection: InternetConnectionEnum @defaultValue(value: "lan")
+    serviceProviderType: ServiceProviderTypeEnum
+    inspectionDate: Date
   }
 `;
 
 const LabInspection = `
   type LabInspection @model {
     labName: String
+    labNo: Int
     description: String
     inspectionBy: User @relation(name: "LabInspectionByUser", direction: "OneWay")
     inspectionDate: Date
@@ -59,6 +73,7 @@ const LabInspection = `
     media: [File] @relation(name: "LabConfigurationMedia", direction: "OneWay")
     systems: [LabInspectedDevice] @relation(name: "LabInspectedDevices")
     school: School @relation(name:"LabInspectionLab")
+    comment: String
   }
 `;
 
@@ -79,6 +94,7 @@ const LabInspectedDevice = `
     inspectionMode: String @defaultValue(value: "online")
     inspectionChecks: [LabInspectionChecks]
     systemInformation: String
+    inspectionDate: Date
     previousLogs: [String]
     inspection: LabInspection @relation(name: "LabInspectedDevices")
     school: School @relation(name: "SchoolLabInspectedDevice")
@@ -95,4 +111,5 @@ export default [
   LabInspectedDevice,
   PowerBackupType,
   InternetConnectionEnum,
+  ServiceProviderTypeEnum,
 ];
