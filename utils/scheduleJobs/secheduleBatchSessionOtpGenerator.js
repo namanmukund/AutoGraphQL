@@ -90,18 +90,13 @@ const getBatchSessionAggregation = () => [
   },
 ];
 
-const getSchoolSessionOtpAggregation = ({ sessionStatus }) => [
+const getSchoolSessionOtpAggregation = () => [
   {
     $lookup: {
       from: 'BatchSession',
       localField: 'batchSession.typeId',
       foreignField: 'id',
       as: 'batchSession',
-    },
-  },
-  {
-    $match: {
-      'batchSession.sessionStatus': sessionStatus,
     },
   },
   {
@@ -112,10 +107,22 @@ const getSchoolSessionOtpAggregation = ({ sessionStatus }) => [
         bookingDate: 1,
         sessionStatus: 1,
         isRetakeSession: 1,
+        updatedAt: 1,
       },
     },
   },
 ];
+
+const ifCurrentTimeGreaterThanSessionOtpGeneration = (date) => {
+  const currentDate = new Date();
+  const otpGenerationDate = new Date(date);
+  const currentDateHour = currentDate.getHours();
+  const otpGenerationDateHour = otpGenerationDate.getHours();
+  if (currentDate > otpGenerationDate && (currentDateHour - otpGenerationDateHour)) {
+    return true;
+  }
+  return false;
+};
 
 const scheduleBatchSessionOtpGenerator = async () => {
   const dt = new Date().setHours(0, 0, 0, 0);
@@ -136,7 +143,7 @@ const scheduleBatchSessionOtpGenerator = async () => {
   const batchSessions = await batchSessionModel.aggregate(
     getBatchSessionAggregation(),
   );
-  const schoolSessionOtps = await schoolSessionOtpModal.aggregate(getSchoolSessionOtpAggregation({ sessionStatus: 'completed' }));
+  const schoolSessionOtps = await schoolSessionOtpModal.aggregate(getSchoolSessionOtpAggregation());
   const batchIdsMap = {};
   for (const batchSession of batchSessions) {
     // const schoolSessionOtpArray = get(batchSession, 'schoolSessionOtp', []);
@@ -161,7 +168,9 @@ const scheduleBatchSessionOtpGenerator = async () => {
   //   log(`Creating schoolSessionOtp for batch ${batchId}, with OTP: ${finalOtpMap[batchId]} for batchSession: ${batchIdsMap[batchId]}`);
   // });
   for (const schoolSessionOtp of schoolSessionOtps) {
-    if (get(schoolSessionOtp, 'batchSession', []).length && !get(schoolSessionOtp, 'batchSession[0].isRetakeSession')) {
+    if (get(schoolSessionOtp, 'batchSession', []).length
+    && ((!get(schoolSessionOtp, 'batchSession[0].isRetakeSession') && get(schoolSessionOtp, 'batchSession[0].sessionStatus') === 'completed')
+    || (get(schoolSessionOtp, 'batchSession[0].sessionStatus') !== 'completed' && ifCurrentTimeGreaterThanSessionOtpGeneration(get(schoolSessionOtp, 'batchSession[0].updatedAt'))))) {
       deleteSchoolSessionOtp(get(schoolSessionOtp, 'id'));
       log(`Deleting schoolSessionOtp: ${get(schoolSessionOtp, 'id')} for batchSession ${get(schoolSessionOtp, 'batchSession[0].id', '')}`);
     }
