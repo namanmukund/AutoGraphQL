@@ -7,24 +7,23 @@ import getRandomTextOtp from '../../../../../utils/getRandomTextOtp';
 import { callLocalGraphqlApi } from '../../../../api';
 import checkIfOtpPresent from './checkIfOtpPresent';
 
-const getBatchClassGrade = async (batchId) => {
+const getSchoolSessionOtp = async () => {
   const query = `
     query{
-      batch(id: "${batchId}") {
-        classes {
-          grade
-        }
+      schoolSessionOtpsMeta {
+        count
       }
     }
 `;
   const res = await callLocalGraphqlApi(query);
-  return get(res, 'data.batch.classes[0].grade');
+  return get(res, 'data.schoolSessionOtpsMeta.count');
 };
 
 // recursive function which checks if the otp already exists
-const finalOtp = async (otpMap = {}, grade = null) => {
+const finalOtp = async (otpMap = {}) => {
+  const otpCount = await getSchoolSessionOtp();
   let otp = null;
-  if (grade && grade >= 4) {
+  if (otpCount > 10000) {
     otp = getRandomTextOtp();
   } else {
     otp = getRandomNumber(rangeOTP.min, rangeOTP.max);
@@ -34,21 +33,14 @@ const finalOtp = async (otpMap = {}, grade = null) => {
   if (!Object.values(otpMap).includes(otp) && !alreadyExists) {
     return otp;
   }
-  return await finalOtp(otpMap, grade);
+  return await finalOtp(otpMap);
 };
 
 // finding all combinations on the basis of grade and section combination
 const arrayCombinations = async (uniqueBatchIdsArray = []) => {
   const otpMap = {};
   for (let batchIdPointer = 0; batchIdPointer < uniqueBatchIdsArray.length; batchIdPointer += 1) {
-    const batchId = uniqueBatchIdsArray[batchIdPointer];
-    const grade = await getBatchClassGrade(batchId);
-    let gradeNumber = null;
-    if (grade) {
-      const gradeNumArr = grade.split('Grade');
-      gradeNumber = gradeNumArr.length && gradeNumArr[1];
-    }
-    otpMap[uniqueBatchIdsArray[batchIdPointer]] = await finalOtp(otpMap, gradeNumber);
+    otpMap[uniqueBatchIdsArray[batchIdPointer]] = await finalOtp(otpMap);
   }
   return otpMap;
 };
