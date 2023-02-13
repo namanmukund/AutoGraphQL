@@ -116,12 +116,9 @@ const getSchoolSessionOtpAggregation = () => [
 const ifCurrentTimeGreaterThanSessionOtpGeneration = (date) => {
   const currentDate = new Date();
   const otpGenerationDate = new Date(date);
-  const currentDateHour = currentDate.getHours();
-  const otpGenerationDateHour = otpGenerationDate.getHours();
-  if (currentDate > otpGenerationDate && (currentDateHour - otpGenerationDateHour)) {
-    return true;
-  }
-  return false;
+  const twoHours = 2 * 60 * 60 * 1000;
+  const timeDifference = currentDate - otpGenerationDate;
+  return timeDifference > twoHours;
 };
 
 const scheduleBatchSessionOtpGenerator = async () => {
