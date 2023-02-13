@@ -22,19 +22,25 @@ const getBatchClassGrade = async (batchId) => {
 };
 
 // recursive function which checks if the otp already exists
-const finalOtp = async (otpMap = {}, grade = null) => {
+const finalOtp = async (otpMap = {}, grade = null, recursionLimit) => {
   let otp = null;
   if (grade && grade >= 4) {
     otp = getRandomTextOtp();
-  } else {
+  } else if (recursionLimit) {
     otp = getRandomNumber(rangeOTP.min, rangeOTP.max);
+  } else {
+    otp = getRandomTextOtp();
   }
   otp = otp.toString();
   const alreadyExists = await checkIfOtpPresent(otp);
+  if (alreadyExists) {
+    // eslint-disable-next-line no-param-reassign
+    recursionLimit -= 1;
+  }
   if (!Object.values(otpMap).includes(otp) && !alreadyExists) {
     return otp;
   }
-  return await finalOtp(otpMap, grade);
+  return await finalOtp(otpMap, grade, recursionLimit);
 };
 
 // finding all combinations on the basis of grade and section combination
@@ -48,7 +54,8 @@ const arrayCombinations = async (uniqueBatchIdsArray = []) => {
       const gradeNumArr = grade.split('Grade');
       gradeNumber = gradeNumArr.length && gradeNumArr[1];
     }
-    otpMap[uniqueBatchIdsArray[batchIdPointer]] = await finalOtp(otpMap, gradeNumber);
+    const recursionLimit = 5;
+    otpMap[uniqueBatchIdsArray[batchIdPointer]] = await finalOtp(otpMap, gradeNumber, recursionLimit);
   }
   return otpMap;
 };
