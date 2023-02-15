@@ -102,6 +102,7 @@ const getSchoolSessionOtpAggregation = () => [
   {
     $project: {
       id: 1,
+      updatedAt: 1,
       batchSession: {
         id: 1,
         bookingDate: 1,
@@ -167,7 +168,7 @@ const scheduleBatchSessionOtpGenerator = async () => {
   for (const schoolSessionOtp of schoolSessionOtps) {
     if (get(schoolSessionOtp, 'batchSession', []).length
     && ((!get(schoolSessionOtp, 'batchSession[0].isRetakeSession') && get(schoolSessionOtp, 'batchSession[0].sessionStatus') === 'completed')
-    || (get(schoolSessionOtp, 'batchSession[0].sessionStatus') !== 'completed' && ifCurrentTimeGreaterThanSessionOtpGeneration(get(schoolSessionOtp, 'batchSession[0].updatedAt'))))) {
+    || (get(schoolSessionOtp, 'batchSession[0].sessionStatus') !== 'completed' && ifCurrentTimeGreaterThanSessionOtpGeneration(get(schoolSessionOtp, 'updatedAt'))))) {
       deleteSchoolSessionOtp(get(schoolSessionOtp, 'id'));
       log(`Deleting schoolSessionOtp: ${get(schoolSessionOtp, 'id')} for batchSession ${get(schoolSessionOtp, 'batchSession[0].id', '')}`);
     }
