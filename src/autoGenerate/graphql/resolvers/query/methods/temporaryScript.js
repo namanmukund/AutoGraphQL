@@ -1,4 +1,5 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+// import updateLoWithLsHavingPq from '../scriptMethods/updateLoWithLsHavingPq';
 // import updateUserLOWithLearningSlides from '../scriptMethods/updateUserLOWithLearningSlides';
 // import generateBulkBatchSession from '../scriptMethods/generateBulkBatchSession';
 // import uploadUsersToMailModo from '../scriptMethods/uploadUsersToMailModo';
@@ -105,6 +106,7 @@ const temporaryScript = (async (root, params, context) => {
   // await mentorMenteeSessionSchemaMigration(root, params, context);
   // await updateUserLOWithLearningSlides(context);
   // await updateSessionOtpType();
+  // await updateLoWithLsHavingPq(context);
   return {
     result: true,
   };
