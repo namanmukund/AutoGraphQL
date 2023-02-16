@@ -74,6 +74,15 @@ const fetchUserDetails = async (queryFilter) => {
   return get(result, 'data.studentProfiles', []);
 };
 
+const fetchSingleUserDetail = async (userId) => {
+  const result = await callLocalGraphqlApi(`{user(id:"${userId}") {
+      id
+      name
+      role
+    }}`);
+  return get(result, 'data.user', null);
+};
+
 const updateMagicLinkLog = async (magicLogId, visitedCount) => {
   const updateQuery = `mutation {
   updateMagicLinkLog(id: "${magicLogId}", input: { ${visitedCount ? `visitedCount: ${visitedCount}` : ''} }) {
@@ -300,6 +309,38 @@ const getMagicLink = (async (root, params, context) => {
           index += 1;
         }
       }
+      if (addMagicLinkLogQuery) {
+        callLocalGraphqlApi(`mutation{ ${addMagicLinkLogQuery} }`);
+      }
+    } else {
+      const user = await fetchSingleUserDetail(userId);
+      const {
+        expiresIn: expiryValue, linkToken, linkUri, addMagicLinkLogQuery: addLogQuery,
+        // eslint-disable-next-line no-await-in-loop
+      } = await generateAndReturnToken(user, '', 0, {
+        appName,
+        grade,
+        section,
+        userIdFromContext,
+        schoolId,
+        expiresIn: expiresInValue,
+        linkVisitLimit,
+        isLeadLogin,
+        parents: [],
+        school: null,
+        isDownloadExcel,
+      });
+      await getMagicLinkLogs(get(user, 'id'), linkToken);
+      const tokenObj = {
+        linkToken,
+        expiresIn: expiryValue,
+        linkUri,
+      };
+      if (get(user, 'id')) {
+        tokenObj.user = { type: 'User', typeId: `${get(user, 'id')}` };
+      }
+      tokens.push(tokenObj);
+      addMagicLinkLogQuery += addLogQuery;
       if (addMagicLinkLogQuery) {
         callLocalGraphqlApi(`mutation{ ${addMagicLinkLogQuery} }`);
       }
