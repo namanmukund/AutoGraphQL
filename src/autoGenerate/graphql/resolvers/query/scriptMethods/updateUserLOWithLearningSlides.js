@@ -23,9 +23,14 @@ const updateUserLOWithLearningSlides = async (context) => {
                 and: [
                     { learningObjective_some: { id: "${row.loId}" } }
                     {
-                        user_some: {
-                            studentProfile_some: { batch_some: { documentType: classroom } }
+                      user_some: {
+                        studentProfile_some: {
+                          or: [
+                            { batch_some: { documentType: classroom } }
+                            { batches_some: { documentType: classroom } }
+                          ]
                         }
+                      }
                     }
                 ]
             }
