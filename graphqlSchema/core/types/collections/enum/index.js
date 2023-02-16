@@ -138,7 +138,7 @@ import LayoutType from './LayoutType';
 import LearningSlideType from './LearningSlideType';
 import ClassType from './ClassType';
 import DatabaseControllerMode from './DatabaseControllerMode';
-import CoursePackageType from './CoursePackageType';
+import ContentType from './ContentType';
 import CoursePackageTopicRuleType from './CoursePackageTopicRuleType';
 import BlockBasedPracticeAnswerType from './BlockBasedPracticeAnswerType';
 import McqType from './McqType';
@@ -288,7 +288,7 @@ export default [
   LearningSlideType,
   ClassType,
   DatabaseControllerMode,
-  CoursePackageType,
+  ContentType,
   CoursePackageTopicRuleType,
   BlockBasedPracticeAnswerType,
   McqType,

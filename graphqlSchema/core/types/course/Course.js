@@ -101,6 +101,7 @@ const Course = `
     documentationUrl: String
     thumbnailSmall: File @relation(name: "CourseThumbnailSmall", direction: "OneWay")
     ebooks: [EBookCourse] @relation(name: "EBookCourseCourses")
+    contentType: ContentType! @defaultValue(value: "normal")
   }
 `;
 
