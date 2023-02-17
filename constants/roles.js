@@ -29,6 +29,7 @@ const LEAD_PARTNER = 'leadPartner';
 const SENSEI = 'sensei';
 const EVENT_SPEAKER = 'eventSpeaker';
 const SCHOOL_TEACHER = 'schoolTeacher';
+const SCHOOL_TRAINER = 'schoolTrainer';
 
 const CMS_HEAD = `[
 "${ADMIN}",
@@ -225,6 +226,7 @@ const ALL_ROLES_ARRAY = [
   SENSEI,
   EVENT_SPEAKER,
   SCHOOL_TEACHER,
+  SCHOOL_TRAINER,
 ];
 
 const CMS_HEAD_ARRAY = [
@@ -306,4 +308,5 @@ export {
   SENSEI,
   EVENT_SPEAKER,
   SCHOOL_TEACHER,
+  SCHOOL_TRAINER,
 };
