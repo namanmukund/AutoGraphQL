@@ -69,6 +69,7 @@ const MentorProfile = `
     accessType: SchoolTeacherAccessType @defaultValue(value: "teacher")
     schoolClasses: [SchoolClass] @relation(name: "MentorProfileSchoolClass", direction: "OneWay")
     knownLanguages:[KnownLanguage]
+    teacherOrganisation: TeacherOrganisation @defaultValue(value: "external")
 }`;
 
 export default [MentorProfile, ScheduleManagement, ClassroomControl, CourseControl, SessionReporting, KnownLanguage];

@@ -145,6 +145,7 @@ import McqType from './McqType';
 import SessionFeedbackType from './sessionFeedbackType';
 import SessionFeedbackCategory from './SessionFeedbackCategory';
 import DatabaseDialect from './DatabaseDialect';
+import TeacherOrganisation from './teacherOrganisation';
 
 export default [
   Status,
@@ -295,4 +296,5 @@ export default [
   SessionFeedbackType,
   SessionFeedbackCategory,
   DatabaseDialect,
+  TeacherOrganisation,
 ];

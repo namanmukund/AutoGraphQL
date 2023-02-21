@@ -347,3 +347,7 @@ export const MentorIsInactiveError = createError(' MentorIsInactiveError', {
 export const PracticeQuestionsNotFound = createError(' PracticeQuestionsNotFound', {
   message: 'Practice Questions were not found for the given document',
 });
+
+export const UserWithSimilarUsernameAlreadyExist = createError('UserWithSimilarUsernameAlreadyExist', {
+  message: 'User with similar Username already exist.',
+});

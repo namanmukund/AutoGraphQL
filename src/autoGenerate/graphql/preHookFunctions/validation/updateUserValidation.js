@@ -5,7 +5,10 @@ import getUserPasswordObject from '../../resolvers/mutation/user/utils/getUserPa
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import { ADMIN, UMS_ADMIN } from '../../../../../constants/roles';
 import { InsufficientPermissionError } from '../../../../../constants/errors';
-import { UserWithSimilarEmailAlreadyExist, UserWithSimilarNumberAlreadyExist } from '../../../../../constants/errors/db';
+import {
+  UserWithSimilarEmailAlreadyExist, UserWithSimilarNumberAlreadyExist,
+  UserWithSimilarUsernameAlreadyExist,
+} from '../../../../../constants/errors/db';
 import getUserActiveClassroom from '../../../../../utils/getUserActiveClassroom';
 
 const allowedRoles = [ADMIN, UMS_ADMIN];
@@ -52,6 +55,24 @@ const fetchUserDetail = async (emailOrPhoneNumber = '', userId, shouldCheckPhone
   return get(user, 'data.users', []).length;
 };
 
+const fetchUserWithUsername = async (username = '', userId, context) => {
+  const query = `{
+  users(
+    filter: {
+      and: [
+        { username: "${username.trim()}" }
+        { id_not: "${userId}" }
+      ]
+    }
+  ) {
+    id
+  }
+}
+`;
+  const user = await callLocalGraphqlApi(query, context);
+  return get(user, 'data.users', []).length;
+};
+
 const updateUserValidation = async (params, context, mutationOrQueryName) => {
   const { input, id: userId } = params;
   const userObj = {};
@@ -68,6 +89,10 @@ const updateUserValidation = async (params, context, mutationOrQueryName) => {
     name, email, phone, mutationOrQueryName,
   });
   if (username) {
+    const isUserExistWithUsername = await fetchUserWithUsername(username, userId, context);
+    if (isUserExistWithUsername) {
+      throw new UserWithSimilarUsernameAlreadyExist();
+    }
     validateUsername(username);
   }
   // getting user role from context. We will allow adding mentorSession if logged in user is admin

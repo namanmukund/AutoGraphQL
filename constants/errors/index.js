@@ -91,6 +91,7 @@ import {
   MentorHasExistingSessionsError,
   MentorIsInactiveError,
   PracticeQuestionsNotFound,
+  UserWithSimilarUsernameAlreadyExist,
 } from './db';
 import {
   RelationValuesExistError, ConnectMutationsArgumentsLimitError,
@@ -341,4 +342,5 @@ export {
   InvalidLearningObjectiveComponent,
   PracticeQuestionsNotFound,
   UserAlreadyLoggedInIntoAnotherSystemError,
+  UserWithSimilarUsernameAlreadyExist,
 };
