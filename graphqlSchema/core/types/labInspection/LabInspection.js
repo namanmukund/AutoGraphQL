@@ -57,6 +57,7 @@ const LabConfiguration = `
     powerBackup: PowerBackup @defaultValue(value: "no")
     internetConnection: InternetConnectionEnum @defaultValue(value: "lan")
     serviceProviderType: ServiceProviderTypeEnum
+    internetSpeed: Int
     inspectionDate: Date
   }
 `;
