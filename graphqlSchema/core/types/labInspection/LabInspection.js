@@ -57,12 +57,13 @@ const LabConfiguration = `
     powerBackup: PowerBackup @defaultValue(value: "no")
     internetConnection: InternetConnectionEnum @defaultValue(value: "lan")
     serviceProviderType: ServiceProviderTypeEnum
+    internetSpeed: Int
     inspectionDate: Date
   }
 `;
 
 const LabInspection = `
-  type LabInspection @model {
+  type LabInspection @model @databaseController(mode: "aggregation") {
     labName: String
     labNo: Int
     description: String
@@ -87,7 +88,7 @@ const LabInspectionChecks = `
 `;
 
 const LabInspectedDevice = `
-  type LabInspectedDevice @model {
+  type LabInspectedDevice @model @databaseController(mode: "aggregation") {
     serialNo: Int
     uniqueDeviceId: String
     status: String
@@ -95,6 +96,7 @@ const LabInspectedDevice = `
     inspectionChecks: [LabInspectionChecks]
     systemInformation: String
     inspectionDate: Date
+    comment: String
     previousLogs: [String]
     inspection: LabInspection @relation(name: "LabInspectedDevices")
     school: School @relation(name: "SchoolLabInspectedDevice")

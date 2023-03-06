@@ -1,7 +1,9 @@
+import { get } from 'lodash';
 import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
 import { SINGULAR } from '../../../../../../constants/graphqlOperations';
 import {
+  BlockedOperationError,
   DatabaseRecordNotFoundError,
   EitherUsernameEmailOrPhoneRequiredError,
   InvalidEmailError,
@@ -14,6 +16,7 @@ import { getUserFromDBQuery } from './utils';
 import { checkPasswordAndReturnUserWithToken } from '../utils/checkPasswordAndReturnUserWithToken';
 import getChildrenToken from './utils/getChildrenToken';
 import { EmailOrUsernameRequired } from '../../../../../../constants/errors/db';
+import { BLOCKED, INACTIVE } from '../../../../../../constants';
 
 const USER_TYPE = 'User';
 
@@ -74,6 +77,9 @@ const loginViaPasswordMutationResolver = async (
   const userData = await getUserFromDBQuery(input, modelQueries);
   if (!userData || !userData.id) {
     throw new DatabaseRecordNotFoundError();
+  }
+  if (get(userData, 'status') && (get(userData, 'status') === BLOCKED || get(userData, 'status') === INACTIVE)) {
+    throw new BlockedOperationError();
   }
   const { role, id: userId } = userData;
   const userTokenData = checkPasswordAndReturnUserWithToken(userData, input, authentication);
