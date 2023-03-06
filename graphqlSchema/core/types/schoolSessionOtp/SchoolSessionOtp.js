@@ -3,7 +3,8 @@ const SchoolSessionOtp = `
     grade: Grade
     section: Section
     batchSession: BatchSession! @relation(name:"SchoolSessionOtpBatchSession")
-    otp: Int!
+    otp: String!
+    expiryDate: Date
   }`;
 
 export default [SchoolSessionOtp];

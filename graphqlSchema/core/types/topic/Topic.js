@@ -81,6 +81,7 @@ const Topic = `
     classType: ClassType @defaultValue(value: "lab")
     referenceContent: String
     referenceContentWidth: Int
+    contentType: ContentType! @defaultValue(value: "normal")
   }
 `;
 

@@ -138,13 +138,14 @@ import LayoutType from './LayoutType';
 import LearningSlideType from './LearningSlideType';
 import ClassType from './ClassType';
 import DatabaseControllerMode from './DatabaseControllerMode';
-import CoursePackageType from './CoursePackageType';
+import ContentType from './ContentType';
 import CoursePackageTopicRuleType from './CoursePackageTopicRuleType';
 import BlockBasedPracticeAnswerType from './BlockBasedPracticeAnswerType';
 import McqType from './McqType';
 import SessionFeedbackType from './sessionFeedbackType';
 import SessionFeedbackCategory from './SessionFeedbackCategory';
 import DatabaseDialect from './DatabaseDialect';
+import TeacherOrganisation from './teacherOrganisation';
 
 export default [
   Status,
@@ -288,11 +289,12 @@ export default [
   LearningSlideType,
   ClassType,
   DatabaseControllerMode,
-  CoursePackageType,
+  ContentType,
   CoursePackageTopicRuleType,
   BlockBasedPracticeAnswerType,
   McqType,
   SessionFeedbackType,
   SessionFeedbackCategory,
   DatabaseDialect,
+  TeacherOrganisation,
 ];

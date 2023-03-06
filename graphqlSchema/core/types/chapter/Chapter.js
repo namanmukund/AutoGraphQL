@@ -30,6 +30,7 @@ const Chapter = `
     topics: [Topic] @relation(name: "ChapterTopic", isSubset: true)
     thumbnail: File @relation(name: "ChapterThumbnail", direction: "OneWay")
     courses: [Course] @relation(name: "CourseChapter")
+    contentType: ContentType! @defaultValue(value: "normal")
   }
 `;
 

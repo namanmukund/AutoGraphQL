@@ -83,6 +83,7 @@ const User = `
     eventSpeakerProfile: EventSpeakerProfile @relation(name: "EventSpeakerProfileUser",  isSubset: true)
     isEmailGenerated: Boolean @defaultValue(value: "false")
     displayName: String
+    roles: [UserRole]
   }
 `;
 
