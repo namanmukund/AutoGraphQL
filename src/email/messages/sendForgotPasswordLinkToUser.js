@@ -12,18 +12,18 @@ const sendForgotPasswordLinkToUser = (emailTo, forgotPassLink, appName, name) =>
   const templateString = parsedHtmlFromTemplateFileAndObject(
     templateFileName, templateObject,
   );
-  if (process.env.DATA_MASKING) {
-    // eslint-disable-next-line no-param-reassign
-    emailTo = [
-      'gokul.madhusudhan@tekie.in',
-    ];
-  }
+  // if (process.env.DATA_MASKING) {
+  //   // eslint-disable-next-line no-param-reassign
+  //   emailTo = [
+  //     'tinku.parmar@uolo.com',
+  //   ];
+  // }
   templateString.then((html) => {
     const ccEmail = '';
     const bccEmail = '';
     const subject = 'Reset Password';
     const text = '';
-    const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, text, html, 'hello@tekie.in');
+    const emailMsgObject = getEmailObject(emailTo, ccEmail, bccEmail, subject, text, html, 'tinku.parmar@uolo.com');
     sendEmail(emailMsgObject);
   });
 };

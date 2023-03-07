@@ -253,8 +253,15 @@ const stickerEmojiType = {
   emoji: 'emoji',
 };
 
-const forgotPassWebURL = {
+const forgotPassWebURLTMS = {
   development: 'https://tekie-tms-dev.herokuapp.com/forgotPassword',
+  staging: 'https://tekie-tms-staging.herokuapp.com/forgotPassword',
+  production: 'https://tekie-managment-system.herokuapp.com/forgotPassword',
+  preProd: 'https://tekie-tms-pre-prod.herokuapp.com/forgotPassword',
+};
+
+const forgotPassWebURLTeacherApp = {
+  development: 'http://teacher:8001/?step=reset-password',
   staging: 'https://tekie-tms-staging.herokuapp.com/forgotPassword',
   production: 'https://tekie-managment-system.herokuapp.com/forgotPassword',
   preProd: 'https://tekie-tms-pre-prod.herokuapp.com/forgotPassword',
@@ -696,7 +703,7 @@ export {
   learningObjectiveQuizReportThreshHolds,
   learningObjectiveRecommendationTexts,
   badgeTypes,
-  forgotPassWebURL,
+  forgotPassWebURLTMS,
   stickerEmojiType,
   slotTimes,
   MAX_ALLOWED_REFERRALS,
@@ -761,5 +768,9 @@ export {
   PG_MODEL_SUFFIX,
   SECONDARY_APPLICATIONS,
   NEW_RELIC_CONFIG,
+<<<<<<< Updated upstream
   INACTIVE,
+=======
+  forgotPassWebURLTeacherApp,
+>>>>>>> Stashed changes
 };

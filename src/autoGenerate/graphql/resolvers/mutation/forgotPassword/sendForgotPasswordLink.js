@@ -4,7 +4,7 @@ import { getFieldsBeingFetched } from '../../../../utils';
 import { validate } from '../../../validation';
 import { sendEmailForSendForgotPasswordLink } from '../utils';
 import { UPDATE } from '../../../../../../constants/graphqlOperations';
-import { forgotPassWebURL } from '../../../../../../constants';
+import { forgotPassWebURLTeacherApp } from '../../../../../../constants';
 import getTokenForLoginLink from '../../utils/getTokenForLoginLink';
 
 const nodeEnv = process.env.NODE_ENV || 'development';
@@ -72,10 +72,10 @@ export default function sendForgotPasswordLinkMutationResolver(
         throw new DatabaseRecordNotFoundError();
       }
       const token = getTokenForLoginLink(fetchedUser, new Date(), 1);
-      let forgotPassLink = `${forgotPassWebURL[nodeEnv]}?authToken=${token}`;
+      let forgotPassLink = `${forgotPassWebURLTeacherApp[nodeEnv]}&authToken=${token}`;
       if (process.env.DATA_MASKING) {
         // eslint-disable-next-line no-param-reassign
-        forgotPassLink = `${forgotPassWebURL.preProd}?authToken=${token}`;
+        forgotPassLink = `${forgotPassWebURLTeacherApp.development}&authToken=${token}`;
       }
       // Send email to user with forgot password link
       sendEmailForSendForgotPasswordLink(fetchedUser, authentication, forgotPassLink);
