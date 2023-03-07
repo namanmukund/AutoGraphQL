@@ -7,6 +7,7 @@ const LearningSlide = `
     order: Int
     status: ContentStatus! @defaultValue(value: "unpublished")
     slideContents: [LearningSlideContent] @relation(name: "LearningSlideSlides")
+    googleSlideLink: String
     practiceQuestions: [QuestionBank] @relation(name: "LearningSlideQuestionBank")
     topics: [Topic] @relation(name: "LearningSlideTopic")
     courses: [Course] @relation(name: "LearningSlideCourse", direction: "OneWay")
