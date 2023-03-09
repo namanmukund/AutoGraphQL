@@ -14,8 +14,8 @@ const LabSpeaker = `
     none
   }
 `;
-const PowerBackup = `
-  enum PowerBackup {
+const YesNoPartial = `
+  enum YesNoPartial {
     yes
     no
     partial
@@ -54,9 +54,12 @@ const LabConfiguration = `
     projectInteractivePanel: ProjectInteractivePanel @defaultValue(value: "none")
     speakers: LabSpeaker @defaultValue(value: "none")
     powerBackupType: PowerBackupType
-    powerBackup: PowerBackup @defaultValue(value: "no")
+    powerBackup: YesNoPartial @defaultValue(value: "no")
     internetConnection: InternetConnectionEnum @defaultValue(value: "lan")
     serviceProviderType: ServiceProviderTypeEnum
+    sharedSystemArchSetup: YesNoPartial
+    masterSystem: YesNoPartial
+    totalNumberOfConnectedSystems: Int
     internetSpeed: Int
     inspectionDate: Date
   }
@@ -107,7 +110,7 @@ export default [
   ProjectInteractivePanel,
   LabInspectionChecks,
   LabConfiguration,
-  PowerBackup,
+  YesNoPartial,
   LabSpeaker,
   LabInspection,
   LabInspectedDevice,
