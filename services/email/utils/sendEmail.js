@@ -1,19 +1,42 @@
+/* eslint-disable no-console */
 /* eslint-disable no-unreachable */
-import sgMail from '@sendgrid/mail';
-import sendGridApi from '../../../config/sendGrid';
-import { log } from '../../../utils/log';
+import AWS from 'aws-sdk';
+import { awsConfig } from '../../../utils';
+import { fromEmail } from '../../../constants';
 
-const sendEmail = (emailMsgObject) => {
-  return null;
-  sgMail.setApiKey(sendGridApi.SENDGRID_API_KEY);
-  sgMail
-    .send(emailMsgObject, (error) => {
-      if (error) {
-        log('Error while sending email.');
-        log(error);
-      }
-    });
-  return null;
+const { ses } = awsConfig;
+
+const awsSes = new AWS.SES(ses);
+
+const sendEmail = (emailTo, html) => {
+  const params = {
+    Destination: {
+      ToAddresses: [emailTo],
+    },
+    Message: {
+      Body: {
+        Text: {
+          Data: 'Reset Password',
+        },
+        Html: {
+          Data: html,
+        },
+      },
+      Subject: {
+        Data: 'Reset Password',
+      },
+    },
+    Source: fromEmail,
+  };
+
+  awsSes.sendEmail(params, (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log('Email sent:', data);
+    }
+    return null;
+  });
 };
 
 export default sendEmail;

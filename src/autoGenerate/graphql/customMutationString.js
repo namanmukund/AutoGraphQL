@@ -10,7 +10,7 @@ const customMutationString = `
    resendForgotPasswordOTP (input: PhoneInput, email: String): BooleanResult,
    validateForgotPasswordOTP (input: PhoneInput, phoneOtp: Int, email: String, emailOtp: Int): BooleanResult,
    finishForgotPassword (input: PhoneInput, phoneOtp: Int, email: String, emailOtp: Int, newPassword: String!): BooleanResult,
-   sendForgotPasswordLink (email: String!): BooleanResult,
+   sendForgotPasswordLink (email: String!, platform: TekiePlatform): BooleanResult,
    resetPasswordFromForgotPasswordLink (newPassword: String!): BooleanResult,
    userCourseSyllabus (courseId: ID): UserCourseSyllabus,
    userTopicJourney ( topicId: ID!, courseId: ID): UserTopicJourney,
