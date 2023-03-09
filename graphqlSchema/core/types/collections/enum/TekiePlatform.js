@@ -1,6 +1,6 @@
 const TekiePlatform = `
   enum TekiePlatform {
-    tms
+    internal
     teacher
     student
   }`;

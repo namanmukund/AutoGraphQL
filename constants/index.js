@@ -253,18 +253,19 @@ const stickerEmojiType = {
   emoji: 'emoji',
 };
 
-const forgotPassWebURLTMS = {
-  development: 'https://tekie-tms-dev.herokuapp.com/forgotPassword',
-  staging: 'https://tekie-tms-staging.herokuapp.com/forgotPassword',
-  production: 'https://tekie-managment-system.herokuapp.com/forgotPassword',
-  preProd: 'https://tekie-tms-pre-prod.herokuapp.com/forgotPassword',
-};
-
-const forgotPassWebURLTeacherApp = {
-  development: 'http://teacher:8001/?step=reset-password',
-  staging: 'https://tekie-tms-staging.herokuapp.com/forgotPassword',
-  production: 'https://tekie-managment-system.herokuapp.com/forgotPassword',
-  preProd: 'https://tekie-tms-pre-prod.herokuapp.com/forgotPassword',
+const forgotPassWebURL = {
+  TMS: {
+    development: 'https://tekie-tms-dev.herokuapp.com/forgotPassword',
+    staging: 'https://tekie-tms-staging.herokuapp.com/forgotPassword',
+    production: 'https://tekie-managment-system.herokuapp.com/forgotPassword',
+    preProd: 'https://tekie-tms-pre-prod.herokuapp.com/forgotPassword',
+  },
+  TeacherApp: {
+    development: 'http://teacher:8001/?step=reset-password',
+    staging: 'https://tekie-tms-staging.herokuapp.com/forgotPassword',
+    production: 'https://tekie-managment-system.herokuapp.com/forgotPassword',
+    preProd: 'https://tekie-tms-pre-prod.herokuapp.com/forgotPassword',
+  },
 };
 
 const slotTimes = [
@@ -703,7 +704,6 @@ export {
   learningObjectiveQuizReportThreshHolds,
   learningObjectiveRecommendationTexts,
   badgeTypes,
-  forgotPassWebURLTMS,
   stickerEmojiType,
   slotTimes,
   MAX_ALLOWED_REFERRALS,
@@ -769,5 +769,5 @@ export {
   SECONDARY_APPLICATIONS,
   NEW_RELIC_CONFIG,
   INACTIVE,
-  forgotPassWebURLTeacherApp,
+  forgotPassWebURL,
 };

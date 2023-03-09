@@ -30,6 +30,7 @@ const cloudFrontPrivateKeyString = '-----BEGIN RSA PRIVATE KEY-----\n'
   + 'hL4nMmX3PSuDBRv0YHlIrm/A/mGCOx3Lt3ps9lFUahbVj6wIQp0CIw==\n'
   + '-----END RSA PRIVATE KEY-----';
 
+// aws simple email service credentials
 const sesAccessKeyId = process.env.SES_ACCESS_KEY_ID;
 const sesSecretAccessKey = process.env.SES_SECRET_ACCESS_KEY;
 

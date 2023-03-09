@@ -35,6 +35,7 @@ const sendEmail = (emailTo, html) => {
     } else {
       console.log('Email sent:', data);
     }
+    return null;
   });
 };
 
