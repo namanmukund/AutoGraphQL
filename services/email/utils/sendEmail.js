@@ -1,43 +1,35 @@
+/* eslint-disable no-console */
 /* eslint-disable no-unreachable */
-// import sgMail from '@sendgrid/mail';
-// import sendGridApi from '../../../config/sendGrid';
-// import { log } from '../../../utils/log';
 import AWS from 'aws-sdk';
+import { awsConfig } from '../../../utils';
+import { fromEmail } from '../../../constants';
 
-const SES_REGION = 'ap-south-1';
-const SES_ACCESS_KEY_ID = 'AKIAW5K4IEIGHLN3OSWC';
-const SES_SECRET_ACCESS_KEY = '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';
+const { ses } = awsConfig;
 
-const ses = new AWS.SES({
-  region: SES_REGION,
-  accessKeyId: SES_ACCESS_KEY_ID,
-  secretAccessKey: SES_SECRET_ACCESS_KEY,
-});
+const awsSes = new AWS.SES(ses);
 
-const sendEmail = (emailMsgObject) => {
-  const { html, to } = emailMsgObject;
-
+const sendEmail = (emailTo, html) => {
   const params = {
     Destination: {
-      ToAddresses: [to],
+      ToAddresses: [emailTo],
     },
     Message: {
       Body: {
         Text: {
-          Data: 'test mail',
+          Data: 'Reset Password',
         },
         Html: {
           Data: html,
         },
       },
       Subject: {
-        Data: 'This is the subject line.',
+        Data: 'Reset Password',
       },
     },
-    Source: 'support@uolo.com',
+    Source: fromEmail,
   };
 
-  ses.sendEmail(params, (err, data) => {
+  awsSes.sendEmail(params, (err, data) => {
     if (err) {
       console.log(err);
     } else {

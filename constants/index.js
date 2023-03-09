@@ -104,7 +104,7 @@ const smsOTPMessage = {
   bodyAfterName: ', your login OTP for Tekie App is ',
 };
 
-const fromEmail = 'namanmukund@gmail.com';
+const fromEmail = 'support@uolo.com';
 const STATIC = 'static';
 
 const fetchRetries = 5;
@@ -768,9 +768,6 @@ export {
   PG_MODEL_SUFFIX,
   SECONDARY_APPLICATIONS,
   NEW_RELIC_CONFIG,
-<<<<<<< Updated upstream
   INACTIVE,
-=======
   forgotPassWebURLTeacherApp,
->>>>>>> Stashed changes
 };

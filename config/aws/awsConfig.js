@@ -30,6 +30,9 @@ const cloudFrontPrivateKeyString = '-----BEGIN RSA PRIVATE KEY-----\n'
   + 'hL4nMmX3PSuDBRv0YHlIrm/A/mGCOx3Lt3ps9lFUahbVj6wIQp0CIw==\n'
   + '-----END RSA PRIVATE KEY-----';
 
+const sesAccessKeyId = process.env.SES_ACCESS_KEY_ID;
+const sesSecretAccessKey = process.env.SES_SECRET_ACCESS_KEY;
+
 const awsConfig = {
   production: {
     aws: {
@@ -52,6 +55,11 @@ const awsConfig = {
       keypairId: cloudFrontKeypairId,
       privateKeyString: cloudFrontPrivateKeyString,
       expireTime: new Date().getTime() + 8000000000,
+    },
+    ses: {
+      region: 'ap-south-1',
+      accessKeyId: sesAccessKeyId,
+      secretAccessKey: sesSecretAccessKey,
     },
   },
   staging: {
@@ -76,6 +84,11 @@ const awsConfig = {
       privateKeyString: cloudFrontPrivateKeyString,
       expireTime: new Date().getTime() + 8000000000,
     },
+    ses: {
+      region: 'ap-south-1',
+      accessKeyId: sesAccessKeyId,
+      secretAccessKey: sesSecretAccessKey,
+    },
   },
   development: {
     aws: {
@@ -99,6 +112,11 @@ const awsConfig = {
       private: 'private',
       public: 'public',
     },
+    ses: {
+      region: 'ap-south-1',
+      accessKeyId: sesAccessKeyId,
+      secretAccessKey: sesSecretAccessKey,
+    },
   },
   test: {
     aws: {
@@ -121,6 +139,11 @@ const awsConfig = {
       keypairId: cloudFrontKeypairId,
       privateKeyString: cloudFrontPrivateKeyString,
       expireTime: new Date().getTime() + 8000000000,
+    },
+    ses: {
+      region: 'ap-south-1',
+      accessKeyId: sesAccessKeyId,
+      secretAccessKey: sesSecretAccessKey,
     },
   },
 };
