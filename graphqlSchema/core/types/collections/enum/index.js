@@ -146,6 +146,7 @@ import SessionFeedbackType from './sessionFeedbackType';
 import SessionFeedbackCategory from './SessionFeedbackCategory';
 import DatabaseDialect from './DatabaseDialect';
 import TeacherOrganisation from './teacherOrganisation';
+import TekiePlatform from './TekiePlatform';
 
 export default [
   Status,
@@ -297,4 +298,5 @@ export default [
   SessionFeedbackCategory,
   DatabaseDialect,
   TeacherOrganisation,
+  TekiePlatform,
 ];
