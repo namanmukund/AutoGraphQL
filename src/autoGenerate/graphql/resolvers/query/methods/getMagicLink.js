@@ -195,7 +195,7 @@ const getMagicLink = (async (root, params, context) => {
     },
   } = params;
   // getting input from params
-  const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
+  const userAndAppInfo = getUserIdandAppNameAfterValidation(context, true);
   const {
     appName,
     userIdFromContext,
