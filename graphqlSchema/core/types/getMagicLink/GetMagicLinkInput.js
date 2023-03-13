@@ -11,6 +11,7 @@ const GetMagicLinkInput = `
     isLeadLogin: Boolean @defaultValue(value: "false")
     isDownloadExcel: Boolean @defaultValue(value: "false")
     studentIds: [ID]
+    forBuddies: Boolean @defaultValue(value: "false")
   }
 `;
 

@@ -97,7 +97,8 @@ const validateMagicLinkMutationResolver = async (
       }
       throw new SomethingWentWrongError();
     }
-    const { expiresIn, userInfo: { id } } = get(values, 'linkData');
+    const { expiresIn, usersInfo } = get(values, 'linkData');
+    const id = (usersInfo && usersInfo.length > 1) ? get(usersInfo, '[0].id') : get(usersInfo, 'id');
     // getting link details from logs
     const magicLinkDetails = await getTokenDetails(linkToken, id);
     if (!magicLinkDetails.length) {
@@ -114,8 +115,8 @@ const validateMagicLinkMutationResolver = async (
     if (moment().isAfter(moment(expiresIn))) {
       throw new LinkExpiredError();
     }
-    const userInfo = await getuserInfo(id);
-    const parentInfo = get(userInfo, 'studentProfile.parents[0].user');
+    const userInformation = await getuserInfo(id);
+    const parentInfo = get(userInformation, 'studentProfile.parents[0].user');
     if (get(parentInfo, 'id')) {
       input.id = get(parentInfo, 'id');
     } else input.id = id;
