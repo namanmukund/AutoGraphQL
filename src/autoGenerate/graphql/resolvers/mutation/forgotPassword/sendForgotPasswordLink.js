@@ -76,11 +76,11 @@ export default function sendForgotPasswordLinkMutationResolver(
       if (platform === 'teacher') {
         forgotPassLink = `${forgotPassWebURL.TeacherApp[nodeEnv]}&auth-token=${token}`;
       }
-      if (process.env.DATA_MASKING) {
+      if (['true', true].includes(process.env.DATA_MASKING)) {
         // eslint-disable-next-line no-param-reassign
-        forgotPassLink = `${forgotPassWebURL.TMS.development}?authToken=${token}`;
+        forgotPassLink = `${forgotPassWebURL.TMS.preProd}?authToken=${token}`;
         if (platform === 'teacher') {
-          forgotPassLink = `${forgotPassWebURL.TeacherApp.development}&auth-token=${token}`;
+          forgotPassLink = `${forgotPassWebURL.TeacherApp.preProd}&auth-token=${token}`;
         }
       }
       // Send email to user with forgot password link
