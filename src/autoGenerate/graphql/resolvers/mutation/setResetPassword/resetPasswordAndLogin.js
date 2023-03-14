@@ -66,7 +66,7 @@ export default async function resetPasswordAndLoginMutationResolver(
       if (error) {
         throw new SomethingWentWrongError();
       }
-      const { expiresIn, userInfo: { id } } = get(values, 'linkData');
+      const { expiresIn, usersInfo: { id } } = get(values, 'linkData');
       // if link visit exceeds the limit
       if (moment().isAfter(moment(expiresIn))) {
         throw new LinkExpiredError();
