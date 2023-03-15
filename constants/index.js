@@ -261,7 +261,7 @@ const forgotPassWebURL = {
     preProd: 'https://tekie-tms-pre-prod.herokuapp.com/forgotPassword',
   },
   TeacherApp: {
-    development: 'http://teacher:8001/?step=reset-password',
+    development: 'https://teacher-staging.tekie.in/?step=reset-password',
     staging: 'https://teacher-staging.tekie.in/?step=reset-password',
     production: 'https://teacher.tekie.in/?step=reset-password',
     preProd: 'https://teacher-preprod.tekie.in/?step=reset-password',
