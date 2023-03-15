@@ -8,7 +8,7 @@ import {
 } from '../../../../../../constants/errors';
 import { QueryController } from '../../../controllers';
 import { getUserFromDBQuery } from './utils';
-import { PARENT } from '../../../../../../constants/roles';
+import { PARENT, MENTOR } from '../../../../../../constants/roles';
 import getChildrenToken from './utils/getChildrenToken';
 import { createUserTokenTypeData } from '../utils/createUserTokenTypeData';
 import { LinkExpiredError } from '../../../../../../constants/errors/auth';
@@ -138,8 +138,8 @@ const validateMagicLinkMutationResolver = async (
 
   const userTokenData = createUserTokenTypeData(userData, authentication);
   // if user is a parent then get children tokens as well
-  if (role === PARENT) {
-    userTokenData.children = await getChildrenToken(context, id);
+  if (role === PARENT || role === MENTOR) {
+    userTokenData.children = await getChildrenToken(context, id, role);
   }
   return userTokenData;
 };
