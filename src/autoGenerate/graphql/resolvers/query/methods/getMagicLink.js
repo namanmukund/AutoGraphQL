@@ -171,7 +171,7 @@ const generateAndReturnToken = async (user, addMagicLinkLogQuery = '', index, {
       ${section ? `section:${section}` : ''}
       ${isLeadLogin ? 'isLeadLogin: true' : ''}
     }
-    userConnectId: "${get(user, 'id')}"
+    userConnectId: "${(user && user.length > 1) ? get(user, '[0].id') : get(user, 'id')}"
     ${schoolId ? `schoolConnectId:"${schoolId}"` : ''}
     ${userIdFromContext ? `linkGeneratedbyConnectId: "${userIdFromContext}"` : ''}
   ) {
@@ -191,11 +191,11 @@ const getMagicLink = (async (root, params, context) => {
     input: {
       schoolId, grade, section, userId, email, phone, expiresIn,
       linkVisitLimit = 2, isLeadLogin = false, isDownloadExcel = false,
-      studentIds,
+      studentIds, forBuddies,
     },
   } = params;
   // getting input from params
-  const userAndAppInfo = getUserIdandAppNameAfterValidation(context);
+  const userAndAppInfo = getUserIdandAppNameAfterValidation(context, true);
   const {
     appName,
     userIdFromContext,
@@ -232,14 +232,47 @@ const getMagicLink = (async (root, params, context) => {
   }
   if (studentIds && studentIds.length) {
     const studentIdsString = studentIds.map((student) => `"${student}"`);
-    fetchQueryFilter = `{ id_in: [${studentIdsString}] }`;
+    fetchQueryFilter = `{ user_some: { id_in: [${studentIdsString}] } }`;
   }
   if (!fetchQueryFilter) {
     throw new MissingMandatoryInputInRequestError();
   } else {
     let addMagicLinkLogQuery = '';
     const studentDetails = await fetchUserDetails(fetchQueryFilter);
-    if (studentDetails.length > 0) {
+    if (forBuddies && studentDetails.length > 1) {
+      const users = studentDetails.map((studentDetail) => get(studentDetail, 'user'));
+      const {
+        parents = [], school, batch,
+      } = studentDetails[0];
+      const {
+        expiresIn: expiryValue, linkToken, linkUri, addMagicLinkLogQuery: addLogQuery,
+      // eslint-disable-next-line no-await-in-loop
+      } = await generateAndReturnToken(users, '', 0, {
+        appName,
+        grade,
+        section,
+        userIdFromContext,
+        schoolId,
+        expiresIn: expiresInValue,
+        linkVisitLimit,
+        isLeadLogin,
+        parents,
+        school,
+        isDownloadExcel,
+      });
+      await getMagicLinkLogs(get(users[0], 'id'), linkToken);
+      const tokenObj = {
+        linkToken,
+        expiresIn: expiryValue,
+        linkUri,
+      };
+      tokenObj.user = { type: 'User', typeId: `${get(users[0], 'id')}` };
+      tokens.push(tokenObj);
+      addMagicLinkLogQuery += addLogQuery;
+      if (addMagicLinkLogQuery) {
+        callLocalGraphqlApi(`mutation{ ${addMagicLinkLogQuery} }`);
+      }
+    } else if (studentDetails.length > 0) {
       let index = 0;
       // eslint-disable-next-line no-restricted-syntax
       for (const studentDetail of studentDetails) {

@@ -3,7 +3,8 @@ const EditorMode = `
     python
     markup
     blockly
-    jupyterNotebook 
+    jupyterNotebook
+    java
   }`;
 
 export default EditorMode;

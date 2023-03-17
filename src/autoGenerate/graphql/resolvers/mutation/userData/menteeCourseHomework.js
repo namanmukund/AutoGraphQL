@@ -333,8 +333,8 @@ const menteeCourseHomeworkMutationResolver = async (
   both should be equal to perform further action
   */
   const userAndAppInfo = getUserIdandAppNameAfterValidation(context, true);
-  const { courseId } = params;
-  const { userIdFromContext: userId } = userAndAppInfo;
+  const { courseId, userId: userIdFromParams } = params;
+  const { userIdFromContext } = userAndAppInfo;
   let batchCurrentComponentInfo;
   let currentTopicOrder;
   const finalTopicBasedHomeworkArray = [];
@@ -342,6 +342,10 @@ const menteeCourseHomeworkMutationResolver = async (
   let currentTopic;
   let userBatchDetails;
   let userActiveClassroom;
+  let userId = userIdFromContext;
+  if (userIdFromParams) {
+    userId = userIdFromParams;
+  }
 
   let activeClassroomId = activeClassroomIdFromContext(context);
 

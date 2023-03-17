@@ -7,7 +7,7 @@ import { UPDATE } from '../../../../../../constants/graphqlOperations';
 import { forgotPassWebURL } from '../../../../../../constants';
 import getTokenForLoginLink from '../../utils/getTokenForLoginLink';
 
-const nodeEnv = process.env.NODE_ENV || 'development';
+const nodeEnv = process.env.NODE_ENV || 'staging';
 
 const sendForgotPasswordLinkMutationPromise = (input, modelQueries) => modelQueries.fetchOne(input);
 
@@ -44,7 +44,7 @@ export default function sendForgotPasswordLinkMutationResolver(
     user: true,
   });
   const modelQueries = new QueryController(typeName, authentication);
-  const { email } = params;
+  const { email, platform } = params;
   const searchObj = {
     email,
   };
@@ -72,10 +72,9 @@ export default function sendForgotPasswordLinkMutationResolver(
         throw new DatabaseRecordNotFoundError();
       }
       const token = getTokenForLoginLink(fetchedUser, new Date(), 1);
-      let forgotPassLink = `${forgotPassWebURL[nodeEnv]}?authToken=${token}`;
-      if (process.env.DATA_MASKING) {
-        // eslint-disable-next-line no-param-reassign
-        forgotPassLink = `${forgotPassWebURL.preProd}?authToken=${token}`;
+      let forgotPassLink = `${forgotPassWebURL.TMS[nodeEnv]}?authToken=${token}`;
+      if (platform === 'teacher') {
+        forgotPassLink = `${forgotPassWebURL.TeacherApp[nodeEnv]}&auth-token=${token}`;
       }
       // Send email to user with forgot password link
       sendEmailForSendForgotPasswordLink(fetchedUser, authentication, forgotPassLink);

@@ -104,7 +104,7 @@ const smsOTPMessage = {
   bodyAfterName: ', your login OTP for Tekie App is ',
 };
 
-const fromEmail = 'namanmukund@gmail.com';
+const fromEmail = 'support@uolo.com';
 const STATIC = 'static';
 
 const fetchRetries = 5;
@@ -254,10 +254,18 @@ const stickerEmojiType = {
 };
 
 const forgotPassWebURL = {
-  development: 'https://tekie-tms-dev.herokuapp.com/forgotPassword',
-  staging: 'https://tekie-tms-staging.herokuapp.com/forgotPassword',
-  production: 'https://tekie-managment-system.herokuapp.com/forgotPassword',
-  preProd: 'https://tekie-tms-pre-prod.herokuapp.com/forgotPassword',
+  TMS: {
+    development: 'https://tekie-tms-dev.herokuapp.com/forgotPassword',
+    staging: 'https://tekie-tms-staging.herokuapp.com/forgotPassword',
+    production: 'https://tekie-managment-system.herokuapp.com/forgotPassword',
+    preProd: 'https://tekie-tms-pre-prod.herokuapp.com/forgotPassword',
+  },
+  TeacherApp: {
+    development: 'https://teacher-staging.tekie.in/?step=reset-password',
+    staging: 'https://teacher-staging.tekie.in/?step=reset-password',
+    production: 'https://teacher.tekie.in/?step=reset-password',
+    preProd: 'https://teacher-preprod.tekie.in/?step=reset-password',
+  },
 };
 
 const slotTimes = [
@@ -696,7 +704,6 @@ export {
   learningObjectiveQuizReportThreshHolds,
   learningObjectiveRecommendationTexts,
   badgeTypes,
-  forgotPassWebURL,
   stickerEmojiType,
   slotTimes,
   MAX_ALLOWED_REFERRALS,
@@ -762,4 +769,5 @@ export {
   SECONDARY_APPLICATIONS,
   NEW_RELIC_CONFIG,
   INACTIVE,
+  forgotPassWebURL,
 };
