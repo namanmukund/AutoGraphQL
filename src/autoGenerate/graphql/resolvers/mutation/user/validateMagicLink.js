@@ -1,3 +1,5 @@
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable no-await-in-loop */
 import { get } from 'lodash';
 import jwt from 'jsonwebtoken';
 import moment from 'moment';
@@ -89,6 +91,8 @@ const validateMagicLinkMutationResolver = async (
   if (!linkToken) {
     throw new MissingMandatoryInputInRequestError();
   }
+  let isBuddyLogin = false;
+  const buddyLoginInput = [];
   // decoding user and expiry time from token received
   await jwt.verify(linkToken, linkTokenSecret, async (error, values) => {
     if (error) {
@@ -99,6 +103,9 @@ const validateMagicLinkMutationResolver = async (
     }
     const { expiresIn, usersInfo } = get(values, 'linkData');
     const id = (usersInfo && usersInfo.length > 1) ? get(usersInfo, '[0].id') : get(usersInfo, 'id');
+    if (usersInfo && Array.isArray(usersInfo) && usersInfo.length > 1) {
+      isBuddyLogin = true;
+    }
     // getting link details from logs
     const magicLinkDetails = await getTokenDetails(linkToken, id);
     if (!magicLinkDetails.length) {
@@ -115,17 +122,42 @@ const validateMagicLinkMutationResolver = async (
     if (moment().isAfter(moment(expiresIn))) {
       throw new LinkExpiredError();
     }
-    const userInformation = await getuserInfo(id);
-    const parentInfo = get(userInformation, 'studentProfile.parents[0].user');
-    if (get(parentInfo, 'id')) {
-      input.id = get(parentInfo, 'id');
-    } else input.id = id;
+    if (isBuddyLogin) {
+      usersInfo.forEach((buddy, index) => {
+        let isPrimaryUser = false;
+        if (index === 0) {
+          isPrimaryUser = true;
+        }
+        buddyLoginInput.push({ userId: get(buddy, 'id'), isPrimaryUser });
+      });
+    }
+    if (!isBuddyLogin) {
+      const userInformation = await getuserInfo(id);
+      const parentInfo = get(userInformation, 'studentProfile.parents[0].user');
+      if (get(parentInfo, 'id')) {
+        input.id = get(parentInfo, 'id');
+      } else input.id = id;
+    }
   });
-
   Object.assign(authentication, {
     bypass: true,
   });
   const modelQueries = new QueryController(USER_TYPE, authentication);
+  if (isBuddyLogin && buddyLoginInput.length) {
+    let userTokenData = { buddyDetails: [] };
+    for (const user of buddyLoginInput) {
+      const userData = await getUserFromDBQuery({ id: get(user, 'userId') }, modelQueries);
+      const userDetail = createUserTokenTypeData(userData, authentication);
+      if (get(user, 'isPrimaryUser')) {
+        userTokenData.buddyDetails.push({ ...userDetail, isPrimaryUser: true });
+        userTokenData = { ...userTokenData, ...userDetail };
+      } else {
+        userTokenData.buddyDetails.push({ ...userDetail, isPrimaryUser: false });
+      }
+    }
+    return userTokenData;
+  }
+
   const userData = await getUserFromDBQuery(input, modelQueries);
   if (!userData || !userData.id) {
     throw new DatabaseRecordNotFoundError();
