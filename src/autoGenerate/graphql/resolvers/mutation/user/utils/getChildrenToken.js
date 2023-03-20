@@ -64,7 +64,9 @@ const getChildrenToken = async (context, userId, role) => {
     }
 
     const { user } = studentProfile;
-    childrenToken.push(createUserTokenTypeData(user));
+    childrenToken.push(createUserTokenTypeData({
+      ...user, isMentorChild: true,
+    }));
   } else {
     const {
       parentProfile,
