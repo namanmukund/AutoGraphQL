@@ -12,7 +12,11 @@ import { MutationController } from '../../../controllers';
 const saveUserTokenInDatabase = (user, token) => {
   const userId = get(user, 'id');
   const userRole = get(user, 'role');
+  const isMentorChild = get(user, 'isMentorChild', false);
   let userTokenObject = {};
+  // Restricting the mentee token creation for the mentor child
+  if (isMentorChild) return true;
+
   // Only Store Token for Mentee
   if (user && (userRole === 'mentee')) {
     userTokenObject = {
@@ -37,6 +41,7 @@ const saveUserTokenInDatabase = (user, token) => {
       userController.addDocument(userTokenObject);
     }
   }
+  return true;
 };
 
 const createUserTokenTypeData = (savedUser, authentication, toPhone, isSignUp = false) => {
