@@ -8,6 +8,7 @@ const addStudentProfile = async (
   studentSchoolId,
   batchId,
   bookingAgentId,
+  academicYearId,
   context,
 ) => {
   let schoolConnectId = '';
@@ -32,6 +33,7 @@ mutation($input: StudentProfileInput!){
   ${schoolConnectId}
   ${batchConnectId}
   ${bookingAgentConnectId}
+  ${academicYearId ? `academicYearConnectIds: ["${academicYearId}"]` : ''}
   ){
     id
   }

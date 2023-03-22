@@ -76,6 +76,7 @@ const School = `
     labInspections: [LabInspection] @relation(name: "LabInspectionLab")
     labInspectedDevices: [LabInspectedDevice] @relation(name: "SchoolLabInspectedDevice")
     comments: [SchoolComment]
+    academicYears: [AcademicYear] @relation(name: "AcademicYearSchool")
   }
 `;
 export default [School, StudentsDraftCSV, DraftCSVConfig, SchoolCommentType, SchoolComment];

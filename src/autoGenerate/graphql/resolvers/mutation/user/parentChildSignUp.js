@@ -103,7 +103,7 @@ const parentChildSignUpMutationResolver = async (
   authentication,
 ) => {
   const {
-    input, schoolId, campaignId = false, bookingAgentId = '',
+    input, schoolId, campaignId = false, bookingAgentId = '', academicYearId = '',
   } = params;
   const { fieldNodes } = info;
   const fieldsFetched = getFieldsBeingFetched(fieldNodes);
@@ -403,6 +403,7 @@ If coming from campaign and the type os b2b allocate the user to the right batch
     studentSchoolId,
     batchId,
     bookingAgentConnectId,
+    academicYearId,
     context,
   );
 

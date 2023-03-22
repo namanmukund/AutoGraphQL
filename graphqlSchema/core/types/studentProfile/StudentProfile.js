@@ -28,6 +28,7 @@ const StudentProfile = `
     events: [Event] @relation(name:"EventStudentProfile")
     wonEvents: [EventWinner] @relation(name:"EventWinnerStudentProfile")
     previousSchoolClass: [PreviousSchoolClass]
+    academicYears: [AcademicYear] @relation(name: "AcademicYearStudentProfile")
 }`;
 
 export default [StudentProfile, previousSchoolClass];

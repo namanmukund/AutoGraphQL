@@ -174,6 +174,7 @@ import SessionFeedback from './sessionFeedback';
 import GSuiteResponse from './googleApisCustomQueries';
 import MenteeToken from './menteeToken';
 import LabInspection from './labInspection';
+import AcademicYear from './academicYear';
 
 export default [
   ...User,
@@ -352,4 +353,5 @@ export default [
   ...SessionFeedback,
   ...GSuiteResponse,
   ...MenteeToken,
+  ...AcademicYear,
 ];
