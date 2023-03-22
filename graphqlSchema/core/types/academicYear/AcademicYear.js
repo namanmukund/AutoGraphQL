@@ -4,7 +4,7 @@ const AcademicYear = `
     startDate: Date
     endDate: Date
     students: [StudentProfile] @relation(name: "AcademicYearStudentProfile")
-    batches: [batch] @relation(name: "BatchAcademicYear")
+    batches: [Batch] @relation(name: "BatchAcademicYear")
   }
 `;
 export default [AcademicYear];
