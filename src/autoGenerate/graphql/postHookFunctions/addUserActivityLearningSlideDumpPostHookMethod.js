@@ -5,7 +5,7 @@ import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import topicComponentRuleQuery from './utils/topicComponentRuleQuery';
 import updateCurrentComponentStatusOfNewCourse from './utils/updateCurrentComponentStatusOfNewCourse';
 
-const userLearningObjectiveQuery = (userId, learningObjectiveId, courseId, learningSlideId) => `
+const userLearningObjectiveQuery = (userId, learningObjectiveId, courseId, topicId, learningSlideId) => `
   query{
     userLearningObjectives(filter:{
       and:[
@@ -16,6 +16,7 @@ const userLearningObjectiveQuery = (userId, learningObjectiveId, courseId, learn
         id:"${learningObjectiveId}"
       }}
       ${courseId ? `{course_some:{id:"${courseId}"}}` : ''}
+      ${topicId ? `{ topic_some: { id:"${topicId}" } }` : ''}
       ]
     }){
       id
@@ -97,8 +98,11 @@ const addUserActivityLearningSlideDumpPostHookMethod = async (input, mutation, c
   if (!topicId) {
     log('Not able to fetch LearningObjective.topic in addUserActivityLearningSlidePostHookMethod');
   }
+  let topicConnectId = '';
+  if (topicId) topicConnectId = topicId;
+  else if (topicIdFromInput) topicConnectId = topicIdFromInput;
   const userLearningObjectiveQueryRes = await callLocalGraphqlApi(
-    userLearningObjectiveQuery(userId, learningObjectiveId, courseId, learningSlideId), context,
+    userLearningObjectiveQuery(userId, learningObjectiveId, courseId, topicConnectId, learningSlideId), context,
   );
   const userLearningObjectiveInfo = get(userLearningObjectiveQueryRes, 'data.userLearningObjectives[0]');
   const {
