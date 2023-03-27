@@ -1,5 +1,5 @@
 const isSentryAppAndEnv = () => {
-  if (process.env.NODE_ENV === 'production' && process.env.IS_SCHEDULER_INSTANCE === 'true') {
+  if (process.env.NODE_ENV === 'production') {
     return true;
   }
   return false;

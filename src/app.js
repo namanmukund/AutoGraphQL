@@ -11,7 +11,7 @@ import schema from './graphql';
 import { log, types } from '../utils';
 import { authMiddleware, graphqlUpload } from './middlewares';
 import isSentryAppAndEnv from '../utils/isSentryAppAndEnv';
-import Raven from './Raven';
+import Sentry, { SentryApolloPlugin } from './Sentry';
 import dataExtractedFromReq from '../constants/dataExtractedFromReq';
 import { getParsedASTMap } from './autoGenerate/utils';
 import phonePeRoutes from './externalProductAPI/phonePe/routes';
@@ -39,13 +39,13 @@ typeformRoute(app);
 
 const path = `/graphql/${application}`;
 
-// Must configure Raven before doing anything else with it
+// Must configure Sentry before doing anything else with it
 if (isSentryAppAndEnv(application, env)) {
   // The request handler must be the first middleware on the app
-  app.use(Raven.requestHandler());
+  app.use(Sentry.Handlers.requestHandler());
 
-  // The error handler must be before any other error middleware
-  app.use(Raven.errorHandler());
+  // TracingHandler creates a trace for every incoming request
+  app.use(Sentry.Handlers.tracingHandler());
 }
 
 // for handling uncaught exceptions
@@ -53,7 +53,7 @@ process.on('unhandledRejection', (reason) => {
   log(`Unhandled Exception Occured. Reason: ${JSON.stringify(reason)},${reason}`, 'error');
   // capture unhandledRejection error and send to sentry when env is staging and production
   if (isSentryAppAndEnv(application, env)) {
-    Raven.captureException(reason);
+    Sentry.captureException(reason);
   }
 });
 
@@ -75,6 +75,12 @@ app.use(cors(corsOptions));
 // the WebSocket server.
 
 app.use(path, bodyParser.json(), graphqlUpload({ uploadDir: '/tmp/uploads' }));
+
+if (isSentryAppAndEnv(application, env)) {
+  // The error handler must be before any other error middleware
+  app.use(Sentry.Handlers.errorHandler());
+}
+
 // To pass parsedASTMap in context
 const parsedASTMap = getParsedASTMap(types);
 
@@ -129,7 +135,7 @@ const server = new ApolloServer({
       'editor.theme': 'light',
     },
   },
-  plugins: [socketServerPlugin, apolloNewRelicPlugin],
+  plugins: [socketServerPlugin, apolloNewRelicPlugin, SentryApolloPlugin],
   debug: true,
   uploads: false,
   cache: new BaseRedisCache({
@@ -140,9 +146,9 @@ const server = new ApolloServer({
   },
   formatError: (error) => {
     if (error.name !== 'GraphQLError') {
-      Raven.captureException(error);
+      Sentry.captureException(error);
     } else {
-      Raven.captureMessage(`Message: ${error.message}`);
+      Sentry.captureMessage(`Message: ${error.message}`);
     }
 
     return {
@@ -153,7 +159,9 @@ const server = new ApolloServer({
   context: ({ req, res, connection }) => {
     let additionalContextDataFromHeader = {};
     if (req && req.headers) {
-      additionalContextDataFromHeader = getAdditionalContextData({ headers: req.headers });
+      additionalContextDataFromHeader = getAdditionalContextData({
+        headers: req.headers,
+      });
     }
     if (connection) {
       // context comes in connection in case WS
@@ -197,16 +205,20 @@ const server = new ApolloServer({
       if (req.currentApp) {
         Object.assign(contextObj, {
           extra: {
-            appInfo: req.currentApp,
+            appInfo:
+              typeof req.currentApp === 'object'
+              && typeof req.currentApp !== 'string'
+                ? JSON.stringify(req.currentApp)
+                : req.currentApp,
             query: req.body.query,
-            variables: req.body.variables,
+            variables: JSON.stringify(req.body.variables || {}),
           },
           tags: {
             app: req.currentApp.name,
           },
         });
       }
-      Raven.setContext(contextObj);
+      Sentry.setContext('context', contextObj);
     }
     // return context data
     const obj = {};

@@ -72,6 +72,7 @@ import updateMentorProfilePostHookMethod from './postHookFunctions/updateMentorP
 import addUserActivityLearningSlideDumpPostHookMethod from './postHookFunctions/addUserActivityLearningSlideDumpPostHookMethod';
 import updateRetakeSessionPostHookMethod from './postHookFunctions/updateRetakeSessionPostHookMethod';
 import reportDumpPostHook from './postHookFunctions/reportDumpPostHook';
+import { setSentryTransactionName } from '../../Sentry';
 // import updateEventSessionPostHookMethod from './postHookFunctions/updateEventSessionPostHookMethod';
 // import addEventSessionPostHookMethod from './postHookFunctions/addEventSessionPostHookMethod';
 
@@ -395,6 +396,8 @@ const posthook = async (input, mutationName, context, params, info) => {
       break;
   }
   reportDumpPostHook(input, mutationName, context);
+  // Setting Sentry Transaction Name for GraphQL Requests.
+  if (mutationName) setSentryTransactionName({ operationName: mutationName });
   return hook(input, mutationName, 'PostHook');
 };
 export { posthook };

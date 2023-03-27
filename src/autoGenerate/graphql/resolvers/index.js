@@ -127,6 +127,7 @@ import redisUtils from './query/redisUtils';
 import gsuiteUtils from './query/gsuiteUtils';
 import getSubmittedAssignmentsStudents from './query/methods/getSubmittedAssignmentsStudents';
 import syncUserSessionReports from '../../../../utils/scheduleJobs/jobs/batchAndUpdateUserSessionReports';
+import { setSentryTransactionName } from '../../../Sentry';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -370,6 +371,8 @@ Object.keys(parsedASTMap).forEach((type) => {
         Object.assign(authentication, {
           mutationOrQueryName: modelMeta,
         });
+        // Setting the transaction name for sentry
+        setSentryTransactionName({ operationName: modelMeta });
         return fetchListAggregationQueryResolver(
           root,
           params,

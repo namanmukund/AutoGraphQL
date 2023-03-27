@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import PrettyError from 'pretty-error';
-import Raven from 'raven';
+import Sentry from '@sentry/node';
 import { NEW_RELIC_CONFIG } from '../constants';
 import isSentryAppAndEnv from './isSentryAppAndEnv';
 
@@ -74,9 +74,9 @@ const log = (string, type = 'status', isSentry = false, isError = false) => {
   /* eslint-enable no-console */
   if (isSentry && isSentryAppAndEnv(application, env)) {
     if (isError) {
-      Raven.captureException(`Error: ${formattedString}`);
+      Sentry.captureException(`Error: ${formattedString}`);
     } else {
-      Raven.captureMessage(`Message: ${formattedString}`);
+      Sentry.captureMessage(`Message: ${formattedString}`);
     }
   }
   if (
