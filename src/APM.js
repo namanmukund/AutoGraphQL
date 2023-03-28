@@ -1,9 +1,7 @@
 /* eslint-disable no-restricted-syntax */
 import * as Sentry from '@sentry/node';
-import * as Tracing from '@sentry/tracing';
 import { ApolloError } from 'apollo-server-express';
-import sentryDSN from '../config/sentry/index';
-import { version } from '../package.json';
+import SENTRY_CONFIG from '../config/sentry/sentryConfig';
 import { log } from '../utils';
 import isAPMEnabledAppAndEnv from '../utils/isAPMEnabledAppAndEnv';
 import setSentryTransactionName from '../utils/setSentryTransactionName';
@@ -12,7 +10,6 @@ const APMConnectors = {
   SENTRY: 'sentry',
 };
 
-const release = version || 'norelease';
 const env = process.env.NODE_ENV || 'staging';
 const application = process.env.APPLICATION || 'core';
 
@@ -22,18 +19,20 @@ class APM {
   constructor(config = {}) {
     if (isAPMEnabledAppAndEnv(application, env)) {
       for (const key of Object.keys(config)) {
-        switch (key) {
-          case APMConnectors.SENTRY: {
-            const sentryInstance = Sentry.init(config[key]);
-            log('Sentry APM Initialized');
-            this.apmInstances.push({
-              type: APMConnectors.SENTRY,
-              instance: sentryInstance,
-            });
-            break;
-          }
-          default: {
-            break;
+        if (config[key]) {
+          switch (key) {
+            case APMConnectors.SENTRY: {
+              const sentryInstance = Sentry.init(config[key]);
+              log('Sentry APM Initialized');
+              this.apmInstances.push({
+                type: APMConnectors.SENTRY,
+                instance: sentryInstance,
+              });
+              break;
+            }
+            default: {
+              break;
+            }
           }
         }
       }
@@ -208,17 +207,7 @@ class APM {
   });
 }
 
-const sentryConfig = {
-  dsn: sentryDSN,
-  environment: env,
-  integrations: [
-    new Sentry.Integrations.Http({ tracing: true }),
-    new Tracing.Integrations.Apollo(),
-  ],
-  tracesSampleRate: 1.0,
-  release,
-};
-
+// Initializing APM with Sentry.
 export default new APM({
-  [APMConnectors.SENTRY]: sentryConfig,
+  [APMConnectors.SENTRY]: SENTRY_CONFIG,
 });
