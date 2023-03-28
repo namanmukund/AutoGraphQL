@@ -1,12 +1,12 @@
 const sentryConfig = {
   test: {
-    sentryDSN: 'https://ba594c2965dc41a699fdfc0bd4e6b7cc@sentry.io/1859809',
+    sentryDSN: 'https://c1afd683c2384b1ab738b0ce9907ebee@o4504891884568576.ingest.sentry.io/4504909796343808',
   },
   development: {
-    sentryDSN: 'https://ba594c2965dc41a699fdfc0bd4e6b7cc@sentry.io/1859809',
+    sentryDSN: 'https://c1afd683c2384b1ab738b0ce9907ebee@o4504891884568576.ingest.sentry.io/4504909796343808',
   },
   staging: {
-    sentryDSN: 'https://ba594c2965dc41a699fdfc0bd4e6b7cc@sentry.io/1859809',
+    sentryDSN: 'https://c1afd683c2384b1ab738b0ce9907ebee@o4504891884568576.ingest.sentry.io/4504909796343808',
   },
 };
 

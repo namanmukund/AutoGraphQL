@@ -1,8 +1,7 @@
 import fetch from 'node-fetch';
 import PrettyError from 'pretty-error';
-import Sentry from '@sentry/node';
 import { NEW_RELIC_CONFIG } from '../constants';
-import isSentryAppAndEnv from './isSentryAppAndEnv';
+import isAPMEnabledAppAndEnv from './isAPMEnabledAppAndEnv';
 
 const application = process.env.APPLICATION || 'core';
 const env = process.env.NODE_ENV || 'development';
@@ -59,7 +58,7 @@ export const replaceErrors = (key, value) => {
   return value;
 };
 
-const log = (string, type = 'status', isSentry = false, isError = false) => {
+const log = (string, type = 'status', isAPM = false, isError = false) => {
   let dstring = string;
   let logType = type;
   if (typeof string !== 'string') {
@@ -72,11 +71,11 @@ const log = (string, type = 'status', isSentry = false, isError = false) => {
   /* eslint-disable no-console */
   console.log(`${logType}: ${formattedString}`);
   /* eslint-enable no-console */
-  if (isSentry && isSentryAppAndEnv(application, env)) {
+  if (isAPM && isAPMEnabledAppAndEnv(application, env)) {
     if (isError) {
-      Sentry.captureException(`Error: ${formattedString}`);
+      APM.captureException(`Error: ${formattedString}`);
     } else {
-      Sentry.captureMessage(`Message: ${formattedString}`);
+      APM.captureMessage(`Message: ${formattedString}`);
     }
   }
   if (

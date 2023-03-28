@@ -1,8 +1,8 @@
-const isSentryAppAndEnv = () => {
+const isAPMEnabledAppAndEnv = () => {
   if (process.env.NODE_ENV === 'production') {
     return true;
   }
   return false;
 };
 
-export default isSentryAppAndEnv;
+export default isAPMEnabledAppAndEnv;
