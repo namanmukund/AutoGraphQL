@@ -11,7 +11,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const common = require('./webpack.cloudCommon');
 
 // const release = packageJson.version || 'norelease';
-const environment = process.env.NODE_ENV || 'production';
+const environment = process.env.NODE_ENV || 'staging';
 module.exports = merge(common, {
   devtool: 'source-map',
   mode: (environment === 'production') ? environment : 'development',
