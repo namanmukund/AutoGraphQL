@@ -1,5 +1,5 @@
 /* AutoGenerates resolvers for model types  */
-import { camelCase, isArray, get, set } from 'lodash';
+import { camelCase, isArray, get } from 'lodash';
 import pluralize from 'pluralize';
 import { withFilter } from 'graphql-subscriptions';
 import { getParsedASTMap, checkIfArgumentsAreFromSameType, getFieldsBeingFetched } from '../../utils';
