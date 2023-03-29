@@ -1,5 +1,5 @@
 const isAPMEnabledAppAndEnv = () => {
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging') {
     return true;
   }
   return false;
