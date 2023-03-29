@@ -31,7 +31,7 @@ import isEqualArrays from './isEqualArrays';
 import createAndThrowApolloError from './createAndThrowApolloError';
 import compareObjects from './compareObjects';
 import isObject from './isObject';
-import isSentryAppAndEnv from './isSentryAppAndEnv';
+import isAPMEnabledAppAndEnv from './isAPMEnabledAppAndEnv';
 import throwAsyncError from './throwAsyncError';
 import getTimeDifferenceWithCurrentDateInSeconds from './getTimeDifferenceWithCurrentDateInSeconds';
 import dateInPast from './isDateInPast';
@@ -79,7 +79,7 @@ export {
   createAndThrowApolloError,
   compareObjects,
   isObject,
-  isSentryAppAndEnv,
+  isAPMEnabledAppAndEnv,
   throwAsyncError,
   getTimeDifferenceWithCurrentDateInSeconds,
   dateInPast,

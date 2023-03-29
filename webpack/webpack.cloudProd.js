@@ -11,8 +11,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const common = require('./webpack.cloudCommon');
 
 // const release = packageJson.version || 'norelease';
-const environment = process.env.NODE_ENV || 'development';
-
+const environment = process.env.NODE_ENV || 'staging';
 module.exports = merge(common, {
   devtool: 'source-map',
   mode: (environment === 'production') ? environment : 'development',
@@ -23,6 +22,7 @@ module.exports = merge(common, {
     }),
     // new webpack.IgnorePlugin(/schema\.json/),
     // new SentryCliPlugin({
+    //   url: 'https://sentry.io/',
     //   include: './build',
     //   release,
     //   ignoreFile: '.sentrycliignore',

@@ -107,6 +107,7 @@ const temporaryScript = (async (root, params, context) => {
   // await updateUserLOWithLearningSlides(context);
   // await updateSessionOtpType();
   // await updateLoWithLsHavingPq(context);
+  // eslint-disable-next-line no-console
   return {
     result: true,
   };
