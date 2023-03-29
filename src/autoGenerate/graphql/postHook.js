@@ -72,7 +72,6 @@ import updateMentorProfilePostHookMethod from './postHookFunctions/updateMentorP
 import addUserActivityLearningSlideDumpPostHookMethod from './postHookFunctions/addUserActivityLearningSlideDumpPostHookMethod';
 import updateRetakeSessionPostHookMethod from './postHookFunctions/updateRetakeSessionPostHookMethod';
 import reportDumpPostHook from './postHookFunctions/reportDumpPostHook';
-import APM from '../../APM';
 // import updateEventSessionPostHookMethod from './postHookFunctions/updateEventSessionPostHookMethod';
 // import addEventSessionPostHookMethod from './postHookFunctions/addEventSessionPostHookMethod';
 
@@ -396,8 +395,6 @@ const posthook = async (input, mutationName, context, params, info) => {
       break;
   }
   reportDumpPostHook(input, mutationName, context);
-  // Setting APM Transaction Name for GraphQL Requests.
-  if (mutationName) APM.setTransactionName({ operationName: mutationName });
   return hook(input, mutationName, 'PostHook');
 };
 export { posthook };

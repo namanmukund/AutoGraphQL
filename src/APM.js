@@ -116,15 +116,38 @@ class APM {
     }
   };
 
+  setTransactionNameAndTags = (props) => {
+    if (props && props.operationName) this.setTransactionName(props);
+    if (props && props.tags) this.setTags(props.tags);
+  }
+
+  setTags = (tags) => {
+    for (const instance of this.apmInstances) {
+      switch (instance.type) {
+        case APMConnectors.SENTRY: {
+          const scope = Sentry.getCurrentHub().getScope();
+          for (const tag of tags) {
+            if (tag && tag.label && tag.value) {
+              scope.setTag(tag.label, tag.value);
+            }
+          }
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+    }
+  }
+
   setTransactionName = (request) => {
     if (request && request.operationName) {
       const mutationName = request.operationName || '';
-      const operationName = mutationName.charAt(0).toUpperCase() + mutationName.slice(1);
 
       for (const instance of this.apmInstances) {
         switch (instance.type) {
           case APMConnectors.SENTRY: {
-            setSentryTransactionName(operationName);
+            setSentryTransactionName(mutationName);
             break;
           }
           default: {

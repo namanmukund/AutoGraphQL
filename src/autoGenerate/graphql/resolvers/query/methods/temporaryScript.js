@@ -108,7 +108,6 @@ const temporaryScript = (async (root, params, context) => {
   // await updateSessionOtpType();
   // await updateLoWithLsHavingPq(context);
   // eslint-disable-next-line no-console
-  console.log(asfasf);
   return {
     result: true,
   };

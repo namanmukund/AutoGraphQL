@@ -1,5 +1,5 @@
 /* AutoGenerates resolvers for model types  */
-import { camelCase, isArray, get } from 'lodash';
+import { camelCase, isArray, get, set } from 'lodash';
 import pluralize from 'pluralize';
 import { withFilter } from 'graphql-subscriptions';
 import { getParsedASTMap, checkIfArgumentsAreFromSameType, getFieldsBeingFetched } from '../../utils';
@@ -143,6 +143,18 @@ const defaultMutationsResolvers = {
   deleteMultipleMutationResolver,
 };
 
+const setAPMTransactionNameAndTag = (transactionName, tagKindValue) => {
+  APM.setTransactionNameAndTags({
+    operationName: transactionName,
+    tags: [
+      {
+        label: 'kind',
+        value: tagKindValue,
+      },
+    ],
+  });
+};
+
 // FIX: instead of id and input just take in params object as args
 const defaultMutationsResolverWrapper = async (
   root,
@@ -158,6 +170,7 @@ const defaultMutationsResolverWrapper = async (
   Object.assign(authentication, {
     mutationOrQueryName: mutationName,
   });
+  setAPMTransactionNameAndTag(mutationName, graphQlOperations.mutation);
   const { input } = params;
   const hookInput = await prehook(input, mutationName, context, params);
   // error in preHook return;
@@ -314,6 +327,8 @@ Object.keys(parsedASTMap).forEach((type) => {
         Object.assign(authentication, {
           mutationOrQueryName: modelSingular,
         });
+        // Setting the transaction name and tags for APM
+        setAPMTransactionNameAndTag(modelSingular, graphQlOperations.query);
         await prehook('', modelSingular, context, params);
         return fetchSingleQueryResolver(
           root,
@@ -343,6 +358,7 @@ Object.keys(parsedASTMap).forEach((type) => {
         Object.assign(authentication, {
           mutationOrQueryName: modelPlural,
         });
+        setAPMTransactionNameAndTag(modelPlural, graphQlOperations.query);
         await prehook('', modelSingular, context, params);
         return fetchListQueryResolver(
           root,
@@ -371,8 +387,7 @@ Object.keys(parsedASTMap).forEach((type) => {
         Object.assign(authentication, {
           mutationOrQueryName: modelMeta,
         });
-        // Setting the transaction name for APM
-        APM.setTransactionName({ operationName: modelMeta });
+        setAPMTransactionNameAndTag(modelMeta, graphQlOperations.query);
         return fetchListAggregationQueryResolver(
           root,
           params,
@@ -533,6 +548,7 @@ Object.keys(parsedASTMap).forEach((type) => {
           Object.assign(authentication, {
             mutationOrQueryName: addRelationMutationName,
           });
+          setAPMTransactionNameAndTag(addRelationMutationName, graphQlOperations.mutation);
           const argumentKeys = Object.keys(params);
           checkIfArgumentsAreFromSameType(argumentKeys, typeName);
           checkIfArgumentsAreFromSameType(argumentKeys, relatedType);
@@ -568,6 +584,7 @@ Object.keys(parsedASTMap).forEach((type) => {
             mutationOrQueryName: removeRelationMutationName,
             mutationOrQuery: graphQlOperations.mutation,
           });
+          setAPMTransactionNameAndTag(removeRelationMutationName, graphQlOperations.mutation);
           const argumentKeys = Object.keys(params);
           checkIfArgumentsAreFromSameType(argumentKeys, typeName);
           checkIfArgumentsAreFromSameType(argumentKeys, relatedType);
@@ -601,152 +618,182 @@ Object.keys(parsedASTMap).forEach((type) => {
   }
 });
 
-resolvers.Mutation.signUp = signUp;
-resolvers.Mutation.signUpAffiliate = signUpAffiliate;
-resolvers.Mutation.signUpSchool = signUpSchool;
-resolvers.Mutation.signupExistingUser = signupExistingUser;
-resolvers.Mutation.login = login;
-resolvers.Mutation.socialLogin = socialLogin;
-resolvers.Mutation.resendUserOTP = resendUserOTP;
-resolvers.Mutation.setUserPassword = setUserPassword;
-resolvers.Mutation.resetUserPassword = resetUserPassword;
-resolvers.Mutation.sendForgotPasswordOTP = sendForgotPasswordOTP;
-resolvers.Mutation.resendForgotPasswordOTP = resendForgotPasswordOTP;
-resolvers.Mutation.validateForgotPasswordOTP = validateForgotPasswordOTP;
-resolvers.Mutation.finishForgotPassword = finishForgotPassword;
-// Backend token strict password set mutation
-resolvers.Mutation.tcirtSdrowssaPtes = tcirtSdrowssaPtes;
-resolvers.Mutation.uploadFile = uploadFile;
-// Resolver for a custom homepage data for user
-resolvers.Mutation.userCourseSyllabus = userCourseSyllabus;
-// Resolver for a custom homepage data for mentee
-resolvers.Mutation.menteeCourseSyllabus = menteeCourseSyllabus;
-// Resolver for a custom journey page for user
-resolvers.Mutation.userTopicJourney = userTopicJourney;
-// Resolver for custom quiz reports for user
-resolvers.Mutation.userFirstAndLatestQuizReport = userFirstAndLatestQuizReport;
-resolvers.Mutation.userFirstAndLatestQuizReports = userFirstAndLatestQuizReport;
-// Resolver for custom skip video by user
-resolvers.Mutation.skipVideo = skipVideo;
-// Resolver for custom skip practice question by user
-resolvers.Mutation.skipPracticeQuestion = skipPracticeQuestion;
-// Resolver for a custom badges implementation for user
-resolvers.Mutation.userBadge = userBadge;
-// Resolver for a custom user badge getting unlocked at topic component level
-resolvers.Mutation.getUnlockedUserBadge = getUnlockedUserBadge;
-// Resolver for a custom get user quiz report, when user submits quiz
-resolvers.Mutation.getQuizReport = getQuizReport;
-// Resolver for sending link on mail in case user forgets password
-resolvers.Mutation.sendForgotPasswordLink = sendForgotPasswordLink;
-// Resolver for resetting user password through forgot password link
-resolvers.Mutation.resetPasswordFromForgotPasswordLink = resetPasswordFromForgotPasswordLink;
-resolvers.Mutation.parentChildSignUp = parentChildSignUp;
-resolvers.Mutation.updateParentChildDetail = updateParentChildDetail;
-resolvers.Mutation.loginViaPassword = loginViaPassword;
-resolvers.Mutation.loginViaOtp = loginViaOtp;
-resolvers.Mutation.signupOrLoginViaOtp = signupOrLoginViaOtp;
-resolvers.Mutation.schoolLiveClassLoginViaOtp = schoolLiveClassLoginViaOtp;
-resolvers.Mutation.validateUserOTP = validateUserOTP;
-// Resolver for a custom get user payment information, when user buys a product
-resolvers.Mutation.getPaymentRequest = getPaymentRequest;
-// Resolver to check whether hash returned by payU is correct and there is no man in middle attack
-resolvers.Mutation.getPaymentResponse = getPaymentResponse;
-resolvers.Mutation.addUpdateBulkSchoolUserData = addUpdateBulkSchoolUserData;
-resolvers.Mutation.verifyBulkSchoolUserLogin = verifyBulkSchoolUserLogin;
-resolvers.Mutation.updateVisitorReactionOnUserApprovedCode = updateVisitorReactionOnUserApprovedCode;
-resolvers.Mutation.addBulkMentorSession = addBulkMentorSession;
-resolvers.Mutation.bookB2B2CSlots = bookB2B2CSlots;
-resolvers.Mutation.rebookMenteeSession = rebookMenteeSession;
-resolvers.Mutation.sendCertificateInMail = sendCertificateInMail;
-resolvers.Mutation.shiftBatchSessionsAfterGivenDate = shiftBatchSessionsAfterGivenDate;
-resolvers.Mutation.sendJourneySnapshotInMail = sendJourneySnapshotInMail;
-resolvers.Mutation.generateCertificate = generateCertificate;
-resolvers.Mutation.generateCertificateInBulk = generateCertificateInBulk;
-resolvers.Mutation.validateMagicLink = validateMagicLink;
-resolvers.Mutation.resetPasswordAndLogin = resetPasswordAndLogin;
-resolvers.Mutation.generateMentorChild = generateMentorChild;
-resolvers.Mutation.updateEventSessionAttendance = updateEventSessionAttendance;
-resolvers.Mutation.scheduleSessions = scheduleSessions;
-// Resolver to retrieve homework status based on filters
-resolvers.Mutation.menteeCourseHomework = menteeCourseHomework;
-// Resolver to retrieve homework status based on filters
-resolvers.Mutation.advanceBatchCurrentSession = advanceBatchCurrentSession;
-// Resolver to generate batchSession Otp
-resolvers.Mutation.generateBatchSessionOtp = generateBatchSessionOtp;
-// Resolver to Update School Student Emails
-resolvers.Mutation.updateSchoolStudentEmail = updateSchoolStudentEmail;
-// Resolver to remove batchstudets and students from batch
-resolvers.Mutation.removeBatchStudents = removeBatchStudents;
+const customMutations = {
+  signUp,
+  signUpAffiliate,
+  signUpSchool,
+  signupExistingUser,
+  login,
+  socialLogin,
+  resendUserOTP,
+  setUserPassword,
+  resetUserPassword,
+  sendForgotPasswordOTP,
+  resendForgotPasswordOTP,
+  validateForgotPasswordOTP,
+  finishForgotPassword,
+  // Backend token strict password set mutation
+  tcirtSdrowssaPtes,
+  uploadFile,
+  // Resolver for a custom homepage data for user
+  userCourseSyllabus,
+  // Resolver for a custom homepage data for mentee
+  menteeCourseSyllabus,
+  // Resolver for a custom journey page for user
+  userTopicJourney,
+  // Resolver for custom quiz reports for user
+  userFirstAndLatestQuizReport,
+  userFirstAndLatestQuizReports: userFirstAndLatestQuizReport,
+  // Resolver for custom skip video by user
+  skipVideo,
+  // Resolver for custom skip practice question by user
+  skipPracticeQuestion,
+  // Resolver for a custom badges implementation for user
+  userBadge,
+  // Resolver for a custom user badge getting unlocked at topic component level
+  getUnlockedUserBadge,
+  // Resolver for a custom get user quiz report, when user submits quiz
+  getQuizReport,
+  // Resolver for sending link on mail in case user forgets password
+  sendForgotPasswordLink,
+  // Resolver for resetting user password through forgot password link
+  resetPasswordFromForgotPasswordLink,
+  parentChildSignUp,
+  updateParentChildDetail,
+  loginViaPassword,
+  loginViaOtp,
+  signupOrLoginViaOtp,
+  schoolLiveClassLoginViaOtp,
+  validateUserOTP,
+  // Resolver for a custom get user payment information, when user buys a product
+  getPaymentRequest,
+  // Resolver to check whether hash returned by payU is correct and there is no man in middle attack
+  getPaymentResponse,
+  addUpdateBulkSchoolUserData,
+  verifyBulkSchoolUserLogin,
+  updateVisitorReactionOnUserApprovedCode,
+  addBulkMentorSession,
+  bookB2B2CSlots,
+  rebookMenteeSession,
+  sendCertificateInMail,
+  shiftBatchSessionsAfterGivenDate,
+  sendJourneySnapshotInMail,
+  generateCertificate,
+  generateCertificateInBulk,
+  validateMagicLink,
+  resetPasswordAndLogin,
+  generateMentorChild,
+  updateEventSessionAttendance,
+  scheduleSessions,
+  // Resolver to retrieve homework status based on filters
+  menteeCourseHomework,
+  // Resolver to retrieve homework status based on filters
+  advanceBatchCurrentSession,
+  // Resolver to generate batchSession Otp
+  generateBatchSessionOtp,
+  // Resolver to Update School Student Emails
+  updateSchoolStudentEmail,
+  // Resolver to remove batchstudets and students from batch
+  removeBatchStudents,
+};
+
+// eslint-disable-next-line no-restricted-syntax
+for (const mutationName of Object.keys(customMutations)) {
+  if (customMutations[mutationName]) {
+    resolvers.Mutation = {
+      ...resolvers.Mutation,
+      [mutationName]: async (root, params, context, info) => {
+        setAPMTransactionNameAndTag(mutationName, graphQlOperations.mutation);
+        return customMutations[mutationName](root, params, context, info);
+      },
+    };
+  }
+}
 
 // queries
-resolvers.Query.me = me;
-resolvers.Query.getPythonByteCode = getPythonByteCode;
-resolvers.Query.salesOperationReport = salesOperationReport;
-resolvers.Query.temporaryScript = temporaryScript;
-resolvers.Query.sendTransactionalMessage = sendTransactionalMessage;
-resolvers.Query.sendTextMessage = sendTextMessage;
-resolvers.Query.sendCommsMessage = sendCommsMessage;
-// Resolver to get total sell amount and amount colected
-resolvers.Query.getTotalAmountCollected = getTotalAmountCollected;
-// Resolver to get the cheatsheets
-resolvers.Query.getCheatSheet = getCheatSheet;
-// Resolver to get User's Course Completion Certificate
-resolvers.Query.getCourseCertificate = getCourseCertificate;
-// Resolver to get Event's Certificate
-resolvers.Query.getEventCertificate = getEventCertificate;
-// Resolver to get students Status
-resolvers.Query.getStudentCurrentStatus = getStudentCurrentStatus;
-// Resolver to get the campaign slots
-resolvers.Query.getCampaignSlots = getCampaignSlots;
-// Resolver to get school Details
-resolvers.Query.getSchoolDetails = getSchoolDetails;
-// Resolver to get user's courses
-resolvers.Query.getUserCourses = getUserCourses;
-// Resolver to get school campaign slots
-resolvers.Query.getSchoolCampaignSlots = getSchoolCampaignSlots;
-// Resolver to get magic link
-resolvers.Query.getMagicLink = getMagicLink;
-// Resolver to get event Speaker
-resolvers.Query.getEventSpeaker = getEventSpeaker;
-// Resolver to get event winner
-resolvers.Query.getEventWinner = getEventWinner;
-// Resolver to get classroom sessions
-resolvers.Query.classroomSessions = classroomSessions;
-// Resolver to get next or prev classroom sessions
-resolvers.Query.getNextOrPrevClassroomSessions = getNextOrPrevClassroomSessions;
-// Resolver to get classroom sessions
-resolvers.Query.getClassroomDetails = getClassroomDetails;
-// Resolver to get classroom sessions
-resolvers.Query.getSchoolAndBatchDetail = getSchoolAndBatchDetail;
-// Resolver to fetch Batch Details from OTP and School Code
-resolvers.Query.getBatchDetails = getBatchDetails;
-// Resolver to fetch Batch Details from OTP and School Code
-resolvers.Query.getBatchStudent = getBatchStudent;
-// Resolver to get classroom session Details
-resolvers.Query.getSessionComponentMeta = getSessionComponentMeta;
-// Resolver to get classroom homework report
-resolvers.Query.getClassroomReport = getClassroomReport;
-// Resolver to get classroom homework report
-resolvers.Query.getPracticeQuestionReport = getPracticeQuestionReport;
-// Resolver to check for the loggedIn status of buddies in buddy login flow
-resolvers.Query.getBuddyStatus = getBuddyStatus;
-// Resolver to get completed practice or coding assignments
-resolvers.Query.getSubmittedAssignmentsStudents = getSubmittedAssignmentsStudents;
-// Redis utility queries
-resolvers.Query.cacheKeys = redisUtils.cacheKeys;
-resolvers.Query.purgeCache = redisUtils.purgeCache;
-resolvers.Query.getCache = redisUtils.getCache;
-// GSuite utility queries
-resolvers.Query.createGsuiteFileOrFolder = gsuiteUtils.createGsuiteFileOrFolder;
-resolvers.Query.updatePermissionOfGsuiteFileOrFolder = gsuiteUtils.updatePermissionOfGsuiteFileOrFolder;
-resolvers.Query.updateParentFolderOfGsuiteFileOrFolder = gsuiteUtils.updateParentFolderOfGsuiteFileOrFolder;
-resolvers.Query.duplicateGsuiteFileOrFolder = gsuiteUtils.duplicateGsuiteFileOrFolder;
-resolvers.Query.deleteGsuiteFileOrFolder = gsuiteUtils.deleteGsuiteFileOrFolder;
-resolvers.Query.gettingGsuiteChildFileOrFolder = gsuiteUtils.gettingGsuiteChildFileOrFolder;
-resolvers.Query.getGsuiteFileOrFolderDetails = gsuiteUtils.getGsuiteFileOrFolderDetails;
-resolvers.Query.createGsuiteLastRevisionFile = gsuiteUtils.createGsuiteLastRevisionFile;
+const customQueries = {
+  me,
+  getPythonByteCode,
+  salesOperationReport,
+  temporaryScript,
+  sendTransactionalMessage,
+  sendTextMessage,
+  sendCommsMessage,
+  // Resolver to get total sell amount and amount colected
+  getTotalAmountCollected,
+  // Resolver to get the cheatsheets
+  getCheatSheet,
+  // Resolver to get User's Course Completion Certificate
+  getCourseCertificate,
+  // Resolver to get Event's Certificate
+  getEventCertificate,
+  // Resolver to get students Status
+  getStudentCurrentStatus,
+  // Resolver to get the campaign slots
+  getCampaignSlots,
+  // Resolver to get school Details
+  getSchoolDetails,
+  // Resolver to get user's courses
+  getUserCourses,
+  // Resolver to get school campaign slots
+  getSchoolCampaignSlots,
+  // Resolver to get magic link
+  getMagicLink,
+  // Resolver to get event Speaker
+  getEventSpeaker,
+  // Resolver to get event winner
+  getEventWinner,
+  // Resolver to get classroom sessions
+  classroomSessions,
+  // Resolver to get next or prev classroom sessions
+  getNextOrPrevClassroomSessions,
+  // Resolver to get classroom sessions
+  getClassroomDetails,
+  // Resolver to get classroom sessions
+  getSchoolAndBatchDetail,
+  // Resolver to fetch Batch Details from OTP and School Code
+  getBatchDetails,
+  // Resolver to fetch Batch Details from OTP and School Code
+  getBatchStudent,
+  // Resolver to get classroom session Details
+  getSessionComponentMeta,
+  // Resolver to get classroom homework report
+  getClassroomReport,
+  // Resolver to get classroom homework report
+  getPracticeQuestionReport,
+  // Resolver to check for the loggedIn status of buddies in buddy login flow
+  getBuddyStatus,
+  // Resolver to get completed practice or coding assignments
+  getSubmittedAssignmentsStudents,
+  // Redis utility queries
+  cacheKeys: redisUtils.cacheKeys,
+  purgeCache: redisUtils.purgeCache,
+  getCache: redisUtils.getCache,
+  // GSuite utility queries
+  createGsuiteFileOrFolder: gsuiteUtils.createGsuiteFileOrFolder,
+  updatePermissionOfGsuiteFileOrFolder: gsuiteUtils.updatePermissionOfGsuiteFileOrFolder,
+  updateParentFolderOfGsuiteFileOrFolder: gsuiteUtils.updateParentFolderOfGsuiteFileOrFolder,
+  duplicateGsuiteFileOrFolder: gsuiteUtils.duplicateGsuiteFileOrFolder,
+  deleteGsuiteFileOrFolder: gsuiteUtils.deleteGsuiteFileOrFolder,
+  gettingGsuiteChildFileOrFolder: gsuiteUtils.gettingGsuiteChildFileOrFolder,
+  getGsuiteFileOrFolderDetails: gsuiteUtils.getGsuiteFileOrFolderDetails,
+  createGsuiteLastRevisionFile: gsuiteUtils.createGsuiteLastRevisionFile,
+  syncUserSessionReports,
+};
 
-resolvers.Query.syncUserSessionReports = syncUserSessionReports;
+// eslint-disable-next-line no-restricted-syntax
+for (const queryName of Object.keys(customQueries)) {
+  if (customQueries[queryName]) {
+    resolvers.Query = {
+      ...resolvers.Query,
+      [queryName]: (async (root, params, context, info) => {
+        setAPMTransactionNameAndTag(queryName, graphQlOperations.query);
+        return customQueries[queryName](root, params, context, info);
+      }),
+    };
+  }
+}
+
 // Resolver for a custom scalar type 'Date'
 resolvers.Date = scalarDate;
 

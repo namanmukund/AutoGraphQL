@@ -199,8 +199,6 @@ const server = new ApolloServer({
               && typeof req.currentApp !== 'string'
                 ? JSON.stringify(req.currentApp)
                 : req.currentApp,
-            query: req.body.query,
-            variables: JSON.stringify(req.body.variables || {}),
           },
           tags: {
             app: req.currentApp.name,
