@@ -22,12 +22,14 @@ class APM {
         if (config[key]) {
           switch (key) {
             case APMConnectors.SENTRY: {
-              const sentryInstance = Sentry.init(config[key]);
-              log('Sentry APM Initialized');
-              this.apmInstances.push({
-                type: APMConnectors.SENTRY,
-                instance: sentryInstance,
-              });
+              if (config[key].dsn) {
+                Sentry.init(config[key]);
+                log('Sentry APM Initialized');
+                this.apmInstances.push({
+                  type: APMConnectors.SENTRY,
+                  config: config[key],
+                });
+              }
               break;
             }
             default: {
