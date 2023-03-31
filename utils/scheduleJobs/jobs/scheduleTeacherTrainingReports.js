@@ -63,7 +63,7 @@ const scheduleTeacherTrainingReports = async () => {
       teacherTaughtId,
       homeworkVisited,
       homeworkAttempted,
-      homeworkScore,
+      homeworkScore = 0,
       homeworkExists,
       homeworkQuizLog = [],
     } = userSessionReport;
@@ -82,6 +82,13 @@ const scheduleTeacherTrainingReports = async () => {
           unansweredQuestionCount = get(homeworkQuizReport, 'unansweredQuestionCount');
         }
       }
+      let assignmentScore = (totalQuestionCount && correctQuestionCount) ? ((correctQuestionCount / totalQuestionCount) * 100) : 0;
+      assignmentScore = Number(assignmentScore.toFixed(0));
+      let homeworkScoreValue = Number(homeworkScore.toFixed(0));
+      if (homeworkScoreValue !== assignmentScore) {
+        // Additional check to verify the score
+        homeworkScoreValue = assignmentScore;
+      }
       sessionReportsArray.push({
         teacherName: userName,
         classroomTitle,
@@ -96,7 +103,7 @@ const scheduleTeacherTrainingReports = async () => {
         correctAssignmentCount: correctQuestionCount,
         inCorrectAssignmentCount: inCorrectQuestionCount,
         unansweredAssignmentCount: unansweredQuestionCount,
-        'assignmentScore %': homeworkScore,
+        'assignmentScore %': homeworkScoreValue,
       });
     }
   }
