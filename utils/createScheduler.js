@@ -168,7 +168,7 @@ const createScheduler = (schedulerName) => {
     case 'teacherTrainingReport':
       rule.tz = 'Asia/Kolkata';
       rule.minute = 0;
-      rule.hour = 21;
+      rule.hour = 22;
       rule.dayOfWeek = new schedule.Range(0, 6);
       schedule.scheduleJob(rule, async () => {
         // eslint-disable-next-line no-console
