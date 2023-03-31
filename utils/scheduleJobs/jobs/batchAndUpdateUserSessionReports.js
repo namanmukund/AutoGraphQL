@@ -112,7 +112,7 @@ const getAggregationQueries = (documentIdsToFetch) => {
             .Lookup(EqualityPayload('School', 'school', 'school.typeId', 'id'))
             .Lookup(EqualityPayload('User', 'allottedMentor', 'allottedMentor.typeId', 'id'))
             .Project({
-              id: 1, classroomTitle: 1, code: 1, school: ArrayElemAt('$school', 0), allottedMentor: ArrayElemAt('$allottedMentor', 0), createdAt: 1, updatedAt: 1,
+              id: 1, classroomTitle: 1, code: 1, school: ArrayElemAt('$school', 0), allottedMentor: ArrayElemAt('$allottedMentor', 0), createdAt: 1, updatedAt: 1, isTeacherTraining: 1,
             }),
         }))
       .Project({
@@ -268,7 +268,13 @@ const getBaseDocumentAndCalculatedFields = ({
 
   const sessionDuration = (get(sessionDetails, 'sessionStartDate') && get(sessionDetails, 'sessionEndDate')) ? Math.abs(sessionStartDate.getTime() - sessionEndDate.getTime()) / 1000 : 0;
 
-  const userRole = get(userDetails, 'studentProfile.mentor.typeId') ? 'Teacher' : 'Student';
+  let userRole = get(userDetails, 'studentProfile.mentor.typeId') ? 'Teacher' : 'Student';
+  const isTeacherTrainingBatch = get(sessionDetails, 'batch.isTeacherTraining', false);
+  const teacherTaughtId = get(existingSessionReport, 'teacherTaughtId') || get(sessionDetails, 'batch.allottedMentor.id');
+  if (isTeacherTrainingBatch) {
+    if (userId !== teacherTaughtId && studentAttendanceDoc) userRole = 'TeacherTraining';
+    else userRole = 'Trainer';
+  }
 
   const sessionComponentRule = get(topicDoc, 'topicComponentRule') || get(sessionDetails, 'topic.topicComponentRule') || [];
   const sessionClassworkComponents = sessionComponentRule.filter((component) => !['homeworkAssignment', 'quiz', 'homeworkPractice'].includes(component.componentName));
@@ -302,7 +308,7 @@ const getBaseDocumentAndCalculatedFields = ({
     sessionCreationDate: get(sessionDetails, 'createdAt'),
     sessionUpdationAt: get(sessionDetails, 'updatedAt'),
     teacherTaughtName: get(existingSessionReport, 'teacherTaughtName') || get(sessionDetails, 'batch.allottedMentor.name'),
-    teacherTaughtId: get(existingSessionReport, 'teacherTaughtId') || get(sessionDetails, 'batch.allottedMentor.id'),
+    teacherTaughtId,
     sessionClassworkComponents,
     sessionHomeworkComponents,
   };
