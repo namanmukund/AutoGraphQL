@@ -13,6 +13,7 @@ import scheduleB2cBatchSessionReport from './scheduleJobs/scheduleB2cBatchSessio
 import deleteUserBlacklistedTokens from './scheduleJobs/deleteUserBlacklistedTokens';
 import batchAndUpdateUserSessionReports from './scheduleJobs/jobs/batchAndUpdateUserSessionReports';
 import { TAT } from '../constants';
+import scheduleTeacherTrainingReports from './scheduleJobs/jobs/scheduleTeacherTrainingReports';
 
 // create scheduler for different functionalities
 const createScheduler = (schedulerName) => {
@@ -162,6 +163,17 @@ const createScheduler = (schedulerName) => {
         // eslint-disable-next-line no-console
         console.log('scheduler started for: ', schedulerName);
         await deleteUserBlacklistedTokens();
+      });
+      break;
+    case 'teacherTrainingReport':
+      rule.tz = 'Asia/Kolkata';
+      rule.minute = 0;
+      rule.hour = 21;
+      rule.dayOfWeek = new schedule.Range(0, 6);
+      schedule.scheduleJob(rule, async () => {
+        // eslint-disable-next-line no-console
+        console.log('scheduler started for: ', schedulerName);
+        await scheduleTeacherTrainingReports();
       });
       break;
     default:

@@ -45,5 +45,6 @@ mongoose.on('error', (err) => {
   }
   if (process.env.NODE_ENV === 'production' && process.env.SECONDARY_APPLICATION_NAME === TAT) {
     createScheduler(TAT);
+    createScheduler('teacherTrainingReport');
   }
 });
