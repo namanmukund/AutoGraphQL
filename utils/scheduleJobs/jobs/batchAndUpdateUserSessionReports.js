@@ -356,7 +356,7 @@ const getBaseDocumentAndCalculatedFields = ({
 
       isTeacherTrainingBatch = get(batchDetails, 'isTeacherTraining', false);
       if (isTeacherTrainingBatch) {
-        // Assigning teacherTaughtId to the for the roles
+        // Assigning teacherTaughtId to check for for the userRole
 
         teacherTaughtId = get(existingSessionReport, 'teacherTaughtId') || get(batchDetails, 'allottedMentor.id');
 
