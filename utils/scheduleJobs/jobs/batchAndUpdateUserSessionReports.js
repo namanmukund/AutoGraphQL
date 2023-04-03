@@ -354,11 +354,12 @@ const getBaseDocumentAndCalculatedFields = ({
       const batchStudentsArray = [...(get(batchDetails, 'students', []) || []), ...(get(batchDetails, 'batchStudents', []) || [])];
       const isUserAddedInBatch = batchStudentsArray.find((student) => get(student, 'id') === get(userDetails, 'studentProfile.id'));
 
+      teacherTaughtId = get(existingSessionReport, 'teacherTaughtId') || get(batchDetails, 'allottedMentor.id');
+      const teacherTaughtName = get(existingSessionReport, 'teacherTaughtName') || get(batchDetails, 'allottedMentor.name');
+
       isTeacherTrainingBatch = get(batchDetails, 'isTeacherTraining', false);
       if (isTeacherTrainingBatch) {
         // Assigning teacherTaughtId to check for for the userRole
-
-        teacherTaughtId = get(existingSessionReport, 'teacherTaughtId') || get(batchDetails, 'allottedMentor.id');
 
         if (userId !== teacherTaughtId && isUserAddedInBatch) userRoleFromBaseDocument = 'TeacherTraining';
         else userRoleFromBaseDocument = 'Trainer';
@@ -369,6 +370,8 @@ const getBaseDocumentAndCalculatedFields = ({
         classroomTitle: get(batchDetails, 'classroomTitle'),
         schoolId: get(batchDetails, 'school.id'),
         schoolName: get(batchDetails, 'school.name'),
+        teacherTaughtId,
+        teacherTaughtName,
         userRole: userRoleFromBaseDocument,
       });
     }
