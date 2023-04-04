@@ -10,8 +10,8 @@ import { useServer as useSocketServer } from 'graphql-ws/lib/use/ws';
 import schema from './graphql';
 import { log, types } from '../utils';
 import { authMiddleware, graphqlUpload } from './middlewares';
-import isSentryAppAndEnv from '../utils/isSentryAppAndEnv';
-import Raven from './Raven';
+import isAPMEnabledAppAndEnv from '../utils/isAPMEnabledAppAndEnv';
+import APM from './APM';
 import dataExtractedFromReq from '../constants/dataExtractedFromReq';
 import { getParsedASTMap } from './autoGenerate/utils';
 import phonePeRoutes from './externalProductAPI/phonePe/routes';
@@ -39,22 +39,13 @@ typeformRoute(app);
 
 const path = `/graphql/${application}`;
 
-// Must configure Raven before doing anything else with it
-if (isSentryAppAndEnv(application, env)) {
-  // The request handler must be the first middleware on the app
-  app.use(Raven.requestHandler());
-
-  // The error handler must be before any other error middleware
-  app.use(Raven.errorHandler());
-}
+APM.setRequestAndTracingHandlers(app);
 
 // for handling uncaught exceptions
 process.on('unhandledRejection', (reason) => {
   log(`Unhandled Exception Occured. Reason: ${JSON.stringify(reason)},${reason}`, 'error');
-  // capture unhandledRejection error and send to sentry when env is staging and production
-  if (isSentryAppAndEnv(application, env)) {
-    Raven.captureException(reason);
-  }
+  // capture unhandledRejection error and send to APM when env is production
+  APM.captureException(reason);
 });
 
 app.get('/', (req, res) => {
@@ -75,6 +66,9 @@ app.use(cors(corsOptions));
 // the WebSocket server.
 
 app.use(path, bodyParser.json(), graphqlUpload({ uploadDir: '/tmp/uploads' }));
+
+APM.setErrorHandler(app);
+
 // To pass parsedASTMap in context
 const parsedASTMap = getParsedASTMap(types);
 
@@ -129,7 +123,7 @@ const server = new ApolloServer({
       'editor.theme': 'light',
     },
   },
-  plugins: [socketServerPlugin, apolloNewRelicPlugin],
+  plugins: [socketServerPlugin, apolloNewRelicPlugin, ...APM.getPluginsForApollo()],
   debug: true,
   uploads: false,
   cache: new BaseRedisCache({
@@ -139,12 +133,13 @@ const server = new ApolloServer({
     defaultMaxAge: 5,
   },
   formatError: (error) => {
+    const apolloErrorObject = Object.create(error);
+    apolloErrorObject.stack = error.extensions.exception.stacktrace.join('\n');
     if (error.name !== 'GraphQLError') {
-      Raven.captureException(error);
+      APM.captureException(apolloErrorObject);
     } else {
-      Raven.captureMessage(`Message: ${error.message}`);
+      // APM.captureMessage(`Message: ${error.message}`);
     }
-
     return {
       ...error,
       code: get(error, 'extensions.exception.name') || '',
@@ -153,7 +148,9 @@ const server = new ApolloServer({
   context: ({ req, res, connection }) => {
     let additionalContextDataFromHeader = {};
     if (req && req.headers) {
-      additionalContextDataFromHeader = getAdditionalContextData({ headers: req.headers });
+      additionalContextDataFromHeader = getAdditionalContextData({
+        headers: req.headers,
+      });
     }
     if (connection) {
       // context comes in connection in case WS
@@ -181,10 +178,10 @@ const server = new ApolloServer({
       req.body.variables = {};
     }
 
-    // initiaize setContext to capture all the useful info before sending any error to sentry
-    if (isSentryAppAndEnv(application, env)) {
+    // initiaize setContext to capture all the useful info before sending any error to APM
+    if (isAPMEnabledAppAndEnv(application, env)) {
       const contextObj = {};
-      // if userId available then send the id to sentry
+      // if userId available then send the id to APM
       if (req.currentUser) {
         const { id } = req.currentUser;
         Object.assign(contextObj, {
@@ -193,20 +190,22 @@ const server = new ApolloServer({
           },
         });
       }
-      // if appInfo available then send the info to sentry
+      // if appInfo available then send the info to APM
       if (req.currentApp) {
         Object.assign(contextObj, {
           extra: {
-            appInfo: req.currentApp,
-            query: req.body.query,
-            variables: req.body.variables,
+            appInfo:
+              typeof req.currentApp === 'object'
+              && typeof req.currentApp !== 'string'
+                ? JSON.stringify(req.currentApp)
+                : req.currentApp,
           },
           tags: {
             app: req.currentApp.name,
           },
         });
       }
-      Raven.setContext(contextObj);
+      APM.setContext('context', contextObj);
     }
     // return context data
     const obj = {};
