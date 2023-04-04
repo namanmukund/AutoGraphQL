@@ -1,4 +1,5 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+// import updateStudentAndClassesOfSchoolsForAcademicYear from '../scriptMethods/updateStudentAndClassesOfSchoolsForAcademicYear';
 // import updateBatchDetailsForReports from '../scriptMethods/updateBatchDetailsForReports';
 // import updateLoWithLsHavingPq from '../scriptMethods/updateLoWithLsHavingPq';
 // import updateUserLOWithLearningSlides from '../scriptMethods/updateUserLOWithLearningSlides';
@@ -110,6 +111,7 @@ const temporaryScript = (async (root, params, context) => {
   // await updateLoWithLsHavingPq(context);
   // eslint-disable-next-line no-console
   // await updateBatchDetailsForReports();
+  // await updateStudentAndClassesOfSchoolsForAcademicYear(context);
   return {
     result: true,
   };
