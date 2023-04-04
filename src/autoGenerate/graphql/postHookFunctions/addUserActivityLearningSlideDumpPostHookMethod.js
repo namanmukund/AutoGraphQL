@@ -53,7 +53,8 @@ const updateUserLearningObjectiveMutation = (userLearningObjectiveId,
   learningSlideStatus,
   learningSlideId,
   startTime,
-  endTime) => `
+  endTime,
+  topicId) => `
   mutation{
     updateUserLearningObjective(id:"${userLearningObjectiveId}",  input:{
       learningSlides: {
@@ -66,7 +67,7 @@ const updateUserLearningObjectiveMutation = (userLearningObjectiveId,
           learningSlideReferenceId: "${learningSlideId}"
         }
       }
-    }){
+    }, ${topicId ? `topicConnectId: "${topicId}"` : ''}){
       id
     }
   }
@@ -182,6 +183,7 @@ const addUserActivityLearningSlideDumpPostHookMethod = async (input, mutation, c
     learningSlideId,
     startTime,
     endTime,
+    topicConnectId,
   ), context);
   return true;
 };
