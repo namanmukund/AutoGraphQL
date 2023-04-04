@@ -55,6 +55,7 @@ const scheduleTeacherTrainingReports = async () => {
     const {
       userId,
       userName,
+      userRole,
       classroomTitle,
       schoolName,
       sessionTitle,
@@ -67,7 +68,7 @@ const scheduleTeacherTrainingReports = async () => {
       homeworkExists,
       homeworkQuizLog = [],
     } = userSessionReport;
-    if (userId !== teacherTaughtId) {
+    if (userRole === 'TeacherTraining') {
       const sortHomeworkQuizLog = (sortBy(homeworkQuizLog, 'mongoDocUpdatedAt') || []);
       let correctQuestionCount = 0;
       let inCorrectQuestionCount = 0;
