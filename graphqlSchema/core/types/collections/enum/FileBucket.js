@@ -9,6 +9,7 @@ const FileBucket = `
     blockly
     temp
     topicThumbnail
+    videosToTranscode
   }`;
 
 export default FileBucket;
