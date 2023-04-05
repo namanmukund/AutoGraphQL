@@ -1,0 +1,238 @@
+/* eslint-disable no-restricted-syntax */
+import * as Sentry from '@sentry/node';
+import { ApolloError } from 'apollo-server-express';
+import SENTRY_CONFIG from '../config/sentry/sentryConfig';
+import { log } from '../utils';
+import isAPMEnabledAppAndEnv from '../utils/isAPMEnabledAppAndEnv';
+import setSentryTransactionName from '../utils/setSentryTransactionName';
+
+const APMConnectors = {
+  SENTRY: 'sentry',
+};
+
+const env = process.env.NODE_ENV || 'staging';
+const application = process.env.APPLICATION || 'core';
+
+class APM {
+  apmInstances = [];
+
+  constructor(config = {}) {
+    if (isAPMEnabledAppAndEnv(application, env)) {
+      for (const key of Object.keys(config)) {
+        if (config[key]) {
+          switch (key) {
+            case APMConnectors.SENTRY: {
+              if (config[key].dsn) {
+                Sentry.init(config[key]);
+                log('Sentry APM Initialized');
+                this.apmInstances.push({
+                  type: APMConnectors.SENTRY,
+                  config: config[key],
+                });
+              }
+              break;
+            }
+            default: {
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  setRequestAndTracingHandlers = (app) => {
+    // Must configure Sentry before doing anything else with it
+    if (isAPMEnabledAppAndEnv(application, env)) {
+      for (const instance of this.apmInstances) {
+        switch (instance.type) {
+          case APMConnectors.SENTRY: {
+            // The request handler must be the first middleware on the app
+            app.use(Sentry.Handlers.requestHandler());
+
+            // TracingHandler creates a trace for every incoming request
+            app.use(Sentry.Handlers.tracingHandler());
+            break;
+          }
+          default: {
+            break;
+          }
+        }
+      }
+    }
+  };
+
+  setErrorHandler = (app) => {
+    for (const instance of this.apmInstances) {
+      switch (instance.type) {
+        case APMConnectors.SENTRY: {
+          app.use(Sentry.Handlers.errorHandler());
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+    }
+  };
+
+  setContext = (label, context) => {
+    for (const instance of this.apmInstances) {
+      switch (instance.type) {
+        case APMConnectors.SENTRY: {
+          Sentry.setContext(label, context);
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+    }
+  };
+
+  captureException = (reason) => {
+    for (const instance of this.apmInstances) {
+      switch (instance.type) {
+        case APMConnectors.SENTRY: {
+          Sentry.captureException(reason);
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+    }
+  };
+
+  captureException = (message) => {
+    for (const instance of this.apmInstances) {
+      switch (instance.type) {
+        case APMConnectors.SENTRY: {
+          Sentry.captureMessage(message);
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+    }
+  };
+
+  setTransactionNameAndTags = (props) => {
+    if (props && props.operationName) this.setTransactionName(props);
+    if (props && props.tags) this.setTags(props.tags);
+  }
+
+  setTags = (tags) => {
+    for (const instance of this.apmInstances) {
+      switch (instance.type) {
+        case APMConnectors.SENTRY: {
+          const scope = Sentry.getCurrentHub().getScope();
+          for (const tag of tags) {
+            if (tag && tag.label && tag.value) {
+              scope.setTag(tag.label, tag.value);
+            }
+          }
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+    }
+  }
+
+  setTransactionName = (request) => {
+    if (request && request.operationName) {
+      const mutationName = request.operationName || '';
+
+      for (const instance of this.apmInstances) {
+        switch (instance.type) {
+          case APMConnectors.SENTRY: {
+            setSentryTransactionName(mutationName);
+            break;
+          }
+          default: {
+            break;
+          }
+        }
+      }
+    }
+  };
+
+  getPluginsForApollo = () => {
+    const plugins = [];
+    for (const instance of this.apmInstances) {
+      switch (instance.type) {
+        case APMConnectors.SENTRY: {
+          plugins.push(this.buildSentryApolloPlugin());
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+    }
+    return plugins;
+  };
+
+  buildSentryApolloPlugin = () => ({
+    requestDidStart({ request }) {
+      if (request.operationName) {
+        setSentryTransactionName(request.operationName);
+      }
+      /* Within this returned object, define functions that respond
+            to request-specific lifecycle events. */
+      return {
+        didEncounterErrors(ctx) {
+          // If we couldn't parse the operation, don't
+          // do anything here
+          if (!ctx.operation) {
+            return;
+          }
+
+          // eslint-disable-next-line no-restricted-syntax
+          for (const err of ctx.errors) {
+            // Only report internal server errors,
+            // all errors extending ApolloError should be user-facing
+            if (err instanceof ApolloError) {
+              // eslint-disable-next-line no-continue
+              continue;
+            }
+
+            // Add scoped report details and send to Sentry
+            Sentry.withScope((scope) => {
+              // Annotate whether failing operation was query/mutation/subscription
+              scope.setTag('kind', ctx.operation.operation);
+
+              // Log query and variables as extras (make sure to strip out sensitive data!)
+              scope.setExtra('query', ctx.request.query);
+              scope.setExtra('variables', ctx.request.variables);
+
+              if (err.path) {
+                // We can also add the path as breadcrumb
+                scope.addBreadcrumb({
+                  category: 'query-path',
+                  message: err.path.join(' > '),
+                  level: 'debug',
+                });
+              }
+
+              const transactionId = ctx.request.http.headers.get('x-transaction-id');
+              if (transactionId) {
+                scope.setTransaction(transactionId);
+              }
+
+              Sentry.captureException(err);
+            });
+          }
+        },
+      };
+    },
+  });
+}
+
+// Initializing APM with Sentry.
+export default new APM({
+  [APMConnectors.SENTRY]: SENTRY_CONFIG,
+});

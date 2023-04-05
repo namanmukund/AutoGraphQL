@@ -1,4 +1,5 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+// import updateBatchDetailsForReports from '../scriptMethods/updateBatchDetailsForReports';
 // import updateLoWithLsHavingPq from '../scriptMethods/updateLoWithLsHavingPq';
 // import updateUserLOWithLearningSlides from '../scriptMethods/updateUserLOWithLearningSlides';
 // import generateBulkBatchSession from '../scriptMethods/generateBulkBatchSession';
@@ -107,6 +108,8 @@ const temporaryScript = (async (root, params, context) => {
   // await updateUserLOWithLearningSlides(context);
   // await updateSessionOtpType();
   // await updateLoWithLsHavingPq(context);
+  // eslint-disable-next-line no-console
+  // await updateBatchDetailsForReports();
   return {
     result: true,
   };

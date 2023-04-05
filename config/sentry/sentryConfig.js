@@ -1,13 +1,17 @@
+import * as Sentry from '@sentry/node';
+import * as Tracing from '@sentry/tracing';
+import { version } from '../../package.json';
+import sentryDSN from '.';
+
 const sentryConfig = {
-  test: {
-    sentryDSN: 'https://ba594c2965dc41a699fdfc0bd4e6b7cc@sentry.io/1859809',
-  },
-  development: {
-    sentryDSN: 'https://ba594c2965dc41a699fdfc0bd4e6b7cc@sentry.io/1859809',
-  },
-  staging: {
-    sentryDSN: 'https://ba594c2965dc41a699fdfc0bd4e6b7cc@sentry.io/1859809',
-  },
+  dsn: sentryDSN,
+  environment: process.env.NODE_ENV || 'staging',
+  integrations: [
+    new Sentry.Integrations.Http({ tracing: true }),
+    new Tracing.Integrations.Apollo(),
+  ],
+  tracesSampleRate: 1.0,
+  release: version || 'norelease',
 };
 
 export default sentryConfig;

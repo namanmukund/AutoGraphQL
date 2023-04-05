@@ -16,7 +16,7 @@ import topicComponentRuleQuery from './utils/topicComponentRuleQuery';
 
 /* query to get userLO to check if document exists for userId and learningObjectiveId
 also we are doing computation for chatStatus and next component for this */
-const userLearningObjectiveQuery = (userId, learningObjectiveId, courseId) => `
+const userLearningObjectiveQuery = (userId, learningObjectiveId, courseId, topicId) => `
   query{
     userLearningObjectives(filter:{
       and:[
@@ -27,6 +27,7 @@ const userLearningObjectiveQuery = (userId, learningObjectiveId, courseId) => `
         id:"${learningObjectiveId}"
       }}
       ${courseId ? `{course_some:{id:"${courseId}"}}` : ''}
+      ${topicId ? `{ topic_some: { id:"${topicId}" } }` : ''}
       ]
     }){
       id
@@ -70,13 +71,14 @@ const updateUserLearningObjectiveMutation = (
   isPracticeQuestionBookmarked,
   practiceQuestionStatus,
   popAllQuery,
+  topicId,
 ) => `
   mutation{
     updateUserLearningObjective(id:"${userLearningObjectiveId}",  input:{
       ${typeof isPracticeQuestionBookmarked === 'boolean' ? `isPracticeQuestionBookmarked: ${isPracticeQuestionBookmarked}` : ''}
       practiceQuestionStatus: ${practiceQuestionStatus}
       ${popAllQuery}
-    }){
+    }, ${topicId ? `topicConnectId:"${topicId}"` : ''}){
       id
     }
   }
@@ -84,12 +86,12 @@ const updateUserLearningObjectiveMutation = (
 
 // mutation to update User Learning Objective, pushing updated practice questions
 const updateUserLearningObjectiveMutationPracticeQuestions = (
-  userLearningObjectiveId, pushManyQuery,
+  userLearningObjectiveId, pushManyQuery, topicId,
 ) => `
   mutation{
     updateUserLearningObjective(id:"${userLearningObjectiveId}",  input:{
       ${pushManyQuery}
-    }){
+    }, ${topicId ? `topicConnectId:"${topicId}"` : ''}){
       id
     }
   }
@@ -191,7 +193,7 @@ const addUserActivityPQDumpPostHookMethod = async (input, mutationName, context)
   -we get next component from the document and update user current topic component status with same
   */
   const userLearningObjectiveQueryRes = await callLocalGraphqlApi(
-    userLearningObjectiveQuery(userId, learningObjectiveId, courseId), context,
+    userLearningObjectiveQuery(userId, learningObjectiveId, courseId, topicIdFromInput), context,
   );
   const userLearningObjectiveInfo = get(userLearningObjectiveQueryRes, 'data.userLearningObjectives[0]');
   const {
@@ -466,11 +468,13 @@ And current component status will not get changed when it is already consumed in
     isPracticeQuestionBookmarked,
     practiceQuestionStatus,
     popAllQuery,
+    topicIdFromInput,
   ), context);
   // pushing new array of objects(updated questions)
   await callLocalGraphqlApi(updateUserLearningObjectiveMutationPracticeQuestions(
     userLearningObjectiveId,
     pushManyQuery,
+    topicIdFromInput,
   ), context);
   const pqReportInput = {
     firstTryCount,
