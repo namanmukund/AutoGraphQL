@@ -1,13 +1,19 @@
 import { get } from 'lodash';
 import { operationName, topicComponents } from '../../../../../constants';
 
-const userLearningObjectiveReportDump = async (input, loData) => {
+const { add, update } = operationName;
+
+const userLearningObjectiveReportDump = async (input, loData, mutationOrQueryName) => {
+  let eventType = add;
+  if (mutationOrQueryName === 'updateUserLearningObjective') {
+    eventType = update;
+  }
   const reportsInputObj = {
     userId: get(input, 'user.typeId'),
     topicId: get(input, 'topic.typeId'),
     componentId: get(input, 'learningObjective.typeId'),
     componentType: topicComponents.learningObjective,
-    eventType: operationName.add,
+    eventType,
   };
   if (get(loData, 'topics', []).length && !reportsInputObj.topicId) {
     Object.assign(reportsInputObj, {

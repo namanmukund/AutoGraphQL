@@ -76,6 +76,8 @@ const getDatabaseControllers = () => {
 
   const userController = new QueryController('User', { bypass: true });
 
+  const batchController = new QueryController('Batch', authentication);
+
   const userSessionReportController = new MasterController('UserLevelSessionReport', {
     bypass: true,
   });
@@ -86,6 +88,7 @@ const getDatabaseControllers = () => {
     topicController,
     userController,
     userSessionReportController,
+    batchController,
   };
 };
 
@@ -93,6 +96,7 @@ const getAggregationQueries = (documentIdsToFetch) => {
   let batchSessionAggregationQuery = [];
   let topicAggregationQuery = [];
   let userAggregationQuery = [];
+  let batchAggregationQuery = [];
   if (Object.values(documentIdsToFetch.batchSessionFilters).length) {
     batchSessionAggregationQuery = new AggregationBuilder('BatchSession')
       .Match({ $or: Object.values(documentIdsToFetch.batchSessionFilters) })
@@ -112,7 +116,7 @@ const getAggregationQueries = (documentIdsToFetch) => {
             .Lookup(EqualityPayload('School', 'school', 'school.typeId', 'id'))
             .Lookup(EqualityPayload('User', 'allottedMentor', 'allottedMentor.typeId', 'id'))
             .Project({
-              id: 1, classroomTitle: 1, code: 1, school: ArrayElemAt('$school', 0), allottedMentor: ArrayElemAt('$allottedMentor', 0), createdAt: 1, updatedAt: 1,
+              id: 1, classroomTitle: 1, code: 1, school: ArrayElemAt('$school', 0), allottedMentor: ArrayElemAt('$allottedMentor', 0), createdAt: 1, updatedAt: 1, isTeacherTraining: 1,
             }),
         }))
       .Project({
@@ -148,11 +152,33 @@ const getAggregationQueries = (documentIdsToFetch) => {
       })
       .getPipeline();
   }
+  if (documentIdsToFetch.classroomIds && Array.from(documentIdsToFetch.classroomIds).length) {
+    batchAggregationQuery = new AggregationBuilder('Batch')
+      .Match({ id: { $in: Array.from(documentIdsToFetch.classroomIds) } })
+      .Lookup(EqualityPayload('StudentProfile', 'students', 'students.typeId', 'id'))
+      .Lookup(EqualityPayload('StudentProfile', 'batchStudents', 'batchStudents.typeId', 'id'))
+      .Lookup(EqualityPayload('School', 'school', 'school.typeId', 'id'))
+      .Lookup(EqualityPayload('User', 'allottedMentor', 'allottedMentor.typeId', 'id'))
+      .Project({
+        id: 1,
+        classroomTitle: 1,
+        code: 1,
+        school: ArrayElemAt('$school', 0),
+        allottedMentor: ArrayElemAt('$allottedMentor', 0),
+        students: 1,
+        batchStudents: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        isTeacherTraining: 1,
+      })
+      .getPipeline();
+  }
 
   return {
     batchSessionAggregationQuery,
     userAggregationQuery,
     topicAggregationQuery,
+    batchAggregationQuery,
   };
 };
 
@@ -163,6 +189,7 @@ const getAllRequiredDataFromDatabase = async () => {
     batchSessionController,
     topicController,
     userController,
+    batchController,
     userSessionReportController,
   } = getDatabaseControllers();
 
@@ -181,15 +208,18 @@ const getAllRequiredDataFromDatabase = async () => {
       batchSessionAggregationQuery,
       userAggregationQuery,
       topicAggregationQuery,
+      batchAggregationQuery,
     } = getAggregationQueries(documentIdsToFetch);
 
     // Fetching BatchSession and User Data from mongo.
     let batchSessions = [];
     let topics = [];
     let users = [];
+    let batches = [];
     if (batchSessionAggregationQuery.length) batchSessions = await batchSessionController.aggregate(batchSessionAggregationQuery);
     if (topicAggregationQuery.length) topics = await topicController.aggregate(topicAggregationQuery);
     if (userAggregationQuery.length) users = await userController.aggregate(userAggregationQuery);
+    if (batchAggregationQuery.length) batches = await batchController.aggregate(batchAggregationQuery);
 
     let userSessionReports = [];
     // Creating Filter Array for fetching UserSessionReport
@@ -223,6 +253,7 @@ const getAllRequiredDataFromDatabase = async () => {
       userSessionDumpController,
       userSessionReportController,
       batchedSessionDump,
+      batches,
     };
   }
   return {
@@ -235,11 +266,12 @@ const getAllRequiredDataFromDatabase = async () => {
     topicAggregationQuery: [],
     userSessionDumpController,
     userSessionReportController,
+    batches: [],
   };
 };
 
 const getBaseDocumentAndCalculatedFields = ({
-  classroomId, userId, topicId, userSessionReports, topicDoc, batchSessions, users,
+  classroomId, userId, topicId, userSessionReports, topicDoc, batchSessions, users, batches,
 }) => {
   // Check if userSessionReport already exists
   const existingSessionReport = (userSessionReports || []).find((report) => (
@@ -268,7 +300,13 @@ const getBaseDocumentAndCalculatedFields = ({
 
   const sessionDuration = (get(sessionDetails, 'sessionStartDate') && get(sessionDetails, 'sessionEndDate')) ? Math.abs(sessionStartDate.getTime() - sessionEndDate.getTime()) / 1000 : 0;
 
-  const userRole = get(userDetails, 'studentProfile.mentor.typeId') ? 'Teacher' : 'Student';
+  let userRole = get(userDetails, 'studentProfile.mentor.typeId') ? 'Teacher' : 'Student';
+  let isTeacherTrainingBatch = get(sessionDetails, 'batch.isTeacherTraining', false);
+  let teacherTaughtId = get(existingSessionReport, 'teacherTaughtId') || get(sessionDetails, 'batch.allottedMentor.id');
+  if (isTeacherTrainingBatch) {
+    if (userId !== teacherTaughtId && studentAttendanceDoc) userRole = 'TeacherTraining';
+    else userRole = 'Trainer';
+  }
 
   const sessionComponentRule = get(topicDoc, 'topicComponentRule') || get(sessionDetails, 'topic.topicComponentRule') || [];
   const sessionClassworkComponents = sessionComponentRule.filter((component) => !['homeworkAssignment', 'quiz', 'homeworkPractice'].includes(component.componentName));
@@ -302,10 +340,42 @@ const getBaseDocumentAndCalculatedFields = ({
     sessionCreationDate: get(sessionDetails, 'createdAt'),
     sessionUpdationAt: get(sessionDetails, 'updatedAt'),
     teacherTaughtName: get(existingSessionReport, 'teacherTaughtName') || get(sessionDetails, 'batch.allottedMentor.name'),
-    teacherTaughtId: get(existingSessionReport, 'teacherTaughtId') || get(sessionDetails, 'batch.allottedMentor.id'),
+    teacherTaughtId,
     sessionClassworkComponents,
     sessionHomeworkComponents,
   };
+
+  if (!sessionDetails) {
+    // If Session does not exist for the classroomId and topicId, will get the basic details from batch
+    const batchDetails = (batches || []).find((batch) => get(batch, 'id') === classroomId);
+    if (batchDetails) {
+      let userRoleFromBaseDocument = get(baseDocument, 'userRole');
+
+      const batchStudentsArray = [...(get(batchDetails, 'students', []) || []), ...(get(batchDetails, 'batchStudents', []) || [])];
+      const isUserAddedInBatch = batchStudentsArray.find((student) => get(student, 'id') === get(userDetails, 'studentProfile.id'));
+
+      teacherTaughtId = get(existingSessionReport, 'teacherTaughtId') || get(batchDetails, 'allottedMentor.id');
+      const teacherTaughtName = get(existingSessionReport, 'teacherTaughtName') || get(batchDetails, 'allottedMentor.name');
+
+      isTeacherTrainingBatch = get(batchDetails, 'isTeacherTraining', false);
+      if (isTeacherTrainingBatch) {
+        // Assigning teacherTaughtId to check for for the userRole
+
+        if (userId !== teacherTaughtId && isUserAddedInBatch) userRoleFromBaseDocument = 'TeacherTraining';
+        else userRoleFromBaseDocument = 'Trainer';
+      }
+
+      // Updating the basic details in the baseDocument
+      Object.assign(baseDocument, {
+        classroomTitle: get(batchDetails, 'classroomTitle'),
+        schoolId: get(batchDetails, 'school.id'),
+        schoolName: get(batchDetails, 'school.name'),
+        teacherTaughtId,
+        teacherTaughtName,
+        userRole: userRoleFromBaseDocument,
+      });
+    }
+  }
 
   // If userSessionReport already exists, then use the id from it.
   if (existingSessionReport && get(existingSessionReport, 'id')) {
