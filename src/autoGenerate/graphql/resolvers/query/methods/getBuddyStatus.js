@@ -190,15 +190,24 @@ const getBuddyStatus = async (
     if (!isAlreadyAdded) {
       const studentStatusIndex = addedStudentsArray.findIndex((student) => get(student, 'user.typeId') === userId);
       if (studentStatusIndex !== -1) {
-        const input = {
-          id: sessionId,
-          fields: {
-            loggedInUserStatus: {
-              updateWhere: { userReferenceId: userId },
-              updateWith: { systemId, isLoggedIn: true },
+        const systemIdValue = get(addedStudentsArray, `[${studentStatusIndex}].systemId`);
+        let input = {};
+        if (systemIdValue !== systemId) {
+          input = {
+            id: sessionId,
+            fields: { loggedInUserStatus: { pushMany: [{ userConnectId: userId, systemId, isLoggedIn: true }] } },
+          };
+        } else {
+          input = {
+            id: sessionId,
+            fields: {
+              loggedInUserStatus: {
+                updateWhere: { userReferenceId: userId },
+                updateWith: { systemId, isLoggedIn: true },
+              },
             },
-          },
-        };
+          };
+        }
         if (shouldRevertLogoutStatus) {
           Object.assign(input.fields, { logoutAllStudents: false });
         }
@@ -216,15 +225,24 @@ const getBuddyStatus = async (
     } else {
       const studentStatusIndex = addedStudentsArray.findIndex((student) => get(student, 'user.typeId') === userId);
       if (studentStatusIndex !== -1) {
-        const input = {
-          id: sessionId,
-          fields: {
-            loggedInUserStatus: {
-              updateWhere: { userReferenceId: userId },
-              updateWith: { systemId, isLoggedIn: true },
+        const systemIdValue = get(addedStudentsArray, `[${studentStatusIndex}].systemId`);
+        let input = {};
+        if (systemIdValue !== systemId) {
+          input = {
+            id: sessionId,
+            fields: { loggedInUserStatus: { pushMany: [{ userConnectId: userId, systemId, isLoggedIn: true }] } },
+          };
+        } else {
+          input = {
+            id: sessionId,
+            fields: {
+              loggedInUserStatus: {
+                updateWhere: { userReferenceId: userId },
+                updateWith: { systemId, isLoggedIn: true },
+              },
             },
-          },
-        };
+          };
+        }
         if (shouldRevertLogoutStatus) {
           Object.assign(input.fields, { logoutAllStudents: false });
         }
@@ -242,7 +260,7 @@ const getBuddyStatus = async (
     if (isAdded) {
       const input = {
         id: sessionId,
-        fields: { loggedInUserStatus: { pop: { userReferenceId: userId } } },
+        fields: { loggedInUserStatus: { pop: { and: [{ userReferenceId: userId }, { systemId }] } } },
       };
       if (shouldRevertLogoutStatus) {
         Object.assign(input.fields, { logoutAllStudents: false });
