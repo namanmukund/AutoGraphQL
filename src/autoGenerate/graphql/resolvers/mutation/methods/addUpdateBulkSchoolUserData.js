@@ -7,7 +7,7 @@ import countryAndCode from '../../../../../../constants/countryAndCode';
 import callLocalGraphqlApi from '../../../../../api/callLocalGraphqlApi';
 import getFirstTopicAndLearningObjective from '../../../../utils/getFirstTopicAndLearningObjective';
 
-const callParentChildSignup = async (row, schoolName, country) => {
+const callParentChildSignup = async (row, schoolName, country, academicYearId) => {
   const {
     childName,
     parentName,
@@ -22,7 +22,7 @@ const callParentChildSignup = async (row, schoolName, country) => {
   } = row;
   const query = `
 mutation($input: ParentChildSignUpInput){
-  parentChildSignUp(input: $input){
+  parentChildSignUp(input: $input, ${academicYearId ? `academicYearId: "${academicYearId}"` : ''}){
     id
     parentProfile{
       id
@@ -293,6 +293,7 @@ const addUpdateBulkSchoolUserData = async (root, params, context) => {
   validateAuthentication(context);
   const {
     sheetId, country = 'india', schoolName, booking = false, setPassword = false,
+    academicYearId = '',
   } = params;
   if (!schoolName) {
     throw new MissingMandatoryInputInRequestError();
@@ -339,7 +340,7 @@ temp code
         row.parentPassword = row.parentEmail && row.parentEmail.trim().toLowerCase().split('@')[0];
       }
       let result;
-      if (shouldUpdate) result = await callParentChildSignup(row, schoolName, country);
+      if (shouldUpdate) result = await callParentChildSignup(row, schoolName, country, academicYearId);
       if (schoolData && shouldUpdate) updateUserStatusInSchoolDraftCSV(context, row, schoolData, 'Uploaded', ' ');
 
       if (booking && result && result.id) {

@@ -315,6 +315,7 @@ Create student and their user profile
     studentSchoolId,
     batchId,
     null,
+    null,
     context,
   );
 
