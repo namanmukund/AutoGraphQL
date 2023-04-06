@@ -16,13 +16,14 @@ const getIdArrForQuery = (idArr) => {
   return arr;
 };
 
-const userBatchQuery = async (schoolId, currentGrade, currentSection) => {
+const userBatchQuery = async (schoolId, currentGrade, currentSection, academicYearId) => {
   const query = `
   query{
     batches(filter: {
     and: [
       { school_some: { id: "${schoolId}" } }
       { classes_some: { and: [{ grade: ${currentGrade} }, { section: ${currentSection} }] } }
+      ${academicYearId ? `academicYear_some:{id:"${academicYearId}"}` : ''}
       { documentType: classroom }
     ]
   }){
@@ -59,6 +60,7 @@ const addStudentProfilePostHookMethod = async (input, params, mutationName, cont
   const currentGrade = input.grade;
   const schoolId = get(input, 'school.typeId');
   const batchId = get(input, 'batch.typeId');
+  const academicYearId = get(input, 'academicYears[0].typeId');
   if (schoolId && currentGrade && currentSection) {
     const schoolClassId = await addUpdateSchoolClass(
       {
@@ -73,7 +75,7 @@ const addStudentProfilePostHookMethod = async (input, params, mutationName, cont
     if (batchId) {
       addSchoolSessionOtpInBatchSession(batchId, context);
     }
-    const batches = await userBatchQuery(schoolId, currentGrade, currentSection);
+    const batches = await userBatchQuery(schoolId, currentGrade, currentSection, academicYearId);
     if (batches && batches.length > 0) {
       const studentId = get(input, 'id');
       const inHeritedBatch = batches.filter((batch) => get(batch, 'inheritedFrom.id', null) !== null);
