@@ -33,7 +33,7 @@ mutation($input: StudentProfileInput!){
   ${schoolConnectId}
   ${batchConnectId}
   ${bookingAgentConnectId}
-  ${academicYearId ? `academicYearConnectIds: ["${academicYearId}"]` : ''}
+  ${academicYearId ? `academicYearsConnectIds: ["${academicYearId}"]` : ''}
   ){
     id
   }
