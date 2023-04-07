@@ -70,6 +70,7 @@ const addStudentProfilePostHookMethod = async (input, params, mutationName, cont
       schoolId,
       input.id,
       context,
+      academicYearId,
     );
     Object.assign(input, { schoolClass: { type: 'SchoolClass', typeId: schoolClassId } });
     if (batchId) {

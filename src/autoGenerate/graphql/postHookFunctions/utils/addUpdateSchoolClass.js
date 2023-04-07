@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 
-const getSchoolClass = async (input, studentSchoolId, context) => {
+const getSchoolClass = async (input, studentSchoolId, context, academicYearId) => {
   const {
     grade,
     section,
@@ -13,6 +13,9 @@ const getSchoolClass = async (input, studentSchoolId, context) => {
       {school_some:{id:"${studentSchoolId}"}}
       {grade:${grade}}
       {section: ${section}}
+      ${academicYearId ? `{
+        academicYear_some:{id:"${academicYearId}"}
+      }` : ''}
     ]
   }){
     id
@@ -23,13 +26,14 @@ const getSchoolClass = async (input, studentSchoolId, context) => {
   return get(res, 'data.schoolClasses.0.id');
 };
 
-const addSchoolClass = async (input, studentSchoolId, studentProfileId, context) => {
+const addSchoolClass = async (input, studentSchoolId, studentProfileId, context, academicYearId) => {
   const query = `
     mutation($input: SchoolClassInput!){
       addSchoolClass(
       input:$input, 
       schoolConnectId:"${studentSchoolId}"
       studentsConnectIds:["${studentProfileId}"]
+      ${academicYearId ? `academicYearsConnectIds: ["${academicYearId}"]` : ''}
       ){
         id
       }
@@ -65,14 +69,14 @@ const connectSchoolClassWithStudentProfile = async (schoolClassId, studentSchool
   return get(res, 'data.updateSchoolClass.id');
 };
 
-const addUpdateSchoolClass = async (input, studentSchoolId, studentProfileId, context) => {
-  const schoolClassId = await getSchoolClass(input, studentSchoolId, context);
+const addUpdateSchoolClass = async (input, studentSchoolId, studentProfileId, context, academicYearId) => {
+  const schoolClassId = await getSchoolClass(input, studentSchoolId, context, academicYearId);
   // map student profile with school class if exist else create first and then map
   if (schoolClassId) {
     // just connect school class and student profile
     return connectSchoolClassWithStudentProfile(schoolClassId, studentSchoolId, studentProfileId, context);
   }
-  return addSchoolClass(input, studentSchoolId, studentProfileId, context);
+  return addSchoolClass(input, studentSchoolId, studentProfileId, context, academicYearId);
 };
 
 export default addUpdateSchoolClass;
