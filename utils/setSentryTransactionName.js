@@ -1,4 +1,4 @@
-import * as Sentry from "@sentry/node";
+import * as Sentry from '@sentry/node';
 
 const setSentryTransactionName = (transactionName) => {
   const scope = Sentry.getCurrentHub().getScope();
@@ -7,7 +7,7 @@ const setSentryTransactionName = (transactionName) => {
   if (transaction) {
     // qualify transaction name
     // i.e. "POST /graphql" -> "POST /graphql: MyOperation"
-    scope?.setTransactionName(`${transaction.name}: ${transactionName}`);
+    scope.setTransactionName(`${transaction.name}: ${transactionName}`);
   }
 };
 
