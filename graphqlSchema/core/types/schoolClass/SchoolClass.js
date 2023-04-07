@@ -6,6 +6,7 @@ const SchoolClass = `
     gradeDisplayName: String
     sectionDisplayName: String
     students: [StudentProfile] @relation(name: "SchoolClassStudentProfile")
+    academicYears: [AcademicYear] @relation(name: "AcademicYearSchoolClass")
   }
 `;
 export default [SchoolClass];
