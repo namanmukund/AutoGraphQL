@@ -39,7 +39,7 @@ const SchoolComment = `
 `;
 
 const School = `
-  type School @model {
+  type School @model @databaseController(mode: "aggregation") {
     name: String! @unique
     code: String @unique @trim @lowercase
     whiteLabel: Boolean @defaultValue(value: "false")
