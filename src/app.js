@@ -2,7 +2,6 @@ import { get } from 'lodash';
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import createApolloNewRelicPlugin from '@newrelic/apollo-server-plugin';
 import { ApolloServer } from 'apollo-server-express';
 import { BaseRedisCache } from 'apollo-server-cache-redis';
 import { WebSocketServer } from 'ws';
@@ -106,13 +105,6 @@ const socketServerPlugin = {
   },
 };
 
-const apolloNewRelicPlugin = createApolloNewRelicPlugin({
-  captureScalars: true,
-  captureIntrospectionQueries: false,
-  captureServiceDefinitionQueries: true,
-  captureHealthCheckQueries: true,
-});
-
 // using apollo-server
 const server = new ApolloServer({
   schema,
@@ -123,7 +115,7 @@ const server = new ApolloServer({
       'editor.theme': 'light',
     },
   },
-  plugins: [socketServerPlugin, apolloNewRelicPlugin, ...APM.getPluginsForApollo()],
+  plugins: [socketServerPlugin, ...APM.getPluginsForApollo()],
   debug: true,
   uploads: false,
   cache: new BaseRedisCache({

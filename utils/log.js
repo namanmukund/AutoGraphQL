@@ -1,6 +1,4 @@
-import fetch from 'node-fetch';
 import PrettyError from 'pretty-error';
-import { NEW_RELIC_CONFIG } from '../constants';
 import isAPMEnabledAppAndEnv from './isAPMEnabledAppAndEnv';
 
 const application = process.env.APPLICATION || 'core';
@@ -77,26 +75,6 @@ const log = (string, type = 'status', isAPM = false, isError = false) => {
     } else {
       APM.captureMessage(`Message: ${formattedString}`);
     }
-  }
-  if (
-    NEW_RELIC_CONFIG.isEnabled
-    && NEW_RELIC_CONFIG.logAPIUrl
-    && (env === 'production')
-  ) {
-    const secondaryApplicationName = process.env.SECONDARY_APPLICATION_NAME || 'core';
-    const logAPIBody = JSON.stringify([{
-      message: `[${secondaryApplicationName}] ${logType}: ${dstring}`,
-      secondaryApplication: secondaryApplicationName,
-      entity: {
-        name: NEW_RELIC_CONFIG.appName,
-      },
-      timestamp: new Date().toISOString(),
-    }]);
-    fetch(NEW_RELIC_CONFIG.logAPIUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: logAPIBody,
-    });
   }
 };
 

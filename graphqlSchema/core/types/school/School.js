@@ -39,7 +39,7 @@ const SchoolComment = `
 `;
 
 const School = `
-  type School @model {
+  type School @model @databaseController(mode: "aggregation") {
     name: String! @unique
     code: String @unique @trim @lowercase
     whiteLabel: Boolean @defaultValue(value: "false")
@@ -76,6 +76,7 @@ const School = `
     labInspections: [LabInspection] @relation(name: "LabInspectionLab")
     labInspectedDevices: [LabInspectedDevice] @relation(name: "SchoolLabInspectedDevice")
     comments: [SchoolComment]
+    academicYears: [AcademicYear] @relation(name: "AcademicYearSchool")
   }
 `;
 export default [School, StudentsDraftCSV, DraftCSVConfig, SchoolCommentType, SchoolComment];
