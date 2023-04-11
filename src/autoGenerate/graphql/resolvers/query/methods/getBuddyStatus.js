@@ -323,7 +323,7 @@ const getBuddyStatus = async (
     let isUpdated = false;
     const updateLoginsPromiseArray = [];
     studentIds.forEach((studentProfileId) => {
-      const findStudentDataIndex = addedStudentsArray.findIndex((student) => get(student, 'user.typeId') === studentProfileId);
+      const findStudentDataIndex = addedStudentsArray.findIndex((student) => get(student, 'user.typeId') === studentProfileId && get(student, 'systemId') === systemId);
       if (findStudentDataIndex !== -1) {
         const loginStatusOfUser = addedStudentsArray[findStudentDataIndex];
         if (get(loginStatusOfUser, 'isLoggedIn')) {
@@ -331,7 +331,7 @@ const getBuddyStatus = async (
             id: sessionId,
             fields: {
               loggedInUserStatus: {
-                updateWhere: { userReferenceId: studentProfileId },
+                updateWhere: { and: [{ userReferenceId: studentProfileId }, { systemId }] },
                 updateWith: { isLoggedIn: false },
               },
             },
