@@ -14,7 +14,7 @@ const getSchoolClass = async (input, studentSchoolId, context, academicYearId) =
       {grade:${grade}}
       {section: ${section}}
       ${academicYearId ? `{
-        academicYear_some:{id:"${academicYearId}"}
+        academicYears_some:{id:"${academicYearId}"}
       }` : ''}
     ]
   }){
