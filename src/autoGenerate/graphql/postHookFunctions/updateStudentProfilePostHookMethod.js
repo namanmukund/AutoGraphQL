@@ -53,9 +53,9 @@ const removeFromSchoolCLassStudentProfile = async (schoolClassId, studentProfile
   return get(res, 'data.removeFromSchoolClassStudentProfile.fieldName');
 };
 
-const removeOldLinkAndAddUpdateSchoolClass = async (previousSchoolClassId, input, studentSchoolId, studentProfileId, context) => {
+const removeOldLinkAndAddUpdateSchoolClass = async (previousSchoolClassId, input, studentSchoolId, studentProfileId, context, academicYearId) => {
   await removeFromSchoolCLassStudentProfile(previousSchoolClassId, studentProfileId, context);
-  return addUpdateSchoolClass(input, studentSchoolId, studentProfileId, context);
+  return addUpdateSchoolClass(input, studentSchoolId, studentProfileId, context, academicYearId);
 };
 
 // const removeOldLinkAndAddUpdateNewBatch = async (prevBatchId, input, studentSchoolId, studentProfileId, context) => {
@@ -65,6 +65,7 @@ const removeOldLinkAndAddUpdateSchoolClass = async (previousSchoolClassId, input
 
 const updateStudentProfilePostHookMethod = async (input, params, mutationName, context) => {
   const userId = get(context, 'previousDocument.user.id');
+  const academicYearId = get(input, 'academicYears[0].typeId');
   if (get(params, 'input.profileAvatarCode') !== get(context, 'previousDocument.profileAvatarCode')) {
     const userApprovedCodes = await userApprovedCodeQuery(userId, context);
     const updateObj = {
@@ -102,6 +103,7 @@ const updateStudentProfilePostHookMethod = async (input, params, mutationName, c
         schoolId,
         input.id,
         context,
+        academicYearId,
       );
       Object.assign(input, { schoolClass: { type: 'SchoolClass', typeId: schoolClassId } });
     }
@@ -122,6 +124,7 @@ const updateStudentProfilePostHookMethod = async (input, params, mutationName, c
         schoolId,
         input.id,
         context,
+        academicYearId,
       );
       Object.assign(input, { schoolClass: { type: 'SchoolClass', typeId: schoolClassId } });
     }
