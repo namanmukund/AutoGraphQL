@@ -202,7 +202,7 @@ const getBuddyStatus = async (
             id: sessionId,
             fields: {
               loggedInUserStatus: {
-                updateWhere: { userReferenceId: userId },
+                updateWhere: { and: [{ userReferenceId: userId }, { systemId }] },
                 updateWith: { systemId, isLoggedIn: true },
               },
             },
@@ -237,7 +237,7 @@ const getBuddyStatus = async (
             id: sessionId,
             fields: {
               loggedInUserStatus: {
-                updateWhere: { userReferenceId: userId },
+                updateWhere: { and: [{ userReferenceId: userId }, { systemId }] },
                 updateWith: { systemId, isLoggedIn: true },
               },
             },
