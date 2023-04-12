@@ -78,7 +78,7 @@ const addUserActivityComicStripDumpPostHookMethod = async (input, mutationName, 
   */
   const learningObjectiveInfo = get(context, `${mutationName}.learningObjective`);
   const topicId = (get(learningObjectiveInfo, 'topics') && get(learningObjectiveInfo, 'topics[0].id')) || get(learningObjectiveInfo, 'topic.id');
-  const { id: learningObjectiveIdInResult } = learningObjectiveInfo;
+  const learningObjectiveIdInResult = get(learningObjectiveInfo, 'id');
   /*
   we are getting userLearningObjective for below purpose:
   -we get userLearningObjective id , which will be used further to update the document
