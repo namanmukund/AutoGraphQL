@@ -23,7 +23,7 @@ const userBatchQuery = async (schoolId, currentGrade, currentSection, academicYe
     and: [
       { school_some: { id: "${schoolId}" } }
       { classes_some: { and: [{ grade: ${currentGrade} }, { section: ${currentSection} }] } }
-      ${academicYearId ? `academicYear_some:{id:"${academicYearId}"}` : ''}
+      {${academicYearId ? `academicYear_some:{id:"${academicYearId}"}` : ''}}
       { documentType: classroom }
     ]
   }){
