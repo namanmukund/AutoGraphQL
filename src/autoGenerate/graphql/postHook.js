@@ -72,6 +72,7 @@ import updateMentorProfilePostHookMethod from './postHookFunctions/updateMentorP
 import addUserActivityLearningSlideDumpPostHookMethod from './postHookFunctions/addUserActivityLearningSlideDumpPostHookMethod';
 import updateRetakeSessionPostHookMethod from './postHookFunctions/updateRetakeSessionPostHookMethod';
 import reportDumpPostHook from './postHookFunctions/reportDumpPostHook';
+import { MEDIA_RESOLUTIONS, VIDEOS_TO_TRANSCODE_FOLDER } from '../../../constants';
 // import updateEventSessionPostHookMethod from './postHookFunctions/updateEventSessionPostHookMethod';
 // import addEventSessionPostHookMethod from './postHookFunctions/addEventSessionPostHookMethod';
 
@@ -381,6 +382,19 @@ const posthook = async (input, mutationName, context, params, info) => {
     }
     case 'updateRetakeSession': {
       await updateRetakeSessionPostHookMethod(input, params, mutationName, context);
+      break;
+    }
+    case 'deleteVideo': {
+      // Check if video was uploaded to `videosToTranscode` folder, then delete differnt resolution videos from `python/video` folder.
+      if (get(context, 'deletedVideoURL') && get(context, 'deletedVideoURL', '').includes(VIDEOS_TO_TRANSCODE_FOLDER)) {
+        for (const res of MEDIA_RESOLUTIONS) {
+          let videoUri = `${get(context, 'deletedVideoURL', '').split('.')[0]}_${res}.${get(context, 'deletedVideoURL', '').split('.')[1]
+          }`;
+          videoUri = videoUri.replace(VIDEOS_TO_TRANSCODE_FOLDER, 'python');
+          // eslint-disable-next-line no-await-in-loop
+          await deleteFromS3(videoUri);
+        }
+      }
       break;
     }
     // case 'updateEventSession': {
