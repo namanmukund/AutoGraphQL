@@ -637,6 +637,10 @@ const GSUITE_FILE_TYPES = ['drive', 'spreadsheet', 'presentation', 'document'];
 
 const PG_MODEL_SUFFIX = '.pg.model.js';
 
+const MEDIA_RESOLUTIONS = ['480', '720', '1080'];
+
+const VIDEOS_TO_TRANSCODE_FOLDER = 'videosToTranscode';
+
 export {
   scalarTypes,
   defaultFields,
@@ -763,4 +767,6 @@ export {
   SECONDARY_APPLICATIONS,
   INACTIVE,
   forgotPassWebURL,
+  MEDIA_RESOLUTIONS,
+  VIDEOS_TO_TRANSCODE_FOLDER,
 };
