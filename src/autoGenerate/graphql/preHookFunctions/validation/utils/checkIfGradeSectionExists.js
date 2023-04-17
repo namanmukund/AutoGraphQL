@@ -29,7 +29,14 @@ const getSchoolClassIdFilter = (schoolClassId) => {
   return '';
 };
 
-const fetchSchoolClasses = async (schoolClassId, grade, section, schoolConnectId) => {
+const getAcademicYearFilter = (academicYearsConnectIds) => {
+  if (academicYearsConnectIds && academicYearsConnectIds.length) {
+    return `{ academicYears_some: { id: "${academicYearsConnectIds[0]}" }}`;
+  }
+  return '';
+};
+
+const fetchSchoolClasses = async (schoolClassId, grade, section, schoolConnectId, academicYearsConnectIds) => {
   const query = `
           {
             schoolClasses(filter:
@@ -39,6 +46,7 @@ const fetchSchoolClasses = async (schoolClassId, grade, section, schoolConnectId
                   ${getGradeFilter(grade)}
                   ${getSectionFilter(section)}
                   ${getSchoolFilter(schoolConnectId)}
+                  ${getAcademicYearFilter(academicYearsConnectIds)}
                 ]
               }
             ){
