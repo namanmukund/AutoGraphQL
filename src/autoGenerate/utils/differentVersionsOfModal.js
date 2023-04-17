@@ -30,9 +30,9 @@ const differentVersionsOfModel = (model) => {
 const stagingModelName = (modelName,academicYear) => {
     academicYear = academicYear || currentAcademyYear
     if(academicYear === 'previous'){
-        return `${modelName}_staging`;
+        return `${modelName}-staging`;
     }
-    return `${modelName}_staging_AY_${academicYear}`;
+    return `${modelName}-staging-AY-${academicYear}`;
 }
 const productionModelName = (modelName,academicYear) => {
     academicYear = academicYear || currentAcademyYear
@@ -40,7 +40,7 @@ const productionModelName = (modelName,academicYear) => {
     if(academicYear === 'previous'){
         return `${modelName}`;
     }
-    return `${modelName}_AY_${academicYear}`;
+    return `${modelName}-AY-${academicYear}`;
 }
 
 export const currentModelName = (modelName,academicYear) => {
