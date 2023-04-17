@@ -8,7 +8,7 @@ import { topicComponents } from '../../../constants';
 import { QueryController } from '../../../src/autoGenerate/graphql/controllers';
 import MasterController from '../../../src/autoGenerate/graphql/controllers/MasterController';
 import { log } from '../../log';
-import { currentModalName, currentModelName, modelVersions } from '../../../src/autoGenerate/utils/differentVersionsOfModal';
+import { currentModelName } from '../../../src/autoGenerate/utils/differentVersionsOfModal';
 
 const SequelizeOperation = Sequelize.Op;
 

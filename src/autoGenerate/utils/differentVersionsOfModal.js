@@ -1,7 +1,6 @@
 
 // format date - 23-24
 const currentAcademyYear = new Date().getFullYear() + '-' + (new Date().getFullYear() + 1).toString().substr(-2);
-console.log({currentAcademyYear})
 
 // create different modal with different name for staging and for academic year
 const differentVersionsOfModel = (model) => {
@@ -12,7 +11,7 @@ const differentVersionsOfModel = (model) => {
     const productionModel = {
       model
     }
-    const stagingAcademicYearModelStaging = {
+    const stagingAcademicYearModel = {
       ...model,
       name: stagingModelName(model.name, currentAcademyYear),
     };
@@ -22,7 +21,7 @@ const differentVersionsOfModel = (model) => {
     };
     if(process.env.NODE_ENV === 'staging'){
         return [
-            stagingModel,stagingAcademicYearModelStaging
+            stagingModel,stagingAcademicYearModel
         ]
     }
     return [ productionAcademicYearModel,productionModel];
@@ -33,10 +32,15 @@ const stagingModelName = (modelName,academicYear) => {
     if(academicYear === 'previous'){
         return `${modelName}_staging`;
     }
-    return `${modelName}_staging_AY_${currentAcademyYear}`;
+    return `${modelName}_staging_AY_${academicYear}`;
 }
-const productionModelName = (modelName) => {
-    return `${modelName}_AY_${currentAcademyYear}`;
+const productionModelName = (modelName,academicYear) => {
+    academicYear = academicYear || currentAcademyYear
+
+    if(academicYear === 'previous'){
+        return `${modelName}`;
+    }
+    return `${modelName}_AY_${academicYear}`;
 }
 
 export const currentModelName = (modelName,academicYear) => {
