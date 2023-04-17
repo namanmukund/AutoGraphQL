@@ -12,9 +12,10 @@ import userLearningObjectiveReportDump from './userLearningObjectiveReportDump';
 import userPracticeQuestionReportDump from './userPracticeQuestionReportDump';
 import userQuizReportDump from './userQuizReportDump';
 import userVideoReportDump from './userVideoReportDump';
+import { currentModelName } from '../../../utils/differentVersionsOfModal';
 
 const documentTypes = {
-  USER_SESSION_DUMP_TYPE: 'UserSessionDump',
+  USER_SESSION_DUMP_TYPE: currentModelName('UserSessionDump','previous'),
   FILE: 'File',
   LEARNING_OBJECTIVE: 'LearningObjective',
   ASSIGNMENT_QUESTION: 'AssignmentQuestion',
