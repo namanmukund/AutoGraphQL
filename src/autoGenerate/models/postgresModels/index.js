@@ -4,7 +4,7 @@ import UserLevelSessionReportModel from './userLevelSessionReports.pg.model';
 import differentVersionsOfModel from '../../utils/differentVersionsOfModal';
 
 const models = [
-  ...differentVersionsOfModel(UserSessionDumpModel),
+  ...differentVersionsOfModel(UserSessionDumpModel, false),
   ...differentVersionsOfModel(UserSessionReportModel),
   ...differentVersionsOfModel(UserLevelSessionReportModel),
 ];
