@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-param-reassign */
 // format date - 23-24
-const currentAcademyYear = '23-24';
+const currentAcademicYear = '23_24';
 
 // create different modal with different name for staging and for academic year
 const differentVersionsOfModel = (model, includeAcademicYear = true) => {
@@ -9,16 +9,14 @@ const differentVersionsOfModel = (model, includeAcademicYear = true) => {
     ...model,
     name: stagingModelName(model.name, 'previous'),
   };
-  const productionModel = {
-    model,
-  };
+  const productionModel = model;
   const stagingAcademicYearModel = {
     ...model,
-    name: stagingModelName(model.name, currentAcademyYear),
+    name: stagingModelName(model.name, currentAcademicYear),
   };
   const productionAcademicYearModel = {
     ...model,
-    name: productionModelName(model.name, currentAcademyYear),
+    name: productionModelName(model.name, currentAcademicYear),
   };
   // if staging env then create table for staging env and for previous academic year
   if (process.env.NODE_ENV === 'staging') {
@@ -35,19 +33,19 @@ const differentVersionsOfModel = (model, includeAcademicYear = true) => {
 };
 
 const stagingModelName = (modelName, academicYear) => {
-  academicYear = academicYear || currentAcademyYear;
+  academicYear = academicYear || currentAcademicYear;
   if (academicYear === 'previous') {
-    return `${modelName}-staging`;
+    return `${modelName}_staging`;
   }
-  return `${modelName}-staging-AY-${academicYear}`;
+  return `${modelName}_staging_AY_${academicYear}`;
 };
 const productionModelName = (modelName, academicYear) => {
-  academicYear = academicYear || currentAcademyYear;
+  academicYear = academicYear || currentAcademicYear;
 
   if (academicYear === 'previous') {
     return `${modelName}`;
   }
-  return `${modelName}-AY-${academicYear}`;
+  return `${modelName}_AY_${academicYear}`;
 };
 
 export const currentModelName = (modelName, academicYear) => {
