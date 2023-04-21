@@ -129,6 +129,7 @@ import getSubmittedAssignmentsStudents from './query/methods/getSubmittedAssignm
 import syncUserSessionReports from '../../../../utils/scheduleJobs/jobs/batchAndUpdateUserSessionReports';
 import APM from '../../../APM';
 import { CacheController } from '../controllers';
+import removeBatchesFromStudent from './mutation/userData/removeBatchesFromStudent';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -703,6 +704,7 @@ const customMutations = {
   updateSchoolStudentEmail,
   // Resolver to remove batchstudets and students from batch
   removeBatchStudents,
+  removeBatchesFromStudent,
 };
 
 // eslint-disable-next-line no-restricted-syntax

@@ -90,8 +90,8 @@ const removeStudentFromBatch = async (batchId, studentId, context) => {
     }
   }
   `;
+  // eslint-disable-next-line no-unused-vars
   const res = await callLocalGraphqlApi(query, context);
-  console.log('res ... ', res);
   return null;
 };
 
@@ -103,8 +103,8 @@ const removeBatchesFromStudent = async (studentId, context) => {
     }
   }
   `;
+  // eslint-disable-next-line no-unused-vars
   const res = await callLocalGraphqlApi(query, context);
-  console.log('res ... ', res);
   return null;
 };
 
@@ -184,31 +184,31 @@ const updateStudentProfilePostHookMethod = async (input, params, mutationName, c
     }
     if (isGradeOrSectionUpdated) {
       const studentProfile = await getStudentProfile(userId);
-      console.log('student profile ', studentProfile)
       const studentProfileBatchId = get(studentProfile, 'batch.id');
+      const studentProfileBatches = get(studentProfile, 'batches', []);
       const studentProfileId = get(studentProfile, 'id');
-      console.log('student profile batch ', studentProfileBatchId, studentProfileId)
-      // await removeStudentFromBatch(studentProfileBatchId, studentProfileId, context);
-      // await removeBatchesFromStudent(studentProfileId, context);
-
-      // const batches = await userBatchQuery(schoolId, currentGrade, currentSection, academicYearId);
-      // console.log('batches ... ', batches);
-      // if (batches && batches.length > 0) {
-      //   const studentId = get(input, 'id');
-      //   const inHeritedBatch = batches.filter((batch) => get(batch, 'inheritedFrom.id', null) !== null);
-      //   let masterbatchId = '';
-      //   let batchesConnectIds = [];
-      //   if (inHeritedBatch.length > 0) {
-      //     const masterBatch = batches.filter((batch) => get(batch, 'id') === get(inHeritedBatch, '[0].inheritedFrom.id'));
-      //     masterbatchId = get(masterBatch, '[0].id');
-      //     const remainingInheritedBatches = batches.filter((batch) => get(batch, 'inheritedFrom.id', null) === masterbatchId);
-      //     batchesConnectIds = remainingInheritedBatches.length > 0 && remainingInheritedBatches.map((item) => get(item, 'id'));
-      //   } else {
-      //     masterbatchId = get(batches, '[0].id');
-      //   }
-      //   updateStudentProfile(studentId, masterbatchId, batchesConnectIds);
-      // }
-
+      if (studentProfileBatchId) {
+        await removeStudentFromBatch(studentProfileBatchId, studentProfileId, context);
+      }
+      if (studentProfileBatches.length) {
+        await removeBatchesFromStudent(studentProfileId, context);
+      }
+      const batches = await userBatchQuery(schoolId, currentGrade, currentSection, academicYearId);
+      if (batches && batches.length > 0) {
+        const studentId = get(input, 'id');
+        const inHeritedBatch = batches.filter((batch) => get(batch, 'inheritedFrom.id', null) !== null);
+        let masterbatchId = '';
+        let batchesConnectIds = [];
+        if (inHeritedBatch.length > 0) {
+          const masterBatch = batches.filter((batch) => get(batch, 'id') === get(inHeritedBatch, '[0].inheritedFrom.id'));
+          masterbatchId = get(masterBatch, '[0].id');
+          const remainingInheritedBatches = batches.filter((batch) => get(batch, 'inheritedFrom.id', null) === masterbatchId);
+          batchesConnectIds = remainingInheritedBatches.length > 0 && remainingInheritedBatches.map((item) => get(item, 'id'));
+        } else {
+          masterbatchId = get(batches, '[0].id');
+        }
+        updateStudentProfile(studentId, masterbatchId, batchesConnectIds);
+      }
       // const studentBatchId = get(context, 'previousDocument.batch.id');
       // removeOldLinkAndAddUpdateNewBatch(studentBatchId, {
       //   grade: currentGrade, section: currentSection,
