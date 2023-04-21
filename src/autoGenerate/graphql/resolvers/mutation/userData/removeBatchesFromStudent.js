@@ -17,7 +17,7 @@ const removeBatchesFromStudentMutationResolver = async (
     },
   };
   const modelMutation = new MutationController('StudentProfile', newAuthentication);
-  await modelMutation.update(query, updateObj).then((res) => console.log({ res: JSON.stringify(res) }));
+  await modelMutation.update(query, updateObj);
   return true;
 };
 export default removeBatchesFromStudentMutationResolver;
