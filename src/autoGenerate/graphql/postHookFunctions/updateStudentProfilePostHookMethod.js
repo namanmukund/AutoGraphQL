@@ -63,9 +63,9 @@ const removeOldLinkAndAddUpdateSchoolClass = async (previousSchoolClassId, input
 //   return addStudentToBatch(input, studentSchoolId, studentProfileId, context);
 // };
 
-const getStudentProfile = async (userId, context) => {
+const getStudentProfile = async (studentProfileId, context) => {
   const query = `{
-  studentProfile(id: "${userId}") {
+  studentProfile(id: "${studentProfileId}") {
     id
     batch {
       id
@@ -134,7 +134,7 @@ const updateStudentProfilePostHookMethod = async (input, params, mutationName, c
    */
   const previousGrade = get(context, 'previousDocument.grade');
   const previousSection = get(context, 'previousDocument.section');
-  const currentSection = get(input, 'section');
+  const currentSection = get(params, 'input.section');
   const currentGrade = input.grade;
   const schoolId = get(input, 'school.typeId');
   const previousSchoolClassId = get(input, 'schoolClass.typeId');
