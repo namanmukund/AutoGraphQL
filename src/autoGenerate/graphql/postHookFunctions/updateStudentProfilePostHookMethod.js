@@ -65,7 +65,7 @@ const removeOldLinkAndAddUpdateSchoolClass = async (previousSchoolClassId, input
 
 const getStudentProfile = async (userId, context) => {
   const query = `{
-  studentProfiles(filter: { user_some: { id: "${userId}" } }) {
+  studentProfile(id: "${userId}") {
     id
     batch {
       id
@@ -77,7 +77,7 @@ const getStudentProfile = async (userId, context) => {
 }
 `;
   const result = await callLocalGraphqlApi(query, context);
-  return get(result, 'data.studentProfiles[0]');
+  return get(result, 'data.studentProfile');
 };
 
 const removeStudentFromBatch = async (batchId, studentId, context) => {
@@ -110,6 +110,7 @@ const removeBatchesFromStudent = async (studentId, context) => {
 
 const updateStudentProfilePostHookMethod = async (input, params, mutationName, context) => {
   const userId = get(context, 'previousDocument.user.id');
+  const studentProfileId = get(params, 'id');
   const academicYearId = get(input, 'academicYears[0].typeId');
   if (get(params, 'input.profileAvatarCode') !== get(context, 'previousDocument.profileAvatarCode')) {
     const userApprovedCodes = await userApprovedCodeQuery(userId, context);
@@ -183,10 +184,9 @@ const updateStudentProfilePostHookMethod = async (input, params, mutationName, c
       isGradeOrSectionUpdated = true;
     }
     if (isGradeOrSectionUpdated) {
-      const studentProfile = await getStudentProfile(userId);
+      const studentProfile = await getStudentProfile(studentProfileId);
       const studentProfileBatchId = get(studentProfile, 'batch.id');
       const studentProfileBatches = get(studentProfile, 'batches', []);
-      const studentProfileId = get(studentProfile, 'id');
       if (studentProfileBatchId) {
         await removeStudentFromBatch(studentProfileBatchId, studentProfileId, context);
       }
