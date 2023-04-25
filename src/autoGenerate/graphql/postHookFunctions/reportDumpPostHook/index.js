@@ -114,8 +114,10 @@ const reportDumpPostHook = async (input, mutationOrQueryName, context) => {
       mongoDocCreatedAt: get(input, 'createdAt'),
       mongoDocUpdatedAt: get(input, 'updatedAt'),
     };
-    const userSessionDumpController = new MasterController(documentTypes.USER_SESSION_DUMP_TYPE);
-    await userSessionDumpController.Model.create({ ...reportsInputObj });
+    if (get(reportsInputObj, 'userId')) {
+      const userSessionDumpController = new MasterController(documentTypes.USER_SESSION_DUMP_TYPE);
+      await userSessionDumpController.Model.create({ ...reportsInputObj });
+    }
   }
 };
 
