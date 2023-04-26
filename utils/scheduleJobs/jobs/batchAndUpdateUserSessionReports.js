@@ -8,6 +8,7 @@ import { topicComponents } from '../../../constants';
 import { QueryController } from '../../../src/autoGenerate/graphql/controllers';
 import MasterController from '../../../src/autoGenerate/graphql/controllers/MasterController';
 import { log } from '../../log';
+import { currentModelName } from '../../../src/autoGenerate/utils/differentVersionsOfModal';
 
 const SequelizeOperation = Sequelize.Op;
 
@@ -68,7 +69,7 @@ const getBatchedUserSessionDump = (userSessionDumps) => {
 
 const getDatabaseControllers = () => {
   const authentication = { bypass: true };
-  const userSessionDumpController = new MasterController('UserSessionDump', authentication);
+  const userSessionDumpController = new MasterController(currentModelName('userSessionDump', 'previous'), authentication);
 
   const batchSessionController = new QueryController('BatchSession', authentication);
 
@@ -78,7 +79,7 @@ const getDatabaseControllers = () => {
 
   const batchController = new QueryController('Batch', authentication);
 
-  const userSessionReportController = new MasterController('UserLevelSessionReport', {
+  const userSessionReportController = new MasterController(currentModelName('userLevelSessionReport', 'previous'), {
     bypass: true,
   });
 
