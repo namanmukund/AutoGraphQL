@@ -129,7 +129,7 @@ class APM {
         case APMConnectors.SENTRY: {
           const scope = Sentry.getCurrentHub().getScope();
           for (const tag of tags) {
-            if (tag && tag.label && tag.value) {
+            if (scope && !scope._tags[tag.label] && tag && tag.label && tag.value) {
               scope.setTag(tag.label, tag.value);
             }
           }

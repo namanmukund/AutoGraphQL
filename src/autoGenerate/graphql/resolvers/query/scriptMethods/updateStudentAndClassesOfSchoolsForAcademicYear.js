@@ -40,6 +40,16 @@ const getSchoolStudents = async (schoolId, context) => {
   return get(studentsRes, 'data.studentProfiles', []);
 };
 
+const getSchoolClasses = async (schoolId, context) => {
+  const schoolClassesRes = await callLocalGraphqlApi(`{
+  schoolClasses(filter: { school_some: { id: "${schoolId}" } }) {
+    id
+  }
+}
+`, context);
+  return get(schoolClassesRes, 'data.schoolClasses', []);
+};
+
 const getSchoolBatches = async (schoolId, context) => {
   const studentsRes = await callLocalGraphqlApi(`{
   batches(filter: { school_some: { id: "${schoolId}" } }) {
@@ -54,49 +64,42 @@ const updateStudentAndClassesOfSchoolsForAcademicYear = async (context) => {
   const schoolsRes = await callLocalGraphqlApi(`{
     schools(filter: { code_exists: true }) {
         id
+        createdAt
     }
     }
     `, context);
   const schools = get(schoolsRes, 'data.schools', []);
+  console.log({ schools: schools.length });
+  let i = 0;
   for (const school of schools) {
     const schoolConnectId = get(school, 'id');
-    const academicYearConnectId = await getSchoolAcademicYear(schoolConnectId, context);
-    if (academicYearConnectId) {
-      const studentProfiles = await getSchoolStudents(schoolConnectId, context);
-      let updateStudentsMutationStr = '';
-      for (const studentProfile of studentProfiles) {
-        const studentProfileId = get(studentProfile, 'id');
-        updateStudentsMutationStr += `updateStudent${studentProfileId}: updateStudentProfile(id: "${studentProfileId}", academicYearsConnectIds: ["${academicYearConnectId}"]) {
-            id
-        }`;
-      }
-      if (updateStudentsMutationStr) {
-        const updatedStudentProfilesRes = await callLocalGraphqlApi(`mutation {
-            ${updateStudentsMutationStr}
-        }`, context);
-        if (updatedStudentProfilesRes) {
-          console.log('StudentProfiles updated with academic year');
+    const dateCheck = new Date('Sun Jan 01 2023 00:00:00 GMT+0530 (India Standard Time)');
+    const schoolCreatedDate = new Date(get(school, 'createdAt'));
+    if (dateCheck > schoolCreatedDate) {
+      i += 1;
+      const academicYearConnectId = await getSchoolAcademicYear(schoolConnectId, context);
+      if (academicYearConnectId) {
+        const studentProfiles = await getSchoolStudents(schoolConnectId, context);
+        const studentProfileIds = studentProfiles.map((student) => get(student, 'id'));
+        const batches = await getSchoolBatches(schoolConnectId, context);
+        const batchesIds = batches.map((batch) => get(batch, 'id'));
+        const schoolClasses = await getSchoolClasses(schoolConnectId, context);
+        const schoolClassesIds = schoolClasses.map((schoolClass) => get(schoolClass, 'id'));
+        await callLocalGraphqlApi(`mutation {
+        updateAcademicYear(
+          id: "${academicYearConnectId}"
+          studentsConnectIds: ${JSON.stringify(studentProfileIds)}
+          batchesConnectIds: ${JSON.stringify(batchesIds)}
+          classesConnectIds: ${JSON.stringify(schoolClassesIds)}
+        ) {
+          id
         }
       }
-
-      const batches = await getSchoolBatches(schoolConnectId, context);
-      let updateBatchesMutationStr = '';
-      for (const batch of batches) {
-        const batchId = get(batch, 'id');
-        updateBatchesMutationStr += `updateBatch${batchId}: updateBatch(id: "${batchId}", academicYearConnectId: "${academicYearConnectId}") {
-            id
-        }`;
-      }
-      if (updateBatchesMutationStr) {
-        const updatedbatchesRes = await callLocalGraphqlApi(`mutation {
-            ${updateBatchesMutationStr}
-        }`, context);
-        if (updatedbatchesRes) {
-          console.log('Batches updated with academic year');
-        }
+      `, context);
       }
     }
   }
+  console.log({ i });
 };
 
 export default updateStudentAndClassesOfSchoolsForAcademicYear;

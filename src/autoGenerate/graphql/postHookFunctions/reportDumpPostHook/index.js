@@ -1,6 +1,7 @@
 /* eslint-disable no-case-declarations */
 import cuid from 'cuid';
 import { get } from 'lodash';
+import { log } from '../../../../../utils';
 import getDataFromContext from '../../../../../utils/getDataFromContext';
 import { QueryController } from '../../controllers';
 import MasterController from '../../controllers/MasterController';
@@ -115,6 +116,7 @@ const reportDumpPostHook = async (input, mutationOrQueryName, context) => {
       mongoDocUpdatedAt: get(input, 'updatedAt'),
     };
     const userSessionDumpController = new MasterController(documentTypes.USER_SESSION_DUMP_TYPE);
+    log(reportsInputObj);
     await userSessionDumpController.Model.create({ ...reportsInputObj });
   }
 };

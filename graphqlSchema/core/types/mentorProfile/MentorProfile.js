@@ -70,6 +70,7 @@ const MentorProfile = `
     schoolClasses: [SchoolClass] @relation(name: "MentorProfileSchoolClass", direction: "OneWay")
     knownLanguages:[KnownLanguage]
     teacherOrganisation: TeacherOrganisation @defaultValue(value: "external")
+    teacherManualTooltipCount: Int @defaultValue(value: 5)
 }`;
 
 export default [MentorProfile, ScheduleManagement, ClassroomControl, CourseControl, SessionReporting, KnownLanguage];
