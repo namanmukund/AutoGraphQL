@@ -43,6 +43,9 @@ mongoose.on('error', (err) => {
     createScheduler('autoDeleteBlacklistedTokens');
     reRunJobsFromDB();
   }
+  if(process.env.STAGING_INSTANCE ||  process.env.STAGING_INSTANCE === undefined){
+    createScheduler(TAT);
+  }
   if (process.env.NODE_ENV === 'production' && process.env.SECONDARY_APPLICATION_NAME === TAT) {
     createScheduler(TAT);
     createScheduler('teacherTrainingReport');
