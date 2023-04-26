@@ -69,7 +69,7 @@ const getBatchedUserSessionDump = (userSessionDumps) => {
 
 const getDatabaseControllers = () => {
   const authentication = { bypass: true };
-  const userSessionDumpController = new MasterController('UserSessionDump', authentication);
+  const userSessionDumpController = new MasterController(currentModelName('userSessionDump', 'previous'), authentication);
 
   const batchSessionController = new QueryController('BatchSession', authentication);
 
@@ -79,7 +79,7 @@ const getDatabaseControllers = () => {
 
   const batchController = new QueryController('Batch', authentication);
 
-  const userSessionReportController = new MasterController(currentModelName('UserLevelSessionReport', 'previous'), {
+  const userSessionReportController = new MasterController(currentModelName('userLevelSessionReport', 'previous'), {
     bypass: true,
   });
 
