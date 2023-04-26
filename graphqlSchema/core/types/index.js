@@ -175,6 +175,7 @@ import GSuiteResponse from './googleApisCustomQueries';
 import MenteeToken from './menteeToken';
 import LabInspection from './labInspection';
 import AcademicYear from './academicYear';
+import SessionComponentTracker from './sessionComponentTracker';
 
 export default [
   ...User,
@@ -354,4 +355,5 @@ export default [
   ...GSuiteResponse,
   ...MenteeToken,
   ...AcademicYear,
+  ...SessionComponentTracker,
 ];

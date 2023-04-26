@@ -83,3 +83,7 @@ export const InvalidUserIdError = createError('InvalidUserIdError', {
 export const UserAlreadyLoggedInIntoAnotherSystemError = createError('UserAlreadyLoggedInIntoAnotherSystemError', {
   message: 'User is already loggedIn into another system',
 });
+
+export const ComponentTrackerIdAlreadyGenerated = createError('ComponentTrackerIdAlreadyGenerated', {
+  message: 'Component tracker id is already created',
+});

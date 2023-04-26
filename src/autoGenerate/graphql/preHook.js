@@ -129,6 +129,9 @@ import addWeekDayForOneDayEvent from './preHookFunctions/validation/utils/addWee
 import addUserLearningSlideDumpValidation from './preHookFunctions/validation/addUserLearningSlideDumpValidation ';
 import commonPreHookValidations from './preHookFunctions/commonPreHookValidations';
 import updateRetakeSessionValidation from './preHookFunctions/validation/updateRetakeSessionValidation';
+import batchSessionQuery from './graphqlQueries/batchSessionQuery';
+import { callLocalGraphqlApi } from '../../api';
+import { ComponentTrackerIdAlreadyGenerated } from '../../../constants/errors/auth';
 // import updateEventSessionValidation from './preHookFunctions/validation/updateEventSessionValidation';
 // import addMentorAvailabilitySlotValidation from './preHookFunctions/validation/addMentorAvailabilitySlotValidation';
 
@@ -996,6 +999,15 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
       };
       await updateRetakeSessionValidation(newParams, newParams.input, mutationOrQueryName, context);
       return hook(newParams.input, mutationOrQueryName, 'PreHook');
+    }
+    case 'addSessionComponentTracker': {
+      const batchSessionConnectId = get(params, 'id') || get(params, 'batchSessionId') || get(params, 'batchSessionConnectId');
+      const batchSessionData = await callLocalGraphqlApi(batchSessionQuery(batchSessionConnectId));
+      const sessionComponentTracker = get(batchSessionData, 'data.batchSession.sessionComponentTracker');
+      if (sessionComponentTracker) {
+        throw new ComponentTrackerIdAlreadyGenerated();
+      }
+      break;
     }
     // case 'updateEventSession': {
     //   await updateEventSessionValidation(params, input, mutationOrQueryName, context);
