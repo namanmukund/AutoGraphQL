@@ -57,6 +57,7 @@ const customMutationString = `
    generateBatchSessionOtp (batchSessionIds: [ID]): [BatchSession]
    updateSchoolStudentEmail (schoolId: ID): BooleanResult
    removeBatchStudents ( batchId: ID! ): RemoveBatchStudentsResult
+   removeBatchesFromStudent ( studentProfileId: ID! ): BooleanResult
    `;
 
 export default customMutationString;
