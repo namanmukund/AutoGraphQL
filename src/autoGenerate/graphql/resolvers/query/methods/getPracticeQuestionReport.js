@@ -334,8 +334,8 @@ const getLoQuestionCount = async (loId, context, usersPracticeQuestionReportRes)
   `;
   const res = await callLocalGraphqlApi(query, context);
   let questionCount = 0;
-  if (get(res, 'learningSlidesPQMeta')) questionCount = get(res, 'learningSlidesPQMeta');
-  if (get(res, 'chatbotPQMeta')) questionCount = get(res, 'chatbotPQMeta');
+  if (get(res, 'data.learningObjective.learningSlidesPQMeta.count')) questionCount = get(res, 'data.learningObjective.learningSlidesPQMeta.count');
+  if (get(res, 'data.learningObjective.chatbotPQMeta.count')) questionCount = get(res, 'data.learningObjective.chatbotPQMeta.count');
   if (!questionCount && usersPracticeQuestionReportRes && usersPracticeQuestionReportRes.length) {
     usersPracticeQuestionReportRes.forEach((report) => {
       if (questionCount < get(report, 'detailedReport', []).length) {
