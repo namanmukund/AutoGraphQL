@@ -1,6 +1,7 @@
 /* AutoGenerates resolvers for model types  */
 import { camelCase, isArray, get } from 'lodash';
 import pluralize from 'pluralize';
+import fetch from 'node-fetch';
 import { withFilter } from 'graphql-subscriptions';
 import { getParsedASTMap, checkIfArgumentsAreFromSameType, getFieldsBeingFetched } from '../../utils';
 import getRelationMutationNames from '../../utils/getRelationMutationNames';
@@ -155,6 +156,29 @@ const setAPMTransactionNameAndTag = (transactionName, tagKindValue) => {
   });
 };
 
+const clearStellateCache = (typeName, inputParams, mutationResolverName) => {
+  const stellateEndpoint = 'https://admin.stellate.co/tekie-backend';
+  const stellateHeaders = {
+    'content-type': 'application/json',
+    'stellate-token': 'd701925ee244a3a2340d4bb1522c1d76318e08f396c875f59c757ce06c550b03',
+  };
+  const stellateGraphqlQuery = {
+    query: `mutation { 
+      purge${typeName}(
+        soft: ${(mutationResolverName !== 'updateMutationResolver') ? 'false' : 'true'},
+        ${mutationResolverName !== 'addMutationResolver' ? `id:["${inputParams.id}"]` : ''}
+      ) 
+    }`,
+    extensions: {
+      source: 'tekie-backend',
+    },
+  };
+  fetch(stellateEndpoint, {
+    headers: stellateHeaders,
+    method: 'POST',
+    body: JSON.stringify(stellateGraphqlQuery),
+  });
+};
 // FIX: instead of id and input just take in params object as args
 const defaultMutationsResolverWrapper = async (
   root,
@@ -202,6 +226,8 @@ const defaultMutationsResolverWrapper = async (
     }
     const dbData = await posthook(newResult, mutationName, context, params, info);
     // allow subscription on defined events
+    // purge cache on defined typeName
+    clearStellateCache(typeName, inputParams, mutationResolverName);
     subscribeToEvents(
       typeName,
       mutationName,
