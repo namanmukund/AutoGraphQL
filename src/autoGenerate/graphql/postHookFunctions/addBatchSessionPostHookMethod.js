@@ -21,7 +21,8 @@ import generateOtpForBatchSession from './utils/generateOtpForBatchSession';
 import getSlotDifference from './utils/getTimeDifference';
 import { getTopicsFromCoursePackage } from './utils/updateBatchPostHookQueries';
 import getSortedTopics from '../../../../utils/getSortedTopicsFromCoursePackageOrder';
-import { CacheController } from '../controllers';
+import { CacheController, QueryController } from '../controllers';
+import getStudentsCombinedArray from '../../../../utils/getStudentsCombinedArray';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -46,23 +47,9 @@ const getBatchQuery = (batchId) => `
         type
         students{
           id
-          user{
-            id
-            source
-            studentProfile{
-              id
-            }
-          }
         }
         batchStudents{
           id
-          user{
-            id
-            source
-            studentProfile{
-              id
-            }
-          }
         }
         currentComponent{
           id
@@ -74,6 +61,59 @@ const getBatchQuery = (batchId) => `
       }
     }
   `;
+
+const getBatchAggregation = (batchId) => ([
+  {
+    $match: {
+      id: batchId,
+    },
+  },
+  {
+    $lookup: {
+      from: 'BatchCurrentComponentStatus',
+      let: { batchId: '$currentComponent.typeId' },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $eq: ['$id', '$$batchId'],
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: 'Topic',
+            localField: 'currentTopic.typeId',
+            foreignField: 'id',
+            as: 'currentTopic',
+          },
+        },
+        {
+          $project: {
+            id: 1,
+            latestSessionStatus: 1,
+            currentTopic: {
+              $arrayElemAt: ['$currentTopic', 0],
+            },
+          },
+        },
+      ],
+      as: 'currentComponent',
+    },
+  },
+  {
+    $project: {
+      id: 1,
+      code: 1,
+      type: 1,
+      students: 1,
+      batchStudents: 1,
+      currentComponent: {
+        $arrayElemAt: ['$currentComponent', 0],
+      },
+    },
+  },
+]);
 
 // query to get published topic list
 const nextTopicQuery = (courseId) => `
@@ -146,9 +186,13 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
     get batch info
   */
   const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId), context);
-  const isTrial = await isTrialSession(get(input, 'topic.typeId'));
-  const batchType = get(batchResult, 'data.batch.type');
-  if (isTrial) {
+  const batchModel = new QueryController('Batch', { bypass: true });
+  const batchAggrResult = await batchModel.aggregate(getBatchAggregation(batchId));
+  // const isTrial = await isTrialSession(get(input, 'topic.typeId'));
+  const batchType = get(batchAggrResult, '0.type');
+  // if (isTrial) {
+  // eslint-disable-next-line no-constant-condition
+  if (false) {
     let mentorProfile;
     if (mentorSessionConnectId) {
       mentorProfile = await getMentorProfileFromMentorSession(mentorSessionConnectId);
@@ -163,8 +207,8 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
       batchType,
     });
   }
-  const batchInfo = get(batchResult, 'data.batch');
-  const { students, currentComponent, code } = batchInfo;
+  const batchInfo = batchAggrResult[0] || {};
+  const { currentComponent, code } = batchInfo;
   const batchCurrentComponentId = currentComponent && currentComponent.id;
   const currentComponentTopicId = get(currentComponent, 'currentTopic.id');
 
@@ -210,12 +254,13 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
       );
     }
   }
+  const students = getStudentsCombinedArray(batchInfo);
   // add students to the batch session and mark them absent as default
   if (students && students.length && topicId) {
     let pushManyQuery = 'attendance:{ pushMany: [';
     students.forEach((studentElem) => {
-      if (studentElem.user && studentElem.user.studentProfile && studentElem.user.studentProfile.id) {
-        pushManyQuery += `{studentConnectId: "${studentElem.user.studentProfile.id}", 
+      if (studentElem.typeId) {
+        pushManyQuery += `{studentConnectId: "${studentElem.typeId}", 
                                                isPresent: false, 
                                                }, `;
       }
@@ -223,16 +268,16 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
     pushManyQuery += ']}';
     context.fromAddBatchSession = true;
     // pushing new array of students in batch session
-    await callLocalGraphqlApi(updateBatchSessionQuery(
+    callLocalGraphqlApi(updateBatchSessionQuery(
       batchSessionId,
       pushManyQuery,
     ), context);
   }
-  const isBetweenTwoHrs = getSlotDifference(get(slotTimeStringArray, '[0]'), bookingDate, 2);
+  // const isBetweenTwoHrs = getSlotDifference(get(slotTimeStringArray, '[0]'), bookingDate, 2);
   // if (isBetweenTwoHrs && batchType === 'b2b') generateOtpForBatchSession(batchSessionId, students);
-  const studentsId = (students && students.length) ? students.map((student) => get(student, 'id')) : [];
-  extractBatchSessionAndSendB2BC(batchSessionId, studentsId, false);
-  extractBatchSessionAndSendB2B(batchSessionId);
+  // const studentsId = (students && students.length) ? students.map((student) => get(student, 'id')) : [];
+  // extractBatchSessionAndSendB2BC(batchSessionId, studentsId, false);
+  // extractBatchSessionAndSendB2B(batchSessionId);
 
   // call addMentorMenteeSessionFor batch to create mentorMenteesession for each student in batch
   // mentorSessionConnectId made non-mandatory
