@@ -1,6 +1,9 @@
+import fetch from 'node-fetch';
 import { log } from '../../../../utils';
 import redis from '../../../redis';
 import MasterController from './MasterController';
+import { STELLATE_ENDPOINT, STELLATE_HEADERS, STELLATE_PURGE_TOKEN } from '../../../../constants';
+import { get } from 'lodash';
 
 class CacheController extends MasterController {
   REDIS_SUCCESS_STATE = ['ready', 'connect'];
@@ -57,9 +60,43 @@ class CacheController extends MasterController {
     if (this.validateRedisConn()) await this.redis.del(hkey);
   }
 
+  clearStellateEdgeCache({
+    typeName, mutationResolverName, inputParams,
+  }) {
+    // eslint-disable-next-line no-unused-vars
+    const _redis = this.redis;
+    try {
+      if (typeName && STELLATE_PURGE_TOKEN) {
+        /**
+         * Building Purge Query -
+         * Example:
+         * typeName -> Topic
+         * Query -> mutation { purgeTopic(id:["123"]) } or mutation { purgeTopic }
+         */
+        const stellateGraphqlQuery = {
+          query: `mutation { 
+            purge${typeName}${((mutationResolverName !== 'addMutationResolver') && get(inputParams, 'id')) ? `(id:["${get(inputParams, 'id')}"])` : ''}
+          }`,
+          extensions: {
+            source: 'tekie-backend',
+          },
+        };
+        log(`Purging ${typeName} cache ${get(inputParams, 'id') ? `with id: ${get(inputParams, 'id')}` : ''}`, 'stellate');
+        fetch(STELLATE_ENDPOINT, {
+          headers: STELLATE_HEADERS,
+          method: 'POST',
+          body: JSON.stringify(stellateGraphqlQuery),
+        });
+      }
+    } catch (e) {
+      log(e);
+    }
+  }
+
   async flushall() {
     if (this.validateRedisConn()) await redis.flushall();
   }
+
 }
 
 export default CacheController;
