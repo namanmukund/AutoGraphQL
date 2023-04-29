@@ -188,10 +188,13 @@ const updateStudentProfilePostHookMethod = async (input, params, mutationName, c
       const studentProfileBatchId = get(studentProfile, 'batch.id');
       const studentProfileBatches = get(studentProfile, 'batches', []);
       if (studentProfileBatchId) {
-        await removeStudentFromBatch(studentProfileBatchId, studentProfileId, context);
+        removeStudentFromBatch(studentProfileBatchId, studentProfileId, context);
       }
       if (studentProfileBatches.length) {
-        await removeBatchesFromStudent(studentProfileId, context);
+        studentProfileBatches.forEach((item) => {
+          removeStudentFromBatch(get(item, 'id'), studentProfileId, context);
+        });
+        removeBatchesFromStudent(studentProfileId, context);
       }
       const batches = await userBatchQuery(schoolId, currentGrade, currentSection, academicYearId);
       if (batches && batches.length > 0) {
