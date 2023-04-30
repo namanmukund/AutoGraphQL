@@ -1,7 +1,6 @@
 /* AutoGenerates resolvers for model types  */
 import { camelCase, isArray, get } from 'lodash';
 import pluralize from 'pluralize';
-import fetch from 'node-fetch';
 import { withFilter } from 'graphql-subscriptions';
 import { getParsedASTMap, checkIfArgumentsAreFromSameType, getFieldsBeingFetched } from '../../utils';
 import getRelationMutationNames from '../../utils/getRelationMutationNames';
