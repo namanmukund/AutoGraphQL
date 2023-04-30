@@ -3,7 +3,7 @@ import { get } from 'lodash';
 import { log } from '../../../../utils';
 import redis from '../../../redis';
 import MasterController from './MasterController';
-import { STELLATE_ENDPOINT, STELLATE_HEADERS, STELLATE_PURGE_TOKEN } from '../../../../constants';
+import { STELLATE_PURGE_CONFIG, STELLATE_PURGE_TOKEN } from '../../../../constants';
 
 class CacheController extends MasterController {
   REDIS_SUCCESS_STATE = ['ready', 'connect'];
@@ -81,8 +81,8 @@ class CacheController extends MasterController {
             source: 'tekie-backend',
           },
         };
-        fetch(STELLATE_ENDPOINT, {
-          headers: STELLATE_HEADERS,
+        fetch(STELLATE_PURGE_CONFIG.STELLATE_ENDPOINT, {
+          headers: STELLATE_PURGE_CONFIG.STELLATE_HEADERS,
           method: 'POST',
           body: JSON.stringify(stellateGraphqlQuery),
         }).then(() => {
