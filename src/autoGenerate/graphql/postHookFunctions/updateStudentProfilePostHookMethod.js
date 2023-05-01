@@ -63,23 +63,6 @@ const removeOldLinkAndAddUpdateSchoolClass = async (previousSchoolClassId, input
 //   return addStudentToBatch(input, studentSchoolId, studentProfileId, context);
 // };
 
-const getStudentProfile = async (studentProfileId, context) => {
-  const query = `{
-  studentProfile(id: "${studentProfileId}") {
-    id
-    batch {
-      id
-    }
-    batches {
-      id
-    }
-  }
-}
-`;
-  const result = await callLocalGraphqlApi(query, context);
-  return get(result, 'data.studentProfile');
-};
-
 const removeStudentFromBatch = async (batchId, studentId, context) => {
   const query = `
   mutation{
@@ -95,11 +78,13 @@ const removeStudentFromBatch = async (batchId, studentId, context) => {
   return null;
 };
 
-const removeBatchesFromStudent = async (studentId, context) => {
+const removeStudentFromBatches = async (batchId, studentId, context) => {
   const query = `
   mutation{
-    removeBatchesFromStudent(studentProfileId:"${studentId}"){
-      result
+    removeFromBatchesStudentProfile(studentProfileId:"${studentId}", batchId:"${batchId}"){
+      studentProfile{
+        id
+      }
     }
   }
   `;
@@ -184,17 +169,16 @@ const updateStudentProfilePostHookMethod = async (input, params, mutationName, c
       isGradeOrSectionUpdated = true;
     }
     if (isGradeOrSectionUpdated) {
-      const studentProfile = await getStudentProfile(studentProfileId);
-      const studentProfileBatchId = get(studentProfile, 'batch.id');
-      const studentProfileBatches = get(studentProfile, 'batches', []);
+      // const studentProfile = await getStudentProfile(studentProfileId);
+      const studentProfileBatchId = get(input, 'batch.typeId');
+      const studentProfileBatches = get(input, 'batches', []);
       if (studentProfileBatchId) {
         removeStudentFromBatch(studentProfileBatchId, studentProfileId, context);
       }
       if (studentProfileBatches.length) {
         studentProfileBatches.forEach((item) => {
-          removeStudentFromBatch(get(item, 'id'), studentProfileId, context);
+          removeStudentFromBatches(get(item, 'typeId'), studentProfileId, context);
         });
-        removeBatchesFromStudent(studentProfileId, context);
       }
       const batches = await userBatchQuery(schoolId, currentGrade, currentSection, academicYearId);
       if (batches && batches.length > 0) {
@@ -212,10 +196,6 @@ const updateStudentProfilePostHookMethod = async (input, params, mutationName, c
         }
         updateStudentProfile(studentId, masterbatchId, batchesConnectIds);
       }
-      // const studentBatchId = get(context, 'previousDocument.batch.id');
-      // removeOldLinkAndAddUpdateNewBatch(studentBatchId, {
-      //   grade: currentGrade, section: currentSection,
-      // }, schoolId, get(input, 'id'), context);
     }
   }
 
