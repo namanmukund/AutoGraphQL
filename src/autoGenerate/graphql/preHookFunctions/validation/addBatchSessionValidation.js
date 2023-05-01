@@ -1,7 +1,10 @@
 /* eslint-disable */
 import { get } from 'lodash';
 import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
-import { PermissionDeniedError, MentorIsInactiveError } from '../../../../../constants/errors';
+import {
+  PermissionDeniedError,
+  // MentorIsInactiveError
+} from '../../../../../constants/errors';
 import {
   ADMIN, UMS_ADMIN, MENTOR, UMS_VIEWER,
 } from '../../../../../constants/roles';
@@ -12,9 +15,8 @@ import validateBatchSessionInput from './utils/validateBatchSessionInput';
 import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
 import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
 import getSelectedSlotsTime from './utils/getSelectedSlotsTime';
-import getMentorSessions from '../../../utils/getMentorSessions';
-import { checkIfSlotCanBeOpenedValidation } from './utils';
-import isTrialSession from '../../resolvers/utils/isTrialSession';
+// import getMentorSessions from '../../../utils/getMentorSessions';
+// import { checkIfSlotCanBeOpenedValidation } from './utils';
 import getSelectedSlotsStringArray from '../../postHookFunctions/utils/getSelectedSlotsStringArray';
 import { getHoursDiff } from './utils/validateMenteeSessionInput';
 
@@ -72,7 +74,7 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
   const batchId = get(params, 'batchConnectId');
   const topicId = get(params, 'topicConnectId');
   const mentorSessionConnectId = get(params, 'mentorSessionConnectId');
-  context.isTrialSession = await isTrialSession(topicId);
+  // context.isTrialSession = await isTrialSession(topicId);
 
   // log in case batch or topic id is not present
   // if (!batchId || !topicId || !mentorSessionConnectId) {
@@ -113,28 +115,28 @@ const addBatchSessionValidation = async (params, mutationOrQueryName, context) =
   await validateBatchSessionInput(params, context, 'addBatch', userRoleFromContext);
 
   // check if mentor already has another session in same slot
-  console.log('change1 *** addBatchSessionValidation')
-  if (mentorSessionConnectId) {
-    const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId), context);
-    const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
-    const bookingDate = get(params, 'input.bookingDate', '');
-    const isMentorActive = get(fetchMentorRes,'data.mentorSession.user.mentorProfile.isMentorActive')
-    if(!isMentorActive){
-      throw new MentorIsInactiveError()
-    }
+  // console.log('change1 *** addBatchSessionValidation')
+  // if (mentorSessionConnectId) {
+  //   const fetchMentorRes = await callLocalGraphqlApi(fetchMentor(mentorSessionConnectId), context);
+  //   const mentorUserId = get(fetchMentorRes, 'data.mentorSession.user.id', '');
+  //   const bookingDate = get(params, 'input.bookingDate', '');
+  //   const isMentorActive = get(fetchMentorRes,'data.mentorSession.user.mentorProfile.isMentorActive')
+  //   if(!isMentorActive){
+  //     throw new MentorIsInactiveError()
+  //   }
   
-    if (mentorUserId && bookingDate) {
-      const getMentorSessionsRes = await callLocalGraphqlApi(
-        getMentorSessions(
-          mentorUserId,
-          bookingDate,
-        ),
-        context,
-      );
-      const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
-      checkIfSlotCanBeOpenedValidation(params, mentorSessions);
-    }
-  }
+  //   if (mentorUserId && bookingDate) {
+  //     const getMentorSessionsRes = await callLocalGraphqlApi(
+  //       getMentorSessions(
+  //         mentorUserId,
+  //         bookingDate,
+  //       ),
+  //       context,
+  //     );
+  //     const mentorSessions = get(getMentorSessionsRes, 'data.mentorSessions');
+  //     checkIfSlotCanBeOpenedValidation(params, mentorSessions);
+  //   }
+  // }
 
   if (
     !backendApps.includes(appName)
