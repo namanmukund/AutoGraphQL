@@ -1002,7 +1002,7 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'addSessionComponentTracker': {
       const batchSessionConnectId = get(params, 'id') || get(params, 'batchSessionId') || get(params, 'batchSessionConnectId');
-      const batchSessionData = await callLocalGraphqlApi(batchSessionQuery(batchSessionConnectId));
+      const batchSessionData = await callLocalGraphqlApi(batchSessionQuery(batchSessionConnectId), context);
       const sessionComponentTracker = get(batchSessionData, 'data.batchSession.sessionComponentTracker');
       if (sessionComponentTracker) {
         throw new ComponentTrackerIdAlreadyGenerated();
