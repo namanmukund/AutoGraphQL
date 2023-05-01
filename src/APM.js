@@ -90,6 +90,20 @@ class APM {
     }
   };
 
+  setUser = (context) => {
+    for (const instance of this.apmInstances) {
+      switch (instance.type) {
+        case APMConnectors.SENTRY: {
+          Sentry.setUser(context);
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+    }
+  };
+
   captureException = (reason) => {
     for (const instance of this.apmInstances) {
       switch (instance.type) {

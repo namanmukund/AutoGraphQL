@@ -14,7 +14,7 @@ const batchAttendanceType = `
 
 const batchLoginStatusType = `
   type BatchLoginStatusType {
-   user: User! @relation(name:"BatchSessionLoginUser", direction: "OneWay")
+   user: User @relation(name:"BatchSessionLoginUser", direction: "OneWay")
    isLoggedIn: Boolean
    systemId: String
  }`;

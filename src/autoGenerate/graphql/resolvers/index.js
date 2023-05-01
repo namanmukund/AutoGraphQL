@@ -129,6 +129,7 @@ import getSubmittedAssignmentsStudents from './query/methods/getSubmittedAssignm
 import syncUserSessionReports from '../../../../utils/scheduleJobs/jobs/batchAndUpdateUserSessionReports';
 import APM from '../../../APM';
 import removeBatchesFromStudent from './mutation/userData/removeBatchesFromStudent';
+import { CacheController } from '../controllers';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
@@ -203,6 +204,13 @@ const defaultMutationsResolverWrapper = async (
     }
     const dbData = await posthook(newResult, mutationName, context, params, info);
     // allow subscription on defined events
+    // purge cache on defined typeName
+    const cacheController = new CacheController({ bypass: true });
+    cacheController.clearStellateEdgeCache({
+      typeName,
+      inputParams,
+      mutationResolverName,
+    });
     subscribeToEvents(
       typeName,
       mutationName,

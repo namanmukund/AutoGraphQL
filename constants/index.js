@@ -641,6 +641,15 @@ const MEDIA_RESOLUTIONS = ['480', '720', '1080'];
 
 const VIDEOS_TO_TRANSCODE_FOLDER = 'videosToTranscode';
 
+const STELLATE_PURGE_TOKEN = process.env.STELLATE_PURGE_TOKEN;
+const STELLATE_PURGE_CONFIG = {
+  STELLATE_ENDPOINT: 'https://admin.stellate.co/tekie-backend',
+  STELLATE_HEADERS: {
+    'content-type': 'application/json',
+    'stellate-token': STELLATE_PURGE_TOKEN,
+  },
+};
+
 export {
   scalarTypes,
   defaultFields,
@@ -769,4 +778,6 @@ export {
   forgotPassWebURL,
   MEDIA_RESOLUTIONS,
   VIDEOS_TO_TRANSCODE_FOLDER,
+  STELLATE_PURGE_CONFIG,
+  STELLATE_PURGE_TOKEN,
 };

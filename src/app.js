@@ -18,7 +18,7 @@ import iciciRoutes from './externalProductAPI/icici/routes';
 import typeformRoute from './typeformAPI';
 import redis from './redis';
 import pubsub from './pubsub';
-import { ALLOWED_HEADERS } from '../constants';
+import { ALLOWED_HEADERS, TBA } from '../constants';
 import getAdditionalContextData from '../utils/getAdditionalContextData';
 
 const http = require('http');
@@ -197,7 +197,11 @@ const server = new ApolloServer({
           },
         });
       }
+      APM.setUser(get(req, 'currentUser'));
       APM.setContext('context', contextObj);
+      APM.setTags([
+        { label: 'app', value: get(req, 'currentApp.name') || TBA },
+      ]);
     }
     // return context data
     const obj = {};

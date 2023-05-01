@@ -33,7 +33,7 @@ const addSchoolClass = async (input, studentSchoolId, studentProfileId, context,
       input:$input, 
       schoolConnectId:"${studentSchoolId}"
       studentsConnectIds:["${studentProfileId}"]
-      ${academicYearId ? `academicYearsConnectIds: ["${academicYearId}"]` : ''}
+      academicYearsConnectIds: ["${academicYearId}"]
       ){
         id
       }
