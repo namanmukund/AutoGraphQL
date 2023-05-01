@@ -1,28 +1,28 @@
-import { get } from 'lodash';
+// import { get } from 'lodash';
 // import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
-import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
+// import getSelectedSlotsStringArray from './utils/getSelectedSlotsStringArray';
 // import availableSlotsQuery from '../graphqlQueries/availableSlotsQuery';
 // import updateAvailableSlotQuery from '../graphqlQueries/updateAvailableSlotQuery';
 // import addAvailableSlotQuery from '../graphqlQueries/addAvailableSlotQuery';
 import { backendApps } from '../../../../constants';
-import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
-import getMentorProfile from './utils/getMentorProfile';
+// import mentorAvailabilitySlotOperation from './utils/mentorAvailabilitySlotOperation';
+// import getMentorProfile from './utils/getMentorProfile';
 
-const addMentorSessionPostHookMethod = async (input, mutationName, context) => {
-  const { sessionType, availabilityDate, ...slots } = input;
+const addMentorSessionPostHookMethod = async (input, _mutationName, context) => {
+  const { sessionType } = input;
   if (sessionType && (sessionType === 'paid' || sessionType === 'batch')) {
     return true;
   }
-  const slotTimeStringArray = getSelectedSlotsStringArray(slots);
-  const userInfo = await getMentorProfile(get(input, 'user.typeId'));
-  await mentorAvailabilitySlotOperation({
-    sessionId: get(input, 'id'),
-    slotTimeStringArray,
-    sessionType,
-    date: availabilityDate,
-    mutationName,
-    mentorProfileId: get(userInfo, 'mentorProfile.id'),
-  });
+  // const slotTimeStringArray = getSelectedSlotsStringArray(slots);
+  // const userInfo = await getMentorProfile(get(input, 'user.typeId'));
+  // await mentorAvailabilitySlotOperation({
+  //   sessionId: get(input, 'id'),
+  //   slotTimeStringArray,
+  //   sessionType,
+  //   date: availabilityDate,
+  //   mutationName,
+  //   mentorProfileId: get(userInfo, 'mentorProfile.id'),
+  // });
   // don't increase the availability slot if it is done through backend
   const { appName } = context;
   if (backendApps.includes(appName)) {

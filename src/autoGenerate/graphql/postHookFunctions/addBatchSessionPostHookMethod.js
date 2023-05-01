@@ -185,7 +185,7 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
   /*
     get batch info
   */
-  const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId), context);
+  // const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId), context);
   const batchModel = new QueryController('Batch', { bypass: true });
   const batchAggrResult = await batchModel.aggregate(getBatchAggregation(batchId));
   // const isTrial = await isTrialSession(get(input, 'topic.typeId'));

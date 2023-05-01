@@ -441,9 +441,9 @@ const prehook = async (input, mutationOrQueryName, context, params) => {
     }
     case 'addMentorSession': {
       const { availabilityDate } = input;
-      const updatedDate = new Date(availabilityDate);
+      let updatedDate = new Date(availabilityDate);
+      if (!availabilityDate) updatedDate = new Date();
       updatedDate.setHours(0, 0, 0, 0);
-
       const newInput = {
         ...input,
         availabilityDate: updatedDate.toISOString(),

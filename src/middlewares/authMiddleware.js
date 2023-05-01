@@ -7,6 +7,7 @@ import { STATIC } from '../../constants';
 import { DatabaseRecordNotFoundError } from '../../constants/errors';
 import appSpecificAuthTokens from '../../constants/appSpecificAuthTokens';
 import validateBuddyToken from './utils/validateBuddyToken';
+import APM from '../APM';
 
 const application = process.env.APPLICATION || 'core';
 const CACHE_EXPIRY_IN_SECONDS = 3600;
@@ -207,6 +208,8 @@ const authMiddleware = async (req, res, next) => {
     // To Validate if the buddy token is valid
     await validateBuddyToken(batchSessionId, userDeviceId, req);
   }
+  // Set user info in APM i.e sentry
+  APM.setUser(req.currentUser);
   next();
 };
 
