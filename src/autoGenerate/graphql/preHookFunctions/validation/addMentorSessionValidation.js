@@ -1,8 +1,6 @@
 import { get } from 'lodash';
-import callLocalGraphqlApi from '../../../../api/callLocalGraphqlApi';
 import {
   UserMismatchError,
-  MentorIsInactiveError,
 } from '../../../../../constants/errors';
 import { backendApps } from '../../../../../constants';
 import getUserIdandAppNameAfterValidation from './utils/getUserIdandAppNameAfterValidation';
@@ -10,22 +8,6 @@ import validateTokenAndExtractInformation from './utils/validateTokenAndExtractI
 import { ADMIN, SALES_EXECUTIVE, UMS_ADMIN } from '../../../../../constants/roles';
 import validateMentorSessionInput from './utils/validateMentorSessionInput';
 import { MissingMandatoryInputInRequestError } from '../../../../../constants/errors/input';
-// import { SimilarDocumentAlreadyExistError } from '../../../../../constants/errors/db';
-// import checkIfSlotCanBeOpenedValidation from './utils/checkIfSlotCanBeOpenedValidation';
-// import getMentorSessions from '../../../utils/getMentorSessions';
-import addAcceptedSlotRequestByMentorLogCheck from './utils/addAcceptedSlotRequestByMentorLogCheck';
-
-const getMentorProfile = async (mentorId, context) => {
-  const query = `{
-  mentorProfiles(filter: { user_some: { id: "${mentorId}" } }) {
-    id
-    isMentorActive
-  }
-}
-`;
-  const result = await callLocalGraphqlApi(query, context);
-  return get(result, 'data.mentorProfiles', []);
-};
 
 // prehook logic to check if added MentorSession(user id and availabilityDate) already exists
 const addMentorSessionValidation = async (params, mutationOrQueryName, context) => {
@@ -35,24 +17,6 @@ const addMentorSessionValidation = async (params, mutationOrQueryName, context) 
   both should be equal to perform further action
   */
 
-  // getting user role from context. We will allow adding mentorSession if logged in user is admin
-  const mentorId = get(params, 'userConnectId');
-  const mentorProfile = await getMentorProfile(mentorId, context);
-  const isMentorActive = get(mentorProfile, '[0].isMentorActive');
-  if (!isMentorActive) {
-    throw new MentorIsInactiveError();
-  }
-  if (get(params, 'input.acceptanceObjects', []).length > 0) {
-    const mentorProfileId = get(mentorProfile, '[0].id');
-    const acceptanceObjectsArray = get(params, 'input.acceptanceObjects', []);
-    // eslint-disable-next-line no-restricted-syntax
-    for (const acceptanceObject of acceptanceObjectsArray) {
-      // eslint-disable-next-line no-await-in-loop
-      await addAcceptedSlotRequestByMentorLogCheck({
-        acceptanceObject, mentorProfileId, mentorId, action: 'addMentorSession',
-      });
-    }
-  }
   const userInfo = validateTokenAndExtractInformation(context, false);
   const {
     currentUser,
