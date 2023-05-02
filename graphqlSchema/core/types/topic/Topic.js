@@ -82,6 +82,7 @@ const Topic = `
     referenceContent: String
     referenceContentWidth: Int
     contentType: ContentType! @defaultValue(value: "normal")
+    contentStatus: ContentStatus @defaultValue(value: "unpublished")
   }
 `;
 
