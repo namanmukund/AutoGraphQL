@@ -1,11 +1,13 @@
+/* eslint-disable no-console */
 /* eslint-disable no-return-await */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-unused-vars */
-import { get } from 'lodash';
+import { get, sortBy } from 'lodash';
+import { PARENT } from '../../../../../../constants/roles';
 import { callLocalGraphqlApi } from '../../../../../api';
 
-const callParentChildSignup = async (input, schoolName, country) => {
+const callParentChildSignup = async (input, schoolName, academicYearId) => {
   const {
     childName,
     parentName,
@@ -17,7 +19,7 @@ const callParentChildSignup = async (input, schoolName, country) => {
   } = input;
   const query = `
 mutation($input: ParentChildSignUpInput){
-  parentChildSignUp(input: $input){
+  parentChildSignUp(input: $input, ${academicYearId ? `academicYearId: "${academicYearId}"` : ''}){
     id
     parentProfile{
       id
@@ -52,6 +54,38 @@ mutation($input: ParentChildSignUpInput){
   return get(res, 'data.parentChildSignUp');
 };
 
+const deleteUser = async (userId) => {
+  await callLocalGraphqlApi(`mutation{
+    deleteUser(id:"${userId}"){
+      id
+    }
+  }`);
+};
+
+const addParentUser = async (input, context) => {
+  const addUserQuery = `mutation {
+  addUser(input: {
+    name: "${input.name}"
+    email:"${input.email}"
+    role: ${input.role}
+    password:"${input.password}"
+  }) {
+    id
+  }
+}
+`;
+  const addUserRes = await callLocalGraphqlApi(addUserQuery, context);
+  const userConnectId = get(addUserRes, 'data.addUser.id');
+  const addParentProfileQuery = `mutation {
+    addParentProfile(input: {}, userConnectId: "${userConnectId}") {
+      id
+    }
+  }
+  `;
+  const addParentProfileRes = await callLocalGraphqlApi(addParentProfileQuery, context);
+  return get(addParentProfileRes, 'data.addParentProfile.id');
+};
+
 const getUserWithSameEmail = async (emailOrUsername, context) => {
   const filter = `{email:"${emailOrUsername}"}`;
   const query = `{
@@ -62,6 +96,28 @@ const getUserWithSameEmail = async (emailOrUsername, context) => {
 `;
   const res = await callLocalGraphqlApi(query, context);
   return get(res, 'data.users', []).length;
+};
+
+const removeFromStudentProfileParentProfile = async (parentProfileId, studentProfileId, context) => {
+  const removeStudent = await callLocalGraphqlApi(`mutation {
+  removeFromStudentProfileParentProfile(
+    studentProfileId: "${studentProfileId}"
+    parentProfileId: "${parentProfileId}"
+  ) {
+    typeName
+  }
+}`, context);
+  return get(removeStudent, 'data.removeFromStudentProfileParentProfile.typeName');
+};
+
+const updateStudentProfile = async (studentProfileId, parentProfileId, context) => {
+  const studentProfileRes = await callLocalGraphqlApi(`mutation {
+  updateStudentProfile(id: "${studentProfileId}", input: {}, parentsConnectIds: ["${parentProfileId}"]) {
+    id
+  }
+}
+`, context);
+  return get(studentProfileRes, 'data.updateStudentProfile.id');
 };
 
 const getUniqueEmail = async (email, schoolUserEmailIds = [], index, initialEmail, context) => {
@@ -77,7 +133,7 @@ const getUniqueEmail = async (email, schoolUserEmailIds = [], index, initialEmai
 };
 
 const findDeleteAndCreateDuplicateUsers = async (context) => {
-  const SCHOOL_ID = 'clf6mrs23066w0tlw1qd24cq3';
+  const SCHOOL_ID = 'clerchs0305h70uhm4fjz7tsc';
   const schoolDetailRes = await callLocalGraphqlApi(`{
   school(id: "${SCHOOL_ID}") {
     id
@@ -116,20 +172,23 @@ const findDeleteAndCreateDuplicateUsers = async (context) => {
   const duplicateUsers = [];
   const schoolUsers = get(schoolUsersRes, 'data.users');
   const schoolDetail = get(schoolDetailRes, 'data.school');
+  const { code, name: schoolName, studentsMeta: { count } } = schoolDetail;
   const schoolUserEmailIds = [];
   for (const user of schoolUsers) {
     const childrens = get(user, 'parentProfile.children', []);
     if (childrens && childrens.length > 1) {
-      const [child1, child2] = childrens;
-      const child1CreatedAt = new Date(get(child1, 'createdAt'));
-      const child2CreatedAt = new Date(get(child2, 'createdAt'));
-      if (child1CreatedAt > child2CreatedAt) duplicateUsers.push(child2);
-      else duplicateUsers.push(child1);
+      const childrensArray = sortBy(childrens, 'createdAt');
+      const [_, ...rest] = childrensArray;
+      console.log({ rest: rest.length });
+      duplicateUsers.push(...rest);
     }
     schoolUserEmailIds.push(get(user, 'email'));
   }
-  const index = 0;
+  let index = 0;
+  const createdUsers = [];
+  const notCreatedUsers = [];
   for (const child of duplicateUsers) {
+    console.log(`Processing Index: ${index}========`);
     const studentId = get(child, 'id');
     const studentDetailRes = await callLocalGraphqlApi(`{
         studentProfile(id: "${studentId}") {
@@ -137,6 +196,12 @@ const findDeleteAndCreateDuplicateUsers = async (context) => {
             grade
             section
             rollNo
+            parents{
+              id
+            }
+            academicYears{
+              id
+            }
             user {
                 name
             }
@@ -147,9 +212,10 @@ const findDeleteAndCreateDuplicateUsers = async (context) => {
     const {
       grade, section, rollNo, user: { name }, academicYears,
     } = studentDetail;
-    const { code, name: schoolName, studentsMeta: { count } } = schoolDetail;
+    const prevParentProfileId = get(studentDetail, 'parents[0].id');
+    const studentProfileId = get(studentDetail, 'id');
     const academicYearId = get(academicYears, '[0].id');
-    const email = `${code}${count}@tekie.in`;
+    const email = `${code}${schoolUsers.length + 1}@tekie.in`;
     const parentEmail = await getUniqueEmail(email, schoolUserEmailIds, index, code, context);
     schoolUserEmailIds.push(parentEmail);
     const parentPassword = parentEmail && parentEmail.trim().toLowerCase().split('@')[0];
@@ -160,11 +226,48 @@ const findDeleteAndCreateDuplicateUsers = async (context) => {
       grade,
       section,
       rollNo: rollNo || '',
-      schoolName,
       parentPassword,
     };
-    await callParentChildSignup(input, schoolName);
+    console.log({ input: JSON.stringify(input), prevParentProfileId, studentProfileId });
+    try {
+      // await callParentChildSignup(input, schoolName, academicYearId).then(async (res) => {
+      //   await deleteUser(get(child, 'user.id'));
+      //   createdUsers.push(res);
+      // });
+      const parentData = {
+        name: input.parentName,
+        email: parentEmail && parentEmail.trim().toLowerCase(),
+        role: PARENT,
+        password: parentPassword,
+      };
+      const parentProfileId = await addParentUser(parentData, context);
+      console.log({ parentProfileId });
+      if (parentProfileId) {
+        const removeProfileMapping = await removeFromStudentProfileParentProfile(prevParentProfileId, studentProfileId, context);
+        console.log({ removeProfileMapping });
+        if (removeProfileMapping) {
+          const updatedStudentProfileId = await updateStudentProfile(studentProfileId, parentProfileId, context);
+          if (updatedStudentProfileId) {
+            console.log({ updatedStudentProfileId });
+            createdUsers.push(updatedStudentProfileId);
+          }
+        }
+      }
+    } catch (err) {
+      notCreatedUsers.push(input);
+      console.log('Something went wrong', err);
+    }
+    index += 1;
   }
+  console.log({
+    createdUsers: createdUsers.length,
+    duplicateUsers: duplicateUsers.length,
+    notCreatedUsers: notCreatedUsers.length,
+    studentsMeta: count,
+    schoolUsers: schoolUsers.length,
+    totalStudentsAfterUpdate: schoolUsers.length + duplicateUsers.length,
+  });
+  console.log(JSON.stringify(notCreatedUsers));
 };
 
 export default findDeleteAndCreateDuplicateUsers;
