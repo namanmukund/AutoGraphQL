@@ -44,7 +44,7 @@ mongoose.on('error', (err) => {
     reRunJobsFromDB();
   }
 
-  if ((process.env.STAGING_INSTANCE && process.env.STAGING_INSTANCE === 'true') || process.env.STAGING_INSTANCE === undefined) {
+  if (process.env.NODE_ENV === 'staging' && ((process.env.STAGING_INSTANCE && process.env.STAGING_INSTANCE === 'true') || process.env.STAGING_INSTANCE === undefined)) {
     createScheduler(TAT);
   }
   if (process.env.NODE_ENV === 'production' && process.env.SECONDARY_APPLICATION_NAME === TAT) {

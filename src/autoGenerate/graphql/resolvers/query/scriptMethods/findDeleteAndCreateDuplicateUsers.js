@@ -133,7 +133,7 @@ const getUniqueEmail = async (email, schoolUserEmailIds = [], index, initialEmai
 };
 
 const findDeleteAndCreateDuplicateUsers = async (context) => {
-  const SCHOOL_ID = 'cleshdaz20h750uhbe5yhcmw6';
+  const SCHOOL_ID = 'cleseyt9f0bto0uhmflvhb020';
   const schoolDetailRes = await callLocalGraphqlApi(`{
   school(id: "${SCHOOL_ID}") {
     id
@@ -230,10 +230,6 @@ const findDeleteAndCreateDuplicateUsers = async (context) => {
     };
     console.log({ input: JSON.stringify(input), prevParentProfileId, studentProfileId });
     try {
-      // await callParentChildSignup(input, schoolName, academicYearId).then(async (res) => {
-      //   await deleteUser(get(child, 'user.id'));
-      //   createdUsers.push(res);
-      // });
       const parentData = {
         name: input.parentName,
         email: parentEmail && parentEmail.trim().toLowerCase(),
