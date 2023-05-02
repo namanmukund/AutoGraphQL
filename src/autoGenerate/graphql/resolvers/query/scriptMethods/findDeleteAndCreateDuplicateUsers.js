@@ -133,7 +133,7 @@ const getUniqueEmail = async (email, schoolUserEmailIds = [], index, initialEmai
 };
 
 const findDeleteAndCreateDuplicateUsers = async (context) => {
-  const SCHOOL_ID = 'clerchs0305h70uhm4fjz7tsc';
+  const SCHOOL_ID = 'cleshdaz20h750uhbe5yhcmw6';
   const schoolDetailRes = await callLocalGraphqlApi(`{
   school(id: "${SCHOOL_ID}") {
     id
@@ -240,19 +240,19 @@ const findDeleteAndCreateDuplicateUsers = async (context) => {
         role: PARENT,
         password: parentPassword,
       };
-      const parentProfileId = await addParentUser(parentData, context);
-      console.log({ parentProfileId });
-      if (parentProfileId) {
-        const removeProfileMapping = await removeFromStudentProfileParentProfile(prevParentProfileId, studentProfileId, context);
-        console.log({ removeProfileMapping });
-        if (removeProfileMapping) {
-          const updatedStudentProfileId = await updateStudentProfile(studentProfileId, parentProfileId, context);
-          if (updatedStudentProfileId) {
-            console.log({ updatedStudentProfileId });
-            createdUsers.push(updatedStudentProfileId);
-          }
-        }
-      }
+      // const parentProfileId = await addParentUser(parentData, context);
+      // console.log({ parentProfileId });
+      // if (parentProfileId) {
+      //   const removeProfileMapping = await removeFromStudentProfileParentProfile(prevParentProfileId, studentProfileId, context);
+      //   console.log({ removeProfileMapping });
+      //   if (removeProfileMapping) {
+      //     const updatedStudentProfileId = await updateStudentProfile(studentProfileId, parentProfileId, context);
+      //     if (updatedStudentProfileId) {
+      //       console.log({ updatedStudentProfileId });
+      //       createdUsers.push(updatedStudentProfileId);
+      //     }
+      //   }
+      // }
     } catch (err) {
       notCreatedUsers.push(input);
       console.log('Something went wrong', err);
