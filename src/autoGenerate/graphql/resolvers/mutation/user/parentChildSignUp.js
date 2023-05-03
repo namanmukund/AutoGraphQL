@@ -40,6 +40,7 @@ import getUserPasswordObject from './utils/getUserPasswordObject';
 import { getNumberAndSendSms } from '../../../../../sms';
 // import updateLeadSquared from '../../../../../../services/leadsquared/updateLeadSquared';
 import checkForRollNumberInSchoolClass from './utils/checkForRollNumberInSchoolClass';
+import checkForSameNameAndGradeInSchool from './utils/checkForSameNameAndGradeInSchool';
 
 const USER_TYPE = 'User';
 
@@ -172,6 +173,16 @@ const parentChildSignUpMutationResolver = async (
   let campaign = null;
   if (campaignId) {
     campaign = await getBatchDetailsFromACampaign(campaignId);
+  }
+
+  let studentSchoolId = schoolId;
+  if (!schoolId && schoolName) {
+    studentSchoolId = await getSchoolInformation(schoolName);
+  }
+
+  if (studentSchoolId && childName && grade) {
+    // Check for the same childName in same grade
+    await checkForSameNameAndGradeInSchool(studentSchoolId, grade, childName);
   }
 
   // if parent exist don't add parent and check if the child exists too
@@ -369,10 +380,6 @@ const parentChildSignUpMutationResolver = async (
   /*
 Update school info too
  */
-  let studentSchoolId = schoolId;
-  if (!schoolId && schoolName) {
-    studentSchoolId = await getSchoolInformation(schoolName);
-  }
 
   /*
 If coming from campaign and the type os b2b allocate the user to the right batch

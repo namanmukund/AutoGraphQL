@@ -243,3 +243,7 @@ export const StudentWithSimilarRollNoExist = createError('StudentWithSimilarRoll
 export const InvalidLearningObjectiveComponent = createError('InvalidLearningObjectiveComponent', {
   message: 'Learning Objective Component passed is invalid',
 });
+
+export const StudentWithSimilarNameAndGradeExist = createError('StudentWithSimilarNameAndGradeExist', {
+  message: 'Student with similar name and grade already exists',
+});
