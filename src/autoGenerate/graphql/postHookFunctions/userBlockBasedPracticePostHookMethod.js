@@ -4,6 +4,8 @@ import getInfoFromParams from './utils/getInfoFromParams';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { MENTEE } from '../../../../constants/roles';
+import { checkIfRoleCmsAdmin } from '../../../../utils/ifAuthorized';
+import deleteCreatedDocs from './utils/deleteCreatedDocs';
 
 const filterAndDeleteIfDupicate = (resultArray, context) => {
   const uniqueBlockBasedPractice = [];
@@ -121,7 +123,11 @@ const userBlockBasedPracticePostHookMethod = async (input, params, context) => {
     returning input in that case
     if it is not already present, we will add a new document with default data
   */
-  if (input && input.length) {
+  const isRoleCmsAdmin = checkIfRoleCmsAdmin(context);
+  if (isRoleCmsAdmin && input && input.length) {
+    await deleteCreatedDocs('blockBasedPractice', input, context);
+  }
+  if (input && input.length && !isRoleCmsAdmin) {
     const inputArray = Array.isArray(input) ? input : [input];
     const userBlockBasedPracticeIdsInInput = inputArray.map((item) => get(item, 'blockBasedPractice.typeId'));
     blockBasedPracticeNotCreated = blockBasedPracticeIds.filter(

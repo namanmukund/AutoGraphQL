@@ -8,6 +8,8 @@ import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { log } from '../../../../utils';
 import { MENTEE } from '../../../../constants/roles';
 import { fetchAndCacheQueryRes } from '../resolvers/mutation/userData/menteeCourseSyllabus';
+import { checkIfRoleCmsAdmin } from '../../../../utils/ifAuthorized';
+import deleteCreatedDocs from './utils/deleteCreatedDocs';
 
 // query to get assignment questions associated with topic
 export const topicAssignmentAndQuizQuery = (topicId) => `
@@ -91,7 +93,11 @@ const userAssignmentPostHookMethod = async (input, params, mutationName, context
   returning input in that case
   if it is not already present, we will add a new document with default data
   */
-  if (input && input.length) {
+  const isRoleCmsAdmin = checkIfRoleCmsAdmin(context);
+  if (isRoleCmsAdmin && input && input.length) {
+    await deleteCreatedDocs(mutationName, input, context);
+  }
+  if (input && input.length && !isRoleCmsAdmin) {
     return input;
   }
   if (get(context, 'userRoleFromContext') && get(context, 'userRoleFromContext') !== MENTEE) {

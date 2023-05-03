@@ -91,7 +91,7 @@ const handleUserToken = async (id, currentApp, currentUser) => {
   }
   // Get status
   let { status } = user;
-  const { role, name } = user;
+  const { role, name, roles } = user;
   // Check if user token have phone login or email login information and update status accordingly
   if (typeof currentUser === 'object' && status === 'active') {
     // commenting emailVerified true logic as unverified email user can be active too
@@ -111,7 +111,9 @@ const handleUserToken = async (id, currentApp, currentUser) => {
   if (name) {
     userInfo.name = name;
   }
-
+  if (roles && roles.length) {
+    userInfo.roles = roles;
+  }
   return userInfo;
 };
 
