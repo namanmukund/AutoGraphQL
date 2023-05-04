@@ -47,3 +47,55 @@ export const addStudentToBatch = async (input, schoolStudentId, studentProfileId
   }
   return true;
 };
+
+export const getIdArrForQuery = (idArr) => {
+  let arr = '';
+  if (idArr) {
+    idArr.forEach((id) => {
+      arr += `"${id}",`;
+    });
+    if (arr.length && arr[arr.length - 1] === ',') {
+      arr.substring(0, arr.length - 1);
+    }
+  }
+  return arr;
+};
+
+export const userBatchQuery = async (schoolId, currentGrade, currentSection, academicYearId) => {
+  const query = `
+  query{
+    batches(filter: {
+    and: [
+      { school_some: { id: "${schoolId}" } }
+      { classes_some: { and: [{ grade: ${currentGrade} }, { section: ${currentSection} }] } }
+      {${academicYearId ? `academicYear_some:{id:"${academicYearId}"}` : ''}}
+      { documentType: classroom }
+    ]
+  }){
+    id
+    code
+    inheritedFrom {
+      id
+    }
+  }
+}
+  `;
+  const res = await callLocalGraphqlApi(query);
+  return get(res, 'data.batches');
+};
+
+export const updateStudentProfile = async (studentId, batchConnectId, batchesConnectIds) => {
+  const query = `
+  mutation{
+    updateStudentProfile(
+      id: "${studentId}"
+      batchConnectId:"${batchConnectId}"
+      ${(batchesConnectIds && batchesConnectIds.length) ? `batchesConnectIds: [${getIdArrForQuery([...batchesConnectIds, batchConnectId])}]` : ''}
+    ){
+      id
+    }
+  }
+  `;
+  const res = await callLocalGraphqlApi(query);
+  return get(res, 'data');
+};
