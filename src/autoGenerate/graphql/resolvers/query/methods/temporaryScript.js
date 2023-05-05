@@ -45,6 +45,7 @@ import validateAuthentication from '../../../../../../utils/validateAuthenticati
 // import RemappingBatchStudentInSchool from './RemappingBatchStudentInSchool';
 // import mentorMenteeSessionSchemaMigration from './mentorMenteeSessionSchemaMigration';
 // import updateSessionOtpType from '../scriptMethods/updateSessionOtpType';
+// import updateTopicContentStatus from '../scriptMethods/updateTopicContentStatus';
 
 const temporaryScript = (async (root, params, context) => {
   validateAuthentication(context);
@@ -114,6 +115,7 @@ const temporaryScript = (async (root, params, context) => {
   // await updateBatchDetailsForReports();
   // await updateStudentAndClassesOfSchoolsForAcademicYear(context);
   // await findDeleteAndCreateDuplicateUsers(context);
+  // await updateTopicContentStatus();
   return {
     result: true,
   };
