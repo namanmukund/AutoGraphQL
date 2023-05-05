@@ -130,7 +130,6 @@ import syncUserSessionReports from '../../../../utils/scheduleJobs/jobs/batchAnd
 import APM from '../../../APM';
 import removeBatchesFromStudent from './mutation/userData/removeBatchesFromStudent';
 import { CacheController } from '../controllers';
-import removeBatchesFromStudent from './mutation/userData/removeBatchesFromStudent';
 
 const parsedASTMap = getParsedASTMap(types);
 const resolvers = {
