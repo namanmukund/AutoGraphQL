@@ -23,6 +23,7 @@ import { getTopicsFromCoursePackage } from './utils/updateBatchPostHookQueries';
 import getSortedTopics from '../../../../utils/getSortedTopicsFromCoursePackageOrder';
 import { CacheController, QueryController } from '../controllers';
 import getStudentsCombinedArray from '../../../../utils/getStudentsCombinedArray';
+import addSessionComponentTracker from './utils/addSessionComponentTracker';
 
 // query to get chapters and topics belomngin to a course
 const getCourseQuery = () => `
@@ -308,6 +309,8 @@ const addBatchSessionPostHookMethod = async (input, params, mutationName, contex
     // update session log entry
     addSessionLog(bookingDate, slotTimeStringArray, '', topicId, currentUser, courseId, 'addBatchSession', code, mentorSessionConnectId, sessionStatusFromInput || sessionStatus.allotted, '', get(context, 'isManualSession', false));
   }
+
+  addSessionComponentTracker({ batchSessionId: batchId, topicId });
 };
 
 export default addBatchSessionPostHookMethod;

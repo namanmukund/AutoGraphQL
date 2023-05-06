@@ -41,6 +41,9 @@ query{
     course{
         id
     }
+    sessionComponentTracker{
+      id
+    }
   }
 }
 `;

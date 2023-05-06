@@ -1024,7 +1024,7 @@ const addUserActivityQuizDumpPostHookMethod = async (input, mutationName, contex
   */
   if (quizAction === next) {
     // calling method to evaluate quiz and generate report
-    const userQuizReportRes = await callLocalGraphqlApi(fetchUserQuizReport(userId, topicId, courseId));
+    const userQuizReportRes = await callLocalGraphqlApi(fetchUserQuizReport(userId, topicId, courseId), context);
     let userQuizReportId = get(userQuizReportRes, 'data.userQuizReports[0].id', '');
     const {
       pushManyQuery,
