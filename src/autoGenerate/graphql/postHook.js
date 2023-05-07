@@ -73,6 +73,7 @@ import addUserActivityLearningSlideDumpPostHookMethod from './postHookFunctions/
 import updateRetakeSessionPostHookMethod from './postHookFunctions/updateRetakeSessionPostHookMethod';
 import reportDumpPostHook from './postHookFunctions/reportDumpPostHook';
 import { MEDIA_RESOLUTIONS, VIDEOS_TO_TRANSCODE_FOLDER } from '../../../constants';
+import { callLocalGraphqlApi } from '../../api';
 // import updateEventSessionPostHookMethod from './postHookFunctions/updateEventSessionPostHookMethod';
 // import addEventSessionPostHookMethod from './postHookFunctions/addEventSessionPostHookMethod';
 
@@ -395,6 +396,34 @@ const posthook = async (input, mutationName, context, params, info) => {
           await deleteFromS3(videoUri);
         }
       }
+      break;
+    }
+    case 'updateTopic':
+    case 'updateLearningObjective':
+    case 'addLearningObjective':
+    case 'addLearningSlide':
+    case 'updateLearningSlide':
+    case 'addLearningSlideContent':
+    case 'updateLearningSlideContent':
+    case 'addQuestionBank':
+    case 'updateQuestionBank':
+    case 'updateAssignmentQuestion':
+    case 'addAssignmentQuestion': {
+      // Purging static and batch cache
+      const batchAndSessionCachePattern = 'batch*';
+      const staticCachePattern = 'static*';
+      const purgeCacheQuery = `
+        query purgeCache {
+          purgeStaticCache: purgeCache(pattern:"${staticCachePattern}") {
+            result
+          }
+          purgeBatchCache: purgeCache(pattern:"${batchAndSessionCachePattern}") {
+            result
+          }
+        }
+      `;
+      callLocalGraphqlApi(purgeCacheQuery, {}, context);
+      callLocalGraphqlApi(purgeCacheQuery, {}, context);
       break;
     }
     // case 'updateEventSession': {
