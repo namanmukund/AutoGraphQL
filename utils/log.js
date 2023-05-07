@@ -1,5 +1,6 @@
 import PrettyError from 'pretty-error';
 import isAPMEnabledAppAndEnv from './isAPMEnabledAppAndEnv';
+import winstonLogger from './winstonLogger';
 
 const application = process.env.APPLICATION || 'core';
 const env = process.env.NODE_ENV || 'development';
@@ -59,23 +60,35 @@ export const replaceErrors = (key, value) => {
 const log = (string, type = 'status', isAPM = false, isError = false) => {
   let dstring = string;
   let logType = type;
-  if (typeof string !== 'string') {
-    dstring = JSON.stringify(string, replaceErrors);
-  }
-  if ((typeof type === 'object') && type.dialect) {
-    logType = type.dialect || 'status';
-  }
-  const formattedString = pe.render(dstring);
-  /* eslint-disable no-console */
-  console.log(`${logType}: ${formattedString}`);
-  /* eslint-enable no-console */
-  if (isAPM && isAPMEnabledAppAndEnv(application, env)) {
-    if (isError) {
-      APM.captureException(`Error: ${formattedString}`);
-    } else {
-      APM.captureMessage(`Message: ${formattedString}`);
-    }
-  }
+  console.log('testing ========+++++++++========')
+  winstonLogger[type]({ string });
+
+  // if (typeof string !== 'string') {
+  //   console.log('not string ........')
+  //   winstonLogger[type]({ string });
+  // }
+  // if ((typeof type === 'object') && type.dialect) {
+  //   console.log('object and dialect ........')
+  //   winstonLogger[type]({ string });
+  // }
+
+  // if (typeof string !== 'string') {
+  //   dstring = JSON.stringify(string, replaceErrors);
+  // }
+  // if ((typeof type === 'object') && type.dialect) {
+  //   logType = type.dialect || 'status';
+  // }
+  // const formattedString = pe.render(dstring);
+  // /* eslint-disable no-console */
+  // console.log(`${logType}: ${formattedString}`);
+  // /* eslint-enable no-console */
+  // if (isAPM && isAPMEnabledAppAndEnv(application, env)) {
+  //   if (isError) {
+  //     APM.captureException(`Error: ${formattedString}`);
+  //   } else {
+  //     APM.captureMessage(`Message: ${formattedString}`);
+  //   }
+  // }
 };
 
 // for logging map of form: {key1:[1,2,3]}
