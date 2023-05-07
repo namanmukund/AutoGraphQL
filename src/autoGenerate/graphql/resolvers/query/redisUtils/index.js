@@ -30,7 +30,9 @@ const purgeCache = async (_root, params) => {
     let keysToFlush = [];
     if (pattern) {
       keysToFlush = await cacheClient.keys(pattern);
-      await cacheClient.destroy(keysToFlush);
+      if (keysToFlush && keysToFlush.length) {
+        await cacheClient.destroy(keysToFlush);
+      }
     } else {
       await cacheClient.flushall();
     }
