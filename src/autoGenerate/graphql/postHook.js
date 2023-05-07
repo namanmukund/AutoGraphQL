@@ -73,7 +73,7 @@ import addUserActivityLearningSlideDumpPostHookMethod from './postHookFunctions/
 import updateRetakeSessionPostHookMethod from './postHookFunctions/updateRetakeSessionPostHookMethod';
 import reportDumpPostHook from './postHookFunctions/reportDumpPostHook';
 import { MEDIA_RESOLUTIONS, VIDEOS_TO_TRANSCODE_FOLDER } from '../../../constants';
-import { callLocalGraphqlApi } from '../../api';
+import clearStaticAndBatchCache from './postHookFunctions/utils/clearStaticAndBatchCache';
 // import updateEventSessionPostHookMethod from './postHookFunctions/updateEventSessionPostHookMethod';
 // import addEventSessionPostHookMethod from './postHookFunctions/addEventSessionPostHookMethod';
 
@@ -398,6 +398,7 @@ const posthook = async (input, mutationName, context, params, info) => {
       }
       break;
     }
+    // Please Note : While separating the below posthook methods, please make sure to clear the cache for the respective query.
     case 'updateTopic':
     case 'updateLearningObjective':
     case 'addLearningObjective':
@@ -410,20 +411,7 @@ const posthook = async (input, mutationName, context, params, info) => {
     case 'updateAssignmentQuestion':
     case 'addAssignmentQuestion': {
       // Purging static and batch cache
-      const batchAndSessionCachePattern = 'batch*';
-      const staticCachePattern = 'static*';
-      const purgeCacheQuery = `
-        query purgeCache {
-          purgeStaticCache: purgeCache(pattern:"${staticCachePattern}") {
-            result
-          }
-          purgeBatchCache: purgeCache(pattern:"${batchAndSessionCachePattern}") {
-            result
-          }
-        }
-      `;
-      callLocalGraphqlApi(purgeCacheQuery, {}, context);
-      callLocalGraphqlApi(purgeCacheQuery, {}, context);
+      clearStaticAndBatchCache(context);
       break;
     }
     // case 'updateEventSession': {
