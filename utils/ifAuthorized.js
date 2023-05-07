@@ -47,3 +47,10 @@ export const ifAuthorized = (context, userToken) => {
   obj.user = user;
   return obj;
 };
+
+export const checkIfRoleCmsAdmin = (context) => {
+  const authentication = ifAuthorized(context);
+  const roles = get(authentication, 'user.roles', []);
+  const isRoleCmsAdmin = roles.includes('cmsAdmin') || false;
+  return isRoleCmsAdmin;
+};
