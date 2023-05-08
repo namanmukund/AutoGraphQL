@@ -57,38 +57,28 @@ export const replaceErrors = (key, value) => {
   return value;
 };
 
-const log = (string, type = 'status', isAPM = false, isError = false) => {
+const log = (string, type = 'info', isAPM = false, isError = false) => {
   let dstring = string;
   let logType = type;
-  console.log('testing ========+++++++++========')
-  winstonLogger[type]({ string });
-
-  // if (typeof string !== 'string') {
-  //   console.log('not string ........')
-  //   winstonLogger[type]({ string });
-  // }
-  // if ((typeof type === 'object') && type.dialect) {
-  //   console.log('object and dialect ........')
-  //   winstonLogger[type]({ string });
-  // }
-
-  // if (typeof string !== 'string') {
-  //   dstring = JSON.stringify(string, replaceErrors);
-  // }
-  // if ((typeof type === 'object') && type.dialect) {
-  //   logType = type.dialect || 'status';
-  // }
-  // const formattedString = pe.render(dstring);
-  // /* eslint-disable no-console */
-  // console.log(`${logType}: ${formattedString}`);
-  // /* eslint-enable no-console */
-  // if (isAPM && isAPMEnabledAppAndEnv(application, env)) {
-  //   if (isError) {
-  //     APM.captureException(`Error: ${formattedString}`);
-  //   } else {
-  //     APM.captureMessage(`Message: ${formattedString}`);
-  //   }
-  // }
+  if (!string) {
+    return;
+  }
+  if (typeof string !== 'string') {
+    dstring = JSON.stringify(string, replaceErrors);
+  }
+  if ((typeof type === 'object') && type.dialect) {
+    logType = type.dialect || 'info';
+  }
+  const formattedString = pe.render(dstring);
+  /* eslint-disable no-console */
+  winstonLogger.log(logType, formattedString);
+  if (isAPM && isAPMEnabledAppAndEnv(application, env)) {
+    if (isError) {
+      APM.captureException(`Error: ${formattedString}`);
+    } else {
+      APM.captureMessage(`Message: ${formattedString}`);
+    }
+  }
 };
 
 // for logging map of form: {key1:[1,2,3]}

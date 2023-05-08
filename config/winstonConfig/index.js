@@ -1,11 +1,9 @@
-const SERVICE_NAME = 'test';
-const CORRELATION_ID = '123';
-const TIMEZONE = 'time';
+const SERVICE_NAME = process.env.APPLICATION || 'core';
+const TIMEZONE = process.env.TZ || 'Asia/Kolkata';
 const LOG_DIR = 'var/log/tekie';
 
 const winstonConfig = {
   serviceName: SERVICE_NAME,
-  correlationId: CORRELATION_ID,
   timezone: TIMEZONE,
   logDir: LOG_DIR,
   winstonTransportConfig: {
@@ -21,6 +19,7 @@ const winstonConfig = {
       maxSize: '20m',
       maxFiles: 14,
       handleExceptions: true,
+      zippedArchive: true,
     },
   },
 };
