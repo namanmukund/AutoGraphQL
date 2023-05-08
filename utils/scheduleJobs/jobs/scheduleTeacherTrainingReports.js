@@ -6,6 +6,7 @@ import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { get, sortBy } from 'lodash';
 import { QueryController } from '../../../src/autoGenerate/graphql/controllers';
 import MasterController from '../../../src/autoGenerate/graphql/controllers/MasterController';
+import { currentModelName } from '../../../src/autoGenerate/utils/differentVersionsOfModal';
 
 const CHUNKS_COUNT = 100;
 
@@ -14,7 +15,7 @@ const getDatabaseControllers = () => {
 
   const batchController = new QueryController('Batch', authentication);
 
-  const userSessionReportController = new MasterController('UserLevelSessionReport', {
+  const userSessionReportController = new MasterController(currentModelName('UserLevelSessionReport', 'previous'), {
     bypass: true,
   });
 
