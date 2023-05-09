@@ -7,7 +7,6 @@ import parseTopicComponentResultData from './utils/parseTopicComponentResultData
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { log } from '../../../../utils';
 import { MENTEE } from '../../../../constants/roles';
-import { fetchAndCacheQueryRes } from '../resolvers/mutation/userData/menteeCourseSyllabus';
 import { checkIfRoleCmsAdmin } from '../../../../utils/ifAuthorized';
 import deleteCreatedDocs from './utils/deleteCreatedDocs';
 
