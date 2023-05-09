@@ -128,11 +128,8 @@ const userAssignmentPostHookMethod = async (input, params, mutationName, context
     we are getting below fields in topicQuery:
     -all published assignment questions of the topic
     */
-  const topicQueryRes = await fetchAndCacheQueryRes({
-    hkey: `static::topic::userQuizOrAssignment::${topicId}`,
-    maxAge: 604800,
-    dbCallback: () => callLocalGraphqlApi(topicAssignmentAndQuizQuery(topicId), context),
-  });
+  const topicQueryRes = await callLocalGraphqlApi(topicAssignmentAndQuizQuery(topicId), context);
+
   const topicInfo = get(topicQueryRes, 'data.topic');
   // adding assignment questions in the document
   // this logic will be changed based on assignment question sets
