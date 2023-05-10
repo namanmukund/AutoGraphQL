@@ -6,6 +6,8 @@ import {
 import getInfoFromParams from './utils/getInfoFromParams';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
+import deleteCreatedDocs from './utils/deleteCreatedDocs';
+import { checkIfRoleCmsAdmin } from '../../../../utils/ifAuthorized';
 
 // query to get topic and it's Lo with order 1
 const topicQuery = (topicId) => `
@@ -80,7 +82,11 @@ const userVideoPostHookMethod = async (input, params, mutationName, context) => 
   returning input in that case
   if it is not already present, we will add a new document with default data
   */
-  if (input && input.length) {
+  const isRoleCmsAdmin = checkIfRoleCmsAdmin(context);
+  if (isRoleCmsAdmin && input && input.length) {
+    await deleteCreatedDocs(mutationName, input, context);
+  }
+  if (input && input.length && !isRoleCmsAdmin) {
     return input;
   }
   const resultArray = [];

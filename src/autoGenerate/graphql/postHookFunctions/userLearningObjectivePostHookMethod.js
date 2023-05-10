@@ -7,6 +7,8 @@ import getInfoFromParams from './utils/getInfoFromParams';
 import parseTopicComponentResultData from './utils/parseTopicComponentResultData';
 import callLocalGraphqlApi from '../../../api/callLocalGraphqlApi';
 import { fetchAndCacheQueryRes } from '../resolvers/mutation/userData/menteeCourseSyllabus';
+import deleteCreatedDocs from './utils/deleteCreatedDocs';
+import { checkIfRoleCmsAdmin } from '../../../../utils/ifAuthorized';
 
 // query to get learning objective and all the learning objectives of the topic associated
 const learningObjectiveQuery = (learningObjectiveId) => `
@@ -96,7 +98,11 @@ const userLearningObjectivePostHookMethod = async (input, params, _mutationName,
   returning input in that case
   if it is not already present, we will add a new document with default data
   */
-  if (input && input.length) {
+  const isRoleCmsAdmin = checkIfRoleCmsAdmin(context);
+  if (isRoleCmsAdmin && input && input.length) {
+    await deleteCreatedDocs(_mutationName, input, context);
+  }
+  if (input && input.length && !isRoleCmsAdmin) {
     return input;
   }
   const resultArray = [];
