@@ -89,7 +89,7 @@ const reportDumpPostHook = async (input, mutationOrQueryName, context) => {
     default:
       break;
   }
-  if (Object.keys(reportsInputObj).length) {
+  if (Object.keys(reportsInputObj).length && get(reportsInputObj, 'userId')) {
     const activeClassroomId = getDataFromContext(context, 'activeClassroom');
     const activeSessionId = getDataFromContext(context, 'activeSessionId');
 

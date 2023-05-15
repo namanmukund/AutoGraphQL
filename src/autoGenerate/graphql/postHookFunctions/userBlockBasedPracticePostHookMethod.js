@@ -7,6 +7,19 @@ import { MENTEE } from '../../../../constants/roles';
 import { checkIfRoleCmsAdmin } from '../../../../utils/ifAuthorized';
 import deleteCreatedDocs from './utils/deleteCreatedDocs';
 
+const deleteUserBlockBasedPractice = async (id, context) => {
+  const query = `
+  mutation {
+    deleteUserBlockBasedPractice(
+      id: "${id}"
+    ) {
+      id
+    }
+  }
+  `;
+  await callLocalGraphqlApi(query, context);
+};
+
 const filterAndDeleteIfDupicate = (resultArray, context) => {
   const uniqueBlockBasedPractice = [];
   const uniqueIds = [];
@@ -20,20 +33,7 @@ const filterAndDeleteIfDupicate = (resultArray, context) => {
     }
   });
   blockbasedPracticeToBeDeleted.forEach((id) => {
-    callLocalGraphqlApi(
-      {
-        query: `
-        mutation {
-          deleteUserBlockBasedPractice(
-            id: "${id}"
-          ) {
-            id
-          }
-        }
-      `,
-      },
-      context,
-    );
+    deleteUserBlockBasedPractice(id, context);
   });
   return uniqueBlockBasedPractice;
 };
