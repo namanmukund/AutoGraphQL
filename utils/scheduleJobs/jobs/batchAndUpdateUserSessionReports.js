@@ -273,8 +273,11 @@ const getAllRequiredDataFromDatabase = async () => {
 
 const getBaseDocumentAndCalculatedFields = ({
   classroomId, userId, topicId, userSessionReports, topicDoc, batchSessions, users, batches,
+  eventType = 'componentLogs',
 }) => {
   // Check if userSessionReport already exists
+
+  // Add a check over here with a new field eventType added
   const existingSessionReport = (userSessionReports || []).find((report) => (
     (report.topicId === topicId)
       && (report.userId === userId)
@@ -725,11 +728,11 @@ const batchAndUpdateUserSessionReports = async () => {
       queryMessageString += `Rows Affected: ${userSessionReportUpdateDoc.length || 0}`;
 
       if (userSessionReportUpdateDoc && userSessionReportUpdateDoc.length) {
-        await userSessionReportController.Model.bulkCreate(userSessionReportUpdateDoc, { updateOnDuplicate: sqlColumnsToUpdate }).then((response) => {
-          log(`Session Report Updated, Total Count: ${(response || []).length}`);
-        }).catch((error) => {
-          throw new Error(error);
-        });
+        // await userSessionReportController.Model.bulkCreate(userSessionReportUpdateDoc, { updateOnDuplicate: sqlColumnsToUpdate }).then((response) => {
+        //   log(`Session Report Updated, Total Count: ${(response || []).length}`);
+        // }).catch((error) => {
+        //   throw new Error(error);
+        // });
       }
       // delete record from sql dump
       const idsToDelete = new Set();
@@ -739,10 +742,56 @@ const batchAndUpdateUserSessionReports = async () => {
         }
       });
       log(`Deleting Previous Dumps, Total Count: ${idsToDelete.size}`);
-      await userSessionDumpController.Model.destroy({ where: { id: Array.from(idsToDelete) } });
+      // await userSessionDumpController.Model.destroy({ where: { id: Array.from(idsToDelete) } });
       queryMessageString += ` | Rows Deleted: ${idsToDelete.size}`;
     }
     if (batchedSessionDump && Object.keys(batchedSessionDump).length) {
+      // console.log({ batchedSessionDump });
+      const userSessionReportUpdateDoc = [];
+      Object.keys(batchedSessionDump).forEach((key) => {
+        if (batchedSessionDump[key] && batchedSessionDump[key].length) {
+          const sortedBatchSessions = sortBy(batchedSessionDump[key], 'createdAt');
+          const [firstSessionDoc, ...restSessionDocs] = sortedBatchSessions;
+          const { topicId, classroomId, userId } = firstSessionDoc;
+          const topicDoc = topics.find((topic) => get(topic, 'id') === topicId);
+          if (!topicDoc) { return; }
+
+          // Filter and get base and caculatedFields Document.
+          let {
+          // eslint-disable-next-line prefer-const
+            baseDocument, calculatedFields, sessionDetails,
+          } = getBaseDocumentAndCalculatedFields({
+            classroomId,
+            topicId,
+            userId,
+            topicDoc,
+            eventType: 'batchSession',
+            ...requiredDBData,
+          });
+          let sessionComponentRule = get(sessionDetails, 'topic.topicComponentRule');
+          if (!sessionComponentRule && topicDoc && topicDoc.topicComponentRule && topicDoc.topicComponentRule.length) {
+            sessionComponentRule = get(topicDoc, 'topicComponentRule', []);
+          }
+          // Need to verify how we are passing the multiple records dump, as at diff time the batchSessions data can be diff
+          baseDocument.previousLogs = restSessionDocs;
+          userSessionReportUpdateDoc.push({ ...baseDocument, ...calculatedFields });
+          /*
+            ============= Fields we are updating for the batchSessions event =============
+          */
+          /*
+            id, userId, userName, userRole, classroomId, classroomTitle, schoolId, schoolName, topicId,
+            sessionId, sessionTitle, sessionType, courseId, courseTitle, courseCategory, sessionStart, sessionEnd,
+            sessionCreationDate, sessionUpdatedAt, sessionDuration, sessionStatus, classroomStudentsCount,
+            teacherTaughtName, teacherTaughtId, sessionClassworkComponents, sessionHomeworkComponents, homeworkExists,
+          */
+
+          /*
+            Need to add one more field that will have the eventType in userLevelSessionReport
+            i.e: is it a batchSession event or any other component log event,
+            as currently we are adding or updating by checking if the doc exist for userId, topicId and classroomId
+          */
+        }
+      });
       // TODO : Add logic to update session report in PG SQL
     }
     return {
