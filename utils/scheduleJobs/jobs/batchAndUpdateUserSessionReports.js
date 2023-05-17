@@ -271,9 +271,69 @@ const getAllRequiredDataFromDatabase = async () => {
   };
 };
 
+const getRequiredDataForUserSessionReport = async (userLevelSessionReports) => {
+  const documentIdsToFetch = {
+    classroomIds: new Set(),
+    topicIds: new Set(),
+    userIds: new Set(),
+    batchSessionFilters: {},
+  };
+  if (userLevelSessionReports && userLevelSessionReports.length) {
+    userLevelSessionReports.forEach((userLevelSessionReport) => {
+      const {
+        classroomId,
+        topicId,
+        userId,
+      } = userLevelSessionReport;
+
+      if (classroomId && topicId && userId) {
+        // Adding Ids to Set to fetch from mongo
+        documentIdsToFetch.classroomIds.add(classroomId);
+        documentIdsToFetch.topicIds.add(topicId);
+        documentIdsToFetch.userIds.add(userId);
+        // Compiling filters object to fetch batch session details
+        if (!documentIdsToFetch.batchSessionFilters[`${classroomId}-${topicId}`]) {
+          documentIdsToFetch.batchSessionFilters[`${classroomId}-${topicId}`] = {
+            'batch.typeId': classroomId,
+            'topic.typeId': topicId,
+          };
+        }
+      }
+    });
+  }
+
+  const {
+    batchSessionController,
+    topicController,
+    userController,
+    batchController,
+  } = getDatabaseControllers();
+  const {
+    batchSessionAggregationQuery,
+    userAggregationQuery,
+    topicAggregationQuery,
+    batchAggregationQuery,
+  } = getAggregationQueries(documentIdsToFetch);
+
+  // Fetching BatchSession and User Data from mongo.
+  let batchSessions = [];
+  let topics = [];
+  let users = [];
+  let batches = [];
+  if (batchSessionAggregationQuery.length) batchSessions = await batchSessionController.aggregate(batchSessionAggregationQuery);
+  if (topicAggregationQuery.length) topics = await topicController.aggregate(topicAggregationQuery);
+  if (userAggregationQuery.length) users = await userController.aggregate(userAggregationQuery);
+  if (batchAggregationQuery.length) batches = await batchController.aggregate(batchAggregationQuery);
+  return {
+    batchSessions,
+    topics,
+    users,
+    batches,
+  };
+};
+
 const getBaseDocumentAndCalculatedFields = ({
   classroomId, userId, topicId, userSessionReports, topicDoc, batchSessions, users, batches,
-  eventType = 'componentLogs',
 }) => {
   // Check if userSessionReport already exists
 
@@ -624,6 +684,70 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
   return { userSessionProgress, componentCounts };
 };
 
+const batchAndUpdateSessionRelatedInfo = async (batchedSessionDump) => {
+  const {
+    userSessionReportController,
+  } = getDatabaseControllers();
+  const latestBatchSessionDumps = [];
+  Object.keys(batchedSessionDump).forEach((key) => {
+    if (batchedSessionDump[key] && batchedSessionDump[key].length) {
+      const sortedBatchSessions = sortBy(batchedSessionDump[key], 'createdAt');
+      if (sortedBatchSessions && sortedBatchSessions.length) { latestBatchSessionDumps.push(sortedBatchSessions[0]); }
+    }
+  });
+  const userSessionReportUpdateDoc = [];
+  if (latestBatchSessionDumps.length) {
+    const sessionReportFilterArray = latestBatchSessionDumps.map((batchSession) => ({ sessionId: get(batchSession, 'componentId') }));
+
+    // Fetch Existing UserSessionReport from Postgres
+    const userLevelSessionReportsData = await userSessionReportController.Model.findAll({
+      where: { [SequelizeOperation.or]: sessionReportFilterArray },
+      raw: true,
+    });
+    if (userLevelSessionReportsData && userLevelSessionReportsData.length) {
+      const { topics, ...requiredDBData } = await getRequiredDataForUserSessionReport(userLevelSessionReportsData);
+
+      userLevelSessionReportsData.forEach((userLevelSessionReportData) => {
+        const { classroomId, userId, topicId } = userLevelSessionReportData;
+        const topicDoc = topics.find((topic) => get(topic, 'id') === topicId);
+
+        if (!topicDoc) { return; }
+        let {
+          // eslint-disable-next-line prefer-const
+          baseDocument, calculatedFields,
+        } = getBaseDocumentAndCalculatedFields({
+          classroomId,
+          topicId,
+          userId,
+          topicDoc,
+          userSessionReports: [userLevelSessionReportData],
+          ...requiredDBData,
+        });
+        userSessionReportUpdateDoc.push({ ...baseDocument, ...calculatedFields });
+      });
+    }
+    // Add or Update record in PG SQL
+    log(`BatchSession Report Built: ${userSessionReportUpdateDoc.length || 0}`);
+
+    if (userSessionReportUpdateDoc && userSessionReportUpdateDoc.length) {
+      await userSessionReportController.Model.bulkCreate(userSessionReportUpdateDoc, { updateOnDuplicate: sqlColumnsToUpdate }).then((response) => {
+        log(`Session Report Updated, Total Count: ${(response || []).length}`);
+      }).catch((error) => {
+        throw new Error(error);
+      });
+    }
+    // delete record from sql dump
+    const idsToDelete = new Set();
+    Object.keys(batchedSessionDump).forEach((uniqueSessionRowKey) => {
+      if (batchedSessionDump && batchedSessionDump[uniqueSessionRowKey].length) {
+        batchedSessionDump[uniqueSessionRowKey].forEach((dump) => idsToDelete.add(dump.id));
+      }
+    });
+    log(`Deleting Previous Dumps, Total Count: ${idsToDelete.size}`);
+    await userSessionDumpController.Model.destroy({ where: { id: Array.from(idsToDelete) } });
+  }
+};
+
 const batchAndUpdateUserSessionReports = async () => {
   // Fetching all required data from database
   log('Generating User Session Reports');
@@ -728,11 +852,11 @@ const batchAndUpdateUserSessionReports = async () => {
       queryMessageString += `Rows Affected: ${userSessionReportUpdateDoc.length || 0}`;
 
       if (userSessionReportUpdateDoc && userSessionReportUpdateDoc.length) {
-        // await userSessionReportController.Model.bulkCreate(userSessionReportUpdateDoc, { updateOnDuplicate: sqlColumnsToUpdate }).then((response) => {
-        //   log(`Session Report Updated, Total Count: ${(response || []).length}`);
-        // }).catch((error) => {
-        //   throw new Error(error);
-        // });
+        await userSessionReportController.Model.bulkCreate(userSessionReportUpdateDoc, { updateOnDuplicate: sqlColumnsToUpdate }).then((response) => {
+          log(`Session Report Updated, Total Count: ${(response || []).length}`);
+        }).catch((error) => {
+          throw new Error(error);
+        });
       }
       // delete record from sql dump
       const idsToDelete = new Set();
@@ -742,57 +866,11 @@ const batchAndUpdateUserSessionReports = async () => {
         }
       });
       log(`Deleting Previous Dumps, Total Count: ${idsToDelete.size}`);
-      // await userSessionDumpController.Model.destroy({ where: { id: Array.from(idsToDelete) } });
+      await userSessionDumpController.Model.destroy({ where: { id: Array.from(idsToDelete) } });
       queryMessageString += ` | Rows Deleted: ${idsToDelete.size}`;
     }
     if (batchedSessionDump && Object.keys(batchedSessionDump).length) {
-      // console.log({ batchedSessionDump });
-      const userSessionReportUpdateDoc = [];
-      Object.keys(batchedSessionDump).forEach((key) => {
-        if (batchedSessionDump[key] && batchedSessionDump[key].length) {
-          const sortedBatchSessions = sortBy(batchedSessionDump[key], 'createdAt');
-          const [firstSessionDoc, ...restSessionDocs] = sortedBatchSessions;
-          const { topicId, classroomId, userId } = firstSessionDoc;
-          const topicDoc = topics.find((topic) => get(topic, 'id') === topicId);
-          if (!topicDoc) { return; }
-
-          // Filter and get base and caculatedFields Document.
-          let {
-          // eslint-disable-next-line prefer-const
-            baseDocument, calculatedFields, sessionDetails,
-          } = getBaseDocumentAndCalculatedFields({
-            classroomId,
-            topicId,
-            userId,
-            topicDoc,
-            eventType: 'batchSession',
-            ...requiredDBData,
-          });
-          let sessionComponentRule = get(sessionDetails, 'topic.topicComponentRule');
-          if (!sessionComponentRule && topicDoc && topicDoc.topicComponentRule && topicDoc.topicComponentRule.length) {
-            sessionComponentRule = get(topicDoc, 'topicComponentRule', []);
-          }
-          // Need to verify how we are passing the multiple records dump, as at diff time the batchSessions data can be diff
-          baseDocument.previousLogs = restSessionDocs;
-          userSessionReportUpdateDoc.push({ ...baseDocument, ...calculatedFields });
-          /*
-            ============= Fields we are updating for the batchSessions event =============
-          */
-          /*
-            id, userId, userName, userRole, classroomId, classroomTitle, schoolId, schoolName, topicId,
-            sessionId, sessionTitle, sessionType, courseId, courseTitle, courseCategory, sessionStart, sessionEnd,
-            sessionCreationDate, sessionUpdatedAt, sessionDuration, sessionStatus, classroomStudentsCount,
-            teacherTaughtName, teacherTaughtId, sessionClassworkComponents, sessionHomeworkComponents, homeworkExists,
-          */
-
-          /*
-            Need to add one more field that will have the eventType in userLevelSessionReport
-            i.e: is it a batchSession event or any other component log event,
-            as currently we are adding or updating by checking if the doc exist for userId, topicId and classroomId
-          */
-        }
-      });
-      // TODO : Add logic to update session report in PG SQL
+      await batchAndUpdateSessionRelatedInfo(batchedSessionDump);
     }
     return {
       result: true,
