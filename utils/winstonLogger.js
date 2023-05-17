@@ -3,9 +3,6 @@ import winston from 'winston';
 import WinstonDailyRotateFile from 'winston-daily-rotate-file';
 import winstonConfig from '../config/winstonConfig';
 
-// eslint-disable-next-line no-console, prefer-template
-console.log('winstonLogger:process.env.NODE_ENV=' + process.env.NODE_ENV);
-
 const serviceName = winstonConfig.serviceName;
 
 const timestampFormat = winston.format((info, opts) => {
@@ -29,7 +26,7 @@ const format = winston.format.combine(
   logLineFormat,
 );
 const winstonTransports = [];
-if (['production'].includes(process.env.NODE_ENV)) {
+if (['production', 'staging'].includes(process.env.NODE_ENV)) {
   winstonTransports.push(
     new WinstonDailyRotateFile(winstonConfig.winstonTransportConfig.fileRotateConfig),
   );
