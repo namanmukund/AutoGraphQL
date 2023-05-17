@@ -78,6 +78,7 @@ const BatchSession = `
     retakeSessions: [RetakeSession] @relation(name:"RetakeSessionBatchSession")
     logoutAllStudents: Boolean @defaultValue(value: "false")
     sessionComponentTracker: SessionComponentTracker @relation(name: "SessionComponentTrackerBatchSession")
+    subSessions: BatchSubSession @relation(name: "BatchSubSessionBatchSession")
 }`;
 
 export default [BatchSession, batchAttendanceType, batchLoginStatusType];

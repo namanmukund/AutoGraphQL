@@ -176,6 +176,7 @@ import MenteeToken from './menteeToken';
 import LabInspection from './labInspection';
 import AcademicYear from './academicYear';
 import SessionComponentTracker from './sessionComponentTracker';
+import BatchSubSession from './batchSubSession/BatchSubSession';
 
 export default [
   ...User,
@@ -356,4 +357,5 @@ export default [
   ...MenteeToken,
   ...AcademicYear,
   ...SessionComponentTracker,
+  ...BatchSubSession,
 ];
