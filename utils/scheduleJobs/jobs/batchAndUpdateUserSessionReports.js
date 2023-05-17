@@ -687,6 +687,7 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
 const batchAndUpdateSessionRelatedInfo = async (batchedSessionDump) => {
   const {
     userSessionReportController,
+    userSessionDumpController,
   } = getDatabaseControllers();
   const latestBatchSessionDumps = [];
   Object.keys(batchedSessionDump).forEach((key) => {
