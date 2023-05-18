@@ -1,3 +1,5 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-restricted-syntax */
 import cuid from 'cuid';
 import { get, sortBy } from 'lodash';
 import { AggregationBuilder } from 'mongodb-aggregation-builder';
@@ -696,9 +698,14 @@ const batchAndUpdateSessionRelatedInfo = async (batchedSessionDump) => {
       if (sortedBatchSessions && sortedBatchSessions.length) { latestBatchSessionDumps.push(sortedBatchSessions[0]); }
     }
   });
-  const userSessionReportUpdateDoc = [];
+  const userSessionReportUpdateDocs = [];
   if (latestBatchSessionDumps.length) {
-    const sessionReportFilterArray = latestBatchSessionDumps.map((batchSession) => ({ sessionId: get(batchSession, 'componentId') }));
+    const sessionReportFilterArray = latestBatchSessionDumps.map((batchSession) => ({
+      [SequelizeOperation.and]: [
+        { classroomId: get(batchSession, 'classroomId') },
+        { topicId: get(batchSession, 'topicId') },
+      ],
+    }));
 
     // Fetch Existing UserSessionReport from Postgres
     const userLevelSessionReportsData = await userSessionReportController.Model.findAll({
@@ -724,28 +731,30 @@ const batchAndUpdateSessionRelatedInfo = async (batchedSessionDump) => {
           userSessionReports: [userLevelSessionReportData],
           ...requiredDBData,
         });
-        userSessionReportUpdateDoc.push({ ...baseDocument, ...calculatedFields });
+        userSessionReportUpdateDocs.push({ ...baseDocument, ...calculatedFields });
       });
     }
     // Add or Update record in PG SQL
-    log(`BatchSession Report Built: ${userSessionReportUpdateDoc.length || 0}`);
+    log(`BatchSession Report Built: ${userSessionReportUpdateDocs.length || 0}`);
 
-    if (userSessionReportUpdateDoc && userSessionReportUpdateDoc.length) {
-      await userSessionReportController.Model.bulkCreate(userSessionReportUpdateDoc, { updateOnDuplicate: sqlColumnsToUpdate }).then((response) => {
-        log(`Session Report Updated, Total Count: ${(response || []).length}`);
-      }).catch((error) => {
-        throw new Error(error);
-      });
-    }
-    // delete record from sql dump
-    const idsToDelete = new Set();
-    Object.keys(batchedSessionDump).forEach((uniqueSessionRowKey) => {
-      if (batchedSessionDump && batchedSessionDump[uniqueSessionRowKey].length) {
-        batchedSessionDump[uniqueSessionRowKey].forEach((dump) => idsToDelete.add(dump.id));
+    if (userSessionReportUpdateDocs && userSessionReportUpdateDocs.length) {
+      for (const userSessionReportUpdateDoc of userSessionReportUpdateDocs) {
+        const { exists, id: docId, ...restDoc } = userSessionReportUpdateDoc;
+        if (exists) {
+          await userSessionReportController.Model.update(restDoc, { where: { id: docId } });
+        } else await userSessionReportController.Model.create({ ...restDoc, id: docId });
       }
-    });
-    log(`Deleting Previous Dumps, Total Count: ${idsToDelete.size}`);
-    await userSessionDumpController.Model.destroy({ where: { id: Array.from(idsToDelete) } });
+
+      // delete record from sql dump
+      const idsToDelete = new Set();
+      Object.keys(batchedSessionDump).forEach((uniqueSessionRowKey) => {
+        if (batchedSessionDump && batchedSessionDump[uniqueSessionRowKey].length) {
+          batchedSessionDump[uniqueSessionRowKey].forEach((dump) => idsToDelete.add(dump.id));
+        }
+      });
+      log(`Deleting Previous Dumps, Total Count: ${idsToDelete.size}`);
+      await userSessionDumpController.Model.destroy({ where: { id: Array.from(idsToDelete) } });
+    }
   }
 };
 
