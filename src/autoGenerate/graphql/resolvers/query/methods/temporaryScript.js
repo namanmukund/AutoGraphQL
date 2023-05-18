@@ -1,4 +1,3 @@
-import batchAndUpdateUserSessionReports from '../../../../../../utils/scheduleJobs/jobs/batchAndUpdateUserSessionReports';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 // import findDeleteAndCreateDuplicateUsers from '../scriptMethods/findDeleteAndCreateDuplicateUsers';
 // import updateStudentAndClassesOfSchoolsForAcademicYear from '../scriptMethods/updateStudentAndClassesOfSchoolsForAcademicYear';
@@ -117,7 +116,6 @@ const temporaryScript = (async (root, params, context) => {
   // await updateStudentAndClassesOfSchoolsForAcademicYear(context);
   // await findDeleteAndCreateDuplicateUsers(context);
   // await updateTopicContentStatus();
-  await batchAndUpdateUserSessionReports();
   return {
     result: true,
   };
