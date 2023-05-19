@@ -1,11 +1,12 @@
 const BatchSubSession = `
     type BatchSubSession @model {
-        date: Date
+        sessionStartDate: Date
+        sessionEndDate: Date
         type: BatchSubSessionType! @defaultValue(value: "live")
         subType: BatchSubSessionSubType! @defaultValue(value: "initial")
         sessionStatus: SessionStatus! @defaultValue(value: "allotted")
-        mentorId: [MentorProfile] @relation(name: "BatchSubSessionMentor", direction: "OneWay")
-        batchSessionId: [BatchSession] @relation(name: "BatchSubSession", direction: "OneWay")
+        mentor: User @relation(name: "BatchSubSessionMentor", direction: "OneWay")
+        batchSession: BatchSession @relation(name: "BatchSubSessionBatchSession")
     }
 `;
 

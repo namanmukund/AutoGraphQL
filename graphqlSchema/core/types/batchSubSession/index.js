@@ -1,3 +1,3 @@
 import BatchSubSession from './BatchSubSession';
 
-export default [BatchSubSession];
+export default [...BatchSubSession];

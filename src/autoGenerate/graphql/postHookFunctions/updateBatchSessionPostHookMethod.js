@@ -37,6 +37,8 @@ import { CacheController } from '../controllers';
 import addMinutesToDate from '../../../../utils/addMinutesToDate';
 import { log } from '../../../../utils';
 import MasterController from '../controllers/MasterController';
+import addBatchSubSession from '../../utils/addBatchSubSession';
+import updateBatchSubSession from '../../utils/updateBatchSubSession';
 // import extractBatchSessionAndSendB2B from './utils/extractBatchSessionAndSendB2B';
 
 // query to get chapters and topics belomngin to a course
@@ -227,6 +229,10 @@ const batchSessionQuery = (id) => `{
     course {
       title
     }
+    subSessions {
+      id
+      createdAt
+    }
     batch {
       code
       type
@@ -242,6 +248,18 @@ const batchSessionQuery = (id) => `{
     }
   }
 }`;
+
+const getLatestSubSession = async (batchSessionId, context) => {
+  const batchSessionRes = await callLocalGraphqlApi(batchSessionQuery(batchSessionId), context);
+  const subSessions = get(batchSessionRes, 'data.batchSession.subSessions', []);
+  let latestSubSession;
+  if (subSessions.length) {
+    const tempSubSessions = [...subSessions];
+    tempSubSessions.sort((a, b) => new Date(get(b, 'createdAt')) - new Date(get(a, 'createdAt')));
+    latestSubSession = tempSubSessions[0];
+  }
+  return latestSubSession;
+};
 
 const blacklistUserTokens = async (students) => {
   const menteeTokenController = new MasterController('MenteeToken', { bypass: true });
@@ -290,6 +308,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     batchTypeValue,
     appName,
     userRoleFromContext,
+    allottedMentorId,
   } = context;
   let courseId = get(context, 'courseId');
   const coursePackageId = get(input, 'coursePackage.typeId');
@@ -358,6 +377,40 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
 
   if (coursePackageId) {
     context.usesCoursePackage = true;
+  }
+
+  if (get(input, 'sessionStatus') === 'started') {
+    const inputToSend = {
+      sessionStartDate: `${get(input, 'sessionStartDate')}`,
+      type: 'live',
+      subType: 'initial',
+      sessionStatus: get(input, 'sessionStatus'),
+    };
+    const batchSessionConnectId = get(input, 'id');
+    try {
+      addBatchSubSession(inputToSend, allottedMentorId, batchSessionConnectId, context);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log('error ', e);
+    }
+  }
+
+  if (get(input, 'sessionStatus') === 'completed') {
+    const latestSubSession = await getLatestSubSession(batchSessionId, context);
+    if (latestSubSession) {
+      const latestSubSessionId = get(latestSubSession, 'id');
+      const inputToSend = {
+        sessionStartDate: `${get(input, 'sessionStartDate')}`,
+        sessionEndDate: `${get(input, 'sessionEndDate')}`,
+        sessionStatus: get(input, 'sessionStatus'),
+      };
+      try {
+        updateBatchSubSession(latestSubSessionId, inputToSend, context);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.log('error ', e);
+      }
+    }
   }
 
   if (topicId) {
