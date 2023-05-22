@@ -592,8 +592,8 @@ const classroomReport = async (_root, params, context) => {
     userBlockbasedPracticeRes.forEach((practice) => {
       const findUserBBPractice = filteredUserBlockBasedPractice.find((bbPractice) => get(bbPractice, 'blockBasedPractice.id') === get(practice, 'blockBasedPractice.id'));
       if (get(findUserBBPractice, 'id')) {
-        const hasUserSubmittedPracticeLink = get(practice, 'blockBasedPractice.isSubmitAnswer', false) ? (get(practice, 'answerLink') || get(practice, 'savedBlocks') || get(practice, 'attachments', []).length) : true;
-        const hasUserSubmittedPracticeLinkInPrevDoc = get(findUserBBPractice, 'blockBasedPractice.isSubmitAnswer', false) ? (get(findUserBBPractice, 'answerLink') || get(findUserBBPractice, 'savedBlocks') || get(findUserBBPractice, 'attachments', []).length) : true;
+        const hasUserSubmittedPracticeLink = (get(practice, 'answerLink') || get(practice, 'savedBlocks') || get(practice, 'attachments', []).length) ? true : false;
+        const hasUserSubmittedPracticeLinkInPrevDoc = (get(findUserBBPractice, 'answerLink') || get(findUserBBPractice, 'savedBlocks') || get(findUserBBPractice, 'attachments', []).length) ? true : false;
         if (!hasUserSubmittedPracticeLinkInPrevDoc && hasUserSubmittedPracticeLink) {
           filteredUserBlockBasedPractice = filteredUserBlockBasedPractice.filter((bbPractice) => get(bbPractice, 'blockBasedPractice.id') === get(practice, 'blockBasedPractice.id'));
           filteredUserBlockBasedPractice.push({ ...practice });
@@ -744,25 +744,19 @@ const classroomReport = async (_root, params, context) => {
               get(previousBlockBasedObj, 'pqSubmissions') || new Map(),
           };
           let hasUserSubmittedPracticeLink = false;
-          if (get(userbbPractice, 'blockBasedPractice.isSubmitAnswer')) {
-            const bbPracticeLayout = get(
-              userbbPractice,
-              'blockBasedPractice.layout'
-            );
-            if (bbPracticeLayout === 'externalPlatform') {
-              if (get(userbbPractice, 'answerLink'))
-                hasUserSubmittedPracticeLink = true;
-            } else if (bbPracticeLayout === 'gsuite') {
+          const bbPracticeLayout = get(
+            userbbPractice,
+            'blockBasedPractice.layout'
+          );
+          if (bbPracticeLayout === 'externalPlatform') {
+            if (get(userbbPractice, 'answerLink'))
+              hasUserSubmittedPracticeLink = true;
+          } else if (bbPracticeLayout === 'gsuite') {
             if (get(userbbPractice, 'answerLink') && get(userbbPractice, 'gsuiteFile.fileId')) {
               hasUserSubmittedPracticeLink = true;
             }
-          } else if (
-              get(userbbPractice, 'savedBlocks') ||
-              get(userbbPractice, 'attachments', []).length
-            ) {
-              hasUserSubmittedPracticeLink = true;
-            }
-          } else {
+          }
+          if (get(userbbPractice, 'savedBlocks') || get(userbbPractice, 'attachments', []).length) {
             hasUserSubmittedPracticeLink = true;
           }
           innerObj.title = get(userbbPractice, 'blockBasedPractice.title', '');
@@ -772,7 +766,7 @@ const classroomReport = async (_root, params, context) => {
               get(userbbPractice, 'blockBasedPractice.id')
             )
           ) {
-            if (get(userbbPractice, 'blockBasedPractice.isSubmitAnswer')) {
+            if (hasUserSubmittedPracticeLink) {
               innerObj.pqQuestions.set(
                 get(userbbPractice, 'blockBasedPractice.id'),
                 innerObj.pqQuestions.get(
@@ -780,7 +774,7 @@ const classroomReport = async (_root, params, context) => {
                 ) + 1
               );
             }
-          } else if (get(userbbPractice, 'blockBasedPractice.isSubmitAnswer')) {
+          } else if (hasUserSubmittedPracticeLink) {
             innerObj.pqQuestions.set(
               get(userbbPractice, 'blockBasedPractice.id'),
               1
