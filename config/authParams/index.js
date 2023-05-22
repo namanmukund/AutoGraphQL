@@ -18,6 +18,7 @@ const coreAuthParams = {
   LINK_TOKEN_SECRET,
   DEFAULT_EXPIRY_TOKEN_TIME_IN_HOUR: 24,
   DEFAULT_EXPIRY_TOKEN_TIME_IN_HOUR_FOR_WEB: 1,
+  LIVE_CLASS_EXPIRY_DATE: '2h',
 };
 
 export default coreAuthParams;

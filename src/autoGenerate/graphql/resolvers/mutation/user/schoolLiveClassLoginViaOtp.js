@@ -37,7 +37,7 @@ const schoolLiveClassLoginViaOtp = async (
   }
   if (get(input, 'userId')) {
     const userData = await getUserFromDBQuery({ id: get(input, 'userId') }, userModalQuery);
-    const userTokenData = createUserTokenTypeData(userData, authentication);
+    const userTokenData = createUserTokenTypeData(userData, authentication, null, false, true);
     // if user is a parent then get children tokens as well
     if (get(userData, 'role') === 'parent') {
       userTokenData.children = await getChildrenToken(context, studentId);
@@ -48,7 +48,7 @@ const schoolLiveClassLoginViaOtp = async (
     let userTokenData = { buddyDetails: [] }
     for (let user of get(input, 'buddyLoginInput', [])) {
       const userData = await getUserFromDBQuery({ id: get(user, 'userId') }, userModalQuery);
-      const userDetail = createUserTokenTypeData(userData, authentication);
+      const userDetail = createUserTokenTypeData(userData, authentication, null, false, true);
       if (get(user, 'isPrimaryUser')) {
         userTokenData.buddyDetails.push({ ...userDetail, isPrimaryUser: true })
         userTokenData = { ...userTokenData, ...userDetail }
