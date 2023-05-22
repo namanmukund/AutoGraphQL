@@ -87,7 +87,7 @@ const validateMagicLinkMutationResolver = async (
   if (currentUser) {
     throw new UserTokenNotRequiredError();
   }
-  const { linkToken } = input;
+  const { linkToken, loginViaOtp = false } = input;
   if (!linkToken) {
     throw new MissingMandatoryInputInRequestError();
   }
@@ -147,7 +147,7 @@ const validateMagicLinkMutationResolver = async (
     let userTokenData = { buddyDetails: [] };
     for (const user of buddyLoginInput) {
       const userData = await getUserFromDBQuery({ id: get(user, 'userId') }, modelQueries);
-      const userDetail = createUserTokenTypeData(userData, authentication);
+      const userDetail = createUserTokenTypeData(userData, authentication, null, false, loginViaOtp);
       if (get(user, 'isPrimaryUser')) {
         userTokenData.buddyDetails.push({ ...userDetail, isPrimaryUser: true });
         userTokenData = { ...userTokenData, ...userDetail };
@@ -168,7 +168,7 @@ const validateMagicLinkMutationResolver = async (
     role,
   } = userData;
 
-  const userTokenData = createUserTokenTypeData(userData, authentication);
+  const userTokenData = createUserTokenTypeData(userData, authentication, null, false, loginViaOtp);
   // if user is a parent then get children tokens as well
   if (role === PARENT || role === MENTOR) {
     userTokenData.children = await getChildrenToken(context, id, role);
