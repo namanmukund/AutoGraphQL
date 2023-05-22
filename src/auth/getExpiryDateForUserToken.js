@@ -3,7 +3,7 @@ import {
   MENTEE, MENTOR, PARENT, SELF_LEARNER,
 } from '../../constants/roles';
 
-const getExpiryDateForUserToken = (authParams, authentication, isForgotPasswordToken = false, user, isSignUp) => {
+const getExpiryDateForUserToken = (authParams, authentication, isForgotPasswordToken = false, user, isSignUp, isLiveClass = false) => {
   let expiresIn = authParams.TOKEN_EXPIRY_DATE;
   if (!authentication || !authentication.app) {
     return expiresIn;
@@ -11,6 +11,10 @@ const getExpiryDateForUserToken = (authParams, authentication, isForgotPasswordT
   // in case of forgot password flow, returning fogot pass expiry time
   if (isForgotPasswordToken) {
     expiresIn = authParams.FORGOT_PASSWORD_EXPIRY_DATE;
+    return expiresIn;
+  }
+  if (isLiveClass) {
+    expiresIn = authParams.LIVE_CLASS_EXPIRY_DATE;
     return expiresIn;
   }
   const { app } = authentication;
