@@ -1,6 +1,6 @@
 import * as schedule from 'node-schedule';
 // import scheduleTrialSessionReminder from './scheduleJobs/scheduleTrialSessionReminder';
-import scheduleMentorReport from './scheduleJobs/scheduleMentorReport';
+// import scheduleMentorReport from './scheduleJobs/scheduleMentorReport';
 // import scheduleSessionReport from './scheduleJobs/scheduleSessionReport';
 // import scheduleSessionCourseReport from './scheduleJobs/scheduleCourseReport';
 // import scheduleB2BSessionReminder from './scheduleJobs/scheduleB2BSessionReminder';
@@ -8,10 +8,10 @@ import scheduleMentorReport from './scheduleJobs/scheduleMentorReport';
 // import scheduleEventSessionRemainder from './scheduleJobs/scheduleEventSessionRemainder';
 import scheduleBatchSessionOtpGenerator from './scheduleJobs/secheduleBatchSessionOtpGenerator';
 // import scheduleUpdateLeadSource from './scheduleJobs/scheduleUpdateLeadSource';
-import scheduleUpdateTheoryClassStatus from './scheduleJobs/scheduleUpdateTheoryClassStatus';
-import scheduleB2cBatchSessionReport from './scheduleJobs/scheduleB2cBatchSessionReport';
+// import scheduleUpdateTheoryClassStatus from './scheduleJobs/scheduleUpdateTheoryClassStatus';
+// import scheduleB2cBatchSessionReport from './scheduleJobs/scheduleB2cBatchSessionReport';
 import deleteUserBlacklistedTokens from './scheduleJobs/deleteUserBlacklistedTokens';
-import batchAndUpdateUserSessionReports from './scheduleJobs/jobs/batchAndUpdateUserSessionReports';
+// import batchAndUpdateUserSessionReports from './scheduleJobs/jobs/batchAndUpdateUserSessionReports';
 import { TAT } from '../constants';
 import scheduleTeacherTrainingReports from './scheduleJobs/jobs/scheduleTeacherTrainingReports';
 
@@ -38,18 +38,18 @@ const createScheduler = (schedulerName) => {
     //     await scheduleB2BSessionReminder();
     //   });
     //   break;
-    case 'mentorReport':
-      rule.hour = 10;
-      rule.minute = 32;
-      rule.second = 0;
-      rule.dayOfWeek = new schedule.Range(0, 6);
-      // eslint-disable-next-line no-unused-vars
-      schedule.scheduleJob(rule, async () => {
-        // eslint-disable-next-line no-console
-        console.log('scheduler started for: ', schedulerName);
-        await scheduleMentorReport();
-      });
-      break;
+    // case 'mentorReport':
+    //   rule.hour = 10;
+    //   rule.minute = 32;
+    //   rule.second = 0;
+    //   rule.dayOfWeek = new schedule.Range(0, 6);
+    //   // eslint-disable-next-line no-unused-vars
+    //   schedule.scheduleJob(rule, async () => {
+    //     // eslint-disable-next-line no-console
+    //     console.log('scheduler started for: ', schedulerName);
+    //     await scheduleMentorReport();
+    //   });
+    //   break;
     // case 'sessionReport':
     //   rule.tz = 'Asia/Kolkata';
     //   rule.hour = 1;
@@ -120,28 +120,28 @@ const createScheduler = (schedulerName) => {
     //     await scheduleUpdateLeadSource();
     //   });
     //   break;
-    case 'autoCompleteThoeryClassroomSessions':
-      rule.tz = 'Asia/Kolkata';
-      rule.hour = 2;
-      rule.dayOfWeek = new schedule.Range(0, 6);
-      // eslint-disable-next-line no-unused-vars
-      schedule.scheduleJob(rule, async () => {
-        // eslint-disable-next-line no-console
-        console.log('scheduler started for: ', schedulerName);
-        await scheduleUpdateTheoryClassStatus();
-      });
-      break;
-    case 'b2cBatchSessionReport':
-      rule.tz = 'Asia/Kolkata';
-      rule.hour = 3;
-      rule.dayOfWeek = new schedule.Range(0, 6);
-      // eslint-disable-next-line no-unused-vars
-      schedule.scheduleJob(rule, async () => {
-        // eslint-disable-next-line no-console
-        console.log('scheduler started for: ', schedulerName);
-        await scheduleB2cBatchSessionReport();
-      });
-      break;
+    // case 'autoCompleteThoeryClassroomSessions':
+    //   rule.tz = 'Asia/Kolkata';
+    //   rule.hour = 2;
+    //   rule.dayOfWeek = new schedule.Range(0, 6);
+    //   // eslint-disable-next-line no-unused-vars
+    //   schedule.scheduleJob(rule, async () => {
+    //     // eslint-disable-next-line no-console
+    //     console.log('scheduler started for: ', schedulerName);
+    //     await scheduleUpdateTheoryClassStatus();
+    //   });
+    //   break;
+    // case 'b2cBatchSessionReport':
+    //   rule.tz = 'Asia/Kolkata';
+    //   rule.hour = 3;
+    //   rule.dayOfWeek = new schedule.Range(0, 6);
+    //   // eslint-disable-next-line no-unused-vars
+    //   schedule.scheduleJob(rule, async () => {
+    //     // eslint-disable-next-line no-console
+    //     console.log('scheduler started for: ', schedulerName);
+    //     await scheduleB2cBatchSessionReport();
+    //   });
+    //   break;
     case TAT:
       // eslint-disable-next-line no-console
       rule.tz = 'Asia/Kolkata';
@@ -151,7 +151,7 @@ const createScheduler = (schedulerName) => {
       schedule.scheduleJob(rule, async () => {
         // eslint-disable-next-line no-console
         console.log('scheduler started for: ', schedulerName);
-        await batchAndUpdateUserSessionReports();
+        // await batchAndUpdateUserSessionReports();
       });
       break;
     case 'autoDeleteBlacklistedTokens':

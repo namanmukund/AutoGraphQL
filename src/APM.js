@@ -118,7 +118,7 @@ class APM {
     }
   };
 
-  captureException = (message) => {
+  captureMessage = (message) => {
     for (const instance of this.apmInstances) {
       switch (instance.type) {
         case APMConnectors.SENTRY: {
