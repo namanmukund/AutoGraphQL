@@ -1,6 +1,6 @@
 import * as schedule from 'node-schedule';
 // import scheduleTrialSessionReminder from './scheduleJobs/scheduleTrialSessionReminder';
-import scheduleMentorReport from './scheduleJobs/scheduleMentorReport';
+// import scheduleMentorReport from './scheduleJobs/scheduleMentorReport';
 // import scheduleSessionReport from './scheduleJobs/scheduleSessionReport';
 // import scheduleSessionCourseReport from './scheduleJobs/scheduleCourseReport';
 // import scheduleB2BSessionReminder from './scheduleJobs/scheduleB2BSessionReminder';
@@ -38,18 +38,18 @@ const createScheduler = (schedulerName) => {
     //     await scheduleB2BSessionReminder();
     //   });
     //   break;
-    case 'mentorReport':
-      rule.hour = 10;
-      rule.minute = 32;
-      rule.second = 0;
-      rule.dayOfWeek = new schedule.Range(0, 6);
-      // eslint-disable-next-line no-unused-vars
-      schedule.scheduleJob(rule, async () => {
-        // eslint-disable-next-line no-console
-        console.log('scheduler started for: ', schedulerName);
-        await scheduleMentorReport();
-      });
-      break;
+    // case 'mentorReport':
+    //   rule.hour = 10;
+    //   rule.minute = 32;
+    //   rule.second = 0;
+    //   rule.dayOfWeek = new schedule.Range(0, 6);
+    //   // eslint-disable-next-line no-unused-vars
+    //   schedule.scheduleJob(rule, async () => {
+    //     // eslint-disable-next-line no-console
+    //     console.log('scheduler started for: ', schedulerName);
+    //     await scheduleMentorReport();
+    //   });
+    //   break;
     // case 'sessionReport':
     //   rule.tz = 'Asia/Kolkata';
     //   rule.hour = 1;
