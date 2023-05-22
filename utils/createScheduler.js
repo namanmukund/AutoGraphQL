@@ -11,7 +11,7 @@ import scheduleBatchSessionOtpGenerator from './scheduleJobs/secheduleBatchSessi
 import scheduleUpdateTheoryClassStatus from './scheduleJobs/scheduleUpdateTheoryClassStatus';
 import scheduleB2cBatchSessionReport from './scheduleJobs/scheduleB2cBatchSessionReport';
 import deleteUserBlacklistedTokens from './scheduleJobs/deleteUserBlacklistedTokens';
-import batchAndUpdateUserSessionReports from './scheduleJobs/jobs/batchAndUpdateUserSessionReports';
+// import batchAndUpdateUserSessionReports from './scheduleJobs/jobs/batchAndUpdateUserSessionReports';
 import { TAT } from '../constants';
 import scheduleTeacherTrainingReports from './scheduleJobs/jobs/scheduleTeacherTrainingReports';
 
@@ -151,7 +151,7 @@ const createScheduler = (schedulerName) => {
       schedule.scheduleJob(rule, async () => {
         // eslint-disable-next-line no-console
         console.log('scheduler started for: ', schedulerName);
-        await batchAndUpdateUserSessionReports();
+        // await batchAndUpdateUserSessionReports();
       });
       break;
     case 'autoDeleteBlacklistedTokens':
