@@ -1,3 +1,5 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-restricted-syntax */
 import cuid from 'cuid';
 import { get, sortBy } from 'lodash';
 import { AggregationBuilder } from 'mongodb-aggregation-builder';
@@ -268,6 +270,67 @@ const getAllRequiredDataFromDatabase = async () => {
     userSessionDumpController,
     userSessionReportController,
     batches: [],
+  };
+};
+
+const getRequiredDataForUserSessionReport = async (userLevelSessionReports) => {
+  const documentIdsToFetch = {
+    classroomIds: new Set(),
+    topicIds: new Set(),
+    userIds: new Set(),
+    batchSessionFilters: {},
+  };
+  if (userLevelSessionReports && userLevelSessionReports.length) {
+    userLevelSessionReports.forEach((userLevelSessionReport) => {
+      const {
+        classroomId,
+        topicId,
+        userId,
+      } = userLevelSessionReport;
+
+      if (classroomId && topicId && userId) {
+        // Adding Ids to Set to fetch from mongo
+        documentIdsToFetch.classroomIds.add(classroomId);
+        documentIdsToFetch.topicIds.add(topicId);
+        documentIdsToFetch.userIds.add(userId);
+        // Compiling filters object to fetch batch session details
+        if (!documentIdsToFetch.batchSessionFilters[`${classroomId}-${topicId}`]) {
+          documentIdsToFetch.batchSessionFilters[`${classroomId}-${topicId}`] = {
+            'batch.typeId': classroomId,
+            'topic.typeId': topicId,
+          };
+        }
+      }
+    });
+  }
+
+  const {
+    batchSessionController,
+    topicController,
+    userController,
+    batchController,
+  } = getDatabaseControllers();
+  const {
+    batchSessionAggregationQuery,
+    userAggregationQuery,
+    topicAggregationQuery,
+    batchAggregationQuery,
+  } = getAggregationQueries(documentIdsToFetch);
+
+  // Fetching BatchSession and User Data from mongo.
+  let batchSessions = [];
+  let topics = [];
+  let users = [];
+  let batches = [];
+  if (batchSessionAggregationQuery.length) batchSessions = await batchSessionController.aggregate(batchSessionAggregationQuery);
+  if (topicAggregationQuery.length) topics = await topicController.aggregate(topicAggregationQuery);
+  if (userAggregationQuery.length) users = await userController.aggregate(userAggregationQuery);
+  if (batchAggregationQuery.length) batches = await batchController.aggregate(batchAggregationQuery);
+  return {
+    batchSessions,
+    topics,
+    users,
+    batches,
   };
 };
 
@@ -621,6 +684,78 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
   return { userSessionProgress, componentCounts };
 };
 
+const batchAndUpdateSessionRelatedInfo = async (batchedSessionDump) => {
+  const {
+    userSessionReportController,
+    userSessionDumpController,
+  } = getDatabaseControllers();
+  const latestBatchSessionDumps = [];
+  Object.keys(batchedSessionDump).forEach((key) => {
+    if (batchedSessionDump[key] && batchedSessionDump[key].length) {
+      const sortedBatchSessions = sortBy(batchedSessionDump[key], 'createdAt');
+      if (sortedBatchSessions && sortedBatchSessions.length) { latestBatchSessionDumps.push(sortedBatchSessions[0]); }
+    }
+  });
+  const userSessionReportUpdateDocs = [];
+  if (latestBatchSessionDumps.length) {
+    const sessionReportFilterArray = latestBatchSessionDumps.map((batchSession) => ({
+      [SequelizeOperation.and]: [
+        { classroomId: get(batchSession, 'classroomId') },
+        { topicId: get(batchSession, 'topicId') },
+      ],
+    }));
+
+    // Fetch Existing UserSessionReport from Postgres
+    const userLevelSessionReportsData = await userSessionReportController.Model.findAll({
+      where: { [SequelizeOperation.or]: sessionReportFilterArray },
+      raw: true,
+    });
+    if (userLevelSessionReportsData && userLevelSessionReportsData.length) {
+      const { topics, ...requiredDBData } = await getRequiredDataForUserSessionReport(userLevelSessionReportsData);
+
+      userLevelSessionReportsData.forEach((userLevelSessionReportData) => {
+        const { classroomId, userId, topicId } = userLevelSessionReportData;
+        const topicDoc = topics.find((topic) => get(topic, 'id') === topicId);
+
+        if (!topicDoc) { return; }
+        let {
+          // eslint-disable-next-line prefer-const
+          baseDocument, calculatedFields,
+        } = getBaseDocumentAndCalculatedFields({
+          classroomId,
+          topicId,
+          userId,
+          topicDoc,
+          userSessionReports: [userLevelSessionReportData],
+          ...requiredDBData,
+        });
+        userSessionReportUpdateDocs.push({ ...baseDocument, ...calculatedFields });
+      });
+    }
+    // Add or Update record in PG SQL
+    log(`BatchSession Report Built: ${userSessionReportUpdateDocs.length || 0}`);
+
+    if (userSessionReportUpdateDocs && userSessionReportUpdateDocs.length) {
+      for (const userSessionReportUpdateDoc of userSessionReportUpdateDocs) {
+        const { exists, id: docId, ...restDoc } = userSessionReportUpdateDoc;
+        if (exists) {
+          await userSessionReportController.Model.update(restDoc, { where: { id: docId } });
+        } else await userSessionReportController.Model.create({ ...restDoc, id: docId });
+      }
+
+      // delete record from sql dump
+      const idsToDelete = new Set();
+      Object.keys(batchedSessionDump).forEach((uniqueSessionRowKey) => {
+        if (batchedSessionDump && batchedSessionDump[uniqueSessionRowKey].length) {
+          batchedSessionDump[uniqueSessionRowKey].forEach((dump) => idsToDelete.add(dump.id));
+        }
+      });
+      log(`Deleting Previous Dumps, Total Count: ${idsToDelete.size}`);
+      await userSessionDumpController.Model.destroy({ where: { id: Array.from(idsToDelete) } });
+    }
+  }
+};
+
 const batchAndUpdateUserSessionReports = async () => {
   // Fetching all required data from database
   log('Generating User Session Reports');
@@ -743,7 +878,7 @@ const batchAndUpdateUserSessionReports = async () => {
       queryMessageString += ` | Rows Deleted: ${idsToDelete.size}`;
     }
     if (batchedSessionDump && Object.keys(batchedSessionDump).length) {
-      // TODO : Add logic to update session report in PG SQL
+      await batchAndUpdateSessionRelatedInfo(batchedSessionDump);
     }
     return {
       result: true,
