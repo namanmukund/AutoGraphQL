@@ -1,4 +1,5 @@
 import { DateTime } from 'luxon';
+import { get } from 'lodash';
 import winston from 'winston';
 import WinstonDailyRotateFile from 'winston-daily-rotate-file';
 import winstonConfig from '../config/winstonConfig';
@@ -17,7 +18,7 @@ const logLineFormat = winston.format.printf(
   (info) => `${info.timestamp} \
 [pid-${process.pid}] \
 [${info.label.service}] \
-${info.level.toUpperCase()}: ${info.message}`,
+${get(info, 'level', 'info').toUpperCase()}: ${info.message}`,
 );
 
 const format = winston.format.combine(
