@@ -338,7 +338,6 @@ const getBaseDocumentAndCalculatedFields = ({
   classroomId, userId, topicId, userSessionReports, topicDoc, batchSessions, users, batches,
 }) => {
   // Check if userSessionReport already exists
-
   const existingSessionReport = (userSessionReports || []).find((report) => (
     (report.topicId === topicId)
       && (report.userId === userId)
