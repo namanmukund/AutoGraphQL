@@ -16,6 +16,14 @@ const SequelizeOperation = Sequelize.Op;
 
 const sqlColumnsToUpdate = ['userId', 'userName', 'userRole', 'studentGrade', 'studentSection', 'classroomId', 'classroomTitle', 'schoolId', 'schoolName', 'topicId', 'sessionId', 'sessionTitle', 'sessionType', 'courseId', 'courseTitle', 'courseCategory', 'sessionStart', 'sessionEnd', 'sessionCreationDate', 'sessionUpdationAt', 'sessionDuration', 'sessionStatus', 'studentAttendance', 'classroomStudentsCount', 'teacherTaughtName', 'teacherTaughtId', 'sessionClassworkComponents', 'sessionHomeworkComponents', 'classworkVisited', 'classworkAttempted', 'homeworkVisited', 'homeworkAttempted', 'classworkScore', 'homeworkScore', 'proficiency', 'homeworkExists', 'videoComponentLog', 'pqComponentLog', 'classworkAssignmentLog', 'homeworkAssignmentLog', 'classworkPracticeLog', 'homeworkPracticeLog', 'homeworkQuizLog', 'previousLogs'];
 
+const calculatePercentage = (value, total) => {
+  if (typeof value !== 'number' || typeof total !== 'number' || total === 0 || value === 0) {
+    return 0;
+  }
+
+  return Number(((value / total) * 100).toFixed(0));
+};
+
 const getBatchedUserSessionDump = (userSessionDumps) => {
   const batchedUserSessionDump = {};
   const batchedSessionDump = {};
@@ -359,8 +367,8 @@ const getBaseDocumentAndCalculatedFields = ({
   const studentAttendance = get(studentAttendanceDoc, 'status') === 'present';
 
   // Calculate Session Duration
-  const sessionStartDate = new Date(get(sessionDetails, 'sessionStartDate'));
-  const sessionEndDate = new Date(get(sessionDetails, 'sessionEndDate'));
+  const sessionStartDate = get(sessionDetails, 'sessionStartDate') ? new Date(get(sessionDetails, 'sessionStartDate')) : '';
+  const sessionEndDate = get(sessionDetails, 'sessionEndDate') ? new Date(get(sessionDetails, 'sessionEndDate')) : '';
 
   const sessionDuration = (get(sessionDetails, 'sessionStartDate') && get(sessionDetails, 'sessionEndDate')) ? Math.abs(sessionStartDate.getTime() - sessionEndDate.getTime()) / 1000 : 0;
 
@@ -439,6 +447,13 @@ const getBaseDocumentAndCalculatedFields = ({
         userRole: userRoleFromBaseDocument,
       });
     }
+  }
+  if (get(sessionDetails, 'sessionStatus') === 'allotted') {
+    // If sessionStatus is allotted, then don`t pass start and end date
+    Object.assign(baseDocument, {
+      sessionStart: '',
+      sessionEnd: '',
+    });
   }
 
   // If userSessionReport already exists, then use the id from it.
@@ -539,6 +554,7 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
   switch (componentName) {
     case topicComponents.video: {
       componentCounts.totalClassworkCount += 1;
+      componentCounts.videosCount += 1;
 
       const sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'videoComponentLog', []), componentName);
       const filteredVideoDumps = sortedComponentDumps.filter((doc) => (doc.componentId === get(componentRule, 'video.typeId')));
@@ -548,6 +564,7 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
           userSessionProgress.videoComponentLog.push(...(filteredVideoDumps || []));
           componentCounts.totalClassworkVisitedCount += 1;
           componentCounts.totalClassworkAttemptedCount += 1;
+          componentCounts.videosVisitedCount += 1;
         }
 
         userSessionProgress.videoComponentLog = filterDuplicateComponentDumps(userSessionProgress.videoComponentLog);
@@ -581,6 +598,10 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
             }
             return false;
           });
+          if (!isHomework) {
+            componentCounts.codingAssignmentsCount += filteredAssignments.length;
+            componentCounts.codingAssignmentsAttemptedCount += filteredAssignments.filter((el) => get(el, 'attempted')).length;
+          }
           if (filteredAssignments.some((el) => el.attempted)) {
             if (isHomework) componentCounts.totalHomeworkAttemptedCount += 1;
             else componentCounts.totalClassworkAttemptedCount += 1;
@@ -610,7 +631,10 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
 
       if (sortedComponentDumps && sortedComponentDumps.length) {
         if (isHomework) componentCounts.totalHomeworkVisitedCount += 1;
-        else componentCounts.totalClassworkVisitedCount += 1;
+        else {
+          componentCounts.totalClassworkVisitedCount += 1;
+          componentCounts.practicesCount += 1;
+        }
 
         const filteredPracticeDumps = sortedComponentDumps.filter((doc) => (get(doc, 'componentId') === get(componentRule, 'blockBasedProject.typeId')));
         const studentAttemptedLogs = filteredPracticeDumps.filter((doc) => (doc.eventType === 'update'));
@@ -619,7 +643,10 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
           const isAttempted = get(latestLog, 'link') || get(latestLog, 'savedBlocks') || get(latestLog, 'attachments', []).length;
           if (isAttempted) {
             if (isHomework) componentCounts.totalHomeworkAttemptedCount += 1;
-            else componentCounts.totalClassworkAttemptedCount += 1;
+            else {
+              componentCounts.totalClassworkAttemptedCount += 1;
+              componentCounts.practicesAttemptedCount += 1;
+            }
           }
         }
 
@@ -650,6 +677,8 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
           componentCounts.pQ.threeOrMoreTryCount += get(latestDump, 'threeOrMoreTryCount');
 
           componentCounts.totalClassworkAttemptedCount += 1;
+          componentCounts.practiceQuestionsCount += get(latestDump, 'questions', []).length;
+          componentCounts.practiceQuestionsAttemptedCount += get(latestDump, 'questions', []).length;
         }
         userSessionProgress.pqComponentLog.push(...(filteredLoDumps || []));
         userSessionProgress.pqComponentLog = filterDuplicateComponentDumps(userSessionProgress.pqComponentLog);
@@ -680,7 +709,35 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
     default:
       break;
   }
-
+  const {
+    videosCount = 0,
+    videosVisitedCount = 0,
+    practiceQuestionsCount = 0,
+    practiceQuestionsAttemptedCount = 0,
+    codingAssignmentsCount = 0,
+    codingAssignmentsAttemptedCount = 0,
+    practicesCount = 0,
+    practicesAttemptedCount = 0,
+  } = componentCounts;
+  const videosVisitedScore = calculatePercentage(videosVisitedCount, videosCount);
+  const practiceQuestionsAttemptedScore = calculatePercentage(practiceQuestionsAttemptedCount, practiceQuestionsCount);
+  // const averageCorrectPracticeQuestionTries = calculatePercentage(practiceQuestionsAttemptedCount, practiceQuestionsCount);
+  const codingAssignmentsAttemptedScore = calculatePercentage(codingAssignmentsAttemptedCount, codingAssignmentsCount);
+  const practicesAttemptedScore = calculatePercentage(practicesAttemptedCount, practicesCount);
+  Object.assign(userSessionProgress, {
+    videosCount,
+    videosVisitedCount,
+    videosVisitedScore,
+    practiceQuestionsCount,
+    practiceQuestionsAttemptedCount,
+    practiceQuestionsAttemptedScore,
+    codingAssignmentsCount,
+    codingAssignmentsAttemptedCount,
+    codingAssignmentsAttemptedScore,
+    practicesCount,
+    practicesAttemptedCount,
+    practicesAttemptedScore,
+  });
   return { userSessionProgress, componentCounts };
 };
 
@@ -811,6 +868,19 @@ const batchAndUpdateUserSessionReports = async () => {
             secondTryCount: 0,
             threeOrMoreTryCount: 0,
           },
+          videosCount: 0,
+          videosVisitedCount: 0,
+          videosVisitedScore: 0,
+          practiceQuestionsCount: 0,
+          practiceQuestionsAttemptedCount: 0,
+          practiceQuestionsAttemptedScore: 0,
+          averageCorrectPracticeQuestionTries: 0,
+          codingAssignmentsCount: 0,
+          codingAssignmentsAttemptedCount: 0,
+          codingAssignmentsAttemptedScore: 0,
+          practicesCount: 0,
+          practicesAttemptedCount: 0,
+          practicesAttemptedScore: 0,
         };
         // Iterating over session's component rules to calculate progress
         let sessionComponentRule = get(sessionDetails, 'topic.topicComponentRule');
