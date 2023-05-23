@@ -18,7 +18,7 @@ const logLineFormat = winston.format.printf(
   (info) => `${info.timestamp} \
 [pid-${process.pid}] \
 [${info.label.service}] \
-${get(info, 'level', 'info').toUpperCase()}: ${info.message}`,
+${info.level}: ${info.message}`,
 );
 
 const format = winston.format.combine(
