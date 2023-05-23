@@ -1,5 +1,4 @@
 import { DateTime } from 'luxon';
-import { get } from 'lodash';
 import winston from 'winston';
 import WinstonDailyRotateFile from 'winston-daily-rotate-file';
 import winstonConfig from '../config/winstonConfig';
