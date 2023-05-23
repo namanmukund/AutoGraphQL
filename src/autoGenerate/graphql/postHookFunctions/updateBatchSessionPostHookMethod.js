@@ -261,6 +261,21 @@ const getLatestSubSession = async (batchSessionId, context) => {
   return latestSubSession;
 };
 
+const getSubBatchSessionList = (students = []) => {
+  const pushStudents = [];
+  // eslint-disable-next-line no-unused-expressions
+  students.length && students.forEach((studentElem) => {
+    if (studentElem.id) {
+      const obj = {
+        studentConnectId: studentElem.id,
+        isPresent: false,
+      };
+      pushStudents.push(obj);
+    }
+  });
+  return pushStudents;
+};
+
 const blacklistUserTokens = async (students) => {
   const menteeTokenController = new MasterController('MenteeToken', { bypass: true });
   const blacklistedTokenController = new MasterController('BlacklistedToken', { bypass: true });
@@ -379,40 +394,6 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     context.usesCoursePackage = true;
   }
 
-  if (get(input, 'sessionStatus') === 'started') {
-    const inputToSend = {
-      sessionStartDate: `${get(input, 'sessionStartDate')}`,
-      type: 'live',
-      subType: 'initial',
-      sessionStatus: get(input, 'sessionStatus'),
-    };
-    const batchSessionConnectId = get(input, 'id');
-    try {
-      addBatchSubSession(inputToSend, allottedMentorId, batchSessionConnectId, context);
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log('error ', e);
-    }
-  }
-
-  if (get(input, 'sessionStatus') === 'completed') {
-    const latestSubSession = await getLatestSubSession(batchSessionId, context);
-    if (latestSubSession) {
-      const latestSubSessionId = get(latestSubSession, 'id');
-      const inputToSend = {
-        sessionStartDate: `${get(input, 'sessionStartDate')}`,
-        sessionEndDate: `${get(input, 'sessionEndDate')}`,
-        sessionStatus: get(input, 'sessionStatus'),
-      };
-      try {
-        updateBatchSubSession(latestSubSessionId, inputToSend, context);
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.log('error ', e);
-      }
-    }
-  }
-
   if (topicId) {
     /*
       get batch info
@@ -429,6 +410,43 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     // a batch can have own package topic rule. if it exist in a batch we will select it over the course package.
     let currentComponentTopicOrder = null;
     let currentTopicOrder = null;
+
+    if (get(input, 'sessionStatus') === 'started') {
+      const inputToSend = {
+        sessionStartDate: `${get(input, 'sessionStartDate')}`,
+        type: 'live',
+        subType: 'initial',
+        sessionStatus: get(input, 'sessionStatus'),
+      };
+      if (students && students.length) {
+        inputToSend.attendance = getSubBatchSessionList(students);
+      }
+      const batchSessionConnectId = get(input, 'id');
+      try {
+        addBatchSubSession(inputToSend, allottedMentorId, batchSessionConnectId, context);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.log('error', e);
+      }
+    }
+    if (get(input, 'sessionStatus') === 'completed') {
+      const latestSubSession = await getLatestSubSession(batchSessionId, context);
+      if (latestSubSession) {
+        const latestSubSessionId = get(latestSubSession, 'id');
+        const inputToSend = {
+          sessionStartDate: `${get(input, 'sessionStartDate')}`,
+          sessionEndDate: `${get(input, 'sessionEndDate')}`,
+          sessionStatus: get(input, 'sessionStatus'),
+        };
+        try {
+          updateBatchSubSession(latestSubSessionId, inputToSend, context);
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.log('error ', e);
+        }
+      }
+    }
+
     if (coursePackageId) {
       let topicRules;
       if (get(batchInfo, 'coursePackageTopicRule', []).length) {

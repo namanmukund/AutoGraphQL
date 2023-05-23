@@ -4,6 +4,7 @@ import { PasswordMismatchError, UnknownUserError, UserPasswordNotSetError } from
 import { MissingMandatoryInputInRequestError } from '../../../../../../constants/errors/input';
 import { QueryController } from '../../../controllers';
 import { callLocalGraphqlApi } from '../../../../../api';
+import updateBatchSubSession from '../../../../utils/updateBatchSubSession';
 
 const BATCHSESSION_TYPE = 'BatchSession';
 
@@ -45,6 +46,31 @@ const getStudentLoggedInStatus = ({
   {
     $match: {
       id: sessionId,
+    },
+  },
+  {
+    $lookup: {
+      from: 'BatchSubSession',
+      let: {
+        subSessionId: '$subSessions.typeId',
+      },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $in: ['$id', '$$subSessionId'],
+            },
+          },
+        },
+        {
+          $project: {
+            id: 1,
+            createdAt: 1,
+            attendance: 1,
+          },
+        },
+      ],
+      as: 'subSessions',
     },
   },
   {
@@ -162,6 +188,7 @@ const getBuddyStatus = async (
   const project = {
     id: 1,
     logoutAllStudents: 1,
+    subSessions: 1,
   };
   if (action === 'markAttendance' && studentIds.length) {
     project.attendance = 1;
@@ -291,8 +318,18 @@ const getBuddyStatus = async (
     result = true;
   } else if (action === 'markAttendance' && studentIds && studentIds.length) {
     const attendanceArray = get(batchSessionData, '[0].attendance', []) || [];
+    const subSessions = get(batchSessionData, '[0].subSessions', []);
+    let latestSubSession = null;
+    if (subSessions.length) {
+      const tempSubSessions = [...subSessions];
+      tempSubSessions.sort((a, b) => new Date(get(b, 'createdAt')) - new Date(get(a, 'createdAt')));
+      latestSubSession = tempSubSessions[0];
+    }
+    const batchSubSessionId = get(latestSubSession, 'id');
     let isUpdated = false;
     const attendancePromiseArray = [];
+    const subSessionAttendancePromiseArray = [];
+    let isSubSessionUpdated = false;
     studentIds.forEach((studentProfileId) => {
       const findStudentDataIndex = attendanceArray.findIndex((student) => get(student, 'student.typeId') === studentProfileId);
       if (findStudentDataIndex !== -1) {
@@ -310,13 +347,24 @@ const getBuddyStatus = async (
           if (shouldRevertLogoutStatus) {
             Object.assign(input.fields, { logoutAllStudents: false });
           }
+          const batchSubSessionInput = {
+            attendance: {
+              updateWith: { isPresent: true },
+              updateWhere: { studentReferenceId: studentProfileId },
+            },
+          };
           attendancePromiseArray.push(updateBatchSession(input));
           isUpdated = true;
+          subSessionAttendancePromiseArray.push(updateBatchSubSession(batchSubSessionId, batchSubSessionInput, ''));
+          isSubSessionUpdated = true;
         }
       }
     });
     if (isUpdated) {
       Promise.all(attendancePromiseArray);
+    }
+    if (isSubSessionUpdated) {
+      Promise.all(subSessionAttendancePromiseArray);
     }
     result = true;
   } else if (action === 'logout' && studentIds && studentIds.length) {

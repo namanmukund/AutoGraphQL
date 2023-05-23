@@ -27,6 +27,31 @@ const batchSessionQuery = (id) => `{
   }
 }`;
 
+const getBatchQuery = (batchId) => `
+    query{
+      batch(id:"${batchId}"){
+        students{
+          id
+        }
+      }
+    }
+  `;
+
+const getSubBatchSessionList = (students = []) => {
+  const pushStudents = [];
+  // eslint-disable-next-line no-unused-expressions
+  students.length && students.forEach((studentElem) => {
+    if (studentElem.id) {
+      const obj = {
+        studentConnectId: studentElem.id,
+        isPresent: false,
+      };
+      pushStudents.push(obj);
+    }
+  });
+  return pushStudents;
+};
+
 const getLatestSubSession = async (batchSessionId, context) => {
   const batchSessionRes = await callLocalGraphqlApi(batchSessionQuery(batchSessionId), context);
   const subSessions = get(batchSessionRes, 'data.batchSession.subSessions', []);
@@ -45,12 +70,19 @@ const updateRetakeSessionPostHookMethod = async (input, params, mutationName, co
   const allottedMentorId = get(context, 'allottedMentorId');
   const batchSessionConnectId = get(input, 'batchSession.typeId');
   if (get(input, 'sessionStatus') === 'started') {
+    const batchId = get(context, 'batchId');
+    const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId), context);
+    const batchInfo = get(batchResult, 'data.batch');
+    const students = get(batchInfo, 'students', []);
     const inputToSend = {
       sessionStartDate: `${get(input, 'sessionStartDate')}`,
       type: 'retake',
       subType: 'initial',
       sessionStatus: get(input, 'sessionStatus'),
     };
+    if (students && students.length) {
+      inputToSend.attendance = getSubBatchSessionList(students);
+    }
     try {
       addBatchSubSession(inputToSend, allottedMentorId, batchSessionConnectId, context);
     } catch (e) {

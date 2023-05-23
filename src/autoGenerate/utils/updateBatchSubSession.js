@@ -1,6 +1,6 @@
 import { callLocalGraphqlApi } from '../../api';
 
-const updateBatchSubSession = async (id, input, context) => {
+const updateBatchSubSession = async (id, input, context = '') => {
   const addQuery = `mutation($input: BatchSubSessionUpdate) {
     updateBatchSubSession(
         id: "${id}"

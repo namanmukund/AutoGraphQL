@@ -7,6 +7,7 @@ const BatchSubSession = `
         sessionStatus: SessionStatus! @defaultValue(value: "allotted")
         mentor: User @relation(name: "BatchSubSessionMentor", direction: "OneWay")
         batchSession: BatchSession @relation(name: "BatchSubSessionBatchSession")
+        attendance: [BatchAttendanceType]
     }
 `;
 
