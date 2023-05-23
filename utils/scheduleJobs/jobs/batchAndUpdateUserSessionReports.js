@@ -339,7 +339,6 @@ const getBaseDocumentAndCalculatedFields = ({
 }) => {
   // Check if userSessionReport already exists
 
-  // Add a check over here with a new field eventType added
   const existingSessionReport = (userSessionReports || []).find((report) => (
     (report.topicId === topicId)
       && (report.userId === userId)
