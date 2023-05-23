@@ -36,7 +36,7 @@ const differentVersionsOfModel = (model, includeAcademicYear = true) => {
   const stagingAcademicYearModel = createTable(model, stagingModelName(modelName, currentAcademicYear), stagingModelName(tableName, currentAcademicYear));
   const productionAcademicYearModel = createTable(model, productionModelName(modelName, currentAcademicYear), productionModelName(tableName, currentAcademicYear));
   // if staging env then create table for staging env and for previous academic year
-  if (process.env.NODE_ENV === 'staging') {
+  if (process.env.NODE_ENV !== 'production') {
     if (includeAcademicYear) {
       return [stagingModel, stagingAcademicYearModel];
     }
@@ -66,7 +66,7 @@ const productionModelName = (modelName, academicYear) => {
 };
 
 export const currentModelName = (modelName, academicYear) => {
-  if (process.env.NODE_ENV === 'staging') {
+  if (process.env.NODE_ENV !== 'production') {
     return stagingModelName(modelName, academicYear);
   }
   return productionModelName(modelName, academicYear);
