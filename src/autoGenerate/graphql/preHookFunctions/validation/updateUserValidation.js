@@ -148,15 +148,11 @@ const updateUserValidation = async (params, context, mutationOrQueryName) => {
   context.isPreSalesAuditFromInput = isPreSalesAuditFromInput;
   if (password) {
     const currentUserRole = get(currentUser, 'role');
-    if (userId === get(currentUser, 'id')) {
-      const passwordObj = getUserPasswordObject(password, false);
-      Object.assign(userObj, passwordObj);
-    } else if (!allowedRoles.includes(currentUserRole)) {
+    if (!allowedRoles.includes(currentUserRole) && userId !== get(currentUser, 'id')) {
       throw new InsufficientPermissionError();
-    } else {
-      const passwordObj = getUserPasswordObject(password, false);
-      Object.assign(userObj, passwordObj);
     }
+    const passwordObj = getUserPasswordObject(password, false);
+    Object.assign(userObj, passwordObj);
   }
 
   const { pubsub } = context;
