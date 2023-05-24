@@ -2,6 +2,7 @@ const BatchSubSession = `
     type BatchSubSession @model {
         sessionStartDate: Date
         sessionEndDate: Date
+        duration: Int
         type: BatchSubSessionType! @defaultValue(value: "live")
         subType: BatchSubSessionSubType! @defaultValue(value: "initial")
         sessionStatus: SessionStatus! @defaultValue(value: "allotted")
