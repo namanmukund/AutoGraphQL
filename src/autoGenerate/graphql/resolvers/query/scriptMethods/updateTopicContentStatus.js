@@ -9,6 +9,9 @@ const getAllTopics = async () => {
       topics {
         id
         contentStatus
+        topicComponentRule {
+          componentName
+        }
       }
     }
 `;
@@ -25,7 +28,8 @@ const updateTopicContentStatus = async () => {
     // eslint-disable-next-line no-restricted-syntax
     for (const topic of topics) {
       const contentStatus = get(topic, 'contentStatus');
-      if (contentStatus === UNPUBLISHED) {
+      const topicComponentRule = get(topic, 'topicComponentRule', []);
+      if (contentStatus === UNPUBLISHED && topicComponentRule.length) {
         const topicId = get(topic, 'id');
         const controller = new MutationController('Topic', newAuthentication);
         // eslint-disable-next-line no-await-in-loop
