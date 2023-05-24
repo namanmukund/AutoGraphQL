@@ -16,13 +16,13 @@ const SequelizeOperation = Sequelize.Op;
 
 const sqlColumnsToUpdate = ['userId', 'userName', 'userRole', 'studentGrade', 'studentSection', 'classroomId', 'classroomTitle', 'schoolId', 'schoolName', 'topicId', 'sessionId', 'sessionTitle', 'sessionType', 'courseId', 'courseTitle', 'courseCategory', 'sessionStart', 'sessionEnd', 'sessionCreationDate', 'sessionUpdationAt', 'sessionDuration', 'sessionStatus', 'studentAttendance', 'classroomStudentsCount', 'teacherTaughtName', 'teacherTaughtId', 'sessionClassworkComponents', 'sessionHomeworkComponents', 'classworkVisited', 'classworkAttempted', 'homeworkVisited', 'homeworkAttempted', 'classworkScore', 'homeworkScore', 'proficiency', 'homeworkExists', 'videoComponentLog', 'pqComponentLog', 'classworkAssignmentLog', 'homeworkAssignmentLog', 'classworkPracticeLog', 'homeworkPracticeLog', 'homeworkQuizLog', 'previousLogs'];
 
-const calculatePercentage = (value, total) => {
-  if (typeof value !== 'number' || typeof total !== 'number' || total === 0 || value === 0) {
-    return 0;
-  }
+// const calculatePercentage = (value, total) => {
+//   if (typeof value !== 'number' || typeof total !== 'number' || total === 0 || value === 0) {
+//     return 0;
+//   }
 
-  return Number(((value / total) * 100).toFixed(0));
-};
+//   return Number(((value / total) * 100).toFixed(0));
+// };
 
 const getBatchedUserSessionDump = (userSessionDumps) => {
   const batchedUserSessionDump = {};
@@ -89,6 +89,8 @@ const getDatabaseControllers = () => {
 
   const batchController = new QueryController('Batch', authentication);
 
+  const learningObjectiveController = new QueryController('LearningObjective', authentication);
+
   const userSessionReportController = new MasterController(currentModelName('UserLevelSessionReport', 'previous'), {
     bypass: true,
   });
@@ -100,6 +102,7 @@ const getDatabaseControllers = () => {
     userController,
     userSessionReportController,
     batchController,
+    learningObjectiveController,
   };
 };
 
@@ -144,7 +147,6 @@ const getAggregationQueries = (documentIdsToFetch) => {
       })
       .getPipeline();
   }
-
   if (documentIdsToFetch.topicIds && Array.from(documentIdsToFetch.topicIds).length) {
     topicAggregationQuery = new AggregationBuilder('Topic')
       .Match({ id: { $in: Array.from(documentIdsToFetch.topicIds) } })
@@ -193,6 +195,51 @@ const getAggregationQueries = (documentIdsToFetch) => {
   };
 };
 
+const getLearningObjectives = async (topics = [], batchSessions = []) => {
+  const lOIdsToFetch = new Set();
+  const {
+    learningObjectiveController,
+  } = getDatabaseControllers();
+  if (topics && topics.length) {
+    topics.forEach((topic) => {
+      get(topic, 'topicComponentRule', []).forEach((componentRule) => {
+        if (get(componentRule, 'componentName') === topicComponents.learningObjective
+            && get(componentRule, 'learningObjective.typeId')) {
+          lOIdsToFetch.add(get(componentRule, 'learningObjective.typeId'));
+        }
+      });
+    });
+  }
+  if (batchSessions && batchSessions.length) {
+    batchSessions.forEach((batchSession) => {
+      get(batchSession, 'topic.topicComponentRule', []).forEach((componentRule) => {
+        if (get(componentRule, 'componentName') === topicComponents.learningObjective
+              && get(componentRule, 'learningObjective.typeId')) {
+          lOIdsToFetch.add(get(componentRule, 'learningObjective.typeId'));
+        }
+      });
+    });
+  }
+  if (lOIdsToFetch && Array.from(lOIdsToFetch).length) {
+    const loAggregationQuery = new AggregationBuilder('LearningObjective')
+      .Match({ id: { $in: Array.from(lOIdsToFetch) } })
+      .Lookup(EqualityPayload('QuestionBank', 'questionBank', 'questionBank.typeId', 'id')).Project({
+        id: 1,
+        order: 1,
+        questionBank: {
+          id: 1,
+          order: 1,
+          assessmentType: 1,
+          status: 1,
+        },
+      })
+      .getPipeline();
+    const learningObjectives = await learningObjectiveController.aggregate(loAggregationQuery);
+    return learningObjectives;
+  }
+  return [];
+};
+
 const getAllRequiredDataFromDatabase = async () => {
   // Get all required controllers
   const {
@@ -227,6 +274,7 @@ const getAllRequiredDataFromDatabase = async () => {
     let topics = [];
     let users = [];
     let batches = [];
+    let learningObjectives = [];
     if (batchSessionAggregationQuery.length) batchSessions = await batchSessionController.aggregate(batchSessionAggregationQuery);
     if (topicAggregationQuery.length) topics = await topicController.aggregate(topicAggregationQuery);
     if (userAggregationQuery.length) users = await userController.aggregate(userAggregationQuery);
@@ -252,6 +300,7 @@ const getAllRequiredDataFromDatabase = async () => {
         raw: true,
       });
     }
+    learningObjectives = await getLearningObjectives(topics, batchSessions);
 
     return {
       batchSessions,
@@ -265,6 +314,7 @@ const getAllRequiredDataFromDatabase = async () => {
       userSessionReportController,
       batchedSessionDump,
       batches,
+      learningObjectives,
     };
   }
   return {
@@ -548,7 +598,7 @@ const filterDuplicateComponentDumps = (componentDumps) => {
   return [];
 };
 
-const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, filteredComponentDumps, componentRule, componentCountsMeta) => {
+const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, filteredComponentDumps, componentRule, componentCountsMeta, learningObjectives) => {
   const componentCounts = componentCountsMeta;
   const userSessionProgress = calculatedFields;
   switch (componentName) {
@@ -624,7 +674,10 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
       if (isHomework) {
         componentCounts.totalHomeworkCount += 1;
         userSessionProgress.homeworkExists = true;
-      } else { componentCounts.totalClassworkCount += 1; }
+      } else {
+        componentCounts.totalClassworkCount += 1;
+        componentCounts.practicesCount += 1;
+      }
 
       let sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'classworkPracticeLog', []), componentName);
       if (isHomework) sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'homeworkPracticeLog', []), componentName);
@@ -633,7 +686,6 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
         if (isHomework) componentCounts.totalHomeworkVisitedCount += 1;
         else {
           componentCounts.totalClassworkVisitedCount += 1;
-          componentCounts.practicesCount += 1;
         }
 
         const filteredPracticeDumps = sortedComponentDumps.filter((doc) => (get(doc, 'componentId') === get(componentRule, 'blockBasedProject.typeId')));
@@ -665,6 +717,14 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
 
       const sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'pqComponentLog', []), componentName);
       const filteredLoDumps = sortedComponentDumps.filter((doc) => (doc.componentId === get(componentRule, 'learningObjective.typeId')));
+      const currentLearningObjective = learningObjectives.find((learningObjective) => (learningObjective.typeId === get(componentRule, 'learningObjective.typeId')));
+      if (currentLearningObjective && get(currentLearningObjective, 'questionBank', []).length) {
+        const filteredQuestions = get(currentLearningObjective, 'questionBank', []).filter((question) => get(question, 'assessmentType') === 'practiceQuestion'
+          && get(question, 'status') === 'published');
+        if (filteredQuestions && filteredQuestions.length) {
+          componentCounts.practiceQuestionsCount += filteredQuestions.length;
+        }
+      }
       if (filteredLoDumps && filteredLoDumps.length) {
         componentCounts.totalClassworkVisitedCount += 1;
 
@@ -677,7 +737,6 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
           componentCounts.pQ.threeOrMoreTryCount += get(latestDump, 'threeOrMoreTryCount');
 
           componentCounts.totalClassworkAttemptedCount += 1;
-          componentCounts.practiceQuestionsCount += get(latestDump, 'questions', []).length;
           componentCounts.practiceQuestionsAttemptedCount += get(latestDump, 'questions', []).length;
         }
         userSessionProgress.pqComponentLog.push(...(filteredLoDumps || []));
@@ -709,35 +768,6 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
     default:
       break;
   }
-  const {
-    videosCount = 0,
-    videosVisitedCount = 0,
-    practiceQuestionsCount = 0,
-    practiceQuestionsAttemptedCount = 0,
-    codingAssignmentsCount = 0,
-    codingAssignmentsAttemptedCount = 0,
-    practicesCount = 0,
-    practicesAttemptedCount = 0,
-  } = componentCounts;
-  const videosVisitedScore = calculatePercentage(videosVisitedCount, videosCount);
-  const practiceQuestionsAttemptedScore = calculatePercentage(practiceQuestionsAttemptedCount, practiceQuestionsCount);
-  // const averageCorrectPracticeQuestionTries = calculatePercentage(practiceQuestionsAttemptedCount, practiceQuestionsCount);
-  const codingAssignmentsAttemptedScore = calculatePercentage(codingAssignmentsAttemptedCount, codingAssignmentsCount);
-  const practicesAttemptedScore = calculatePercentage(practicesAttemptedCount, practicesCount);
-  Object.assign(userSessionProgress, {
-    videosCount,
-    videosVisitedCount,
-    videosVisitedScore,
-    practiceQuestionsCount,
-    practiceQuestionsAttemptedCount,
-    practiceQuestionsAttemptedScore,
-    codingAssignmentsCount,
-    codingAssignmentsAttemptedCount,
-    codingAssignmentsAttemptedScore,
-    practicesCount,
-    practicesAttemptedCount,
-    practicesAttemptedScore,
-  });
   return { userSessionProgress, componentCounts };
 };
 
@@ -826,6 +856,7 @@ const batchAndUpdateUserSessionReports = async () => {
       userSessionDumps,
       topics,
       batchedSessionDump,
+      learningObjectives,
       ...requiredDBData
     } = await getAllRequiredDataFromDatabase();
 
@@ -902,6 +933,7 @@ const batchAndUpdateUserSessionReports = async () => {
               filteredComponentDumps,
               componentRule,
               componentCountsMeta,
+              learningObjectives,
             );
 
             calculatedFields = userSessionProgress;

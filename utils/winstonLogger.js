@@ -17,7 +17,7 @@ const logLineFormat = winston.format.printf(
   (info) => `${info.timestamp} \
 [pid-${process.pid}] \
 [${info.label.service}] \
-${info.level.toUpperCase()}: ${info.message}`,
+${info.level}: ${info.message}`,
 );
 
 const format = winston.format.combine(
@@ -26,7 +26,7 @@ const format = winston.format.combine(
   logLineFormat,
 );
 const winstonTransports = [];
-if (['production', 'staging'].includes(process.env.NODE_ENV)) {
+if (['production', 'staging'].includes(process.env.NODE_ENV) && !process.env.FORCE_WINSTON_CONSOLE) {
   winstonTransports.push(
     new WinstonDailyRotateFile(winstonConfig.winstonTransportConfig.fileRotateConfig),
   );
