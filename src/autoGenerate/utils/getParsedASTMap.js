@@ -259,7 +259,7 @@ const getModifiedASTDefinition = (definitions) => {
    * Please Note SECONDARY_APPLICATION_NAME should be either of the value
    * located inside constants file in the variable SECONDARY_APPLICATIONS
    */
-  if (process.env.SECONDARY_APPLICATION_NAME && definitions && definitions.length) {
+  if (process.env.LIMIT_APPLICATION_MODEL && process.env.SECONDARY_APPLICATION_NAME && definitions && definitions.length) {
     const allowedASTDefinitions = new Set();
     definitions
       .filter((definition) => get(definition, 'kind') === 'ObjectTypeDefinition')
