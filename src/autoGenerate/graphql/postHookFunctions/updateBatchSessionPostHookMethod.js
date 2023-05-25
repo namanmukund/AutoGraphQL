@@ -410,8 +410,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     // a batch can have own package topic rule. if it exist in a batch we will select it over the course package.
     let currentComponentTopicOrder = null;
     let currentTopicOrder = null;
-
-    if (get(input, 'sessionStatus') === 'started') {
+    if (get(input, 'sessionStatus') === 'started' && prevSessionStatus === 'allotted') {
       const inputToSend = {
         sessionStartDate: `${get(input, 'sessionStartDate')}`,
         type: 'live',
@@ -425,8 +424,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
       try {
         addBatchSubSession(inputToSend, allottedMentorId, batchSessionConnectId, context);
       } catch (e) {
-        // eslint-disable-next-line no-console
-        console.log('error', e);
+        log(e);
       }
     }
     if (get(input, 'sessionStatus') === 'completed') {
@@ -441,8 +439,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         try {
           updateBatchSubSession(latestSubSessionId, inputToSend, context);
         } catch (e) {
-          // eslint-disable-next-line no-console
-          console.log('error ', e);
+          log(e);
         }
       }
     }

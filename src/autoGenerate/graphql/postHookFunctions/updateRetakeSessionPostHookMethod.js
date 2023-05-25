@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import { get } from 'lodash';
 import { sessionStatus } from '../../../../constants';
+import { log } from '../../../../utils';
 import { callLocalGraphqlApi } from '../../../api';
 import addBatchSubSession from '../../utils/addBatchSubSession';
 import updateBatchSubSession from '../../utils/updateBatchSubSession';
@@ -65,11 +66,12 @@ const getLatestSubSession = async (batchSessionId, context) => {
 };
 
 const updateRetakeSessionPostHookMethod = async (input, params, mutationName, context) => {
+  const { prevSessionStatus } = context;
   const retakeSessionId = get(input, 'id');
   const retakeSessionStatusFromInput = get(params, 'input.sessionStatus', 'allotted');
   const allottedMentorId = get(context, 'allottedMentorId');
   const batchSessionConnectId = get(input, 'batchSession.typeId');
-  if (get(input, 'sessionStatus') === 'started') {
+  if (get(input, 'sessionStatus') === 'started' && prevSessionStatus === 'completed') {
     const batchId = get(context, 'batchId');
     const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId), context);
     const batchInfo = get(batchResult, 'data.batch');
@@ -86,8 +88,7 @@ const updateRetakeSessionPostHookMethod = async (input, params, mutationName, co
     try {
       addBatchSubSession(inputToSend, allottedMentorId, batchSessionConnectId, context);
     } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log('error ', e);
+      log(e);
     }
   }
   if (get(input, 'sessionStatus') === 'completed') {
@@ -102,8 +103,7 @@ const updateRetakeSessionPostHookMethod = async (input, params, mutationName, co
       try {
         updateBatchSubSession(latestSubSessionId, inputToSend, context);
       } catch (e) {
-        // eslint-disable-next-line no-console
-        console.log('error ', e);
+        log(e);
       }
     }
   }

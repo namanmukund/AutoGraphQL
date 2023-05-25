@@ -12,7 +12,7 @@ const getBatchQuery = (batchId) => `
     }
   `;
 
-const updateBatchSessionQuery = (
+const updateBatchSubSessionQuery = (
   batchSubSessionId, pushManyQuery,
 ) => `
   mutation{
@@ -41,7 +41,7 @@ const addBatchSubSessionPostHookMethod = async (input, params, mutationName, con
     });
     pushManyQuery += ']}';
     // pushing new array of students in batch session
-    callLocalGraphqlApi(updateBatchSessionQuery(
+    callLocalGraphqlApi(updateBatchSubSessionQuery(
       batchSubSessionId,
       pushManyQuery,
     ), context);
