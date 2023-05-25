@@ -10,7 +10,7 @@ const userAssignmentReportDump = async (input, mutationOrQueryName, assignmentsD
     eventType = update;
   }
   get(input, 'assignment', []).forEach((question) => {
-    const assignmentQuestion = assignmentsData.find((assignmentData) => get(assignmentData, 'assignmentQuestion.typeId') === get(question, 'id'));
+    const assignmentQuestion = assignmentsData.find((assignmentData) => get(assignmentData, 'id') === get(question, 'assignmentQuestion.typeId'));
     if (assignmentQuestion) {
       assignmentQuestions.push({
         codingAssignmentId: get(question, 'assignmentQuestion.typeId'),

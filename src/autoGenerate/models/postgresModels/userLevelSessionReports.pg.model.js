@@ -64,6 +64,7 @@ const UserLevelSessionReport = sequelize.define(
     practiceQuestionsAttemptedCount: { type: DataTypes.INTEGER, allowNull: true },
     practiceQuestionsAttemptedScore: { type: DataTypes.INTEGER, allowNull: true },
     latestPracticeQuestionTries: { type: DataTypes.ARRAY(DataTypes.JSONB) },
+    latestPracticeQuestionTriesInSession: { type: DataTypes.ARRAY(DataTypes.JSONB) },
     averageCorrectPracticeQuestionTries: { type: DataTypes.DOUBLE, allowNull: true },
     codingAssignmentsCount: { type: DataTypes.INTEGER, allowNull: true },
     codingAssignmentsAttemptedCount: { type: DataTypes.INTEGER, allowNull: true },
