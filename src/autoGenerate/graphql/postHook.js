@@ -74,7 +74,6 @@ import updateRetakeSessionPostHookMethod from './postHookFunctions/updateRetakeS
 import reportDumpPostHook from './postHookFunctions/reportDumpPostHook';
 import { MEDIA_RESOLUTIONS, VIDEOS_TO_TRANSCODE_FOLDER } from '../../../constants';
 import clearStaticAndBatchCache from './postHookFunctions/utils/clearStaticAndBatchCache';
-import addBatchSubSessionPostHookMethod from './postHookFunctions/addBatchSubSessionPostHookMethod';
 // import updateEventSessionPostHookMethod from './postHookFunctions/updateEventSessionPostHookMethod';
 // import addEventSessionPostHookMethod from './postHookFunctions/addEventSessionPostHookMethod';
 
@@ -423,10 +422,6 @@ const posthook = async (input, mutationName, context, params, info) => {
     //   await addEventSessionPostHookMethod(input, params, mutationName, context, info);
     //   break;
     // }
-    case 'addBatchSubSession': {
-      await addBatchSubSessionPostHookMethod(input, params, mutationName, context);
-      break;
-    }
     default:
       break;
   }

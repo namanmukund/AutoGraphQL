@@ -261,10 +261,10 @@ const getLatestSubSession = async (batchSessionId, context) => {
   return latestSubSession;
 };
 
-const getSubBatchSessionList = (students = []) => {
+const attendanceList = (attendance = []) => {
   const pushStudents = [];
   // eslint-disable-next-line no-unused-expressions
-  students.length && students.forEach((studentElem) => {
+  attendance.length && attendance.forEach((studentElem) => {
     if (studentElem.id) {
       const obj = {
         studentConnectId: studentElem.id,
@@ -417,8 +417,9 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
         subType: 'initial',
         sessionStatus: get(input, 'sessionStatus'),
       };
-      if (students && students.length) {
-        inputToSend.attendance = getSubBatchSessionList(students);
+      const { attendance } = input;
+      if (attendance && attendance.length) {
+        inputToSend.attendance = attendanceList(attendance);
       }
       const batchSessionConnectId = get(input, 'id');
       try {

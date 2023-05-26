@@ -21,6 +21,11 @@ const deleteBatchScheduleSession = async (retakeSessionId, context) => {
 const batchSessionQuery = (id) => `{
   batchSession(id: "${id}") {
     id
+    attendance {
+      student {
+        id
+      }
+    }
     subSessions {
       id
       createdAt
@@ -28,23 +33,13 @@ const batchSessionQuery = (id) => `{
   }
 }`;
 
-const getBatchQuery = (batchId) => `
-    query{
-      batch(id:"${batchId}"){
-        students{
-          id
-        }
-      }
-    }
-  `;
-
-const getSubBatchSessionList = (students = []) => {
+const attendanceList = (attendance = []) => {
   const pushStudents = [];
   // eslint-disable-next-line no-unused-expressions
-  students.length && students.forEach((studentElem) => {
-    if (studentElem.id) {
+  attendance.length && attendance.forEach((studentElem) => {
+    if (get(studentElem, 'student.id')) {
       const obj = {
-        studentConnectId: studentElem.id,
+        studentConnectId: get(studentElem, 'student.id'),
         isPresent: false,
       };
       pushStudents.push(obj);
@@ -72,18 +67,16 @@ const updateRetakeSessionPostHookMethod = async (input, params, mutationName, co
   const allottedMentorId = get(context, 'allottedMentorId');
   const batchSessionConnectId = get(input, 'batchSession.typeId');
   if (get(input, 'sessionStatus') === 'started' && prevSessionStatus === 'completed') {
-    const batchId = get(context, 'batchId');
-    const batchResult = await callLocalGraphqlApi(getBatchQuery(batchId), context);
-    const batchInfo = get(batchResult, 'data.batch');
-    const students = get(batchInfo, 'students', []);
+    const batchSessionRes = await callLocalGraphqlApi(batchSessionQuery(batchSessionConnectId), context);
+    const attendance = get(batchSessionRes, 'data.batchSession.attendance', []);
     const inputToSend = {
       sessionStartDate: `${get(input, 'sessionStartDate')}`,
       type: 'retake',
       subType: 'initial',
       sessionStatus: get(input, 'sessionStatus'),
     };
-    if (students && students.length) {
-      inputToSend.attendance = getSubBatchSessionList(students);
+    if (attendance && attendance.length) {
+      inputToSend.attendance = attendanceList(attendance);
     }
     try {
       addBatchSubSession(inputToSend, allottedMentorId, batchSessionConnectId, context);
