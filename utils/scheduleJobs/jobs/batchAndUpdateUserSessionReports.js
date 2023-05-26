@@ -609,7 +609,7 @@ const getClassworkComponentScore = (componentCountsMeta, learningObjectives = []
     practicesAttemptedCount = 0,
     allPracticeQuestions = [],
   } = componentCountsMeta;
-  const videosVisitedScore = calculatePercentage(videosVisitedCount, videosCount);
+  const videosVisitedPercent = calculatePercentage(videosVisitedCount, videosCount);
   const groupedAllQuestionsWithLo = allPracticeQuestions.reduce((accumulator, currentValue) => {
     accumulator[get(currentValue, 'learningObjectiveId')] = accumulator[get(currentValue, 'learningObjectiveId')] || [];
     accumulator[get(currentValue, 'learningObjectiveId')].push(currentValue);
@@ -622,8 +622,8 @@ const getClassworkComponentScore = (componentCountsMeta, learningObjectives = []
     return accumulator;
   }, {});
 
-  let latestPracticeQuestionTries = [];
-  const latestPracticeQuestionTriesInSession = {
+  let latestPracticeQuestionTriesLoWise = [];
+  const latestPracticeQuestionTriesSessionWise = {
     totalLearningObjectives: 0,
     totalQuestions: 0,
     totalAttemptedQuestions: 0,
@@ -656,29 +656,29 @@ const getClassworkComponentScore = (componentCountsMeta, learningObjectives = []
         totalUnattemptedQuestions,
       };
 
-      latestPracticeQuestionTriesInSession.totalLearningObjectives += 1;
-      latestPracticeQuestionTriesInSession.totalQuestions += totalQuestions;
-      latestPracticeQuestionTriesInSession.totalAttemptedQuestions += totalAttemptedQuestions.length;
-      latestPracticeQuestionTriesInSession.totalAttemptedQuestionsInFirstTry += totalAttemptedQuestionsInFirstTry;
-      latestPracticeQuestionTriesInSession.totalAttemptedQuestionsInSecondTry += totalAttemptedQuestionsInSecondTry;
-      latestPracticeQuestionTriesInSession.totalAttemptedQuestionsInThreeOrTry += totalAttemptedQuestionsInThreeOrTry;
-      latestPracticeQuestionTriesInSession.totalUnattemptedQuestions += totalUnattemptedQuestions;
+      latestPracticeQuestionTriesSessionWise.totalLearningObjectives += 1;
+      latestPracticeQuestionTriesSessionWise.totalQuestions += totalQuestions;
+      latestPracticeQuestionTriesSessionWise.totalAttemptedQuestions += totalAttemptedQuestions.length;
+      latestPracticeQuestionTriesSessionWise.totalAttemptedQuestionsInFirstTry += totalAttemptedQuestionsInFirstTry;
+      latestPracticeQuestionTriesSessionWise.totalAttemptedQuestionsInSecondTry += totalAttemptedQuestionsInSecondTry;
+      latestPracticeQuestionTriesSessionWise.totalAttemptedQuestionsInThreeOrTry += totalAttemptedQuestionsInThreeOrTry;
+      latestPracticeQuestionTriesSessionWise.totalUnattemptedQuestions += totalUnattemptedQuestions;
 
-      latestPracticeQuestionTries.push({ ...learningObjectiveObj });
+      latestPracticeQuestionTriesLoWise.push({ ...learningObjectiveObj });
     });
   }
-  latestPracticeQuestionTries = sortBy(latestPracticeQuestionTries, 'learningObjectiveOrder').map((practiceTries, index) => ({
+  latestPracticeQuestionTriesLoWise = sortBy(latestPracticeQuestionTriesLoWise, 'learningObjectiveOrder').map((practiceTries, index) => ({
     ...practiceTries,
     learningObjectiveOrder: index + 1,
   }));
 
-  const practiceQuestionsCount = latestPracticeQuestionTriesInSession.totalQuestions;
-  const practiceQuestionsAttemptedCount = latestPracticeQuestionTriesInSession.totalAttemptedQuestions;
+  const practiceQuestionsCount = latestPracticeQuestionTriesSessionWise.totalQuestions;
+  const practiceQuestionsAttemptedCount = latestPracticeQuestionTriesSessionWise.totalAttemptedQuestions;
 
-  const practiceQuestionsAttemptedScore = calculatePercentage(practiceQuestionsAttemptedCount, practiceQuestionsCount);
+  const practiceQuestionsAttemptedPercent = calculatePercentage(practiceQuestionsAttemptedCount, practiceQuestionsCount);
 
-  const codingAssignmentsAttemptedScore = calculatePercentage(codingAssignmentsAttemptedCount, codingAssignmentsCount);
-  const practicesAttemptedScore = calculatePercentage(practicesAttemptedCount, practicesCount);
+  const codingAssignmentsAttemptedPercent = calculatePercentage(codingAssignmentsAttemptedCount, codingAssignmentsCount);
+  const practicesAttemptedPercent = calculatePercentage(practicesAttemptedCount, practicesCount);
 
   let totalAttemptedQuestionScores = 0;
   get(componentCountsMeta, 'practiceQuestionTriesLogs', []).forEach((practiceTries) => {
@@ -686,23 +686,23 @@ const getClassworkComponentScore = (componentCountsMeta, learningObjectives = []
     if (get(practiceTries, 'secondTry')) totalAttemptedQuestionScores += 2;
     if (get(practiceTries, 'thirdOrMoreTry')) totalAttemptedQuestionScores += 3;
   });
-  const averageCorrectPracticeQuestionTries = (totalAttemptedQuestionScores !== 0 && allPracticeQuestions.length !== 0) ? Number((totalAttemptedQuestionScores / allPracticeQuestions.length).toFixed(2)) : 0;
+  const averageCorrectPracticeQuestionTries = (totalAttemptedQuestionScores !== 0 && practiceQuestionsAttemptedCount !== 0) ? Number((totalAttemptedQuestionScores / practiceQuestionsAttemptedCount).toFixed(2)) : 0;
 
   return {
     videosCount,
     videosVisitedCount,
-    videosVisitedScore,
+    videosVisitedPercent,
     practiceQuestionsCount,
     practiceQuestionsAttemptedCount,
-    practiceQuestionsAttemptedScore,
+    practiceQuestionsAttemptedPercent,
     codingAssignmentsCount,
     codingAssignmentsAttemptedCount,
-    codingAssignmentsAttemptedScore,
+    codingAssignmentsAttemptedPercent,
     practicesCount,
     practicesAttemptedCount,
-    practicesAttemptedScore,
-    latestPracticeQuestionTries,
-    latestPracticeQuestionTriesInSession: [latestPracticeQuestionTriesInSession],
+    practicesAttemptedPercent,
+    latestPracticeQuestionTriesLoWise,
+    latestPracticeQuestionTriesSessionWise: [latestPracticeQuestionTriesSessionWise],
     averageCorrectPracticeQuestionTries,
   };
 };
@@ -948,9 +948,9 @@ const batchAndUpdateSessionRelatedInfo = async (batchedSessionDump) => {
     if (userSessionReportUpdateDocs && userSessionReportUpdateDocs.length) {
       for (const userSessionReportUpdateDoc of userSessionReportUpdateDocs) {
         const { exists, id: docId, ...restDoc } = userSessionReportUpdateDoc;
-        // if (exists) {
-        //   await userSessionReportController.Model.update(restDoc, { where: { id: docId } });
-        // } else await userSessionReportController.Model.create({ ...restDoc, id: docId });
+        if (exists) {
+          await userSessionReportController.Model.update(restDoc, { where: { id: docId } });
+        } else await userSessionReportController.Model.create({ ...restDoc, id: docId });
       }
 
       // delete record from sql dump
@@ -961,7 +961,7 @@ const batchAndUpdateSessionRelatedInfo = async (batchedSessionDump) => {
         }
       });
       log(`Deleting Previous Dumps, Total Count: ${idsToDelete.size}`);
-      // await userSessionDumpController.Model.destroy({ where: { id: Array.from(idsToDelete) } });
+      await userSessionDumpController.Model.destroy({ where: { id: Array.from(idsToDelete) } });
     }
   }
 };
@@ -1058,11 +1058,7 @@ const batchAndUpdateUserSessionReports = async () => {
             componentCountsMeta = componentCounts;
           });
         const classworkComponentScores = getClassworkComponentScore(componentCountsMeta, learningObjectives);
-        console.log({
-          classworkComponentScores: JSON.stringify(classworkComponentScores),
-          userId: baseDocument.userId,
-          topicTitle: baseDocument.sessionTitle,
-        });
+
         const classworkScore = componentCountsMeta.pQ.totalCount !== 0 ? ((
           ((componentCountsMeta.pQ.firstTryCount * 10) + (componentCountsMeta.pQ.secondTryCount * 8) + (componentCountsMeta.pQ.threeOrMoreTryCount * 6)) / (componentCountsMeta.pQ.totalCount * 10)
         ) * 100) : 0;
@@ -1085,11 +1081,11 @@ const batchAndUpdateUserSessionReports = async () => {
       queryMessageString += `Rows Affected: ${userSessionReportUpdateDoc.length || 0}`;
 
       if (userSessionReportUpdateDoc && userSessionReportUpdateDoc.length) {
-        // await userSessionReportController.Model.bulkCreate(userSessionReportUpdateDoc, { updateOnDuplicate: sqlColumnsToUpdate }).then((response) => {
-        //   log(`Session Report Updated, Total Count: ${(response || []).length}`);
-        // }).catch((error) => {
-        //   throw new Error(error);
-        // });
+        await userSessionReportController.Model.bulkCreate(userSessionReportUpdateDoc, { updateOnDuplicate: sqlColumnsToUpdate }).then((response) => {
+          log(`Session Report Updated, Total Count: ${(response || []).length}`);
+        }).catch((error) => {
+          throw new Error(error);
+        });
       }
       // delete record from sql dump
       const idsToDelete = new Set();
@@ -1099,7 +1095,7 @@ const batchAndUpdateUserSessionReports = async () => {
         }
       });
       log(`Deleting Previous Dumps, Total Count: ${idsToDelete.size}`);
-      // await userSessionDumpController.Model.destroy({ where: { id: Array.from(idsToDelete) } });
+      await userSessionDumpController.Model.destroy({ where: { id: Array.from(idsToDelete) } });
       queryMessageString += ` | Rows Deleted: ${idsToDelete.size}`;
     }
     if (batchedSessionDump && Object.keys(batchedSessionDump).length) {
