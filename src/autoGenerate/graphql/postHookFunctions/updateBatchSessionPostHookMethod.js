@@ -265,9 +265,9 @@ const attendanceList = (attendance = []) => {
   const pushStudents = [];
   // eslint-disable-next-line no-unused-expressions
   attendance.length && attendance.forEach((studentElem) => {
-    if (studentElem.id) {
+    if (get(studentElem, 'student.typeId')) {
       const obj = {
-        studentConnectId: studentElem.id,
+        studentConnectId: get(studentElem, 'student.typeId'),
         isPresent: false,
       };
       pushStudents.push(obj);
