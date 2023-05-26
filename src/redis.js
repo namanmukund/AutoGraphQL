@@ -16,7 +16,7 @@ redisClient
   //   log('Redis client disconnected!');
   // })
   .on('connect', () => {
-    if (!process.env.SECONDARY_APPLICATION_NAME) log('Redis client connected');
+    if (!process.env.SECONDARY_APPLICATION_NAME) log('Redis client connected', 'status');
   });
 
 export default redisClient;

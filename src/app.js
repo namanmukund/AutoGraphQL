@@ -223,9 +223,9 @@ const server = new ApolloServer({
 server.applyMiddleware({ app });
 
 httpServer.listen(port, '0.0.0.0', () => {
-  log(`End time:${new Date()}`);
-  log(`Server ready at http://0.0.0.0:${port}${server.graphqlPath}`);
-  log(`Subscriptions ready at ws://0.0.0.0:${port}${server.subscriptionsPath}`);
+  log(`End time:${new Date()}`, 'status');
+  log(`Server ready at http://0.0.0.0:${port}${server.graphqlPath}`, 'status');
+  log(`Subscriptions ready at ws://0.0.0.0:${port}${server.subscriptionsPath}`, 'status');
 });
 
 export default app;

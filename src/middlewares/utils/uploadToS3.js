@@ -16,29 +16,18 @@ const uploadToS3 = (Key, Body, fileMimeType = null) => new Promise((resolve, rej
   ) {
     S3ContentType.ContentType = fileMimeType;
   }
-
-  log(`AWS CONFIG -> ${JSON.stringify(awsConfig, 0, 2)}`);
-  log(`S3 PutObject -> ${JSON.stringify({
-    Bucket: s3Bucket,
-    ACL: awsConfig.ACL.publicReadWrite,
-    Key,
-    ...S3ContentType,
-  }, 0, 2)}`);
-
   S3.putObject({
     Bucket: s3Bucket,
     ACL: awsConfig.ACL.publicReadWrite,
     Key,
     Body,
     ...S3ContentType,
-  }, (err, data) => {
+  }, (err) => {
     if (err) {
       log(err, `Error uploading '${Key}'!`);
-      log(`File Error ${JSON.stringify(err, 0, 2)}`);
       reject(err);
     } else {
       log(`Successfully uploaded '${Key}'!`);
-      log(`File Response ${JSON.stringify(data, 0, 2)}`);
       resolve();
     }
   });
