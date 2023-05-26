@@ -948,9 +948,9 @@ const batchAndUpdateSessionRelatedInfo = async (batchedSessionDump) => {
     if (userSessionReportUpdateDocs && userSessionReportUpdateDocs.length) {
       for (const userSessionReportUpdateDoc of userSessionReportUpdateDocs) {
         const { exists, id: docId, ...restDoc } = userSessionReportUpdateDoc;
-        if (exists) {
-          await userSessionReportController.Model.update(restDoc, { where: { id: docId } });
-        } else await userSessionReportController.Model.create({ ...restDoc, id: docId });
+        // if (exists) {
+        //   await userSessionReportController.Model.update(restDoc, { where: { id: docId } });
+        // } else await userSessionReportController.Model.create({ ...restDoc, id: docId });
       }
 
       // delete record from sql dump
@@ -961,7 +961,7 @@ const batchAndUpdateSessionRelatedInfo = async (batchedSessionDump) => {
         }
       });
       log(`Deleting Previous Dumps, Total Count: ${idsToDelete.size}`);
-      await userSessionDumpController.Model.destroy({ where: { id: Array.from(idsToDelete) } });
+      // await userSessionDumpController.Model.destroy({ where: { id: Array.from(idsToDelete) } });
     }
   }
 };
@@ -1058,6 +1058,11 @@ const batchAndUpdateUserSessionReports = async () => {
             componentCountsMeta = componentCounts;
           });
         const classworkComponentScores = getClassworkComponentScore(componentCountsMeta, learningObjectives);
+        console.log({
+          classworkComponentScores: JSON.stringify(classworkComponentScores),
+          userId: baseDocument.userId,
+          topicTitle: baseDocument.sessionTitle,
+        });
         const classworkScore = componentCountsMeta.pQ.totalCount !== 0 ? ((
           ((componentCountsMeta.pQ.firstTryCount * 10) + (componentCountsMeta.pQ.secondTryCount * 8) + (componentCountsMeta.pQ.threeOrMoreTryCount * 6)) / (componentCountsMeta.pQ.totalCount * 10)
         ) * 100) : 0;
@@ -1080,11 +1085,11 @@ const batchAndUpdateUserSessionReports = async () => {
       queryMessageString += `Rows Affected: ${userSessionReportUpdateDoc.length || 0}`;
 
       if (userSessionReportUpdateDoc && userSessionReportUpdateDoc.length) {
-        await userSessionReportController.Model.bulkCreate(userSessionReportUpdateDoc, { updateOnDuplicate: sqlColumnsToUpdate }).then((response) => {
-          log(`Session Report Updated, Total Count: ${(response || []).length}`);
-        }).catch((error) => {
-          throw new Error(error);
-        });
+        // await userSessionReportController.Model.bulkCreate(userSessionReportUpdateDoc, { updateOnDuplicate: sqlColumnsToUpdate }).then((response) => {
+        //   log(`Session Report Updated, Total Count: ${(response || []).length}`);
+        // }).catch((error) => {
+        //   throw new Error(error);
+        // });
       }
       // delete record from sql dump
       const idsToDelete = new Set();
@@ -1094,7 +1099,7 @@ const batchAndUpdateUserSessionReports = async () => {
         }
       });
       log(`Deleting Previous Dumps, Total Count: ${idsToDelete.size}`);
-      await userSessionDumpController.Model.destroy({ where: { id: Array.from(idsToDelete) } });
+      // await userSessionDumpController.Model.destroy({ where: { id: Array.from(idsToDelete) } });
       queryMessageString += ` | Rows Deleted: ${idsToDelete.size}`;
     }
     if (batchedSessionDump && Object.keys(batchedSessionDump).length) {

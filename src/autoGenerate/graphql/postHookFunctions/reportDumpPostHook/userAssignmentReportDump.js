@@ -12,11 +12,12 @@ const userAssignmentReportDump = async (input, mutationOrQueryName, assignmentsD
   get(input, 'assignment', []).forEach((question) => {
     const assignmentQuestion = assignmentsData.find((assignmentData) => get(assignmentData, 'id') === get(question, 'assignmentQuestion.typeId'));
     if (assignmentQuestion) {
+      const code = get(question, 'userAnswerCodeSnippet') && get(question, 'userAnswerCodeSnippet') !== 'null' ? get(question, 'userAnswerCodeSnippet') : '';
       assignmentQuestions.push({
         codingAssignmentId: get(question, 'assignmentQuestion.typeId'),
-        attempted: !!get(question, 'userAnswerCodeSnippet'),
+        attempted: !!code,
         isHomework: get(assignmentQuestion, 'isHomework', false),
-        code: get(question, 'userAnswerCodeSnippet') && get(question, 'userAnswerCodeSnippet') !== 'null' ? get(question, 'userAnswerCodeSnippet') : '',
+        code,
       });
     }
   });
