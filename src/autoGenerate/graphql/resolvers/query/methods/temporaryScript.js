@@ -1,4 +1,5 @@
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+// import generateRandomPasswordForStudents from '../scriptMethods/generateRandomPasswordForStudents';
 // import findDeleteAndCreateDuplicateUsers from '../scriptMethods/findDeleteAndCreateDuplicateUsers';
 // import updateStudentAndClassesOfSchoolsForAcademicYear from '../scriptMethods/updateStudentAndClassesOfSchoolsForAcademicYear';
 // import updateBatchDetailsForReports from '../scriptMethods/updateBatchDetailsForReports';
@@ -116,6 +117,7 @@ const temporaryScript = (async (root, params, context) => {
   // await updateStudentAndClassesOfSchoolsForAcademicYear(context);
   // await findDeleteAndCreateDuplicateUsers(context);
   // await updateTopicContentStatus();
+  // await generateRandomPasswordForStudents(context);
   return {
     result: true,
   };

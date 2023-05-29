@@ -10,7 +10,7 @@ const appInheritanceCheck = (
   const inheritedApplicationsArray = inheritedApplications ? inheritedApplications.split(',') : [];
 
   if (inheritedApplicationsArray.length <= 0) {
-    log(`Application ${application} is not inheriting from any other application`, 'info');
+    log(`Application ${application} is not inheriting from any other application`, 'status');
     return true;
   }
 

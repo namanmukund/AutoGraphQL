@@ -155,7 +155,7 @@ const createMongooseModelsFromSchema = (allModelsSchema, typesSchema) => {
     const modelDatabaseType = models[model].databaseType;
     // Re-assigning createdModel to models map to flat model structure.
     models[model] = models[model].createdModel;
-    log(`${capitalize(modelDatabaseType)} Model generated for: ${model}`);
+    log(`${capitalize(modelDatabaseType)} Model generated for: ${model}`, 'status');
   });
 
   /**
@@ -170,7 +170,7 @@ const createMongooseModelsFromSchema = (allModelsSchema, typesSchema) => {
   });
 
   Object.keys(additionalModels).forEach((model) => {
-    log(`PG SQL Model generated for: ${model}`);
+    log(`PG SQL Model generated for: ${model}`, 'status');
   });
 
   return { ...models, ...additionalModels };

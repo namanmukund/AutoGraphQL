@@ -44,8 +44,8 @@ const saveUserTokenInDatabase = (user, token) => {
   return true;
 };
 
-const createUserTokenTypeData = (savedUser, authentication, toPhone, isSignUp = false) => {
-  const token = createToken(savedUser, authentication, toPhone, '', isSignUp);
+const createUserTokenTypeData = (savedUser, authentication, toPhone, isSignUp = false, isLiveClass = false) => {
+  const token = createToken(savedUser, authentication, toPhone, '', isSignUp, isLiveClass);
 
   saveUserTokenInDatabase(toObject(savedUser), token);
 
