@@ -14,7 +14,7 @@ import { currentModelName } from '../../../src/autoGenerate/utils/differentVersi
 
 const SequelizeOperation = Sequelize.Op;
 
-const sqlColumnsToUpdate = ['userId', 'userName', 'userRole', 'studentGrade', 'studentSection', 'classroomId', 'classroomTitle', 'schoolId', 'schoolName', 'topicId', 'sessionId', 'sessionTitle', 'sessionType', 'courseId', 'courseTitle', 'courseCategory', 'sessionStart', 'sessionEnd', 'sessionCreationDate', 'sessionUpdationAt', 'sessionDuration', 'sessionStatus', 'studentAttendance', 'classroomStudentsCount', 'teacherTaughtName', 'teacherTaughtId', 'sessionClassworkComponents', 'sessionHomeworkComponents', 'classworkVisited', 'classworkAttempted', 'homeworkVisited', 'homeworkAttempted', 'classworkScore', 'homeworkScore', 'proficiency', 'homeworkExists', 'videoComponentLog', 'pqComponentLog', 'classworkAssignmentLog', 'homeworkAssignmentLog', 'classworkPracticeLog', 'homeworkPracticeLog', 'homeworkQuizLog', 'previousLogs'];
+const sqlColumnsToUpdate = ['userId', 'userName', 'userRole', 'studentGrade', 'studentSection', 'classroomId', 'classroomTitle', 'schoolId', 'schoolName', 'topicId', 'sessionId', 'sessionTitle', 'sessionType', 'courseId', 'courseTitle', 'courseCategory', 'sessionStart', 'sessionEnd', 'sessionCreationDate', 'sessionUpdationAt', 'sessionDuration', 'sessionStatus', 'studentAttendance', 'classroomStudentsCount', 'teacherTaughtName', 'teacherTaughtId', 'sessionClassworkComponents', 'sessionHomeworkComponents', 'classworkVisited', 'classworkAttempted', 'homeworkVisited', 'homeworkAttempted', 'classworkScore', 'homeworkScore', 'proficiency', 'homeworkExists', 'videoComponentLog', 'pqComponentLog', 'classworkAssignmentLog', 'homeworkAssignmentLog', 'classworkPracticeLog', 'homeworkPracticeLog', 'homeworkQuizLog', 'previousLogs', 'videosCount', 'videosVisitedCount', 'videosVisitedPercent', 'practiceQuestionsCount', 'practiceQuestionsAttemptedCount', 'practiceQuestionsAttemptedPercent', 'codingAssignmentsCount', 'codingAssignmentsAttemptedCount', 'codingAssignmentsAttemptedPercent', 'practicesCount', 'practicesAttemptedCount', 'practicesAttemptedPercent', 'latestPracticeQuestionTriesLoWise', 'latestPracticeQuestionTriesSessionWise', 'averageCorrectPracticeQuestionTries'];
 
 const calculatePercentage = (value, total) => {
   if (typeof value !== 'number' || typeof total !== 'number' || total === 0 || value === 0) {
@@ -793,9 +793,7 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
 
       if (sortedComponentDumps && sortedComponentDumps.length) {
         if (isHomework) componentCounts.totalHomeworkVisitedCount += 1;
-        else {
-          componentCounts.totalClassworkVisitedCount += 1;
-        }
+        else componentCounts.totalClassworkVisitedCount += 1;
 
         const filteredPracticeDumps = sortedComponentDumps.filter((doc) => (get(doc, 'componentId') === get(componentRule, 'blockBasedProject.typeId')));
         const studentAttemptedLogs = filteredPracticeDumps.filter((doc) => (doc.eventType === 'update'));
