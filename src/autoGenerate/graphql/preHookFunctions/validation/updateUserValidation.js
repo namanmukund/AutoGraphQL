@@ -25,6 +25,11 @@ const fetchUser = async (id, context) => {
         campaign {
           type
         }
+        parentProfile{
+          children{
+            id
+          }
+        }
         studentProfile {
           batch {
             type
@@ -148,7 +153,7 @@ const updateUserValidation = async (params, context, mutationOrQueryName) => {
   context.isPreSalesAuditFromInput = isPreSalesAuditFromInput;
   if (password) {
     const currentUserRole = get(currentUser, 'role');
-    if (!allowedRoles.includes(currentUserRole) && userId !== get(currentUser, 'id')) {
+    if (!allowedRoles.includes(currentUserRole) && (get(user, 'parentProfile.children') && get(user, 'parentProfile.children').includes(userId))) {
       throw new InsufficientPermissionError();
     }
     const passwordObj = getUserPasswordObject(password, false);
