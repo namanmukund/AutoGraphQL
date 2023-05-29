@@ -14,7 +14,15 @@ import { currentModelName } from '../../../src/autoGenerate/utils/differentVersi
 
 const SequelizeOperation = Sequelize.Op;
 
-const sqlColumnsToUpdate = ['userId', 'userName', 'userRole', 'studentGrade', 'studentSection', 'classroomId', 'classroomTitle', 'schoolId', 'schoolName', 'topicId', 'sessionId', 'sessionTitle', 'sessionType', 'courseId', 'courseTitle', 'courseCategory', 'sessionStart', 'sessionEnd', 'sessionCreationDate', 'sessionUpdationAt', 'sessionDuration', 'sessionStatus', 'studentAttendance', 'classroomStudentsCount', 'teacherTaughtName', 'teacherTaughtId', 'sessionClassworkComponents', 'sessionHomeworkComponents', 'classworkVisited', 'classworkAttempted', 'homeworkVisited', 'homeworkAttempted', 'classworkScore', 'homeworkScore', 'proficiency', 'homeworkExists', 'videoComponentLog', 'pqComponentLog', 'classworkAssignmentLog', 'homeworkAssignmentLog', 'classworkPracticeLog', 'homeworkPracticeLog', 'homeworkQuizLog', 'previousLogs'];
+const sqlColumnsToUpdate = ['userId', 'userName', 'userRole', 'studentGrade', 'studentSection', 'classroomId', 'classroomTitle', 'schoolId', 'schoolName', 'topicId', 'sessionId', 'sessionTitle', 'sessionType', 'courseId', 'courseTitle', 'courseCategory', 'sessionStart', 'sessionEnd', 'sessionCreationDate', 'sessionUpdationAt', 'sessionDuration', 'sessionStatus', 'studentAttendance', 'classroomStudentsCount', 'teacherTaughtName', 'teacherTaughtId', 'sessionClassworkComponents', 'sessionHomeworkComponents', 'classworkVisited', 'classworkAttempted', 'homeworkVisited', 'homeworkAttempted', 'classworkScore', 'homeworkScore', 'proficiency', 'homeworkExists', 'videoComponentLog', 'pqComponentLog', 'classworkAssignmentLog', 'homeworkAssignmentLog', 'classworkPracticeLog', 'homeworkPracticeLog', 'homeworkQuizLog', 'previousLogs', 'videosCount', 'videosVisitedCount', 'videosVisitedPercent', 'practiceQuestionsCount', 'practiceQuestionsAttemptedCount', 'practiceQuestionsAttemptedPercent', 'codingAssignmentsCount', 'codingAssignmentsAttemptedCount', 'codingAssignmentsAttemptedPercent', 'practicesCount', 'practicesAttemptedCount', 'practicesAttemptedPercent', 'latestPracticeQuestionTriesLoWise', 'latestPracticeQuestionTriesSessionWise', 'averageCorrectPracticeQuestionTries'];
+
+const calculatePercentage = (value, total) => {
+  if (typeof value !== 'number' || typeof total !== 'number' || total === 0 || value === 0) {
+    return 0;
+  }
+
+  return Number(((value / total) * 100).toFixed(0));
+};
 
 const getBatchedUserSessionDump = (userSessionDumps) => {
   const batchedUserSessionDump = {};
@@ -81,6 +89,8 @@ const getDatabaseControllers = () => {
 
   const batchController = new QueryController('Batch', authentication);
 
+  const learningObjectiveController = new QueryController('LearningObjective', authentication);
+
   const userSessionReportController = new MasterController(currentModelName('UserLevelSessionReport', 'previous'), {
     bypass: true,
   });
@@ -92,6 +102,7 @@ const getDatabaseControllers = () => {
     userController,
     userSessionReportController,
     batchController,
+    learningObjectiveController,
   };
 };
 
@@ -136,7 +147,6 @@ const getAggregationQueries = (documentIdsToFetch) => {
       })
       .getPipeline();
   }
-
   if (documentIdsToFetch.topicIds && Array.from(documentIdsToFetch.topicIds).length) {
     topicAggregationQuery = new AggregationBuilder('Topic')
       .Match({ id: { $in: Array.from(documentIdsToFetch.topicIds) } })
@@ -185,6 +195,52 @@ const getAggregationQueries = (documentIdsToFetch) => {
   };
 };
 
+const getLearningObjectives = async (topics = [], batchSessions = []) => {
+  const lOIdsToFetch = new Set();
+  const {
+    learningObjectiveController,
+  } = getDatabaseControllers();
+  if (topics && topics.length) {
+    topics.forEach((topic) => {
+      get(topic, 'topicComponentRule', []).forEach((componentRule) => {
+        if (get(componentRule, 'componentName') === topicComponents.learningObjective
+            && get(componentRule, 'learningObjective.typeId')) {
+          lOIdsToFetch.add(get(componentRule, 'learningObjective.typeId'));
+        }
+      });
+    });
+  }
+  if (batchSessions && batchSessions.length) {
+    batchSessions.forEach((batchSession) => {
+      get(batchSession, 'topic.topicComponentRule', []).forEach((componentRule) => {
+        if (get(componentRule, 'componentName') === topicComponents.learningObjective
+              && get(componentRule, 'learningObjective.typeId')) {
+          lOIdsToFetch.add(get(componentRule, 'learningObjective.typeId'));
+        }
+      });
+    });
+  }
+  if (lOIdsToFetch && Array.from(lOIdsToFetch).length) {
+    const loAggregationQuery = new AggregationBuilder('LearningObjective')
+      .Match({ id: { $in: Array.from(lOIdsToFetch) } })
+      .Lookup(EqualityPayload('QuestionBank', 'questionBank', 'questionBank.typeId', 'id')).Project({
+        id: 1,
+        order: 1,
+        title: 1,
+        questionBank: {
+          id: 1,
+          order: 1,
+          assessmentType: 1,
+          status: 1,
+        },
+      })
+      .getPipeline();
+    const learningObjectives = await learningObjectiveController.aggregate(loAggregationQuery);
+    return learningObjectives;
+  }
+  return [];
+};
+
 const getAllRequiredDataFromDatabase = async () => {
   // Get all required controllers
   const {
@@ -219,6 +275,7 @@ const getAllRequiredDataFromDatabase = async () => {
     let topics = [];
     let users = [];
     let batches = [];
+    let learningObjectives = [];
     if (batchSessionAggregationQuery.length) batchSessions = await batchSessionController.aggregate(batchSessionAggregationQuery);
     if (topicAggregationQuery.length) topics = await topicController.aggregate(topicAggregationQuery);
     if (userAggregationQuery.length) users = await userController.aggregate(userAggregationQuery);
@@ -244,6 +301,7 @@ const getAllRequiredDataFromDatabase = async () => {
         raw: true,
       });
     }
+    learningObjectives = await getLearningObjectives(topics, batchSessions);
 
     return {
       batchSessions,
@@ -257,6 +315,7 @@ const getAllRequiredDataFromDatabase = async () => {
       userSessionReportController,
       batchedSessionDump,
       batches,
+      learningObjectives,
     };
   }
   return {
@@ -359,8 +418,8 @@ const getBaseDocumentAndCalculatedFields = ({
   const studentAttendance = get(studentAttendanceDoc, 'status') === 'present';
 
   // Calculate Session Duration
-  const sessionStartDate = new Date(get(sessionDetails, 'sessionStartDate'));
-  const sessionEndDate = new Date(get(sessionDetails, 'sessionEndDate'));
+  const sessionStartDate = get(sessionDetails, 'sessionStartDate') ? new Date(get(sessionDetails, 'sessionStartDate')) : '';
+  const sessionEndDate = get(sessionDetails, 'sessionEndDate') ? new Date(get(sessionDetails, 'sessionEndDate')) : '';
 
   const sessionDuration = (get(sessionDetails, 'sessionStartDate') && get(sessionDetails, 'sessionEndDate')) ? Math.abs(sessionStartDate.getTime() - sessionEndDate.getTime()) / 1000 : 0;
 
@@ -439,6 +498,13 @@ const getBaseDocumentAndCalculatedFields = ({
         userRole: userRoleFromBaseDocument,
       });
     }
+  }
+  if (get(sessionDetails, 'sessionStatus') === 'allotted') {
+    // If sessionStatus is allotted, then don`t pass start and end date
+    Object.assign(baseDocument, {
+      sessionStart: '',
+      sessionEnd: '',
+    });
   }
 
   // If userSessionReport already exists, then use the id from it.
@@ -533,12 +599,121 @@ const filterDuplicateComponentDumps = (componentDumps) => {
   return [];
 };
 
-const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, filteredComponentDumps, componentRule, componentCountsMeta) => {
+const getClassworkComponentScore = (componentCountsMeta, learningObjectives = []) => {
+  const {
+    videosCount = 0,
+    videosVisitedCount = 0,
+    codingAssignmentsCount = 0,
+    codingAssignmentsAttemptedCount = 0,
+    practicesCount = 0,
+    practicesAttemptedCount = 0,
+    allPracticeQuestions = [],
+  } = componentCountsMeta;
+  const videosVisitedPercent = calculatePercentage(videosVisitedCount, videosCount);
+  const groupedAllQuestionsWithLo = allPracticeQuestions.reduce((accumulator, currentValue) => {
+    accumulator[get(currentValue, 'learningObjectiveId')] = accumulator[get(currentValue, 'learningObjectiveId')] || [];
+    accumulator[get(currentValue, 'learningObjectiveId')].push(currentValue);
+    return accumulator;
+  }, {});
+
+  const groupedAttemptedQuestionsWithLo = get(componentCountsMeta, 'practiceQuestionTriesLogs', []).reduce((accumulator, currentValue) => {
+    accumulator[get(currentValue, 'learningObjectiveId')] = accumulator[get(currentValue, 'learningObjectiveId')] || [];
+    accumulator[get(currentValue, 'learningObjectiveId')].push(currentValue);
+    return accumulator;
+  }, {});
+
+  let latestPracticeQuestionTriesLoWise = [];
+  const latestPracticeQuestionTriesSessionWise = {
+    totalLearningObjectives: 0,
+    totalQuestions: 0,
+    totalAttemptedQuestions: 0,
+    totalAttemptedQuestionsInFirstTry: 0,
+    totalAttemptedQuestionsInSecondTry: 0,
+    totalAttemptedQuestionsInThreeOrTry: 0,
+    totalUnattemptedQuestions: 0,
+  };
+
+  if (groupedAllQuestionsWithLo && Object.keys(groupedAllQuestionsWithLo).length) {
+    Object.keys(groupedAllQuestionsWithLo).forEach((key) => {
+      const currentLearningObjective = learningObjectives.find((learningObjective) => (get(learningObjective, 'id') === key));
+
+      const totalQuestions = (get(groupedAllQuestionsWithLo, `${key}`, []) || []).length || 0;
+      const totalAttemptedQuestions = (get(groupedAttemptedQuestionsWithLo, `${key}`, []) || []);
+      const totalAttemptedQuestionsInFirstTry = totalAttemptedQuestions.filter((question) => get(question, 'firstTry')).length;
+      const totalAttemptedQuestionsInSecondTry = totalAttemptedQuestions.filter((question) => get(question, 'secondTry')).length;
+      const totalAttemptedQuestionsInThreeOrTry = totalAttemptedQuestions.filter((question) => get(question, 'thirdOrMoreTry')).length;
+      const totalUnattemptedQuestions = (totalQuestions || 0) - ((totalAttemptedQuestions || []).length || 0);
+
+      const learningObjectiveObj = {
+        learningObjectiveId: get(currentLearningObjective, 'id'),
+        learningObjectiveTitle: get(currentLearningObjective, 'title'),
+        learningObjectiveOrder: get(currentLearningObjective, 'order'),
+        totalQuestions,
+        totalAttemptedQuestions: totalAttemptedQuestions.length,
+        totalAttemptedQuestionsInFirstTry,
+        totalAttemptedQuestionsInSecondTry,
+        totalAttemptedQuestionsInThreeOrTry,
+        totalUnattemptedQuestions,
+      };
+
+      latestPracticeQuestionTriesSessionWise.totalLearningObjectives += 1;
+      latestPracticeQuestionTriesSessionWise.totalQuestions += totalQuestions;
+      latestPracticeQuestionTriesSessionWise.totalAttemptedQuestions += totalAttemptedQuestions.length;
+      latestPracticeQuestionTriesSessionWise.totalAttemptedQuestionsInFirstTry += totalAttemptedQuestionsInFirstTry;
+      latestPracticeQuestionTriesSessionWise.totalAttemptedQuestionsInSecondTry += totalAttemptedQuestionsInSecondTry;
+      latestPracticeQuestionTriesSessionWise.totalAttemptedQuestionsInThreeOrTry += totalAttemptedQuestionsInThreeOrTry;
+      latestPracticeQuestionTriesSessionWise.totalUnattemptedQuestions += totalUnattemptedQuestions;
+
+      latestPracticeQuestionTriesLoWise.push({ ...learningObjectiveObj });
+    });
+  }
+  latestPracticeQuestionTriesLoWise = sortBy(latestPracticeQuestionTriesLoWise, 'learningObjectiveOrder').map((practiceTries, index) => ({
+    ...practiceTries,
+    learningObjectiveOrder: index + 1,
+  }));
+
+  const practiceQuestionsCount = latestPracticeQuestionTriesSessionWise.totalQuestions;
+  const practiceQuestionsAttemptedCount = latestPracticeQuestionTriesSessionWise.totalAttemptedQuestions;
+
+  const practiceQuestionsAttemptedPercent = calculatePercentage(practiceQuestionsAttemptedCount, practiceQuestionsCount);
+
+  const codingAssignmentsAttemptedPercent = calculatePercentage(codingAssignmentsAttemptedCount, codingAssignmentsCount);
+  const practicesAttemptedPercent = calculatePercentage(practicesAttemptedCount, practicesCount);
+
+  let totalAttemptedQuestionScores = 0;
+  get(componentCountsMeta, 'practiceQuestionTriesLogs', []).forEach((practiceTries) => {
+    if (get(practiceTries, 'firstTry')) totalAttemptedQuestionScores += 1;
+    if (get(practiceTries, 'secondTry')) totalAttemptedQuestionScores += 2;
+    if (get(practiceTries, 'thirdOrMoreTry')) totalAttemptedQuestionScores += 3;
+  });
+  const averageCorrectPracticeQuestionTries = (totalAttemptedQuestionScores !== 0 && practiceQuestionsAttemptedCount !== 0) ? Number((totalAttemptedQuestionScores / practiceQuestionsAttemptedCount).toFixed(2)) : 0;
+
+  return {
+    videosCount,
+    videosVisitedCount,
+    videosVisitedPercent,
+    practiceQuestionsCount,
+    practiceQuestionsAttemptedCount,
+    practiceQuestionsAttemptedPercent,
+    codingAssignmentsCount,
+    codingAssignmentsAttemptedCount,
+    codingAssignmentsAttemptedPercent,
+    practicesCount,
+    practicesAttemptedCount,
+    practicesAttemptedPercent,
+    latestPracticeQuestionTriesLoWise,
+    latestPracticeQuestionTriesSessionWise: [latestPracticeQuestionTriesSessionWise],
+    averageCorrectPracticeQuestionTries,
+  };
+};
+
+const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, filteredComponentDumps, componentRule, componentCountsMeta, learningObjectives) => {
   const componentCounts = componentCountsMeta;
   const userSessionProgress = calculatedFields;
   switch (componentName) {
     case topicComponents.video: {
       componentCounts.totalClassworkCount += 1;
+      componentCounts.videosCount += 1;
 
       const sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'videoComponentLog', []), componentName);
       const filteredVideoDumps = sortedComponentDumps.filter((doc) => (doc.componentId === get(componentRule, 'video.typeId')));
@@ -548,6 +723,7 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
           userSessionProgress.videoComponentLog.push(...(filteredVideoDumps || []));
           componentCounts.totalClassworkVisitedCount += 1;
           componentCounts.totalClassworkAttemptedCount += 1;
+          componentCounts.videosVisitedCount += 1;
         }
 
         userSessionProgress.videoComponentLog = filterDuplicateComponentDumps(userSessionProgress.videoComponentLog);
@@ -581,6 +757,10 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
             }
             return false;
           });
+          if (!isHomework) {
+            componentCounts.codingAssignmentsCount += filteredAssignments.length;
+            componentCounts.codingAssignmentsAttemptedCount += filteredAssignments.filter((el) => get(el, 'attempted') || get(el, 'code')).length;
+          }
           if (filteredAssignments.some((el) => el.attempted)) {
             if (isHomework) componentCounts.totalHomeworkAttemptedCount += 1;
             else componentCounts.totalClassworkAttemptedCount += 1;
@@ -603,7 +783,10 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
       if (isHomework) {
         componentCounts.totalHomeworkCount += 1;
         userSessionProgress.homeworkExists = true;
-      } else { componentCounts.totalClassworkCount += 1; }
+      } else {
+        componentCounts.totalClassworkCount += 1;
+        componentCounts.practicesCount += 1;
+      }
 
       let sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'classworkPracticeLog', []), componentName);
       if (isHomework) sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'homeworkPracticeLog', []), componentName);
@@ -619,7 +802,10 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
           const isAttempted = get(latestLog, 'link') || get(latestLog, 'savedBlocks') || get(latestLog, 'attachments', []).length;
           if (isAttempted) {
             if (isHomework) componentCounts.totalHomeworkAttemptedCount += 1;
-            else componentCounts.totalClassworkAttemptedCount += 1;
+            else {
+              componentCounts.totalClassworkAttemptedCount += 1;
+              componentCounts.practicesAttemptedCount += 1;
+            }
           }
         }
 
@@ -638,6 +824,23 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
 
       const sortedComponentDumps = getCombinedAndSortedDumps(filteredComponentDumps, get(calculatedFields, 'pqComponentLog', []), componentName);
       const filteredLoDumps = sortedComponentDumps.filter((doc) => (doc.componentId === get(componentRule, 'learningObjective.typeId')));
+
+      const currentLearningObjective = learningObjectives.find((learningObjective) => (get(learningObjective, 'id') === get(componentRule, 'learningObjective.typeId')));
+
+      if (currentLearningObjective && get(currentLearningObjective, 'questionBank', []).length) {
+        const filteredQuestions = get(currentLearningObjective, 'questionBank', []).filter((question) => get(question, 'assessmentType') === 'practiceQuestion'
+          && get(question, 'status') === 'published');
+
+        if (filteredQuestions && filteredQuestions.length) {
+          filteredQuestions.forEach((question, index) => {
+            componentCounts.allPracticeQuestions.push({
+              ...question,
+              questionNo: index + 1,
+              learningObjectiveId: get(currentLearningObjective, 'id'),
+            });
+          });
+        }
+      }
       if (filteredLoDumps && filteredLoDumps.length) {
         componentCounts.totalClassworkVisitedCount += 1;
 
@@ -650,6 +853,12 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
           componentCounts.pQ.threeOrMoreTryCount += get(latestDump, 'threeOrMoreTryCount');
 
           componentCounts.totalClassworkAttemptedCount += 1;
+          (get(latestDump, 'questions', []) || []).forEach((question) => {
+            componentCounts.practiceQuestionTriesLogs.push({
+              ...question,
+              learningObjectiveId: get(currentLearningObjective, 'id'),
+            });
+          });
         }
         userSessionProgress.pqComponentLog.push(...(filteredLoDumps || []));
         userSessionProgress.pqComponentLog = filterDuplicateComponentDumps(userSessionProgress.pqComponentLog);
@@ -680,7 +889,6 @@ const calculateFieldsBasedOnComponentType = (componentName, calculatedFields, fi
     default:
       break;
   }
-
   return { userSessionProgress, componentCounts };
 };
 
@@ -769,6 +977,7 @@ const batchAndUpdateUserSessionReports = async () => {
       userSessionDumps,
       topics,
       batchedSessionDump,
+      learningObjectives,
       ...requiredDBData
     } = await getAllRequiredDataFromDatabase();
 
@@ -811,6 +1020,14 @@ const batchAndUpdateUserSessionReports = async () => {
             secondTryCount: 0,
             threeOrMoreTryCount: 0,
           },
+          videosCount: 0,
+          videosVisitedCount: 0,
+          codingAssignmentsCount: 0,
+          codingAssignmentsAttemptedCount: 0,
+          practicesCount: 0,
+          practicesAttemptedCount: 0,
+          practiceQuestionTriesLogs: [],
+          allPracticeQuestions: [],
         };
         // Iterating over session's component rules to calculate progress
         let sessionComponentRule = get(sessionDetails, 'topic.topicComponentRule');
@@ -832,11 +1049,13 @@ const batchAndUpdateUserSessionReports = async () => {
               filteredComponentDumps,
               componentRule,
               componentCountsMeta,
+              learningObjectives,
             );
 
             calculatedFields = userSessionProgress;
             componentCountsMeta = componentCounts;
           });
+        const classworkComponentScores = getClassworkComponentScore(componentCountsMeta, learningObjectives);
 
         const classworkScore = componentCountsMeta.pQ.totalCount !== 0 ? ((
           ((componentCountsMeta.pQ.firstTryCount * 10) + (componentCountsMeta.pQ.secondTryCount * 8) + (componentCountsMeta.pQ.threeOrMoreTryCount * 6)) / (componentCountsMeta.pQ.totalCount * 10)
@@ -853,7 +1072,7 @@ const batchAndUpdateUserSessionReports = async () => {
 
         calculatedFields.proficiency = Number(((0.5 * (calculatedFields.classworkScore || 0)) + (0.5 * (calculatedFields.homeworkScore || 0))).toFixed(0));
 
-        userSessionReportUpdateDoc.push({ ...baseDocument, ...calculatedFields });
+        userSessionReportUpdateDoc.push({ ...baseDocument, ...calculatedFields, ...classworkComponentScores });
       });
       // Add or Update record in PG SQL
       log(`Session Report Built: ${userSessionReportUpdateDoc.length || 0}`);

@@ -19,7 +19,7 @@ const userPracticeQuestionReportDump = async (input, mutationOrQueryName, learni
       secondTryCount: get(input, 'secondTryCount'),
       threeOrMoreTryCount: get(input, 'threeOrMoreTryCount'),
       questions: get(input, 'detailedReport', []).map((report) => ({
-        questionId: get(report, 'question.id'),
+        questionId: get(report, 'question.id') || get(report, 'question.typeId'),
         firstTry: get(report, 'firstTry', false),
         secondTry: get(report, 'secondTry', false),
         thirdOrMoreTry: get(report, 'thirdOrMoreTry', false),
