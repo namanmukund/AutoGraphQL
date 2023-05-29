@@ -1,4 +1,3 @@
-import batchAndUpdateUserSessionReports from '../../../../../../utils/scheduleJobs/jobs/batchAndUpdateUserSessionReports';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 // import generateRandomPasswordForStudents from '../scriptMethods/generateRandomPasswordForStudents';
 // import findDeleteAndCreateDuplicateUsers from '../scriptMethods/findDeleteAndCreateDuplicateUsers';
@@ -119,7 +118,6 @@ const temporaryScript = (async (root, params, context) => {
   // await findDeleteAndCreateDuplicateUsers(context);
   // await updateTopicContentStatus();
   // await generateRandomPasswordForStudents(context);
-  await batchAndUpdateUserSessionReports();
   return {
     result: true,
   };
