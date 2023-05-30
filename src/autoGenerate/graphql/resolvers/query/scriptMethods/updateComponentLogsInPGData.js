@@ -182,11 +182,18 @@ const updateComponentLogsInPGData = async (context) => {
               break;
             case 'assignment':
               if (classworkAssignmentLog && classworkAssignmentLog.length) {
+                const newClassworkAssignmentLogData = sortBy([...classworkAssignmentLog], 'mongoDocUpdatedAt');
+                let totalAssignments = [];
+                if (newClassworkAssignmentLogData.length) {
+                  const latestAssignmentLogData = newClassworkAssignmentLogData[newClassworkAssignmentLogData.length - 1];
+                  if (latestAssignmentLogData) {
+                    totalAssignments = get(latestAssignmentLogData, 'recordRawDump', []).filter((el) => !get(el, 'isHomework'));
+                    componentCountsMeta.codingAssignmentsCount += (totalAssignments || []).length;
+                  }
+                }
                 const newClassworkAssignmentLog = sortBy([...classworkAssignmentLog], 'mongoDocUpdatedAt').filter((doc) => (doc.eventType === 'update'));
                 const latestAssignmentLog = newClassworkAssignmentLog.length ? newClassworkAssignmentLog[newClassworkAssignmentLog.length - 1] : null;
                 if (latestAssignmentLog) {
-                  const totalAssignments = get(latestAssignmentLog, 'recordRawDump', []).filter((el) => !get(el, 'isHomework'));
-                  componentCountsMeta.codingAssignmentsCount += (totalAssignments || []).length;
                   componentCountsMeta.codingAssignmentsAttemptedCount += (totalAssignments || []).filter((el) => get(el, 'code')).length;
                 }
               }
