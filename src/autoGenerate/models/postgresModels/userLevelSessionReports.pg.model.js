@@ -72,6 +72,10 @@ const UserLevelSessionReport = sequelize.define(
     practicesCount: { type: DataTypes.INTEGER, allowNull: true },
     practicesAttemptedCount: { type: DataTypes.INTEGER, allowNull: true },
     practicesAttemptedPercent: { type: DataTypes.INTEGER, allowNull: true },
+    sessionResumeCount: { type: DataTypes.INTEGER, allowNull: true },
+    sessionRetakeCount: { type: DataTypes.INTEGER, allowNull: true },
+    subSessionsLog: { type: DataTypes.ARRAY(DataTypes.JSONB) },
+    totalTimeSpentInSession: { type: DataTypes.INTEGER, allowNull: true },
   },
   {
     sequelize,

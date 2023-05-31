@@ -1,3 +1,4 @@
+// import batchAndUpdateUserSessionReports from '../../../../../../utils/scheduleJobs/jobs/batchAndUpdateUserSessionReports';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
 // import updateComponentLogsInPGData from '../scriptMethods/updateComponentLogsInPGData';
 // import generateRandomPasswordForStudents from '../scriptMethods/generateRandomPasswordForStudents';
@@ -120,6 +121,7 @@ const temporaryScript = (async (root, params, context) => {
   // await updateTopicContentStatus();
   // await generateRandomPasswordForStudents(context);
   // await updateComponentLogsInPGData(context);
+  // await batchAndUpdateUserSessionReports();
   return {
     result: true,
   };

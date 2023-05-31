@@ -14,7 +14,7 @@ import { currentModelName } from '../../../src/autoGenerate/utils/differentVersi
 
 const SequelizeOperation = Sequelize.Op;
 
-const sqlColumnsToUpdate = ['userId', 'userName', 'userRole', 'studentGrade', 'studentSection', 'classroomId', 'classroomTitle', 'schoolId', 'schoolName', 'topicId', 'sessionId', 'sessionTitle', 'sessionType', 'courseId', 'courseTitle', 'courseCategory', 'sessionStart', 'sessionEnd', 'sessionCreationDate', 'sessionUpdationAt', 'sessionDuration', 'sessionStatus', 'studentAttendance', 'classroomStudentsCount', 'teacherTaughtName', 'teacherTaughtId', 'sessionClassworkComponents', 'sessionHomeworkComponents', 'classworkVisited', 'classworkAttempted', 'homeworkVisited', 'homeworkAttempted', 'classworkScore', 'homeworkScore', 'proficiency', 'homeworkExists', 'videoComponentLog', 'pqComponentLog', 'classworkAssignmentLog', 'homeworkAssignmentLog', 'classworkPracticeLog', 'homeworkPracticeLog', 'homeworkQuizLog', 'previousLogs', 'videosCount', 'videosVisitedCount', 'videosVisitedPercent', 'practiceQuestionsCount', 'practiceQuestionsAttemptedCount', 'practiceQuestionsAttemptedPercent', 'codingAssignmentsCount', 'codingAssignmentsAttemptedCount', 'codingAssignmentsAttemptedPercent', 'practicesCount', 'practicesAttemptedCount', 'practicesAttemptedPercent', 'latestPracticeQuestionTriesLoWise', 'latestPracticeQuestionTriesSessionWise', 'averageCorrectPracticeQuestionTries'];
+const sqlColumnsToUpdate = ['userId', 'userName', 'userRole', 'studentGrade', 'studentSection', 'classroomId', 'classroomTitle', 'schoolId', 'schoolName', 'topicId', 'sessionId', 'sessionTitle', 'sessionType', 'courseId', 'courseTitle', 'courseCategory', 'sessionStart', 'sessionEnd', 'sessionCreationDate', 'sessionUpdationAt', 'sessionDuration', 'sessionStatus', 'studentAttendance', 'classroomStudentsCount', 'teacherTaughtName', 'teacherTaughtId', 'sessionClassworkComponents', 'sessionHomeworkComponents', 'classworkVisited', 'classworkAttempted', 'homeworkVisited', 'homeworkAttempted', 'classworkScore', 'homeworkScore', 'proficiency', 'homeworkExists', 'videoComponentLog', 'pqComponentLog', 'classworkAssignmentLog', 'homeworkAssignmentLog', 'classworkPracticeLog', 'homeworkPracticeLog', 'homeworkQuizLog', 'previousLogs', 'videosCount', 'videosVisitedCount', 'videosVisitedPercent', 'practiceQuestionsCount', 'practiceQuestionsAttemptedCount', 'practiceQuestionsAttemptedPercent', 'codingAssignmentsCount', 'codingAssignmentsAttemptedCount', 'codingAssignmentsAttemptedPercent', 'practicesCount', 'practicesAttemptedCount', 'practicesAttemptedPercent', 'latestPracticeQuestionTriesLoWise', 'latestPracticeQuestionTriesSessionWise', 'averageCorrectPracticeQuestionTries', 'sessionResumeCount', 'sessionRetakeCount', 'subSessionsLog', 'totalTimeSpentInSession'];
 
 const calculatePercentage = (value, total) => {
   if (typeof value !== 'number' || typeof total !== 'number' || total === 0 || value === 0) {
@@ -133,6 +133,7 @@ const getAggregationQueries = (documentIdsToFetch) => {
               id: 1, classroomTitle: 1, code: 1, school: ArrayElemAt('$school', 0), allottedMentor: ArrayElemAt('$allottedMentor', 0), createdAt: 1, updatedAt: 1, isTeacherTraining: 1,
             }),
         }))
+      .Lookup(EqualityPayload('BatchSubSession', 'subSessions', 'subSessions.typeId', 'id'))
       .Project({
         id: 1,
         sessionStartDate: 1,
@@ -144,6 +145,17 @@ const getAggregationQueries = (documentIdsToFetch) => {
         course: ArrayElemAt('$course', 0),
         batch: ArrayElemAt('$batch', 0),
         topic: ArrayElemAt('$topic', 0),
+        subSessions: {
+          id: 1,
+          sessionStartDate: 1,
+          sessionEndDate: 1,
+          duration: 1,
+          type: 1,
+          subType: 1,
+          sessionStatus: 1,
+          attendance: 1,
+          createdAt: 1,
+        },
       })
       .getPipeline();
   }
@@ -502,6 +514,27 @@ const getBaseDocumentAndCalculatedFields = ({
         userRole: userRoleFromBaseDocument,
       });
     }
+  }
+
+  if (userRole === 'Teacher' && sessionDetails) {
+    const batchSubSessions = (get(sessionDetails, 'subSessions', []) || []);
+    const sessionResumeCount = batchSubSessions.filter((subSession) => get(subSession, 'subType') === 'resume').length;
+    const sessionRetakeCount = batchSubSessions.filter((subSession) => get(subSession, 'type') === 'retake').length;
+    const subSessionsLog = sortBy(batchSubSessions, 'createdAt').map((subSession, index) => ({
+      subSessionOrder: index + 1,
+      subSessionId: get(subSession, 'id'),
+      eventType: get(subSession, 'type'),
+      eventSubType: get(subSession, 'subType'),
+      dateTime: get(subSession, 'createdAt'),
+      subSessionDuration: get(subSession, 'duration'),
+    }));
+    let totalTimeSpentInSession = 0;
+    subSessionsLog.forEach((subSession) => {
+      totalTimeSpentInSession += get(subSession, 'duration') || 0;
+    });
+    Object.assign(baseDocument, {
+      sessionResumeCount, sessionRetakeCount, subSessionsLog, totalTimeSpentInSession,
+    });
   }
 
   // If userSessionReport already exists, then use the id from it.
