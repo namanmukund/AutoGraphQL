@@ -530,7 +530,7 @@ const getBaseDocumentAndCalculatedFields = ({
     }));
     let totalTimeSpentInSession = 0;
     subSessionsLog.forEach((subSession) => {
-      totalTimeSpentInSession += get(subSession, 'duration') || 0;
+      totalTimeSpentInSession += get(subSession, 'subSessionDuration') || 0;
     });
     Object.assign(baseDocument, {
       sessionResumeCount, sessionRetakeCount, subSessionsLog, totalTimeSpentInSession,
