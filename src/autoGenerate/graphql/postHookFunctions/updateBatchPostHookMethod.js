@@ -27,9 +27,6 @@ const getBatchSessionsQuery = (batchId) => `
             id: "${batchId}"
           }
         },
-        {
-          sessionStatus_in: [started, allotted]
-        }
       ]
     }){
       id
@@ -38,19 +35,12 @@ const getBatchSessionsQuery = (batchId) => `
         order
       }
       ${getSlotTimesInString()}
-    }
-  }
-  `;
-
-// mutation to update batch sessions
-const updateBatchSessionQuery = (
-  batchSessionId, pushManyQuery,
-) => `
-  mutation{
-    updateBatchSession(id:"${batchSessionId}",  input:{
-      ${pushManyQuery}
-    }){
-      id
+      sessionStatus
+      attendance{
+        student {
+          id
+        }
+      }
     }
   }
   `;
@@ -353,8 +343,9 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
     const previouslyAllottedMentorId = get(context, 'previousDocument.allottedMentor.id', '');
     if (previouslyAllottedMentorId !== allottedMentorConnectId) {
       // fetch all the batch Sessions corresponding to given batch which are !completed state
-      const notCompletedBatchSessionsResult = await callLocalGraphqlApi(getBatchSessionsQuery(batchId), context);
-      const notCompletedBatchSessions = get(notCompletedBatchSessionsResult, 'data.batchSessions');
+      const batchSessionsResult = await callLocalGraphqlApi(getBatchSessionsQuery(batchId), context);
+      const batchSessions = get(batchSessionsResult, 'data.batchSessions', []);
+      const notCompletedBatchSessions = batchSessions.filter((session) => get(session, 'sessionStatus') !== 'completed');
       notCompletedBatchSessions.forEach(async (batchSession) => {
         // we add or update mentor sessions of the new mentor based on the batch session dates
         const { id: batchSessionId, bookingDate, ...slots } = batchSession;
@@ -371,9 +362,11 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
   }
   // while we are adding new students to a batch, adding those students to not completed batch Sessions
   if (studentsConnectIds && studentsConnectIds.length && batchId) {
-    const notCompletedBatchSessionsResult = await callLocalGraphqlApi(getBatchSessionsQuery(batchId), context);
-    const notCompletedBatchSessions = get(notCompletedBatchSessionsResult, 'data.batchSessions');
-    notCompletedBatchSessions.forEach((batchSession) => {
+    const batchSessionsResult = await callLocalGraphqlApi(getBatchSessionsQuery(batchId), context);
+    const batchSessions = get(batchSessionsResult, 'data.batchSessions', []);
+    let updateAllBatchSessionQuery = '';
+    batchSessions.forEach((batchSession) => {
+      const batchSessionId = get(batchSession, 'id');
       let pushManyQuery = 'attendance:{ pushMany: [';
       studentsConnectIds.forEach((studentsConnectId) => {
         pushManyQuery += `{studentConnectId: "${studentsConnectId}", 
@@ -381,12 +374,17 @@ const updateBatchPostHookMethod = async (input, params, mutationName, context) =
                                                }, `;
       });
       pushManyQuery += ']}';
-      // pushing new array of students in batch session
-      callLocalGraphqlApi(updateBatchSessionQuery(
-        batchSession.id,
-        pushManyQuery,
-      ), context);
+      updateAllBatchSessionQuery += `updateBatchSession_${batchSessionId}: updateBatchSession(
+        id:"${batchSessionId}"
+        input: { ${pushManyQuery} }
+      ) {
+        id
+      }`;
     });
+    if (updateAllBatchSessionQuery) {
+      updateAllBatchSessionQuery = `mutation{ ${updateAllBatchSessionQuery} }`;
+      callLocalGraphqlApi(updateAllBatchSessionQuery);
+    }
 
     const batchTypeFromContext = get(context, 'previousDocument.type', '');
     let vertical = '';

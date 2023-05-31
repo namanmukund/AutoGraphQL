@@ -1,4 +1,6 @@
+import batchAndUpdateUserSessionReports from '../../../../../../utils/scheduleJobs/jobs/batchAndUpdateUserSessionReports';
 import validateAuthentication from '../../../../../../utils/validateAuthentication';
+// import updateComponentLogsInPGData from '../scriptMethods/updateComponentLogsInPGData';
 // import generateRandomPasswordForStudents from '../scriptMethods/generateRandomPasswordForStudents';
 // import findDeleteAndCreateDuplicateUsers from '../scriptMethods/findDeleteAndCreateDuplicateUsers';
 // import updateStudentAndClassesOfSchoolsForAcademicYear from '../scriptMethods/updateStudentAndClassesOfSchoolsForAcademicYear';
@@ -118,6 +120,8 @@ const temporaryScript = (async (root, params, context) => {
   // await findDeleteAndCreateDuplicateUsers(context);
   // await updateTopicContentStatus();
   // await generateRandomPasswordForStudents(context);
+  // await updateComponentLogsInPGData(context);
+  await batchAndUpdateUserSessionReports();
   return {
     result: true,
   };

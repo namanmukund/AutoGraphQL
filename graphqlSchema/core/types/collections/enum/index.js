@@ -147,6 +147,8 @@ import SessionFeedbackCategory from './SessionFeedbackCategory';
 import DatabaseDialect from './DatabaseDialect';
 import TeacherOrganisation from './teacherOrganisation';
 import TekiePlatform from './TekiePlatform';
+import BatchSubSessionType from './BatchSubSessionType';
+import BatchSubSessionSubType from './BatchSubSessionSubType';
 
 export default [
   Status,
@@ -299,4 +301,6 @@ export default [
   DatabaseDialect,
   TeacherOrganisation,
   TekiePlatform,
+  BatchSubSessionType,
+  BatchSubSessionSubType,
 ];

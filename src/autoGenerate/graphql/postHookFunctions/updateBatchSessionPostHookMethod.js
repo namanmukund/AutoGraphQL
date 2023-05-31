@@ -37,6 +37,8 @@ import { CacheController } from '../controllers';
 import addMinutesToDate from '../../../../utils/addMinutesToDate';
 import { log } from '../../../../utils';
 import MasterController from '../controllers/MasterController';
+import addBatchSubSession from '../../utils/addBatchSubSession';
+import updateBatchSubSession from '../../utils/updateBatchSubSession';
 // import extractBatchSessionAndSendB2B from './utils/extractBatchSessionAndSendB2B';
 
 // query to get chapters and topics belomngin to a course
@@ -227,6 +229,10 @@ const batchSessionQuery = (id) => `{
     course {
       title
     }
+    subSessions {
+      id
+      createdAt
+    }
     batch {
       code
       type
@@ -242,6 +248,33 @@ const batchSessionQuery = (id) => `{
     }
   }
 }`;
+
+const getLatestSubSession = async (batchSessionId, context) => {
+  const batchSessionRes = await callLocalGraphqlApi(batchSessionQuery(batchSessionId), context);
+  const subSessions = get(batchSessionRes, 'data.batchSession.subSessions', []);
+  let latestSubSession;
+  if (subSessions.length) {
+    const tempSubSessions = [...subSessions];
+    tempSubSessions.sort((a, b) => new Date(get(b, 'createdAt')) - new Date(get(a, 'createdAt')));
+    latestSubSession = tempSubSessions[0];
+  }
+  return latestSubSession;
+};
+
+const attendanceList = (attendance = []) => {
+  const pushStudents = [];
+  // eslint-disable-next-line no-unused-expressions
+  attendance.length && attendance.forEach((studentElem) => {
+    if (get(studentElem, 'student.typeId')) {
+      const obj = {
+        studentConnectId: get(studentElem, 'student.typeId'),
+        isPresent: false,
+      };
+      pushStudents.push(obj);
+    }
+  });
+  return pushStudents;
+};
 
 const blacklistUserTokens = async (students) => {
   const menteeTokenController = new MasterController('MenteeToken', { bypass: true });
@@ -290,6 +323,7 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     batchTypeValue,
     appName,
     userRoleFromContext,
+    allottedMentorId,
   } = context;
   let courseId = get(context, 'courseId');
   const coursePackageId = get(input, 'coursePackage.typeId');
@@ -376,6 +410,41 @@ const updateBatchSessionPostHookMethod = async (input, params, mutationName, con
     // a batch can have own package topic rule. if it exist in a batch we will select it over the course package.
     let currentComponentTopicOrder = null;
     let currentTopicOrder = null;
+    if (get(input, 'sessionStatus') === 'started' && prevSessionStatus === 'allotted') {
+      const inputToSend = {
+        sessionStartDate: `${get(input, 'sessionStartDate')}`,
+        type: 'live',
+        subType: 'initial',
+        sessionStatus: get(input, 'sessionStatus'),
+      };
+      const { attendance } = input;
+      if (attendance && attendance.length) {
+        inputToSend.attendance = attendanceList(attendance);
+      }
+      const batchSessionConnectId = get(input, 'id');
+      try {
+        addBatchSubSession(inputToSend, allottedMentorId, batchSessionConnectId, context);
+      } catch (e) {
+        log(e);
+      }
+    }
+    if (get(input, 'sessionStatus') === 'completed') {
+      const latestSubSession = await getLatestSubSession(batchSessionId, context);
+      if (latestSubSession) {
+        const latestSubSessionId = get(latestSubSession, 'id');
+        const inputToSend = {
+          sessionStartDate: `${get(input, 'sessionStartDate')}`,
+          sessionEndDate: `${get(input, 'sessionEndDate')}`,
+          sessionStatus: get(input, 'sessionStatus'),
+        };
+        try {
+          updateBatchSubSession(latestSubSessionId, inputToSend, context);
+        } catch (e) {
+          log(e);
+        }
+      }
+    }
+
     if (coursePackageId) {
       let topicRules;
       if (get(batchInfo, 'coursePackageTopicRule', []).length) {

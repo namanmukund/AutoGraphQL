@@ -36,6 +36,9 @@ phonePeRoutes(app);
 iciciRoutes(app);
 typeformRoute(app);
 
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+app.get('/robots.txt', (req, res) => res.status(204).end());
+
 const path = `/graphql/${application}`;
 
 APM.setRequestAndTracingHandlers(app);
