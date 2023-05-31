@@ -455,8 +455,6 @@ const getBaseDocumentAndCalculatedFields = ({
     courseId: get(topicDoc, 'courses[0].id') || get(sessionDetails, 'course.id'),
     courseTitle: get(topicDoc, 'courses[0].title') || get(sessionDetails, 'course.title'),
     courseCategory: get(topicDoc, 'courses[0].category') || get(sessionDetails, 'course.category'),
-    sessionStart: get(sessionDetails, 'sessionStartDate'),
-    sessionEnd: get(sessionDetails, 'sessionEndDate'),
     sessionDuration: Math.round(sessionDuration || 0),
     sessionStatus: get(sessionDetails, 'sessionStatus'),
     studentAttendance,
@@ -467,6 +465,12 @@ const getBaseDocumentAndCalculatedFields = ({
     sessionClassworkComponents,
     sessionHomeworkComponents,
   };
+  if (get(sessionDetails, 'sessionStartDate') && get(sessionDetails, 'sessionStatus') !== 'allotted') {
+    baseDocument.sessionStart = get(sessionDetails, 'sessionStartDate');
+  }
+  if (get(sessionDetails, 'sessionEndDate') && get(sessionDetails, 'sessionStatus') !== 'allotted') {
+    baseDocument.sessionEnd = get(sessionDetails, 'sessionEndDate');
+  }
 
   if (!sessionDetails) {
     // If Session does not exist for the classroomId and topicId, will get the basic details from batch
@@ -498,13 +502,6 @@ const getBaseDocumentAndCalculatedFields = ({
         userRole: userRoleFromBaseDocument,
       });
     }
-  }
-  if (get(sessionDetails, 'sessionStatus') === 'allotted') {
-    // If sessionStatus is allotted, then don`t pass start and end date
-    Object.assign(baseDocument, {
-      sessionStart: '',
-      sessionEnd: '',
-    });
   }
 
   // If userSessionReport already exists, then use the id from it.
