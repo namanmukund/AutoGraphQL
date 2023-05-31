@@ -115,7 +115,7 @@ const getAggregationQueries = (documentIdsToFetch) => {
     batchSessionAggregationQuery = new AggregationBuilder('BatchSession')
       .Match({ $or: Object.values(documentIdsToFetch.batchSessionFilters) })
       .Project({
-        id: 1, course: 1, batch: 1, topic: 1, sessionStartDate: 1, sessionEndDate: 1, sessionStatus: 1, attendance: 1, createdAt: 1, updatedAt: 1,
+        id: 1, course: 1, batch: 1, topic: 1, sessionStartDate: 1, sessionEndDate: 1, sessionStatus: 1, attendance: 1, createdAt: 1, updatedAt: 1, subSessions: 1,
       })
       .Lookup(EqualityPayload('Topic', 'topic', 'topic.typeId', 'id'))
       .Lookup(EqualityPayload('Course', 'course', 'course.typeId', 'id'))
@@ -526,7 +526,7 @@ const getBaseDocumentAndCalculatedFields = ({
       eventType: get(subSession, 'type'),
       eventSubType: get(subSession, 'subType'),
       dateTime: get(subSession, 'createdAt'),
-      subSessionDuration: get(subSession, 'duration'),
+      subSessionDuration: get(subSession, 'duration') || 0,
     }));
     let totalTimeSpentInSession = 0;
     subSessionsLog.forEach((subSession) => {
