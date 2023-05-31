@@ -516,7 +516,7 @@ const getBaseDocumentAndCalculatedFields = ({
     }
   }
 
-  if (userRole === 'Teacher' && sessionDetails) {
+  if (userRole === 'Teacher' && sessionDetails && get(sessionDetails, 'sessionStatus') !== 'allotted') {
     const batchSubSessions = (get(sessionDetails, 'subSessions', []) || []);
     const sessionResumeCount = batchSubSessions.filter((subSession) => get(subSession, 'subType') === 'resume').length;
     const sessionRetakeCount = batchSubSessions.filter((subSession) => get(subSession, 'type') === 'retake').length;
