@@ -629,7 +629,7 @@ const filterDuplicateComponentDumps = (componentDumps) => {
   return [];
 };
 
-export const getClassworkComponentScore = (componentCountsMeta, learningObjectives = []) => {
+const getClassworkComponentScore = (componentCountsMeta, learningObjectives = []) => {
   const {
     videosCount = 0,
     videosVisitedCount = 0,
