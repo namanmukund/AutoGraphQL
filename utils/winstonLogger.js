@@ -38,7 +38,12 @@ if (['production', 'staging'].includes(process.env.NODE_ENV) && !process.env.FOR
 
 const winstonLogger = winston.createLogger({
   levels: {
-    ...winston.config.syslog.levels, stellate: 6, status: 6, postgres: 7, mongo: 7,
+    ...winston.config.syslog.levels,
+    warn: 5,
+    status: 6,
+    stellate: 6,
+    postgres: 7,
+    mongo: 7,
   },
   transports: winstonTransports,
   format,
