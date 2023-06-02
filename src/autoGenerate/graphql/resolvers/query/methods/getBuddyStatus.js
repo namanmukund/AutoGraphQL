@@ -52,7 +52,9 @@ const getStudentLoggedInStatus = ({
     $lookup: {
       from: 'BatchSubSession',
       let: {
-        subSessionId: '$subSessions.typeId',
+        subSessionId: {
+          $ifNull: ['$subSessions.typeId', []],
+        },
       },
       pipeline: [
         {
@@ -90,7 +92,9 @@ const getStudentProfileAggregation = ({
     $lookup: {
       from: 'ParentProfile',
       let: {
-        parentProfileId: '$parents.typeId',
+        parentProfileId: {
+          $ifNull: ['$parents.typeId', []],
+        },
       },
       pipeline: [
         {
