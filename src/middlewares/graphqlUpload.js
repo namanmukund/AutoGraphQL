@@ -15,6 +15,7 @@ import {
   resizeAndUpload,
 } from './utils';
 import callGraphqlApi from '../api/callGraphqlApi';
+import { ANDROID_EXT, ANDROID_EXT_TYPE } from '../../constants';
 
 const checkActionTypeBeforeFileUpload = async (operations) => {
   const {
@@ -130,7 +131,7 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
           /* inavlid file type can be handled by graphql I am just blocking the
           upload in case wrong type is defined
           */
-          const ext = type.split('/')[1];
+          let ext = type.split('/')[1];
           const fileMimeType = type;
           const fileTypeName = getFileTypeName(type);
           // compare file size with the predefined allowed sizes
@@ -141,6 +142,10 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
             ext,
             connectInput,
           );
+
+          if (ext === ANDROID_EXT_TYPE) {
+            ext = ANDROID_EXT;
+          }
 
           const {
             variables: {
