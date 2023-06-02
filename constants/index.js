@@ -650,6 +650,9 @@ const STELLATE_PURGE_CONFIG = {
   },
 };
 
+const ANDROID_EXT_TYPE = 'vnd.android.package-archive';
+const ANDROID_EXT = 'apk';
+
 export {
   scalarTypes,
   defaultFields,
@@ -780,4 +783,6 @@ export {
   VIDEOS_TO_TRANSCODE_FOLDER,
   STELLATE_PURGE_CONFIG,
   STELLATE_PURGE_TOKEN,
+  ANDROID_EXT_TYPE,
+  ANDROID_EXT,
 };

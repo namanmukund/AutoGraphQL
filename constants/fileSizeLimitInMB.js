@@ -1,14 +1,14 @@
 const fileSizeLimitInMB = {
-  image: 12,
-  audio: 20,
+  image: 50,
+  audio: 50,
   video: 200,
-  excel: 30,
-  subtitle: 10,
-  lottie: 1,
-  pdf: 12,
-  programFiles: 1,
-  accessFiles: 15,
-  others: 15,
+  excel: 50,
+  subtitle: 50,
+  lottie: 50,
+  pdf: 50,
+  programFiles: 50,
+  accessFiles: 50,
+  others: 55,
 };
 
 export default fileSizeLimitInMB;
