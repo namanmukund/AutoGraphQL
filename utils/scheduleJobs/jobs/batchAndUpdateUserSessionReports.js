@@ -517,9 +517,21 @@ const getBaseDocumentAndCalculatedFields = ({
   }
 
   if (userRole === 'Teacher' && sessionDetails && get(sessionDetails, 'sessionStatus') !== 'allotted') {
-    const batchSubSessions = (get(sessionDetails, 'subSessions', []) || []);
+    const batchSubSessions = sortBy((get(sessionDetails, 'subSessions', []) || []), 'createdAt');
     const sessionResumeCount = batchSubSessions.filter((subSession) => get(subSession, 'subType') === 'resume').length;
-    const sessionRetakeCount = batchSubSessions.filter((subSession) => get(subSession, 'type') === 'retake').length;
+
+    /**
+     Considering 1st resumed retake session as initial session as there might be the case where the initial few subSession would be of type retake and subtype as resumed
+    * */
+    const retakeSubSessions = batchSubSessions.filter((subSession) => get(subSession, 'type') === 'retake');
+    if (retakeSubSessions && retakeSubSessions.length) {
+      const firstRetakeSession = retakeSubSessions[0];
+      if (get(firstRetakeSession, 'subType') === 'resume') {
+        retakeSubSessions[0].subType = 'initial';
+      }
+    }
+    const sessionRetakeCount = retakeSubSessions.filter((retakeSession) => get(retakeSession, 'subType') === 'initial').length;
+
     const subSessionsLog = sortBy(batchSubSessions, 'createdAt').map((subSession, index) => ({
       subSessionOrder: index + 1,
       subSessionId: get(subSession, 'id'),
@@ -527,6 +539,7 @@ const getBaseDocumentAndCalculatedFields = ({
       eventSubType: get(subSession, 'subType'),
       dateTime: get(subSession, 'createdAt'),
       subSessionDuration: get(subSession, 'duration') || 0,
+      subSessionEndDate: get(subSession, 'sessionEndDate'),
     }));
     let totalTimeSpentInSession = 0;
     subSessionsLog.forEach((subSession) => {
