@@ -1,54 +1,61 @@
-/* eslint-disable no-console */
 import { log, dbConfig } from '../utils';
 import db from './db';
 import createScheduler from '../utils/createScheduler';
 import reRunJobsFromDB from '../utils/scheduleJobs/reRunJobsFromDB';
-import { TAT } from '../constants';
 
 const { mongoose, sequelize } = db;
 
-if ((process.env.NODE_ENV !== 'production') || process.env.FORCE_PG_ALTER) {
-  sequelize.sync({ alter: true });
-  log('Connected to SQL DB.', 'status');
-} else {
-  sequelize.authenticate();
-  log('Connected to SQL DB.', 'status');
+// 1. Initialize PostgreSQL connection if configured
+if (sequelize) {
+  const syncOptions = ((process.env.NODE_ENV !== 'production') || process.env.FORCE_PG_ALTER)
+    ? { alter: true }
+    : undefined;
+
+  const initPostgres = async () => {
+    try {
+      if (syncOptions) {
+        await sequelize.sync(syncOptions);
+      } else {
+        await sequelize.authenticate();
+      }
+      log('Connected to PostgreSQL database.', 'status');
+    } catch (err) {
+      log(`PostgreSQL notice: ${err.message}`, 'status');
+    }
+  };
+
+  initPostgres();
 }
 
+// 2. Initialize MongoDB connection with auto-reconnection
 let dbReconnectCount = 1;
-mongoose.on('error', (err) => {
-  log(`Failed to connect to DB. Error being ${err}`, 'error');
-  if (err.message && err.message.match(/failed to connect to server .* on first connect/)) {
-    // Wait for a bit, then try to connect again
-    setTimeout(() => {
-      log(`Retry count ${dbReconnectCount}. Reconnecting to DB`, 'status');
-      dbReconnectCount += 1;
-      mongoose.openUri(dbConfig.dbUri);
-    }, 5 * 1000);
-  }
-}).on('reconnected', () => {
-  log('MongoDB reconnected!', 'status');
-}).on('disconnected', () => {
-  log('MongoDB disconnected!', 'status');
-}).once('open', async () => {
-  log('Connected to MongoDB.', 'status');
-  if (
-    process.env.NODE_ENV === 'production'
-    && process.env.IS_SCHEDULER_INSTANCE
-    && process.env.IS_SCHEDULER_INSTANCE !== 'false') {
-    createScheduler('mentorReport');
-    createScheduler('batchSessionOtpGeneration');
-    createScheduler('autoCompleteThoeryClassroomSessions');
-    createScheduler('b2cBatchSessionReport');
-    createScheduler('autoDeleteBlacklistedTokens');
-    reRunJobsFromDB();
-  }
+if (mongoose) {
+  mongoose.on('error', (err) => {
+    log(`Failed to connect to MongoDB: ${err.message || err}`, 'error');
+    if (err.message && err.message.match(/failed to connect to server .* on first connect/)) {
+      setTimeout(() => {
+        log(`Retry count ${dbReconnectCount}. Reconnecting to MongoDB...`, 'status');
+        dbReconnectCount += 1;
+        mongoose.openUri(dbConfig.dbUri);
+      }, 5000);
+    }
+  });
 
-  if (process.env.NODE_ENV === 'staging' && ((process.env.STAGING_INSTANCE && process.env.STAGING_INSTANCE === 'true') || process.env.STAGING_INSTANCE === undefined)) {
-    createScheduler(TAT);
-  }
-  if (process.env.NODE_ENV === 'production' && process.env.SECONDARY_APPLICATION_NAME === TAT) {
-    createScheduler(TAT);
-    createScheduler('teacherTrainingReport');
-  }
-});
+  mongoose.on('reconnected', () => {
+    log('MongoDB reconnected successfully.', 'status');
+  });
+
+  mongoose.on('disconnected', () => {
+    log('MongoDB connection disconnected.', 'status');
+  });
+
+  mongoose.once('open', async () => {
+    log('Connected to MongoDB database.', 'status');
+    if (process.env.IS_SCHEDULER_INSTANCE && process.env.IS_SCHEDULER_INSTANCE !== 'false') {
+      createScheduler('autoDeleteBlacklistedTokens');
+      reRunJobsFromDB();
+    }
+  });
+}
+
+export default db;

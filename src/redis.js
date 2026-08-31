@@ -2,19 +2,21 @@ import Redis from 'ioredis';
 import redisConfig from '../config/redis';
 import { log } from '../utils';
 
-const redisClient = new Redis(redisConfig);
+const redisClient = new Redis({
+  ...redisConfig,
+  enableOfflineQueue: false,
+  maxRetriesPerRequest: 1,
+});
 
 redisClient
   .on('error', (error) => {
-    log(`Failed to connect to Redis client. Error being ${error}`);
-    redisClient.quit();
+    // Log Redis error non-blockingly
+    if (error.code === 'ECONNREFUSED') {
+      log('Redis not reachable at configured host:port. Continuing without cache/pubsub.', 'status');
+    } else {
+      log(`Redis error: ${error.message}`, 'error');
+    }
   })
-  // .on('reconnecting', () => {
-  //   log('Redis client reconnecting!');
-  // })
-  // .on('close', () => {
-  //   log('Redis client disconnected!');
-  // })
   .on('connect', () => {
     if (!process.env.SECONDARY_APPLICATION_NAME) log('Redis client connected', 'status');
   });

@@ -87,11 +87,11 @@ function processRequestAndUploadFile(request, { uploadDir } = {}) {
   let middlewareErrorType = '';
   mkdirp.sync(uploadDir);
 
-  const form = formidable.IncomingForm({
+  const form = new formidable.IncomingForm({
     // Defaults to the OS temp directory
     uploadDir,
+    keepExtensions: true,
   });
-  form.keepExtensions = true;
   // form.maxFieldsSize = 2;
   // Parse the multipart form request
   return new Promise((resolve, reject) => {

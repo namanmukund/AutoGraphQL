@@ -7,27 +7,22 @@ import forceUpdateTypeNames from './forceUpdateTypeNames';
 import forceDeleteTypeNames from './forceDeleteTypeNames';
 import regexValidation from './regexValidation';
 import loginType from './loginType';
-import { meWatiSMS, usWatiSMS } from './messagingText';
-import { ADMIN, UMS_ADMIN, SUPPLY_DEMAND_ADMIN } from './roles';
+import { ADMIN, USER, GUEST, SERVICE } from './roles';
 
-const TMS = 'tekieTms';
-const TLA = 'tekieLearningApp';
-const TWA = 'tekieWebApp';
-const TAA = 'tekieAffiliateApp';
-const TBA = 'core';
-const TAT = 'tekieAnalyticsApp';
+const CORE_APP = 'core';
+const WEB_APP = 'web';
+const MOBILE_APP = 'mobile';
+const ADMIN_APP = 'admin';
 
-const SECONDARY_APPLICATIONS = { TAT };
+const SECONDARY_APPLICATIONS = {};
 
-const backendApps = [TBA];
-const byPassMenteeValidationApps = [TBA];
-
-const frontEndApps = [TLA, TMS, TWA, TAA];
+const backendApps = [CORE_APP];
+const byPassMenteeValidationApps = [CORE_APP];
+const frontEndApps = [WEB_APP, MOBILE_APP, ADMIN_APP];
 const permissionIntegratedApps = [];
 const firebaseExcludedApps = [];
 
 const BYPASS = 'bypass';
-
 const SUPER_ADMIN = 'superAdmin';
 
 const scalarTypes = ['String', 'Int', 'Boolean', 'Float', 'ID', 'Date'];
@@ -38,16 +33,16 @@ const rangeOTP = {
   max: 9999,
 };
 
-const MAX_ALLOWED_REFERRALS = 10;
-const AFFILIATE_MAX_ALLOWED_REFERRALS = 1000;
 const randomNumberRangeForUsername = {
   min: 1,
   max: 99,
 };
+
 const nameRules = {
   min: 3,
   max: 30,
 };
+
 const usernameRules = {
   min: 3,
   max: 30,
@@ -64,6 +59,7 @@ const operationName = {
   delete: 'delete',
   read: 'read',
 };
+
 const allFilters = {
   and: 'and',
   or: 'or',
@@ -93,43 +89,21 @@ const allFilters = {
 const arrayUpdateAddTypes = [
   'push', 'pushMany', 'pushToSet', 'replace',
 ];
+
 const arrayUpdateRemoveTypes = [
   'popFront', 'popBack', 'popAll', 'pop',
 ];
 
 const sortBy = ['ASC', 'DESC'];
-const smsOTPMessage = {
-  bodyBeforeName: 'Dear ',
-  bodyBeforeIfNoName: 'Hi',
-  bodyAfterName: ', your login OTP for Tekie App is ',
-};
 
-const fromEmail = 'support@uolo.com';
 const STATIC = 'static';
-
 const fetchRetries = 5;
 const fetchRetryDelay = 1000;
 
 const defaultLimitValue = process.env.DATA_PLATFORM ? 100000 : 1000;
 const defaultDeleteLimitValue = 100;
 
-const defaultPermissionErrorMsg = 'Not authorised to perform this operation.';
-
-const timeZones = [{
-  countryCode: '+91',
-  timeZone: 'Asia/Kolkata',
-},
-{
-  countryCode: '+65',
-  timeZone: 'Asia/Singapore',
-},
-{
-  countryCode: '+63',
-  timeZone: 'Asia/Manila',
-}, {
-  countryCode: '+977',
-  timeZone: 'Asia/Kathmandu',
-}];
+const defaultPermissionErrorMsg = 'Not authorized to perform this operation.';
 
 const historyFieldName = 'history';
 
@@ -137,652 +111,148 @@ const graphQlOperations = {
   query: 'query',
   mutation: 'mutation',
 };
-const META = 'Meta';
-const userProfiles = ['sampleProfile'];
 
+const META = 'Meta';
 const PUBLISHED = 'published';
 const UNPUBLISHED = 'unpublished';
 
-const GLOBAL_COURSE_TITLE = 'python';
-
-const OLD_COURSE_ID = 'cjs8skrd200041huzz78kncz5';
-
-const enrollmentTypes = {
-  free: 'free',
-  pro: 'pro',
-};
-
-const topicTypes = {
-  video: 'video',
-  message: 'message',
-  comicStrip: 'comicStrip',
-  practiceQuestion: 'practiceQuestion',
-  quiz: 'quiz',
-  blockBasedProject: 'blockBasedProject',
-  blockBasedPractice: 'blockBasedPractice',
-  learningSlide: 'learningSlide',
-};
-
-const userActionType = {
-  next: 'next',
-  back: 'back',
-  appClose: 'appClose',
-  skip: 'skip',
-};
-
-const userTopicTypeStatus = {
-  complete: 'complete',
-  incomplete: 'incomplete',
-  skip: 'skip',
-};
-
-const userSavedCodeStatus = {
-  accepted: 'accepted',
-  pending: 'pending',
-  rejected: 'rejected',
-};
-
-const questionTypes = {
-  mcq: 'mcq',
-  fibInput: 'fibInput',
-  fibBlock: 'fibBlock',
-  arrange: 'arrange',
-};
-
-const auditQuestionType = {
-  mcq: questionTypes.mcq,
-  bool: 'bool',
-  rating: 'rating',
-  timestamp: 'timestamp',
-  input: 'input',
-};
-
-const auditType = {
-  mentor: 'mentor',
-  preSales: 'preSales',
-  postSales: 'postSales',
-  demoWow: 'demoWow',
-};
-
-const scholarshipThreshHolds = {
-  proficient: 100,
-  master: 80,
-  familiar: 60,
-};
-
-const learningObjectiveQuizReportThreshHolds = {
-  proficient: 100,
-  master: 80,
-  familiar: 60,
-};
-
-const learningObjectiveRecommendationTexts = {
-  learningObjectiveProficientText: 'Excellent',
-  learningObjectiveMasterText: 'Great going',
-  learningObjectiveFamiliarText: 'Almost there',
-  learningObjectiveDefaultText: 'Need work',
-};
-
-const masteryLevels = {
-  proficient: 'proficient',
-  master: 'master',
-  familiar: 'familiar',
-  defaultMastery: 'none',
-};
-
-const userSourceOrigin = {
-  school: 'school',
-  facebook: 'facebook',
-  instagram: 'instagram',
-  google: 'google',
-  website: 'website',
-  transformation: 'transformation',
-  radioStreet: 'radioStreet',
-  agent: 'agent',
-};
-
-const freeTopicCount = 5;
-const badgeTypes = {
-  character: 'character',
-  equipment: 'equipment',
-  skill: 'skill',
-};
-
-const stickerEmojiType = {
-  sticker: 'sticker',
-  emoji: 'emoji',
-};
-
-const forgotPassWebURL = {
-  TMS: {
-    development: 'https://tekie-tms-dev.herokuapp.com/forgotPassword',
-    staging: 'https://tekie-tms-staging.herokuapp.com/forgotPassword',
-    production: 'https://tekie-managment-system.herokuapp.com/forgotPassword',
-    preProd: 'https://tekie-tms-pre-prod.herokuapp.com/forgotPassword',
-  },
-  TeacherApp: {
-    development: 'https://teacher-staging.tekie.in/?step=reset-password',
-    staging: 'https://teacher-staging.tekie.in/?step=reset-password',
-    production: 'https://teacher.tekie.in/?step=reset-password',
-    preProd: 'https://teacher-preprod.tekie.in/?step=reset-password',
-  },
-};
-
-const slotTimes = [
-  'slot0', 'slot1', 'slot2', 'slot3', 'slot4', 'slot5', 'slot6', 'slot7', 'slot8', 'slot9', 'slot10',
-  'slot11', 'slot12', 'slot13', 'slot14', 'slot15', 'slot16', 'slot17', 'slot18', 'slot19', 'slot20',
-  'slot21', 'slot22', 'slot23',
-];
-
-const weekDays = [
-  'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday',
-];
-
-const CREDITED = 'credited';
-const DEBITED = 'debited';
-const REGISTRATION_BASE_CREDIT = 1000;
-
-const skillsLevel = {
-  easy: 'easy',
-  medium: 'medium',
-  hard: 'hard',
-};
-
-const installmentStatus = {
-  pending: 'pending',
-  paid: 'paid',
-};
-
-const batchType = {
-  normal: 'normal',
-  b2b: 'b2b',
-  b2b2c: 'b2b2c',
-  b2c: 'b2c',
-};
-
-const auditSubType = {
-  b2cDemo: 'b2cDemo',
-  b2cPaid: 'b2cPaid',
-  b2b: batchType.b2b,
-};
-
-const sessionStatus = {
-  started: 'started',
-  completed: 'completed',
-  allotted: 'allotted',
-};
-
-const leadStatus = {
-  pipeline: 'pipeline',
-  hot: 'hot',
-  cold: 'cold',
-  lost: 'lost',
-  won: 'won',
-  unfit: 'unfit',
-  unassigned: 'unassigned',
-};
-
-const campaignTypes = {
-  b2b: 'b2b',
-  b2b2cPaid: 'b2b2cPaid',
-  b2b2cEvent: 'b2b2cEvent',
-};
-
-const batchCreationBasis = {
-  grade: 'grade',
-  section: 'section',
-};
-
-const batchCreationStatus = {
-  todo: 'todo',
-  inProgress: 'inProgress',
-  complete: 'complete',
-};
-
-const sessionType = {
-  trial: 'trial',
-  paid: 'paid',
-  batch: 'batch',
-};
-
-const studentCurrentStatus = {
-  unRegistered: 'unRegistered',
-  registered: 'registered',
-  preDemo: 'preDemo',
-  postDemo: 'postDemo',
-  onBoarding: 'onBoarding',
-  paidUser: 'paidUser',
-  churned: 'churned',
-};
-
-const topicComponents = {
-  video: 'video',
-  learningObjective: 'learningObjective',
-  assignment: 'assignment',
-  homeworkAssignment: 'homeworkAssignment',
-  quiz: 'quiz',
-  blockBasedProject: 'blockBasedProject',
-  blockBasedPractice: 'blockBasedPractice',
-  homeworkPractice: 'homeworkPractice',
-};
-
-const childTopicComponents = {
-  message: 'message',
-  practiceQuestion: 'practiceQuestion',
-  comicStrip: 'comicStrip',
-  chatbot: 'chatbot',
-  learningSlide: 'learningSlide',
-};
-
-const blockBasedProjectType = {
-  project: 'project',
-  practice: 'practice',
-};
-
-const emailText = {
-  instagramLink: {
-    india: 'https://instagram.com/tekie.in',
-    default: 'https://www.instagram.com/tekie.us/',
-  },
-  tekieLink: {
-    india: 'https://www.tekie.in',
-    default: 'https://www.tekie.us',
-  },
-  tekieText: {
-    india: 'VISIT TEKIE.IN',
-    default: 'VISIT TEKIE.US',
-  },
-};
-
-const currencyTypes = {
-  RS: 'RS',
-  USD: 'USD',
-};
-
-const studentNoteForIQ = {
-  smartAndAttentive: 'The student is very smart & attentive and understood the concepts clearly. Also, the kid tried answering all the question and was very curious. Overall the kid has great potential',
-  interestedAndEagerToLearn: 'The student was really interested in coding and was eager to learn as well. Also, the student was asking questions constantly.',
-  goodCommunicationAndCurious: 'The student is an extrovert and has amazing communication skills, also the kid was able to quickly grasp the concepts and had a lot of curiosity to learn more. The kid has great potential overall',
-  interactiveAndFocused: 'The student was good at catching concepts and was really interactive and focused throughout the sessions and was very interested to learn coding',
-  problemSolvingAndCreativeThinkingSkill: 'The student was really curious and filled with tons of energy also, had good problem-solving skills and creative thinking. Amazing kid!',
-};
-
-const iqaTags = ['ambitious', 'energetic', 'curious', 'quickLearner', 'focused', 'determined'];
-
-export const GIFT_VOUCHER_AMOUNT = 2500;
-
-export const MENTOR_REPORT_COUNTRY = 'india';
-
-export const MENTOR_REPORT_SESSION_TYPE = 'trial';
-
-export const MENTOR_REPORT_DAYS = 3;
-
-export const MENTOR_RATING_AUDIT_THRESHOLD = 4;
-
-export const ADD_BATCH_TRY_LIMIT = 20;
-
-export const BULK_MENTOR_SESSION_DAYS_LIMIT = 365;
-export const MAX_ALLOWED_BATCH_SESSIONS_DAYS_RANGE = 365;
-
-export const testMailingList = {
-  production: {
-    email: ['sanatankc@gmail.com'],
-    phone: ['918368246974', '919654347463'],
-  },
-  staging: {
-    email: ['kriteshpk@gmail.com', 'sanatxn@gmail.com'],
-    phone: ['918368246974'],
-  },
-  usMailingList: ['rishabprachi26@gmail.com'],
-};
-
-export const DEFAULT_LS_OM_USER_ID = 'b29041e3-5645-11eb-9166-0a68392cb7c4';
-
-export const SESSION_REPORT_DAYS = 4;
-
-export const COUNTRIES = [
-  'india',
-  'usa',
-  'uk',
-  'canada',
-  'jamaica',
-  'australia',
-  'singapore',
-  'bangladesh',
-  'qatar',
-  'uae',
-  'oman',
-  'kuwait',
-  'egypt',
-  'afghanistan',
-  'russia',
-];
-
-// used for session report, will add 'b2b2c' later
-export const VERTICALS = [
-  'b2b',
-  'b2c',
-  'b2b2c',
-];
-
-export const GRADE = [
-  'grade1',
-  'grade2',
-  'grade3',
-  'grade4',
-  'grade5',
-  'grade6',
-  'grade7',
-  'grade8',
-  'grade9',
-  'grade10',
-  'grade11',
-  'grade12',
-];
-
-export const NUNITO_BOLD_FONT_URL = `${process.env.FILE_BASE_URL}/python/course/Nunito-Bold.ttf`;
-
-export const GILROY_EXTRA_BOLD_FONT_URL = `${process.env.FILE_BASE_URL}/python/course/Gilroy-ExtraBold.otf`;
-
-const ALLOWED_MIME_TYPES = ['html', 'css', 'javascript'];
-
-const MASTER_OTP = 1902;
-
-const TEACHER_MASTER_PASSWORD = 'tkInter2020';
-
-const STUDENT_MASTER_PASSWORD = 'Jupyter2014';
-
-const BLOCKED = 'blocked';
-
-const INACTIVE = 'inactive';
-
-const courseToGradeMapping = [
-  {
-    grade: [1, 2],
-    courseId: 'cks5y78w0000t0vwcauvc2rtm',
-  },
-  {
-    grade: [3, 4, 5],
-    courseId: 'cks94x3jq00fc0w24e92pb9ku',
-  },
-  {
-    grade: [6, 7, 8, 9, 10, 11, 12],
-    courseId: 'cks5r4pzv000r0v29gk231bcy',
-  },
-];
-
-const courseToGradeMappingForStaging = [
-  {
-    grade: [1, 2],
-    courseId: 'ckpwgsqpx00010txl9q1s19f2',
-  },
-  {
-    grade: [3, 4, 5],
-    courseId: 'ckpwvp8gb00000t06f78t6dbz',
-  },
-  {
-    grade: [6, 7, 8, 9, 10, 11, 12],
-    courseId: 'cjs8skrd200041huzz78kncz5',
-  },
-];
-
-const PHONE_OTP_LIMIT_PER_DAY = 20;
-
-const PHONE_OTP_MAX_RETRY_WAIT_SECOND = 60;
-
-const ALLOWED_ROLE_FOR_MANUAL_SESSIONS = [ADMIN, UMS_ADMIN, SUPPLY_DEMAND_ADMIN];
-
-const TIME_DIFF_FOR_MANUAL_SESSION = -1;
-
-const newTekieWebLinks = {
-  staging: 'https://tekie-web-staging-28b1816977c254e7.onporter.run',
-  preProd: 'https://tekie-web-pre-prod-dd811f1acf374a8c.onporter.run',
-};
-const EXCLUDE_NUMBER = ['7000287388'];
-
-const TIME_BEFORE_EVENT_CREATION = 1;
-
-const DAY_BEFORE_DEMO_COMPLETED = 5;
-
-const LEAD_PARTNERS_TO_CHECK_FOR_DEMO = ['virgo_india', 'ICCS'];
-
-/**
- * Mode allow us to query database in a specified manner.
- * 1. Aggregation [Optimized approach but unstable currently] -
- *    Build aggregation pipeline for requested graphQL query at once.
- *    Note: Relation Fields in Nested Object/Array is not
- *          suppported yet (fallbacks to cascade mode).
- * 2. Cascade [Stable version] -
- *    Query database recursively using graphQL's field.resolve method.
- *    i.e first query root collection and then querying db for requested
- *    Relational and Meta fields.
- *    Note: Takes longer period to resolve fields due N+1 problem.
- */
 const dbControllerModes = {
-  aggregation: 'aggregation',
-  cascade: 'cascade',
+  MONGO: 'mongo',
+  POSTGRES: 'postgres',
+};
+
+const DEFAULT_CLAMP_VALUE = 20;
+const DB_AGGREGATION_MODE_STATUS = {
+  ACTIVE: 'active',
+  INACTIVE: 'inactive',
+};
+
+const ALLOWED_MIME_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+  'application/pdf',
+  'video/mp4',
+];
+
+const ALLOWED_FILE_UPLOAD_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'application/pdf',
+];
+
+const ALLOWED_HEADERS = [
+  'Authorization',
+  'authorization',
+  'Content-Type',
+  'content-type',
+  'Accept',
+  'accept',
+  'Origin',
+  'origin',
+  'X-Requested-With',
+  'x-requested-with',
+  'app-name',
+  'appname',
+  'token',
+];
+
+const ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER = [
+  'app-name',
+  'appname',
+  'token',
+];
+
+const HEADER_VARIABLES = {
+  APP_NAME: 'app-name',
+  TOKEN: 'token',
 };
 
 const DATABASE_DIALECTS = {
   mongoose: 'mongoose',
-  postgres: 'postgresql',
+  postgres: 'postgres',
+  MONGO: 'mongoose',
+  POSTGRES: 'postgres',
 };
 
-const DEFAULT_CLAMP_VALUE = {
-  MIN: 0,
-  MAX: 100,
+const PG_MODEL_SUFFIX = 'PG';
+const INACTIVE = 'inactive';
+
+const MEDIA_RESOLUTIONS = {
+  THUMBNAIL: { width: 150, height: 150 },
+  MEDIUM: { width: 600, height: 600 },
+  LARGE: { width: 1200, height: 1200 },
 };
 
-/**
- * Options:
- * 1. ALLOWED - allows aggregation if directive exists for the type.
- * 1. FORCE - force aggregation mode on all types.
- * 1. BLOCK - Fallback to default DB Mode (i.e Cascade).
- */
-const DB_AGGREGATION_MODE_STATUS_OPTIONS = {
-  ALLOWED: 'ALLOWED',
-  FORCE: 'FORCE',
-  BLOCK: 'BLOCK',
-};
-
-const DB_AGGREGATION_MODE_STATUS = {
-  ACTIVE: DB_AGGREGATION_MODE_STATUS_OPTIONS.ALLOWED,
-  OPTIONS: DB_AGGREGATION_MODE_STATUS_OPTIONS,
-};
-
-const ALLOWED_FILE_UPLOAD_TYPES = [
-  'UserBlockBasedPractice',
-];
-
-const HEADER_VARIABLES = {
-  CLASSROOM_UID: 'x-classroom-uid',
-  COURSE_UID: 'x-course-uid',
-  BATCHSESSION_UID: 'batchsession-id',
-};
-
-const ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER = [
-  {
-    contextLabel: 'activeClassroom',
-    headerLabel: HEADER_VARIABLES.CLASSROOM_UID,
-  },
-  {
-    contextLabel: 'activeCourse',
-    headerLabel: HEADER_VARIABLES.COURSE_UID,
-  },
-  {
-    contextLabel: 'activeSessionId',
-    headerLabel: HEADER_VARIABLES.BATCHSESSION_UID,
-  },
-];
-
-const ALLOWED_HEADERS = [
-  'Content-Type',
-  'Authorization',
-  'Content-Length',
-  'X-Requested-With',
-  'X-Forwarded-By',
-  'User-Device-Id',
-  ...ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER.map((VAR) => VAR.headerLabel),
-];
-
-const GSUITE_BASE_FOLDER_ID = {
-  production: '1lBo4KzCIyKeoxeQo6iisFOMPf9zCACFn',
-  development: '10F9f2lE_Sjb7u7Gge-kBECt7aSzt83UK',
-  staging: '10F9f2lE_Sjb7u7Gge-kBECt7aSzt83UK',
-};
-
-const GSUITE_ACCESS_SCOPES = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/drive.appdata', 'https://www.googleapis.com/auth/drive.photos.readonly'];
-
-const GSUITE_FILE_TYPES = ['drive', 'spreadsheet', 'presentation', 'document'];
-
-const PG_MODEL_SUFFIX = '.pg.model.js';
-
-const MEDIA_RESOLUTIONS = ['480', '720', '1080'];
-
-const VIDEOS_TO_TRANSCODE_FOLDER = 'videosToTranscode';
-
-const STELLATE_PURGE_TOKEN = process.env.STELLATE_PURGE_TOKEN;
 const STELLATE_PURGE_CONFIG = {
-  STELLATE_ENDPOINT: 'https://admin.stellate.co/tekie-backend',
-  STELLATE_HEADERS: {
-    'content-type': 'application/json',
-    'stellate-token': STELLATE_PURGE_TOKEN,
-  },
+  URL: process.env.STELLATE_PURGE_URL || '',
 };
 
-const ANDROID_EXT_TYPE = 'vnd.android.package-archive';
-const ANDROID_EXT = 'apk';
+const STELLATE_PURGE_TOKEN = process.env.STELLATE_PURGE_TOKEN || '';
 
 export {
-  scalarTypes,
-  defaultFields,
-  backendApps,
-  connectMutationsArgumentsSuffix,
-  operationName,
-  sortBy,
-  allFilters,
-  BYPASS,
-  rangeOTP,
-  relationDirections,
   errors,
-  randomNumberRangeForUsername,
-  nameRules,
-  usernameRules,
-  smsOTPMessage,
-  frontEndApps,
-  defaultLimitValue,
-  fromEmail,
-  STATIC,
-  permissionIntegratedApps,
+  relationDirections,
   resizePicDimensions,
   fileSizeLimitInMB,
   fileExtensions,
+  forceUpdateTypeNames,
+  forceDeleteTypeNames,
+  regexValidation,
+  loginType,
+  ADMIN,
+  USER,
+  GUEST,
+  SERVICE,
+  SUPER_ADMIN,
+  CORE_APP,
+  WEB_APP,
+  MOBILE_APP,
+  ADMIN_APP,
+  backendApps,
+  byPassMenteeValidationApps,
+  frontEndApps,
+  permissionIntegratedApps,
+  firebaseExcludedApps,
+  BYPASS,
+  scalarTypes,
+  defaultFields,
+  rangeOTP,
+  randomNumberRangeForUsername,
+  nameRules,
+  usernameRules,
+  connectMutationsArgumentsSuffix,
+  operationName,
+  allFilters,
+  arrayUpdateAddTypes,
+  arrayUpdateRemoveTypes,
+  sortBy,
+  STATIC,
   fetchRetries,
   fetchRetryDelay,
-  firebaseExcludedApps,
-  defaultPermissionErrorMsg,
-  SUPER_ADMIN,
-  timeZones,
+  defaultLimitValue,
   defaultDeleteLimitValue,
+  defaultPermissionErrorMsg,
   historyFieldName,
   graphQlOperations,
   META,
-  userProfiles,
-  forceUpdateTypeNames,
-  forceDeleteTypeNames,
   PUBLISHED,
   UNPUBLISHED,
-  regexValidation,
-  arrayUpdateAddTypes,
-  arrayUpdateRemoveTypes,
-  GLOBAL_COURSE_TITLE,
-  enrollmentTypes,
-  topicTypes,
-  userActionType,
-  userTopicTypeStatus,
-  questionTypes,
-  scholarshipThreshHolds,
-  freeTopicCount,
-  TMS,
-  TLA,
-  TWA,
-  TAA,
-  TBA,
-  TAT,
-  loginType,
-  masteryLevels,
-  learningObjectiveQuizReportThreshHolds,
-  learningObjectiveRecommendationTexts,
-  badgeTypes,
-  stickerEmojiType,
-  slotTimes,
-  MAX_ALLOWED_REFERRALS,
-  CREDITED,
-  DEBITED,
-  REGISTRATION_BASE_CREDIT,
-  AFFILIATE_MAX_ALLOWED_REFERRALS,
-  skillsLevel,
-  installmentStatus,
-  byPassMenteeValidationApps,
-  userSourceOrigin,
-  batchType,
-  sessionStatus,
-  leadStatus,
-  userSavedCodeStatus,
-  campaignTypes,
-  batchCreationBasis,
-  batchCreationStatus,
-  weekDays,
-  sessionType,
-  studentCurrentStatus,
-  topicComponents,
-  childTopicComponents,
-  OLD_COURSE_ID,
-  blockBasedProjectType,
-  emailText,
-  meWatiSMS,
-  usWatiSMS,
-  auditQuestionType,
-  auditType,
-  auditSubType,
-  currencyTypes,
-  studentNoteForIQ,
-  ALLOWED_MIME_TYPES,
-  MASTER_OTP,
-  courseToGradeMapping,
-  courseToGradeMappingForStaging,
-  iqaTags,
   dbControllerModes,
-  BLOCKED,
-  PHONE_OTP_LIMIT_PER_DAY,
-  PHONE_OTP_MAX_RETRY_WAIT_SECOND,
-  ALLOWED_ROLE_FOR_MANUAL_SESSIONS,
-  TIME_DIFF_FOR_MANUAL_SESSION,
-  newTekieWebLinks,
-  EXCLUDE_NUMBER,
-  TIME_BEFORE_EVENT_CREATION,
-  DAY_BEFORE_DEMO_COMPLETED,
-  LEAD_PARTNERS_TO_CHECK_FOR_DEMO,
   DEFAULT_CLAMP_VALUE,
   DB_AGGREGATION_MODE_STATUS,
-  TEACHER_MASTER_PASSWORD,
-  STUDENT_MASTER_PASSWORD,
+  ALLOWED_MIME_TYPES,
   ALLOWED_FILE_UPLOAD_TYPES,
   ALLOWED_HEADERS,
   ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER,
   HEADER_VARIABLES,
-  GSUITE_BASE_FOLDER_ID,
-  GSUITE_ACCESS_SCOPES,
-  GSUITE_FILE_TYPES,
   DATABASE_DIALECTS,
   PG_MODEL_SUFFIX,
   SECONDARY_APPLICATIONS,
   INACTIVE,
-  forgotPassWebURL,
   MEDIA_RESOLUTIONS,
-  VIDEOS_TO_TRANSCODE_FOLDER,
   STELLATE_PURGE_CONFIG,
   STELLATE_PURGE_TOKEN,
-  ANDROID_EXT_TYPE,
-  ANDROID_EXT,
 };

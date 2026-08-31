@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  # MongoDB - Primary Application Database
+  mongodb:
+    image: mongo:5.0
+    container_name: autographql-mongodb
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_DATABASE: autographql_dev
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgreSQL - Analytics & Reporting Database
+  postgres:
+    image: postgres:14-alpine
+    container_name: autographql-postgres
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: autographql_dev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d autographql_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis - Cache & GraphQL PubSub Subscriptions
+  redis:
+    image: redis:7-alpine
+    container_name: autographql-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mongodb_data:
+    driver: local
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local

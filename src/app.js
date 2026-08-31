@@ -4,6 +4,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import { ApolloServer } from 'apollo-server-express';
 import { BaseRedisCache } from 'apollo-server-cache-redis';
+import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
 import { WebSocketServer } from 'ws';
 import { useServer as useSocketServer } from 'graphql-ws/lib/use/ws';
 import schema from './graphql';
@@ -13,9 +14,6 @@ import isAPMEnabledAppAndEnv from '../utils/isAPMEnabledAppAndEnv';
 import APM from './APM';
 import dataExtractedFromReq from '../constants/dataExtractedFromReq';
 import { getParsedASTMap } from './autoGenerate/utils';
-import phonePeRoutes from './externalProductAPI/phonePe/routes';
-import iciciRoutes from './externalProductAPI/icici/routes';
-import typeformRoute from './typeformAPI';
 import redis from './redis';
 import pubsub from './pubsub';
 import { ALLOWED_HEADERS, TBA } from '../constants';
@@ -23,7 +21,7 @@ import getAdditionalContextData from '../utils/getAdditionalContextData';
 
 const http = require('http');
 
-const port = process.env.PORT || 80;
+const port = process.env.PORT || 3000;
 const env = process.env.NODE_ENV || 'development';
 const application = process.env.APPLICATION || 'core';
 
@@ -32,10 +30,7 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-phonePeRoutes(app);
-iciciRoutes(app);
-typeformRoute(app);
-
+app.get('/health', (req, res) => res.status(200).json({ status: 'ok', time: new Date() }));
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 app.get('/robots.txt', (req, res) => res.status(204).end());
 
@@ -111,33 +106,39 @@ const socketServerPlugin = {
 // using apollo-server
 const server = new ApolloServer({
   schema,
-  introspection: process.env.ENABLE_GRAPHQL_INTROSPECTION,
-  playground: {
-    endpoint: `http://0.0.0.0:${port}${path}`,
-    settings: {
-      'editor.theme': 'light',
-    },
-  },
-  plugins: [socketServerPlugin, ...APM.getPluginsForApollo()],
+  introspection: process.env.ENABLE_GRAPHQL_INTROSPECTION !== 'false',
+  plugins: [
+    socketServerPlugin,
+    ApolloServerPluginLandingPageGraphQLPlayground({
+      settings: {
+        'editor.theme': 'dark',
+        'editor.cursorShape': 'line',
+        'request.credentials': 'include',
+      },
+    }),
+    ...APM.getPluginsForApollo(),
+  ],
   debug: true,
-  uploads: false,
-  cache: new BaseRedisCache({
-    client: redis,
-  }),
-  cacheControl: {
-    defaultMaxAge: 5,
-  },
+  ...(process.env.ENABLE_REDIS_CACHE === 'true' && redis ? {
+    cache: new BaseRedisCache({
+      client: redis,
+    }),
+  } : {}),
   formatError: (error) => {
-    const apolloErrorObject = Object.create(error);
-    apolloErrorObject.stack = error.extensions.exception.stacktrace.join('\n');
-    if (error.name !== 'GraphQLError') {
+    const stacktrace = get(error, 'extensions.exception.stacktrace', []);
+    if (stacktrace && stacktrace.length && error.name !== 'GraphQLError') {
+      const apolloErrorObject = Object.create(error);
+      apolloErrorObject.stack = Array.isArray(stacktrace) ? stacktrace.join('\n') : String(stacktrace);
       APM.captureException(apolloErrorObject);
-    } else {
-      // APM.captureMessage(`Message: ${error.message}`);
     }
     return {
-      ...error,
-      code: get(error, 'extensions.exception.name') || '',
+      message: error.message,
+      locations: error.locations,
+      path: error.path,
+      code: get(error, 'extensions.code') || get(error, 'extensions.exception.name') || 'INTERNAL_SERVER_ERROR',
+      extensions: {
+        ...(process.env.NODE_ENV !== 'production' ? error.extensions : {}),
+      },
     };
   },
   context: ({ req, res, connection }) => {
@@ -223,12 +224,17 @@ const server = new ApolloServer({
   },
 });
 
-server.applyMiddleware({ app });
+const startServer = async () => {
+  await server.start();
+  server.applyMiddleware({ app, path });
 
-httpServer.listen(port, '0.0.0.0', () => {
-  log(`End time:${new Date()}`, 'status');
-  log(`Server ready at http://0.0.0.0:${port}${server.graphqlPath}`, 'status');
-  log(`Subscriptions ready at ws://0.0.0.0:${port}${server.subscriptionsPath}`, 'status');
-});
+  httpServer.listen(port, '0.0.0.0', () => {
+    log(`End time:${new Date()}`, 'status');
+    log(`Server ready at http://0.0.0.0:${port}${path}`, 'status');
+    log(`Subscriptions ready at ws://0.0.0.0:${port}${path}`, 'status');
+  });
+};
+
+startServer();
 
 export default app;

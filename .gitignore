@@ -10,11 +10,12 @@ uploads/
 .serverless
 mongoMigration/oldVersioningMigrationFiles/*
 main.py
+# .env files
 .env
 .env*
+!.env.example
+*.log
 __pycache__/
-# Excluding this because Porter deployment fails due to package-lock.json
-package-lock.json
 .graphqlconfig
 schema.graphql
 var

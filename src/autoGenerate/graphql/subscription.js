@@ -1,6 +1,7 @@
-import { trimEnd, get, camelCase } from 'lodash';
+import { trimEnd, camelCase } from 'lodash';
 import getParsedASTMap from '../utils/getParsedASTMap';
 import { types } from '../../../utils';
+import hasDirective from '../utils/hasDirective';
 import customSubscriptionString from './customSubscriptionString';
 
 let subscriptionString = 'type Subscription {';
@@ -13,28 +14,23 @@ const getFilterName = (typeName) => `${typeName}Filter`;
 
 const makeSubscriptionTypePayload = (
   type,
-) => `type ${type}${SUBSCRIPTION_PAYLOAD}{
+) => `type ${type}${SUBSCRIPTION_PAYLOAD} {
      mutation: String!,
      data: ${type}!
   }`;
 
 Object.keys(parsedASTMap).forEach((type) => {
   const definition = parsedASTMap[type];
-  const {
-    subscribe,
-  } = definition;
-  if (get(subscribe, 'events', []).length) {
+  const { directives } = definition;
+  const isModel = directives && hasDirective(directives, 'model');
+  if (isModel) {
     const filterName = getFilterName(type);
-    subscriptionString += `${camelCase(type)}(filter: ${filterName}) : ${type}${SUBSCRIPTION_PAYLOAD},`;
+    subscriptionString += `${camelCase(type)}(filter: ${filterName}): ${type}${SUBSCRIPTION_PAYLOAD},`;
     subscriptionPayloadTypes.push(makeSubscriptionTypePayload(type));
   }
 });
 
-/*
-Add custom subscription string along with the generic subscriptions
- */
 subscriptionString += customSubscriptionString;
-
 subscriptionString = trimEnd(subscriptionString, ',');
 subscriptionString += '}';
 const subscription = subscriptionString;

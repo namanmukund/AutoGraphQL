@@ -1,5 +1,5 @@
+// Custom subscriptions string for application-specific subscriptions
 const customSubscriptionString = `
-userUpdated: User
 `;
 
 export default customSubscriptionString;

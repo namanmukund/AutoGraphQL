@@ -1,18 +1,17 @@
-import fetchSchema from 'fetch-graphql-schema';
+import fetch from 'node-fetch';
+import { getIntrospectionQuery } from 'graphql';
 import { fetchRetries, fetchRetryDelay } from '../constants';
 
 export const makeSchemaMap = (remoteSchema) => {
-  /* eslint-disable no-underscore-dangle */
-  const schemaTypes = remoteSchema.data.__schema.types;
-  /* eslint-enable */
+  const schemaTypes = remoteSchema?.data?.__schema?.types || [];
   const schemaMap = {};
   schemaTypes.forEach((schemaType) => {
     if (schemaType.kind !== 'OBJECT') {
-      return null;
+      return;
     }
     const fieldsArray = schemaType.fields;
     if (!fieldsArray || !fieldsArray.length) {
-      return null;
+      return;
     }
     schemaMap[schemaType.name] = {};
     const fieldsObject = {};
@@ -20,24 +19,26 @@ export const makeSchemaMap = (remoteSchema) => {
       fieldsObject[field.name] = true;
     });
     schemaMap[schemaType.name].fields = fieldsObject;
-    return null;
   });
   return schemaMap;
 };
 
-const getRemoteSchema = (uriRemote) => new Promise(((resolve, reject) => {
+const getRemoteSchema = (uriRemote) => new Promise((resolve, reject) => {
   const wrappedFetch = (n) => {
-    fetchSchema(uriRemote)
-      .then((schema) => {
-        const remoteSchema = JSON.parse(schema);
+    fetch(uriRemote, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: getIntrospectionQuery() }),
+    })
+      .then((res) => res.json())
+      .then((remoteSchema) => {
         const schemaMap = makeSchemaMap(remoteSchema);
         resolve(schemaMap);
       })
       .catch((error) => {
         if (n > 0) {
           setTimeout(() => {
-            const i = n - 1;
-            wrappedFetch(i);
+            wrappedFetch(n - 1);
           }, fetchRetryDelay);
         } else {
           reject(error);
@@ -45,6 +46,6 @@ const getRemoteSchema = (uriRemote) => new Promise(((resolve, reject) => {
       });
   };
   wrappedFetch(fetchRetries);
-}));
+});
 
 export default getRemoteSchema;

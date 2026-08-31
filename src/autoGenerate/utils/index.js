@@ -17,7 +17,6 @@ import getParsedField from './getParsedField';
 import getRelationFieldDefinition from './getRelationFieldDefinition';
 import getRelationMutationNames from './getRelationMutationNames';
 import getScalarFieldDefinition from './getScalarFieldDefinition';
-import getSendResendForgotPasswordOTPInput from './getSendResendForgotPasswordOTPInput';
 import getUniqueFieldFromInput from './getUniqueFieldFromInput';
 import hasDirective from './hasDirective';
 import isFieldDirectivePresent from './isFieldDirectivePresent';
@@ -28,12 +27,7 @@ import visitField from './visitField';
 import checkIfArgumentsAreFromSameType from './checkIfArgumentsAreFromSameType';
 import getNestedConnectMutationString from './getNestedConnectMutationString';
 import isDocContainsGivenKeyValue from './isDocContainsGivenKeyValue';
-import isTopicUnlocked from './isTopicUnlocked';
-import getFirstTopicAndLearningObjective from './getFirstTopicAndLearningObjective';
-import addUserCurrentTopicComponentStatus from './addUserCurrentTopicComponentStatus';
-import getUserCurrentTopicComponentStatus from './getUserCurrentTopicComponentStatus';
-import getBatchCurrentComponentStatus from './getBatchCurrentComponentStatus';
-import addMentorMenteeSessionForBatch from './addMentorMenteeSessionForBatch';
+import getUserPasswordObject from './getUserPasswordObject';
 
 export {
   getParsedASTMap,
@@ -55,7 +49,6 @@ export {
   getRelationFieldDefinition,
   getRelationMutationNames,
   getScalarFieldDefinition,
-  getSendResendForgotPasswordOTPInput,
   getUniqueFieldFromInput,
   hasDirective,
   isFieldDirectivePresent,
@@ -66,10 +59,5 @@ export {
   checkIfArgumentsAreFromSameType,
   getNestedConnectMutationString,
   isDocContainsGivenKeyValue,
-  isTopicUnlocked,
-  getFirstTopicAndLearningObjective,
-  addUserCurrentTopicComponentStatus,
-  getUserCurrentTopicComponentStatus,
-  getBatchCurrentComponentStatus,
-  addMentorMenteeSessionForBatch,
+  getUserPasswordObject,
 };

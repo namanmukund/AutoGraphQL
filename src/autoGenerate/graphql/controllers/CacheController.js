@@ -78,7 +78,7 @@ class CacheController extends MasterController {
             purge${typeName}${((mutationResolverName !== 'addMutationResolver') && get(inputParams, 'id')) ? `(id:["${get(inputParams, 'id')}"])` : ''}
           }`,
           extensions: {
-            source: 'tekie-backend',
+            source: 'autographql-backend',
           },
         };
         fetch(STELLATE_PURGE_CONFIG.STELLATE_ENDPOINT, {

@@ -1,15 +1,10 @@
 const FileBucket = `
   enum FileBucket {
-    python
-    email
-    landingPage
-    editor
-    webDevelopment
-    codeOrg
-    blockly
+    default
+    media
+    avatars
+    documents
     temp
-    topicThumbnail
-    videosToTranscode
   }`;
 
 export default FileBucket;

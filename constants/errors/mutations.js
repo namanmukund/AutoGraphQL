@@ -9,7 +9,7 @@ export const ConnectMutationsArgumentsLimitError = createError('ConnectMutations
 });
 
 export const OneToOneRelationSentInInputAndAsConnectError = createError('OneToOneRelationSentInInputAndAsConnectError', {
-  message: '1-1 relation fields can have only one value, but more than one values input',
+  message: '1-1 relation fields can have only one value, but more than one value was provided',
 });
 
 export const RelationMutationSimilarTypeArgumentError = createError('RelationMutationSimilarTypeArgumentError', {
@@ -17,21 +17,9 @@ export const RelationMutationSimilarTypeArgumentError = createError('RelationMut
 });
 
 export const MultipleArrayOperationDeniedError = createError('MultipleArrayOperationDeniedError', {
-  message: 'Only single operation can be done in an array field on a mutation',
+  message: 'Only a single operation can be performed on an array field per mutation',
 });
 
 export const InvalidArrayUpdateOperationError = createError('InvalidArrayUpdateOperationError', {
   message: 'updateWhere and updateWith inside array update can only be used in conjunction',
-});
-
-export const InvalidTopicLOConnectionError = createError('InvalidTopicLOConnectionError', {
-  message: 'Relation between learning objective and topic does not exist',
-});
-
-export const InvalidTopicPassedInCurrentTopicComponent = createError('InvalidTopicPassedInCurrentTopicComponent', {
-  message: 'Order of topic passed is less than or equal to current topic order',
-});
-
-export const UserCourseCombinationExistError = createError('UserCourseCobinationExistError', {
-  message: 'Document with given user and course combination already exists',
 });

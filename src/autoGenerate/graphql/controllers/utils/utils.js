@@ -1,5 +1,5 @@
 import {
-  mergeWith, isPlainObject, isMatch, find,
+  mergeWith, isPlainObject,
 } from 'lodash';
 import {
   AdditionalFieldUpdateDeniedError,
@@ -10,22 +10,15 @@ import arrayOperationFunctions from './arrayOperationUtil';
 // Split on first underscore
 const splitOnFirstUnderscore = (str) => [str.substring(0, str.indexOf('_')), str.substring(str.indexOf('_') + 1)];
 
-/* eslint-disable no-use-before-define */
 // Custom merge which merges nested objects, assigns nested arrays and handle array field updates
 const customMerge = (record, input, arrayFieldsArray = []) => {
-  /* eslint-disable consistent-return */
-  // lodash mergeWith customizer
-  // If current field is an array field handle it using our handleArrayField method logic
-  // else let lodash handle merge accordingly
   const customizer = (objValue, srcValue, key) => {
     if (arrayFieldsArray.includes(key)) {
       return handleArrayField(objValue, srcValue, arrayFieldsArray);
     }
   };
-  /* eslint-enable consistent-return */
   return mergeWith(record, input, customizer);
 };
-/* eslint-enable no-use-before-define */
 
 // Get array field objects
 const handleArrayField = (
@@ -47,7 +40,7 @@ const handleArrayField = (
               input.updateWhere,
               input.updateWith, arrayFieldsArray);
           }
-        } else if (keys.includes('updateWhere') || keys.includes('updateWhere')) {
+        } else if (keys.includes('updateWhere') || keys.includes('updateWith')) {
           throw new InvalidArrayUpdateOperationError();
         }
       }
@@ -83,7 +76,6 @@ const getUpdatedRecordObject = (
   Object.keys(input).forEach((field) => {
     // to make sure same reference is not added
     if (relationFieldsArray.includes(field) && arrayFieldsArray.includes(field)) {
-      // if reference already in record field, then dont push to record
       const allReferencedIds = record[field].map((reference) => reference.typeId);
       input[field].forEach((reference) => {
         if (!allReferencedIds.includes(reference.typeId)) {
@@ -91,12 +83,8 @@ const getUpdatedRecordObject = (
         }
       });
     } else if (isPlainObject(input[field]) && !arrayFieldsArray.includes(field)) {
-      // Updating object type fields that are not array
-      // Check if it is an additional field
       if (additionalRelationFieldsArray.includes(field)) {
-        // Check if relation exists for the additionalfield
         if (record[field].type && record[field].typeId) {
-          // merge all additionalFields
           Object.keys((input[field])).forEach((additionalField) => {
             if (arrayFieldsArray.includes(additionalField)) {
               recordDoc[field][additionalField] = handleArrayField(record[field][additionalField],
@@ -114,19 +102,11 @@ const getUpdatedRecordObject = (
           });
         }
       } else {
-        // update field type object
-        // recordDoc[field] = customMerge(recordDoc[field], input[field], arrayFieldsArray);
-        /*
-        Above line commented as this is mongoose model and it may require set function to assign a value
-         */
         recordDoc.set([field], customMerge(recordDoc[field], input[field], arrayFieldsArray));
       }
     } else if (arrayFieldsArray.includes(field)) {
-      // If array type field
-      // check and handle additionalField array
       if (additionalRelationFieldsArray.includes(field)) {
         const inputId = input[field].id;
-        // Find index by typeId
         const recordFieldIndex = Array.isArray(record[field])
           && record[field].findIndex((rec) => rec.typeId === inputId);
         if (recordFieldIndex >= 0 && record[field][recordFieldIndex].type
@@ -150,7 +130,6 @@ const getUpdatedRecordObject = (
           });
         }
       } else {
-        // Check and handle array field
         recordDoc[field] = handleArrayField(
           record[field],
           input[field],
@@ -160,34 +139,16 @@ const getUpdatedRecordObject = (
         );
       }
     } else if (!input[field]) {
-      /* by setting the empty field value to undefined, mongoose will
-      automatically $unset it and the field will be removed
-      */
-      // For handling case where 0 or false is passed in input
       if (input[field] !== 0 && input[field] !== false) {
         recordDoc[field] = undefined;
       } else {
         recordDoc[field] = input[field];
       }
     } else {
-      // replace field value with input
       recordDoc[field] = input[field];
     }
   });
   return recordDoc;
-};
-
-// returns if input class with grade and sec already exists
-const validateClassItemsUniqueness = (record, input) => {
-  if (!input.grade || !input.section) {
-    return true;
-  }
-  const isAExistingClass = find(record, (rec) => {
-    const existingClass = { grade: rec.grade, section: rec.section };
-    const inputClass = { grade: input.grade, section: input.section };
-    return isMatch(existingClass, inputClass);
-  });
-  return !isAExistingClass;
 };
 
 export {
@@ -195,5 +156,4 @@ export {
   getUpdatedRecordObject,
   splitOnFirstUnderscore,
   customMerge,
-  validateClassItemsUniqueness,
 };

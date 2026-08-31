@@ -1,8 +1,13 @@
+import twilio from 'twilio';
 import twilioConfig from '../../config/sms/twilioConfig';
 import { log } from '../../utils/log';
 
-// require the Twilio module and create a REST client
-const client = require('twilio')(twilioConfig.accountSid, twilioConfig.authToken);
+const getClient = () => {
+  if (twilioConfig.accountSid && twilioConfig.authToken) {
+    return twilio(twilioConfig.accountSid, twilioConfig.authToken);
+  }
+  return null;
+};
 
 const env = process.env.NODE_ENV || 'development';
 const sendTextSms = (receiverNumber, body) => {
@@ -10,13 +15,17 @@ const sendTextSms = (receiverNumber, body) => {
     log(`sendTextSms method called in ${env} environment`);
     return null;
   }
-
-  // eslint-disable-next-line no-param-reassign
-  if (process.env.DATA_MASKING) receiverNumber = '+919999694605';
+  const client = getClient();
+  if (!client) {
+    log('Twilio credentials not configured, skipping SMS');
+    return null;
+  }
+  let targetNumber = receiverNumber;
+  if (process.env.DATA_MASKING) targetNumber = '+919999694605';
 
   return client.messages
     .create({
-      to: receiverNumber,
+      to: targetNumber,
       from: twilioConfig.senderId,
       body,
     }).then((msg) => {

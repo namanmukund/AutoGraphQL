@@ -10,8 +10,7 @@ const generateUsername = (input, context) => {
     appName,
   } = userAndAppInfo;
   const { name, email } = input;
-  // username to always be derived from name or email
-  // if call is from tekieLearningApp we will use email to generate username
+  // Determine username generation based on incoming parameters (email or name)
   let username;
   if (appName === TLA) {
     username = email.replace(/\s/g, '').toLowerCase();

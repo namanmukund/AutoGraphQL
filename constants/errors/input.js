@@ -1,15 +1,7 @@
 import { createError } from 'apollo-errors';
 
 export const EitherEmailOrPhoneRequiredError = createError('EitherEmailOrPhoneRequiredError', {
-  message: 'Either email or phone is mandatory here',
-});
-
-export const EmailNotVerifiedError = createError('EmailNotVerifiedError', {
-  message: 'Provided email is not verified',
-});
-
-export const PhoneNotVerifiedError = createError('PhoneNotVerifiedError', {
-  message: 'Provided phone number is not verified',
+  message: 'Either email or phone is mandatory',
 });
 
 export const EitherEmailOrPhoneNotBothRequiredError = createError('EitherEmailOrPhoneNotBothRequiredError', {
@@ -25,225 +17,73 @@ export const InvalidPhoneError = createError('InvalidPhoneError', {
 });
 
 export const EitherUsernameEmailOrPhoneRequiredError = createError('EitherUsernameEmailOrPhoneRequiredError', {
-  message: 'Either of username, email or phone is mandatory for login',
+  message: 'Either of username, email, or phone is mandatory for authentication',
 });
 
 export const InvalidNameError = createError('InvalidNameError', {
-  message: 'Only name starting with alphabet and containing alphanumeric characters with spaces are allowed',
+  message: 'Name must start with an alphabet and contain alphanumeric characters with spaces',
 });
 
 export const InvalidNameLengthError = createError('InvalidNameLengthError', {
-  message: 'The name should be more than 3 and less than 30 characters in length',
+  message: 'Name must be between 3 and 30 characters in length',
 });
 
 export const InvalidUsernameError = createError('InvalidUsernameError', {
-  message: 'Only username starting with alphabet and containing alphanumeric characters with . and _ are allowed',
+  message: 'Username must start with an alphabet and contain alphanumeric characters, dots, or underscores',
 });
 
 export const InvalidUsernameLengthError = createError('InvalidUsernameLengthError', {
-  message: 'The username should be more than 3 and less than 30 characters in length',
+  message: 'Username must be between 3 and 30 characters in length',
 });
 
 export const InvalidPasswordLengthError = createError('InvalidPasswordLengthError', {
-  message: 'Password must be at least 6 characters',
+  message: 'Password must be at least 6 characters in length',
 });
 
 export const PhoneNumberAndCountryCodeRequiredError = createError('PhoneNumberAndCountryCodeRequiredError', {
-  message: 'Both country code and phone number is mandatory',
+  message: 'Both country code and phone number are mandatory',
 });
 
 export const EitherPhoneOrEmailOtpRequiredError = createError('EitherPhoneOrEmailOtpRequiredError', {
-  message: 'Either of phoneOtp or emailOtp field is mandatory',
+  message: 'Either phoneOtp or emailOtp is mandatory',
 });
 
 export const ConnectIdsAlreadyRelatedError = createError('ConnectIdsAlreadyRelatedError', {
-  message: 'Connect Ids sent in input have already been connected to the type',
+  message: 'Connect IDs provided are already connected to this record',
 });
 
 export const DuplicateConnectIdsError = createError('DuplicateConnectIdsError', {
-  message: 'Duplicate connect ids sent in input',
-});
-
-export const UserOrCourseNotPresentError = createError('UserOrCourseNotPresentError', {
-  message: 'User or course id is missing in input',
-});
-
-export const TopicOrLONotPresentError = createError('TopicOrLONotPresentError', {
-  message: 'Topic or learning objective id is missing in input',
-});
-
-export const TopicOrUserCurrentTopicComponentNotPresentError = createError('TopicOrUserCurrentTopicComponentNotPresentError', {
-  message: 'Topic or UserCurrentTopicComponent id is missing in input',
-});
-
-export const UserOrLearningObjectiveNotPresentError = createError('UserOrLearningObjectiveNotPresentError', {
-  message: 'User or learning objective id is missing in input',
-});
-
-export const UserOrTopicNotPresentError = createError('UserOrTopicNotPresentError', {
-  message: 'User or topic id is missing in input',
-});
-
-export const PracticeQuestionsNotPresentError = createError('PracticeQuestionsNotPresentError', {
-  message: 'PracticeQuestions are missing in input',
-});
-
-export const QuizQuestionsNotPresentError = createError('QuizQuestionsNotPresentError', {
-  message: 'QuizQuestions are missing in input',
+  message: 'Duplicate connect IDs sent in input',
 });
 
 export const UserMismatchError = createError('UserMismatchError', {
-  message: 'User id passed in input does not belong to logged in user',
+  message: 'User ID provided does not match the authenticated user',
 });
 
 export const UnauthorizedFieldOrTypeAccessByAppError = createError('UnauthorizedFieldAccessByAppError', {
-  message: 'App is not authorized to access some of the fields or types',
+  message: 'Application is not authorized to access requested fields or types',
 });
 
 export const InsufficientPermissionError = createError('InsufficientPermissionError', {
-  message: 'Insufficient permission error',
-});
-
-export const InvalidGmailTokenError = createError('InvalidGmailTokenError', {
-  message: 'Invalid gmail token error',
-});
-
-export const InvalidFacebookTokenError = createError('InvalidFacebookTokenError', {
-  message: 'Invalid facebook token error',
-});
-
-export const AssignmentQuestionsNotPresentError = createError('AssignmentQuestionsNotPresentError', {
-  message: 'AssignmentQuestions are missing in input',
-});
-
-export const SessionTopicAndTopicConnectIdMismatchError = createError('SessionTopicAndTopicConnectIdMismatchError', {
-  message: 'Invalid topicConnectId sent in input',
-});
-
-export const InvalidSessionDateTimeError = createError('InvalidSessionDateTimeError', {
-  message: 'Invalid session date or time',
+  message: 'Insufficient permissions to perform this operation',
 });
 
 export const MissingMandatoryInputInRequestError = createError('MissingMandatoryInputInRequestError', {
-  message: 'One or more than one input is missing in request',
+  message: 'One or more mandatory input fields are missing in request',
 });
 
 export const InvalidTimeError = createError('InvalidTimeError', {
-  message: 'Time has to be more than current time',
+  message: 'Time must be in the future',
 });
 
 export const InvalidDateError = createError('InvalidDateError', {
-  message: 'Date can not be less than current date',
+  message: 'Date cannot be in the past',
 });
 
-export const InvalidBannerDateRangeError = createError('InvalidBannerDateRangeError', {
-  message: 'ExpiryDate can not be less than InceptionDate',
+export const EmailNotVerifiedError = createError('EmailNotVerifiedError', {
+  message: 'Email address is not verified',
 });
 
-export const NoSlotSelectedError = createError('NoSlotSelectedError', {
-  message: 'No slot is selected in input',
-});
-
-export const OnlyOneSlotAllowedError = createError('OnlyOneSlotAllowedError', {
-  message: 'Only one slot can be selected in a day',
-});
-
-export const NameFieldRequiredError = createError('NameFieldRequiredError', {
-  message: 'Name field is mandatory in input',
-});
-
-export const PhoneFieldRequiredError = createError('PhoneFieldRequiredError', {
-  message: 'Phone field is mandatory in input',
-});
-
-export const BannerFieldRequiredError = createError('BannerFieldRequiredError', {
-  message: 'Required Field!',
-});
-
-export const PasswordFieldRequiredError = createError('PasswordFieldRequiredError', {
-  message: 'Password field is mandatory in input',
-});
-
-export const ProductIdNotPresentError = createError('ProductIdNotPresentError', {
-  message: 'Product Id is missing in input',
-});
-
-export const TransactionIdNotPresentError = createError('TransactionIdNotPresentError', {
-  message: 'Transaction Id is missing in input',
-});
-
-export const HashOrStatusNotPresentError = createError('HashOrStatusNotPresentError', {
-  message: 'Hash is missing in input',
-});
-
-export const CanNotChangeVerifiedUserStatusError = createError('CanNotChangeVerifiedUserStatusError', {
-  message: 'Can not change the status of a verified user',
-});
-
-export const CanNotChangeSessionStatusError = createError('CanNotChangeSessionStatusError', {
-  message: 'Can not change the status of a completed session',
-});
-
-export const CanNotStartSessionWithoutMentorError = createError('CanNotStartSessionWithoutMentorError', {
-  message: 'Batch Session does not have a mentor assigned.',
-});
-
-export const CanNotCompleteSessionBeforeStartingError = createError('CanNotCompleteSessionBeforeStartingError', {
-  message: 'Can not complete the session before starting it',
-});
-
-export const MessageAlreadySendError = createError('MessageAlreadySendError', {
-  message: 'Message is already send',
-});
-
-export const InvalidRequestError = createError('InvalidRequestError', {
-  message: 'Request validation failed',
-});
-
-export const MandatorySessionLinkError = createError('MandatorySessionLinkError', {
-  message: 'Session link is mandatory',
-});
-
-export const CanNotDeleteCompletedSessionError = createError('CanNotDeleteCompletedSessionError', {
-  message: 'Can not delete a completed session',
-});
-
-export const EitherPhoneOrEmailIsMandatory = createError('EitherPhoneOrEmailIsMandatory', {
-  message: 'Either Phone or Email is mandatory',
-});
-
-export const GradeFieldRequiredError = createError('GradeFieldRequiredError', {
-  message: 'Grade field is mandatory in input',
-});
-
-export const EmailFieldRequiredError = createError('EmailFieldRequiredError', {
-  message: 'Email field is mandatory in input',
-});
-
-export const InvalidStartTimeError = createError('InvalidStartTimeError', {
-  message: 'Time has to be 1 hour more than selected start time',
-});
-
-export const InvalidScheduleParameters = createError('InvalidScheduleParameters', {
-  message: 'Please provide valid parameters for scheduling sessions.',
-});
-
-export const InvalidRescheduleParameters = createError('InvalidRescheduleParameters', {
-  message: 'Please provide valid parameters for re-scheduling sessions.',
-});
-
-export const SectionFieldRequiredError = createError('SectionFieldRequiredError', {
-  message: 'Section field is mandatory in input',
-});
-
-export const StudentWithSimilarRollNoExist = createError('StudentWithSimilarRollNoExist', {
-  message: 'Student with similar roll no already exists',
-});
-
-export const InvalidLearningObjectiveComponent = createError('InvalidLearningObjectiveComponent', {
-  message: 'Learning Objective Component passed is invalid',
-});
-
-export const StudentWithSimilarNameAndGradeExist = createError('StudentWithSimilarNameAndGradeExist', {
-  message: 'Student with similar name and grade already exists',
+export const PhoneNotVerifiedError = createError('PhoneNotVerifiedError', {
+  message: 'Phone number is not verified',
 });
