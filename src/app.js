@@ -21,6 +21,7 @@ import getAdditionalContextData from '../utils/getAdditionalContextData';
 import { createDataLoaders } from './dataloader';
 import { createDepthLimitRule, createComplexityLimitRule } from './autoGenerate/graphql/validation/rules';
 import db from './db';
+import { startOutboxWorker, stopOutboxWorker } from './birdwatch/outbox/worker';
 
 const http = require('http');
 
@@ -177,6 +178,7 @@ const socketServerPlugin = {
   async serverWillStart() {
     return {
       async drainServer() {
+        stopOutboxWorker();
         await socketServer.dispose();
       },
     };
@@ -317,6 +319,7 @@ const server = new ApolloServer({
 const startServer = async () => {
   await server.start();
   server.applyMiddleware({ app, path });
+  startOutboxWorker();
 
   httpServer.listen(port, '0.0.0.0', () => {
     log(`End time:${new Date()}`, 'status');
