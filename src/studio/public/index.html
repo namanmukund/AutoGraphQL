@@ -1,0 +1,1854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoGraphQL Studio — Visual Schema & Hook Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #07090e;
+      --bg-primary: #0b0f19;
+      --bg-secondary: #111827;
+      --bg-card: rgba(17, 24, 39, 0.75);
+      --bg-card-hover: rgba(30, 41, 59, 0.95);
+      --bg-input: #080d1a;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-focus: #6366f1;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --accent-primary: #6366f1;
+      --accent-purple: #a855f7;
+      --accent-pink: #ec4899;
+      --accent-emerald: #10b981;
+      --accent-blue: #3b82f6;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-cyan: #06b6d4;
+      --gradient-main: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+      --gradient-emerald: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+      --gradient-blue: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-display: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    .ambient-glow {
+      position: fixed;
+      top: -20%;
+      left: 15%;
+      width: 70vw;
+      height: 70vh;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.08) 45%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(90px);
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(11, 15, 25, 0.88);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.75rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      text-decoration: none;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      background: var(--gradient-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: white;
+      box-shadow: 0 0 25px rgba(99, 102, 241, 0.55);
+    }
+
+    .brand-title {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.4rem;
+      letter-spacing: -0.025em;
+      background: linear-gradient(to right, #ffffff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-badge {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      background: rgba(99, 102, 241, 0.18);
+      color: #818cf8;
+      border: 1px solid rgba(99, 102, 241, 0.35);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.8rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 20px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      font-weight: 600;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 10px #10b981;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .studio-container {
+      position: relative;
+      z-index: 10;
+      max-width: 1680px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 3rem 2rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .studio-tabs {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.85rem;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 0.92rem;
+      font-weight: 600;
+      padding: 0.65rem 1.25rem;
+      border-radius: 9px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .tab-btn.active {
+      color: #ffffff;
+      background: rgba(99, 102, 241, 0.16);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.25);
+    }
+
+    .tab-pane {
+      display: none;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .tab-pane.active {
+      display: flex;
+    }
+
+    .studio-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 1180px) {
+      .studio-grid-2 { grid-template-columns: 1fr; }
+    }
+
+    .card-panel {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 15px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      transition: border-color 0.25s ease, transform 0.2s ease;
+    }
+
+    .card-panel:hover {
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.85rem;
+    }
+
+    .panel-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      color: #ffffff;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    input, select {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 9px;
+      padding: 0.65rem 0.85rem;
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.3);
+    }
+
+    /* === PRO CODE EDITOR COMPONENT === */
+    .code-editor-wrapper {
+      display: flex;
+      flex-direction: column;
+      background: #020617;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.65);
+      font-family: var(--font-mono);
+    }
+
+    .code-editor-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #090e1a;
+      padding: 0.45rem 0.85rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .editor-tab {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      border-left: 2px solid var(--accent-primary);
+    }
+
+    .editor-tools {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .editor-lang-badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.12);
+      padding: 0.18rem 0.45rem;
+      border-radius: 4px;
+    }
+
+    .editor-tool-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 5px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: all 0.15s;
+    }
+
+    .editor-tool-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .code-editor-body {
+      display: flex;
+      position: relative;
+      min-height: 380px;
+      background: #020617;
+    }
+
+    .code-gutter {
+      width: 44px;
+      padding: 0.85rem 0.4rem;
+      background: #070c18;
+      color: #475569;
+      text-align: right;
+      user-select: none;
+      font-size: 0.82rem;
+      line-height: 1.55;
+      font-family: var(--font-mono);
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
+      white-space: pre-line;
+      overflow: hidden;
+    }
+
+    .code-textarea {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #f1f5f9;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.55;
+      padding: 0.85rem 1rem;
+      outline: none;
+      resize: vertical;
+      white-space: pre;
+      overflow-x: auto;
+      tab-size: 2;
+    }
+
+    .code-editor-statusbar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1.25rem;
+      background: #070c18;
+      padding: 0.3rem 0.85rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.72rem;
+      color: #64748b;
+      font-family: var(--font-mono);
+    }
+
+    /* Buttons */
+    .btn {
+      background: var(--gradient-main);
+      color: white;
+      border: none;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 0.65rem 1.35rem;
+      border-radius: 9px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 22px rgba(99, 102, 241, 0.5);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      box-shadow: none;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: none;
+      transform: none;
+    }
+
+    .btn-danger {
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.35);
+      color: #fb7185;
+      box-shadow: none;
+    }
+
+    .btn-danger:hover {
+      background: rgba(244, 63, 94, 0.35);
+      color: white;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 2fr 1.4fr 1.2fr auto;
+      gap: 0.6rem;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 0.65rem;
+      border-radius: 9px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      transition: all 0.2s;
+    }
+
+    .field-row.relation-row {
+      grid-template-columns: 1.5fr 1.5fr 1.5fr 1.5fr auto;
+      background: rgba(99, 102, 241, 0.1);
+      border-color: rgba(99, 102, 241, 0.25);
+    }
+
+    .pill-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .schema-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      max-height: 480px;
+      overflow-y: auto;
+    }
+
+    .schema-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.9rem 1.2rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 11px;
+      transition: all 0.2s;
+    }
+
+    .schema-item:hover {
+      background: rgba(99, 102, 241, 0.1);
+      border-color: rgba(99, 102, 241, 0.4);
+    }
+
+    .badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.25rem 0.55rem;
+      border-radius: 5px;
+    }
+
+    .badge-mongo { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .badge-pg { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .badge-rel { background: rgba(168, 85, 247, 0.18); color: #c084fc; }
+    .badge-active { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .badge-none { background: rgba(148, 163, 184, 0.1); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.2); }
+
+    .alert-banner {
+      padding: 0.85rem 1.2rem;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #c7d2fe;
+    }
+
+    #toast-container {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .toast {
+      padding: 0.9rem 1.35rem;
+      border-radius: 11px;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(18px);
+      border: 1px solid var(--border-color);
+      color: white;
+      font-size: 0.88rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+      animation: slideUp 0.3s ease;
+    }
+
+    .toast-success { border-color: rgba(16, 185, 129, 0.5); color: #34d399; }
+    .toast-danger { border-color: rgba(244, 63, 94, 0.5); color: #fb7185; }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .relations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .relation-card {
+      background: rgba(0, 0, 0, 0.28);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      transition: all 0.2s;
+    }
+
+    .relation-card:hover {
+      border-color: rgba(168, 85, 247, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .hook-matrix-row {
+      display: grid;
+      grid-template-columns: 1.2fr 1.5fr 1.5fr;
+      gap: 1rem;
+      align-items: center;
+      padding: 0.9rem;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border-color);
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient-glow"></div>
+  <div id="toast-container"></div>
+
+  <!-- In-App Delete Confirmation Modal -->
+  <div id="delete-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 15px; padding: 1.85rem; max-width: 450px; width: 90%; display: flex; flex-direction: column; gap: 1.1rem; box-shadow: 0 25px 50px rgba(0,0,0,0.7);">
+      <div style="display: flex; align-items: center; gap: 0.85rem;">
+        <div style="width: 44px; height: 44px; border-radius: 11px; background: rgba(244, 63, 94, 0.16); display: flex; align-items: center; justify-content: center; font-size: 1.35rem;">🗑️</div>
+        <div>
+          <h3 style="font-size: 1.15rem; color: #fff;">Delete Schema?</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted);" id="delete-modal-msg">Are you sure you want to delete this schema?</p>
+        </div>
+      </div>
+      <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.45;">This will permanently delete the <code>.graphql</code> file from <code>schemas/</code> and unload the compiled AST model from the API.</p>
+      <div style="display: flex; justify-content: flex-end; gap: 0.85rem; margin-top: 0.5rem;">
+        <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+        <button id="btn-confirm-delete" class="btn btn-danger">Yes, Delete Schema</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <a href="/studio" class="brand">
+      <div class="brand-logo">⚡</div>
+      <div>
+        <div class="brand-title">AutoGraphQL Studio</div>
+      </div>
+      <span class="brand-badge">Engine 4.0</span>
+    </a>
+
+    <div class="header-actions">
+      <div class="status-pill" id="db-status-pill">
+        <span class="status-dot"></span>
+        <span id="db-status-text">Server Online :3000</span>
+      </div>
+      <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;" onclick="exportTypeScriptSDK()">
+        📦 Export SDK
+      </button>
+      <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;" onclick="exportSchemaSDL()">
+        📄 Dump SDL
+      </button>
+      <a href="/graphql/core" target="_blank" class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
+        Playground ↗
+      </a>
+    </div>
+  </header>
+
+  <!-- Studio Main -->
+  <div class="studio-container">
+
+    <!-- Tabs Navigation -->
+    <div class="studio-tabs">
+      <button class="tab-btn active" id="btn-tab-schema" onclick="switchTab('tab-schema')">
+        <span>📐</span> Schema Studio
+      </button>
+      <button class="tab-btn" id="btn-tab-relations" onclick="switchTab('tab-relations')">
+        <span>🔗</span> Connected Schemas
+      </button>
+      <button class="tab-btn" id="btn-tab-hooks" onclick="switchTab('tab-hooks')">
+        <span>🪝</span> Lifecycle Hooks
+      </button>
+      <button class="tab-btn" id="btn-tab-webhooks" onclick="switchTab('tab-webhooks')">
+        <span>📡</span> Webhooks & Events
+      </button>
+      <button class="tab-btn" id="btn-tab-database" onclick="switchTab('tab-database')">
+        <span>🗄️</span> Databases & RLS
+      </button>
+      <button class="tab-btn" id="btn-tab-explorer" onclick="switchTab('tab-explorer')">
+        <span>🚀</span> API Playground
+      </button>
+    </div>
+
+    <!-- TAB 1: SCHEMA STUDIO -->
+    <div id="tab-schema" class="tab-pane active">
+      <div class="alert-banner">
+        💡 <strong>Zero-Code Schema Management:</strong> Define entities, relational connectors, and directives below. Schemas are automatically compiled into GraphQL resolvers, Mongoose/Sequelize models, and DataLoaders.
+      </div>
+
+      <div class="studio-grid-2">
+        <!-- Visual Model Builder -->
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title"><span>✨</span> Visual Model Builder</div>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;" onclick="resetModelBuilder()">
+                + New Model
+              </button>
+              <button id="btn-manage-hooks-active" class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem; border-color: rgba(168,85,247,0.4); color: #c084fc; display: none;" onclick="navigateToHooksForActiveSchema()">
+                🪝 Manage Hooks
+              </button>
+              <button id="btn-delete-active-schema" class="btn btn-danger" style="font-size: 0.8rem; padding: 0.35rem 0.75rem; display: none;" onclick="deleteActiveSchema()">
+                🗑️ Delete Schema
+              </button>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label>Model / Type Name</label>
+              <input type="text" id="model-name" placeholder="e.g. Course, Order, Product" oninput="updateSDLPreview()">
+            </div>
+            <div class="form-group">
+              <label>Database Dialect</label>
+              <select id="model-database" onchange="updateSDLPreview()">
+                <option value="default">Global Default (.env)</option>
+                <option value="mongoose">🍃 MongoDB (Mongoose)</option>
+                <option value="postgres">🐘 PostgreSQL (Sequelize)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Model Directives</label>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+              <label class="pill-checkbox">
+                <input type="checkbox" id="dir-history" onchange="updateSDLPreview()"> @history (Audit log)
+              </label>
+              <label class="pill-checkbox">
+                <input type="checkbox" id="dir-tenant" onchange="updateSDLPreview()"> @tenantScoped (Multi-Tenancy)
+              </label>
+              <label class="pill-checkbox">
+                <input type="checkbox" id="dir-owner" onchange="updateSDLPreview()"> @ownerScoped (User Ownership)
+              </label>
+            </div>
+          </div>
+
+          <!-- Fields Section -->
+          <div class="panel-header" style="padding-top: 0.5rem;">
+            <div class="panel-title" style="font-size: 0.95rem;">Fields & Constraints</div>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;" onclick="addFieldRow()">
+                + Add Field
+              </button>
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-color: rgba(168, 85, 247, 0.4); color: #c084fc;" onclick="addRelationRow()">
+                🔗 Connect Schema
+              </button>
+            </div>
+          </div>
+
+          <div id="fields-container" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 280px; overflow-y: auto;">
+            <!-- Dynamic field rows appended here -->
+          </div>
+
+          <div style="display: flex; gap: 0.75rem; margin-top: auto;">
+            <button class="btn" style="flex: 1;" onclick="saveCurrentSchema()">
+              💾 Save & Deploy to schemas/
+            </button>
+          </div>
+        </div>
+
+        <!-- Live SDL Code Editor -->
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title"><span>📝</span> Live GraphQL SDL Editor</div>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;" onclick="loadSampleSchema('Course')">
+                Sample Course
+              </button>
+              <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;" onclick="loadSampleSchema('Order')">
+                Sample Order (PG)
+              </button>
+            </div>
+          </div>
+
+          <!-- Pro Code Editor Wrapper -->
+          <div class="code-editor-wrapper">
+            <div class="code-editor-toolbar">
+              <div class="editor-tab">
+                <span>📄</span>
+                <span id="sdl-editor-filename">schema.graphql</span>
+              </div>
+              <div class="editor-tools">
+                <span class="editor-lang-badge">GraphQL SDL</span>
+                <button class="editor-tool-btn" onclick="copyEditorCode('sdl-editor')">📋 Copy</button>
+              </div>
+            </div>
+            <div class="code-editor-body">
+              <div class="code-gutter" id="sdl-editor-gutter">1</div>
+              <textarea id="sdl-editor" class="code-textarea" spellcheck="false"></textarea>
+            </div>
+            <div class="code-editor-statusbar">
+              <span id="sdl-editor-status">Line 1, Col 1</span>
+              <span>UTF-8</span>
+              <span>GraphQL</span>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.8rem; color: var(--text-muted);" id="schema-save-status">
+              Auto-compiles AST on save
+            </span>
+            <button class="btn btn-secondary" onclick="saveCurrentSchema()">
+              Deploy Editor Code ⚡
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Discovered Schemas List -->
+      <div class="card-panel">
+        <div class="panel-header">
+          <div class="panel-title"><span>📁</span> Managed Schema Files (<code>schemas/</code>)</div>
+          <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <input type="text" id="schema-search" placeholder="Search schemas..." oninput="filterSchemasList()" style="font-size: 0.8rem; padding: 0.3rem 0.6rem; width: 180px;">
+            <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;" onclick="refreshSchemasList()">
+              Refresh
+            </button>
+          </div>
+        </div>
+        <div id="schemas-list" class="schema-list">
+          <div style="color: var(--text-muted); font-size: 0.85rem; padding: 0.5rem;">Loading discovered schemas...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: CONNECTED SCHEMAS & RELATIONSHIPS GRAPH -->
+    <div id="tab-relations" class="tab-pane">
+      <div class="alert-banner">
+        🔗 <strong>Multi-Schema Relational Connectors:</strong> Real-time mapping of foreign key connectors, 1:1, 1:N, and N:N relations wired across your GraphQL entities using <code>@relation(name, direction)</code>.
+      </div>
+
+      <div class="card-panel">
+        <div class="panel-header">
+          <div class="panel-title"><span>🌐</span> Active Cross-Schema Relations</div>
+          <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;" onclick="loadRelationsGraph()">
+            Refresh Graph
+          </button>
+        </div>
+
+        <div id="relations-container" class="relations-grid">
+          <div style="color: var(--text-muted); font-size: 0.85rem;">No active relations detected yet. Connect schemas using "🔗 Connect Schema" in Schema Studio!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: LIFECYCLE HOOKS STUDIO -->
+    <div id="tab-hooks" class="tab-pane">
+      <div class="alert-banner">
+        🪝 <strong>Schema-Centric Lifecycle Hooks:</strong> Select any saved schema below to immediately find, inspect, edit, or generate Pre-Hooks (input normalization, validation, password hashing) and Post-Hooks (emails, notifications, CRM sync).
+      </div>
+
+      <div class="card-panel">
+        <div class="panel-header">
+          <div class="panel-title"><span>🔍</span> Find & Configure Hooks for Schema</div>
+          <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <label style="margin: 0; font-size: 0.75rem;">Active Schema:</label>
+            <select id="hooks-schema-select" onchange="onSchemaHookSelected()" style="font-size: 0.85rem; padding: 0.35rem 0.75rem; min-width: 180px;">
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Schema Hooks Matrix -->
+        <div id="schema-hooks-matrix" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <div class="studio-grid-2">
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title"><span>⚙️</span> Hook Configurator</div>
+          </div>
+
+          <div class="form-group">
+            <label>Target Hook File (<code>hooks/*.js</code>)</label>
+            <input type="text" id="hook-name" placeholder="e.g. courseHooks, userHooks" value="courseHooks" oninput="updateHookEditorTabName()">
+          </div>
+
+          <div class="form-group">
+            <label>1-Click Boilerplate Presets</label>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.35rem 0.65rem;" onclick="insertHookSnippet('slugify')">🔗 Slug Generator</button>
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.35rem 0.65rem;" onclick="insertHookSnippet('validation')">🛡️ Value Validator</button>
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.35rem 0.65rem;" onclick="insertHookSnippet('bcrypt')">🔐 Password Hasher</button>
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.35rem 0.65rem;" onclick="insertHookSnippet('email')">✉️ Welcome Email</button>
+            </div>
+          </div>
+
+          <button class="btn" onclick="saveHookFile()">
+            💾 Save Hook to hooks/
+          </button>
+        </div>
+
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title"><span>💻</span> Active Hook Implementation</div>
+          </div>
+
+          <!-- Pro Code Editor Wrapper for Hooks -->
+          <div class="code-editor-wrapper">
+            <div class="code-editor-toolbar">
+              <div class="editor-tab">
+                <span>📄</span>
+                <span id="hook-editor-filename">courseHooks.js</span>
+              </div>
+              <div class="editor-tools">
+                <span class="editor-lang-badge">JavaScript</span>
+                <button class="editor-tool-btn" onclick="copyEditorCode('hook-code-editor')">📋 Copy</button>
+              </div>
+            </div>
+            <div class="code-editor-body">
+              <div class="code-gutter" id="hook-editor-gutter">1</div>
+              <textarea id="hook-code-editor" class="code-textarea" spellcheck="false"></textarea>
+            </div>
+            <div class="code-editor-statusbar">
+              <span id="hook-editor-status">Line 1, Col 1</span>
+              <span>UTF-8</span>
+              <span>JavaScript ES6</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: WEBHOOKS & EVENTS -->
+    <div id="tab-webhooks" class="tab-pane">
+      <div class="alert-banner">
+        📡 <strong>Birdwatch Event-Driven Automation:</strong> Outgoing mutation events are signed with HMAC-SHA256 and dispatched via a Transactional Outbox with exponential backoff retry.
+      </div>
+
+      <div class="studio-grid-2">
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title"><span>➕</span> Register Webhook</div>
+          </div>
+
+          <div class="form-group">
+            <label>Endpoint URL</label>
+            <input type="text" id="webhook-url" placeholder="https://api.mycrm.com/webhooks/autographql">
+          </div>
+
+          <div class="form-group">
+            <label>Subscribed Events (Comma-separated or * for all)</label>
+            <input type="text" id="webhook-events" placeholder="addOrder, updateUser, deleteUser" value="*">
+          </div>
+
+          <div class="form-group">
+            <label>HMAC Secret Key</label>
+            <input type="text" id="webhook-secret" placeholder="autographql_secret_key" value="studio_secret_2026">
+          </div>
+
+          <button class="btn" onclick="registerNewWebhook()">
+            🚀 Register Webhook Subscription
+          </button>
+        </div>
+
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title"><span>📋</span> Active Webhooks</div>
+            <button class="btn btn-secondary" style="font-size: 0.75rem;" onclick="loadWebhooksList()">Refresh</button>
+          </div>
+          <div id="webhooks-list" style="display: flex; flex-direction: column; gap: 0.65rem;">
+            <div style="color: var(--text-muted); font-size: 0.85rem;">Loading webhooks...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: DATABASES & RLS -->
+    <div id="tab-database" class="tab-pane">
+      <div class="studio-grid-2">
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title"><span>🍃</span> MongoDB Engine (Mongoose)</div>
+            <span class="badge badge-mongo" id="mongo-status-badge">Connected</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">
+            Stores document collections with embedded subdocuments, multi-key indexes, and dynamic aggregation pipelines.
+          </p>
+          <div id="mongo-models-list" style="font-size: 0.85rem;"></div>
+        </div>
+
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title"><span>🐘</span> PostgreSQL Engine (Sequelize)</div>
+            <span class="badge badge-pg" id="pg-status-badge">Configured</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">
+            Stores relational tables with GIN containment indexes, B-Tree indexes, and multi-tenant Row-Level Security.
+          </p>
+          <div id="pg-models-list" style="font-size: 0.85rem;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 6: API PLAYGROUND -->
+    <div id="tab-explorer" class="tab-pane">
+      <div class="studio-grid-2">
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title"><span>🚀</span> GraphQL Request</div>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-secondary" style="font-size: 0.75rem;" onclick="generateTestToken('ADMIN')">
+                🔑 Admin JWT
+              </button>
+              <button class="btn btn-secondary" style="font-size: 0.75rem;" onclick="generateTestToken('USER')">
+                👤 User JWT
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Authorization Token (JWT)</label>
+            <input type="text" id="auth-token" placeholder="Bearer <JWT_TOKEN>">
+          </div>
+
+          <!-- Query Editor Wrapper -->
+          <div class="code-editor-wrapper">
+            <div class="code-editor-toolbar">
+              <div class="editor-tab">
+                <span>⚡</span>
+                <span>Query.graphql</span>
+              </div>
+              <div class="editor-tools">
+                <span class="editor-lang-badge">GraphQL</span>
+                <button class="editor-tool-btn" onclick="copyEditorCode('graphql-query-input')">📋 Copy</button>
+              </div>
+            </div>
+            <div class="code-editor-body" style="min-height: 220px;">
+              <div class="code-gutter" id="query-input-gutter">1</div>
+              <textarea id="graphql-query-input" class="code-textarea" style="min-height: 220px;">query GetUsers {
+  users(first: 5) {
+    id
+    username
+    status
+    createdAt
+  }
+  usersMeta {
+    count
+  }
+}</textarea>
+            </div>
+            <div class="code-editor-statusbar">
+              <span id="query-input-status">Line 1, Col 1</span>
+              <span>GraphQL</span>
+            </div>
+          </div>
+
+          <button class="btn" onclick="executeGraphQLQuery()">
+            ▶ Execute Query
+          </button>
+        </div>
+
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title"><span>📦</span> Response</div>
+            <span id="query-latency" style="font-size: 0.75rem; color: var(--text-muted);">0 ms</span>
+          </div>
+
+          <!-- Response Editor Wrapper -->
+          <div class="code-editor-wrapper">
+            <div class="code-editor-toolbar">
+              <div class="editor-tab">
+                <span>📦</span>
+                <span>response.json</span>
+              </div>
+              <div class="editor-tools">
+                <span class="editor-lang-badge">JSON</span>
+                <button class="editor-tool-btn" onclick="copyEditorCode('graphql-response-output')">📋 Copy</button>
+              </div>
+            </div>
+            <div class="code-editor-body" style="min-height: 380px;">
+              <div class="code-gutter" id="query-response-gutter">1</div>
+              <textarea id="graphql-response-output" class="code-textarea" readonly style="min-height: 380px;"></textarea>
+            </div>
+            <div class="code-editor-statusbar">
+              <span id="query-response-status">Readonly</span>
+              <span>JSON</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // State
+    let availableModels = ['User', 'UserProfile', 'Post', 'Comment', 'Category', 'Tag', 'File'];
+    let rawSchemas = [];
+    let schemaToDelete = null;
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type === 'danger' ? 'toast-danger' : 'toast-success'}`;
+      toast.innerHTML = `<span>${type === 'danger' ? '⚠️' : '✅'}</span> <span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+
+    /* === PRO CODE EDITOR HELPER === */
+    function attachProCodeEditor(textareaId, gutterId, statusId) {
+      const textarea = document.getElementById(textareaId);
+      const gutter = document.getElementById(gutterId);
+      const status = document.getElementById(statusId);
+      if (!textarea || !gutter) return;
+
+      const updateGutter = () => {
+        const lines = (textarea.value || '').split('\n').length;
+        let lineNumbers = '';
+        for (let i = 1; i <= lines; i++) {
+          lineNumbers += i + '\n';
+        }
+        gutter.innerText = lineNumbers;
+      };
+
+      const updateCursorStatus = () => {
+        if (!status) return;
+        const text = textarea.value.substr(0, textarea.selectionStart);
+        const lines = text.split('\n');
+        const line = lines.length;
+        const col = lines[lines.length - 1].length + 1;
+        status.innerText = `Line ${line}, Col ${col}`;
+      };
+
+      textarea.addEventListener('input', () => {
+        updateGutter();
+        updateCursorStatus();
+      });
+
+      textarea.addEventListener('scroll', () => {
+        gutter.scrollTop = textarea.scrollTop;
+      });
+
+      textarea.addEventListener('click', updateCursorStatus);
+      textarea.addEventListener('keyup', updateCursorStatus);
+
+      // Handle Tab key (indent with 2 spaces)
+      textarea.addEventListener('keydown', (e) => {
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          const start = textarea.selectionStart;
+          const end = textarea.selectionEnd;
+          textarea.value = textarea.value.substring(0, start) + '  ' + textarea.value.substring(end);
+          textarea.selectionStart = textarea.selectionEnd = start + 2;
+          updateGutter();
+          updateCursorStatus();
+        }
+      });
+
+      updateGutter();
+    }
+
+    function copyEditorCode(textareaId) {
+      const el = document.getElementById(textareaId);
+      if (el) {
+        navigator.clipboard.writeText(el.value);
+        showToast('Code copied to clipboard! 📋');
+      }
+    }
+
+    function updateHookEditorTabName() {
+      const name = document.getElementById('hook-name').value.trim() || 'customHooks';
+      const filename = name.endsWith('.js') ? name : `${name}.js`;
+      const tab = document.getElementById('hook-editor-filename');
+      if (tab) tab.innerText = filename;
+    }
+
+    function openDeleteModal(name) {
+      schemaToDelete = name;
+      document.getElementById('delete-modal-msg').innerText = `Delete schema '${name}.graphql'?`;
+      document.getElementById('delete-modal').style.display = 'flex';
+      document.getElementById('btn-confirm-delete').onclick = () => executeDeleteSchema(name);
+    }
+
+    function closeDeleteModal() {
+      schemaToDelete = null;
+      document.getElementById('delete-modal').style.display = 'none';
+    }
+
+    async function executeDeleteSchema(name) {
+      closeDeleteModal();
+      try {
+        const res = await fetch(`/api/studio/schemas/${encodeURIComponent(name)}`, { method: 'DELETE' });
+        const result = await res.json();
+        if (result.success) {
+          showToast(`Deleted ${name}.graphql`, 'danger');
+          if (document.getElementById('model-name').value === name) {
+            resetModelBuilder();
+          }
+          await refreshSchemasList();
+          await loadRelationsGraph();
+          await populateHooksSchemaDropdown();
+        } else {
+          showToast(result.error || 'Failed to delete schema', 'danger');
+        }
+      } catch (err) {
+        showToast('Error deleting schema: ' + err.message, 'danger');
+      }
+    }
+
+    function deleteSchemaByName(name) {
+      openDeleteModal(name);
+    }
+
+    function deleteActiveSchema() {
+      const name = document.getElementById('model-name').value.trim();
+      if (name) openDeleteModal(name);
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+      const activeBtn = document.getElementById(`btn-${tabId}`) || event?.currentTarget;
+      if (activeBtn) activeBtn.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+      if (tabId === 'tab-schema') refreshSchemasList();
+      if (tabId === 'tab-relations') loadRelationsGraph();
+      if (tabId === 'tab-hooks') { populateHooksSchemaDropdown(); onSchemaHookSelected(); }
+      if (tabId === 'tab-webhooks') loadWebhooksList();
+      if (tabId === 'tab-database') loadDatabaseInfo();
+    }
+
+    function navigateToHooksForActiveSchema(schemaName) {
+      const name = schemaName || document.getElementById('model-name').value.trim() || 'User';
+      switchTab('tab-hooks');
+      const select = document.getElementById('hooks-schema-select');
+      if (select) {
+        select.value = name;
+        onSchemaHookSelected();
+      }
+    }
+
+    function addFieldRow(name = '', type = 'String', required = false, unique = false) {
+      const container = document.getElementById('fields-container');
+      const rowId = 'field_' + Math.random().toString(36).substr(2, 9);
+
+      const div = document.createElement('div');
+      div.className = 'field-row';
+      div.id = rowId;
+      div.innerHTML = `
+        <input type="text" placeholder="field name" value="${name}" oninput="updateSDLPreview()" style="font-size: 0.8rem; padding: 0.4rem;">
+        <select onchange="updateSDLPreview()" style="font-size: 0.8rem; padding: 0.4rem;">
+          <option value="String" ${type === 'String' ? 'selected' : ''}>String</option>
+          <option value="Int" ${type === 'Int' ? 'selected' : ''}>Int</option>
+          <option value="Float" ${type === 'Float' ? 'selected' : ''}>Float</option>
+          <option value="Boolean" ${type === 'Boolean' ? 'selected' : ''}>Boolean</option>
+          <option value="Date" ${type === 'Date' ? 'selected' : ''}>Date</option>
+          <option value="JSONB" ${type === 'JSONB' ? 'selected' : ''}>JSONB</option>
+          <option value="[String]" ${type === '[String]' ? 'selected' : ''}>[String]</option>
+        </select>
+        <div style="display: flex; gap: 0.4rem;">
+          <label class="pill-checkbox"><input type="checkbox" ${required ? 'checked' : ''} onchange="updateSDLPreview()"> Req</label>
+          <label class="pill-checkbox"><input type="checkbox" ${unique ? 'checked' : ''} onchange="updateSDLPreview()"> Uniq</label>
+        </div>
+        <button class="btn btn-danger" style="padding: 0.3rem 0.5rem; font-size: 0.75rem;" onclick="document.getElementById('${rowId}').remove(); updateSDLPreview();">✕</button>
+      `;
+      container.appendChild(div);
+      updateSDLPreview();
+    }
+
+    function addRelationRow(fieldName = '', targetModel = '', relationName = '', cardinality = '1:1', direction = 'IN') {
+      const container = document.getElementById('fields-container');
+      const rowId = 'rel_' + Math.random().toString(36).substr(2, 9);
+
+      let targetOptions = '';
+      availableModels.forEach(m => {
+        targetOptions += `<option value="${m}" ${targetModel === m ? 'selected' : ''}>${m}</option>`;
+      });
+
+      const div = document.createElement('div');
+      div.className = 'field-row relation-row';
+      div.id = rowId;
+      div.innerHTML = `
+        <input type="text" placeholder="relation field (e.g. instructor)" value="${fieldName}" oninput="updateSDLPreview()" style="font-size: 0.8rem; padding: 0.4rem;">
+        <select onchange="updateSDLPreview()" style="font-size: 0.8rem; padding: 0.4rem;" title="Target Schema">
+          ${targetOptions}
+        </select>
+        <select onchange="updateSDLPreview()" style="font-size: 0.8rem; padding: 0.4rem;" title="Cardinality">
+          <option value="1:1" ${cardinality === '1:1' ? 'selected' : ''}>1:1 (Single)</option>
+          <option value="1:N" ${cardinality === '1:N' ? 'selected' : ''}>1:N (Array [Target])</option>
+          <option value="N:N" ${cardinality === 'N:N' ? 'selected' : ''}>N:N (Many-to-Many)</option>
+        </select>
+        <input type="text" placeholder="Relation Name" value="${relationName}" oninput="updateSDLPreview()" style="font-size: 0.8rem; padding: 0.4rem;">
+        <button class="btn btn-danger" style="padding: 0.3rem 0.5rem; font-size: 0.75rem;" onclick="document.getElementById('${rowId}').remove(); updateSDLPreview();">✕</button>
+      `;
+      container.appendChild(div);
+      updateSDLPreview();
+    }
+
+    function updateSDLPreview() {
+      const modelName = document.getElementById('model-name').value.trim() || 'CustomModel';
+      const dbType = document.getElementById('model-database').value;
+      const isHistory = document.getElementById('dir-history').checked;
+      const isTenant = document.getElementById('dir-tenant').checked;
+      const isOwner = document.getElementById('dir-owner').checked;
+
+      let directives = '@model';
+      if (dbType !== 'default') directives += `(database: ${dbType})`;
+      if (isHistory) directives += ' @history';
+      if (isTenant) directives += ' @tenantScoped(field: "tenantId", claim: "tenantId")';
+      if (isOwner) directives += ' @ownerScoped(field: "userId", claim: "userId")';
+
+      let fieldsSDL = '  id: ID!\n';
+
+      const standardRows = document.querySelectorAll('#fields-container .field-row:not(.relation-row)');
+      standardRows.forEach(row => {
+        const name = row.querySelector('input[type="text"]').value.trim();
+        const type = row.querySelector('select').value;
+        const checkboxes = row.querySelectorAll('input[type="checkbox"]');
+        const req = checkboxes[0].checked;
+        const uniq = checkboxes[1].checked;
+
+        if (name) {
+          let line = `  ${name}: ${type}${req ? '!' : ''}`;
+          if (uniq) line += ' @unique';
+          fieldsSDL += line + '\n';
+        }
+      });
+
+      const relationRows = document.querySelectorAll('#fields-container .relation-row');
+      relationRows.forEach(row => {
+        const inputs = row.querySelectorAll('input[type="text"]');
+        const selects = row.querySelectorAll('select');
+        const relField = inputs[0].value.trim();
+        const targetModel = selects[0].value;
+        const cardinality = selects[1].value;
+        const relName = inputs[1].value.trim() || `${modelName}${targetModel}Relation`;
+
+        if (relField) {
+          const typeStr = (cardinality === '1:N' || cardinality === 'N:N') ? `[${targetModel}]` : targetModel;
+          fieldsSDL += `  ${relField}: ${typeStr} @relation(name: "${relName}")\n`;
+        }
+      });
+
+      if (isTenant) fieldsSDL += '  tenantId: String!\n';
+      fieldsSDL += '  createdAt: Date!\n  updatedAt: Date!';
+
+      const fullSDL = `type ${modelName} ${directives} {\n${fieldsSDL}\n}\n`;
+      const sdlEditor = document.getElementById('sdl-editor');
+      sdlEditor.value = fullSDL;
+      document.getElementById('sdl-editor-filename').innerText = `${modelName}.graphql`;
+      const gutter = document.getElementById('sdl-editor-gutter');
+      if (gutter) {
+        const lines = fullSDL.split('\n').length;
+        let lineNumbers = '';
+        for (let i = 1; i <= lines; i++) lineNumbers += i + '\n';
+        gutter.innerText = lineNumbers;
+      }
+    }
+
+    function resetModelBuilder() {
+      document.getElementById('model-name').value = '';
+      document.getElementById('fields-container').innerHTML = '';
+      document.getElementById('btn-delete-active-schema').style.display = 'none';
+      document.getElementById('btn-manage-hooks-active').style.display = 'none';
+      addFieldRow('title', 'String', true, false);
+      addFieldRow('slug', 'String', true, true);
+      addFieldRow('price', 'Float', true, false);
+      updateSDLPreview();
+    }
+
+    async function refreshSchemasList() {
+      try {
+        const res = await fetch('/api/studio/schemas');
+        const data = await res.json();
+        rawSchemas = (data.data && data.data.schemas) || [];
+        if (data.data && data.data.allModels) {
+          availableModels = data.data.allModels;
+        }
+        renderSchemasList(rawSchemas);
+        populateHooksSchemaDropdown();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderSchemasList(schemas) {
+      const container = document.getElementById('schemas-list');
+      container.innerHTML = '';
+
+      if (schemas && schemas.length) {
+        schemas.forEach(s => {
+          const div = document.createElement('div');
+          div.className = 'schema-item';
+          div.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+              <span style="font-size: 1.25rem;">📄</span>
+              <div>
+                <strong>${s.name}</strong>
+                <span style="color: var(--text-muted); font-size: 0.8rem; margin-left: 0.4rem;">(${s.filename})</span>
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.3rem 0.65rem;" onclick="loadSchemaContent('${s.name}')">✏️ Edit</button>
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.3rem 0.65rem; border-color: rgba(168,85,247,0.4); color: #c084fc;" onclick="navigateToHooksForActiveSchema('${s.name}')">🪝 Hooks</button>
+              <button class="btn btn-danger" style="font-size: 0.75rem; padding: 0.3rem 0.65rem;" onclick="deleteSchemaByName('${s.name}')">🗑️ Delete</button>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      } else {
+        container.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; padding: 0.5rem;">No user schemas in schemas/ yet. Create one above!</div>';
+      }
+    }
+
+    function filterSchemasList() {
+      const query = document.getElementById('schema-search').value.toLowerCase().trim();
+      const filtered = rawSchemas.filter(s => s.name.toLowerCase().includes(query) || s.filename.toLowerCase().includes(query));
+      renderSchemasList(filtered);
+    }
+
+    async function loadSchemaContent(name) {
+      const s = rawSchemas.find(x => x.name === name);
+      if (s) {
+        document.getElementById('model-name').value = s.name;
+        document.getElementById('sdl-editor').value = s.content;
+        document.getElementById('sdl-editor-filename').innerText = s.filename || `${s.name}.graphql`;
+        document.getElementById('btn-delete-active-schema').style.display = 'inline-flex';
+        document.getElementById('btn-manage-hooks-active').style.display = 'inline-flex';
+        const gutter = document.getElementById('sdl-editor-gutter');
+        if (gutter) {
+          const lines = s.content.split('\n').length;
+          let lineNumbers = '';
+          for (let i = 1; i <= lines; i++) lineNumbers += i + '\n';
+          gutter.innerText = lineNumbers;
+        }
+        showToast(`Loaded ${s.name} into editor`);
+      }
+    }
+
+    async function saveCurrentSchema() {
+      const name = document.getElementById('model-name').value.trim() || 'NewModel';
+      const content = document.getElementById('sdl-editor').value;
+
+      try {
+        const res = await fetch('/api/studio/schemas', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, content })
+        });
+        const result = await res.json();
+        if (result.success) {
+          showToast(`Saved ${name}.graphql`);
+          document.getElementById('btn-delete-active-schema').style.display = 'inline-flex';
+          document.getElementById('btn-manage-hooks-active').style.display = 'inline-flex';
+          await refreshSchemasList();
+          await loadRelationsGraph();
+          await populateHooksSchemaDropdown();
+        } else {
+          showToast(result.error, 'danger');
+        }
+      } catch (err) {
+        showToast('Failed to save schema', 'danger');
+      }
+    }
+
+    async function loadRelationsGraph() {
+      try {
+        const res = await fetch('/api/studio/schemas');
+        const data = await res.json();
+        const container = document.getElementById('relations-container');
+        container.innerHTML = '';
+
+        const relations = (data.data && data.data.relations) || [];
+        if (relations.length) {
+          relations.forEach(r => {
+            const card = document.createElement('div');
+            card.className = 'relation-card';
+            card.innerHTML = `
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span class="badge badge-rel">@relation</span>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">${r.relationName}</span>
+              </div>
+              <div style="font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; margin-top: 0.4rem;">
+                <span style="color: #fff;">${r.source}</span>
+                <span style="color: var(--accent-primary); font-size: 0.9rem;">──[ ${r.field} ]──►</span>
+                <span style="color: #c084fc;">${r.target}</span>
+              </div>
+            `;
+            container.appendChild(card);
+          });
+        } else {
+          container.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem;">No active relations detected yet. Connect schemas using "🔗 Connect Schema" in Schema Studio!</div>';
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    /* Schema-to-Hooks Management */
+    function populateHooksSchemaDropdown() {
+      const select = document.getElementById('hooks-schema-select');
+      if (!select) return;
+      const currentVal = select.value;
+      select.innerHTML = '';
+
+      availableModels.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.innerText = `📄 ${m}`;
+        if (m === currentVal) opt.selected = true;
+        select.appendChild(opt);
+      });
+    }
+
+    async function onSchemaHookSelected() {
+      const select = document.getElementById('hooks-schema-select');
+      if (!select) return;
+      const schemaName = select.value || 'User';
+
+      try {
+        const res = await fetch(`/api/studio/hooks/schema/${schemaName}`);
+        const data = await res.json();
+        const hooksInfo = data.data || {};
+        renderSchemaHooksMatrix(hooksInfo);
+      } catch (err) {
+        console.error('Error fetching schema hooks:', err);
+      }
+    }
+
+    function renderSchemaHooksMatrix(hooksInfo) {
+      const container = document.getElementById('schema-hooks-matrix');
+      container.innerHTML = '';
+      const { schemaName = 'Entity', operations = {} } = hooksInfo;
+
+      const mutations = [
+        { label: `add${schemaName}`, opName: 'Add (Create)', pre: operations.addPreHook, post: operations.addPostHook, defaultSlugSnippet: true },
+        { label: `update${schemaName}`, opName: 'Update', pre: operations.updatePreHook, post: operations.updatePostHook, defaultSlugSnippet: false },
+        { label: `delete${schemaName}`, opName: 'Delete', pre: operations.deletePreHook, post: operations.deletePostHook, defaultSlugSnippet: false },
+      ];
+
+      mutations.forEach(m => {
+        const div = document.createElement('div');
+        div.className = 'hook-matrix-row';
+        div.innerHTML = `
+          <div>
+            <strong style="color: #fff; font-size: 0.95rem;">${m.label}</strong>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">${m.opName} Mutation</div>
+          </div>
+          <div>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-size: 0.8rem; font-weight: 600;">Pre-Hook:</span>
+              <span class="badge ${m.pre?.configured ? 'badge-active' : 'badge-none'}">
+                ${m.pre?.configured ? '✅ Active (' + m.pre.file + ')' : '⚪ Not set'}
+              </span>
+            </div>
+            <button class="btn btn-secondary" style="font-size: 0.72rem; padding: 0.25rem 0.5rem; width: 100%; margin-top: 0.35rem;" onclick="loadOrGenerateHook('${schemaName}', '${m.label}PreHook', 'PRE')">
+              ${m.pre?.configured ? '✏️ Inspect / Edit Pre-Hook' : '+ Create Pre-Hook'}
+            </button>
+          </div>
+          <div>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-size: 0.8rem; font-weight: 600;">Post-Hook:</span>
+              <span class="badge ${m.post?.configured ? 'badge-active' : 'badge-none'}">
+                ${m.post?.configured ? '✅ Active (' + m.post.file + ')' : '⚪ Not set'}
+              </span>
+            </div>
+            <button class="btn btn-secondary" style="font-size: 0.72rem; padding: 0.25rem 0.5rem; width: 100%; margin-top: 0.35rem;" onclick="loadOrGenerateHook('${schemaName}', '${m.label}PostHook', 'POST')">
+              ${m.post?.configured ? '✏️ Inspect / Edit Post-Hook' : '+ Create Post-Hook'}
+            </button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    async function loadOrGenerateHook(schemaName, hookFunctionName, hookType) {
+      const hookFileName = `${schemaName.charAt(0).toLowerCase() + schemaName.slice(1)}Hooks`;
+      document.getElementById('hook-name').value = hookFileName;
+      updateHookEditorTabName();
+
+      try {
+        const res = await fetch('/api/studio/hooks');
+        const data = await res.json();
+        const hooksList = data.data || [];
+        const existing = hooksList.find(h => h.name === hookFileName || (h.exportedHooks && h.exportedHooks.includes(hookFunctionName)));
+
+        if (existing) {
+          const editor = document.getElementById('hook-code-editor');
+          editor.value = existing.content;
+          document.getElementById('hook-editor-filename').innerText = existing.filename;
+          const gutter = document.getElementById('hook-editor-gutter');
+          if (gutter) {
+            const lines = existing.content.split('\n').length;
+            let lineNumbers = '';
+            for (let i = 1; i <= lines; i++) lineNumbers += i + '\n';
+            gutter.innerText = lineNumbers;
+          }
+          showToast(`Loaded ${existing.filename} into editor`);
+        } else {
+          // Generate tailored boilerplate
+          let snippet = '';
+          if (hookType === 'PRE') {
+            snippet = `/**\n * Pre-Hook for ${hookFunctionName}\n * Executed synchronously BEFORE database write.\n * Use for data validation, slug generation, password hashing, and enrichment.\n */\nexport const ${hookFunctionName} = [\n  async (input, context) => {\n    // Input normalization / validation\n    if (input.title && !input.slug) {\n      input.slug = input.title.toLowerCase().replace(/\\s+/g, '-');\n    }\n    return input;\n  },\n];\n`;
+          } else {
+            snippet = `/**\n * Post-Hook for ${hookFunctionName}\n * Executed synchronously AFTER database write succeeds.\n * Use for async welcome emails, push notifications, CRM sync, and background queues.\n */\nexport const ${hookFunctionName} = [\n  async (result, input, context) => {\n    console.log('${hookFunctionName} triggered for record ID:', result.id);\n    // Trigger async side-effects\n    return result;\n  },\n];\n`;
+          }
+          const editor = document.getElementById('hook-code-editor');
+          editor.value = snippet;
+          document.getElementById('hook-editor-filename').innerText = `${hookFileName}.js`;
+          const gutter = document.getElementById('hook-editor-gutter');
+          if (gutter) {
+            const lines = snippet.split('\n').length;
+            let lineNumbers = '';
+            for (let i = 1; i <= lines; i++) lineNumbers += i + '\n';
+            gutter.innerText = lineNumbers;
+          }
+          showToast(`Generated boilerplate for ${hookFunctionName}`);
+        }
+      } catch (err) {
+        showToast('Error loading hook: ' + err.message, 'danger');
+      }
+    }
+
+    function insertHookSnippet(type) {
+      const schemaName = document.getElementById('hooks-schema-select')?.value || 'Course';
+      const cap = schemaName.charAt(0).toUpperCase() + schemaName.slice(1);
+      let code = '';
+      if (type === 'slugify') {
+        code = `export const add${cap}PreHook = [\n  async (input, context) => {\n    if (input.title && !input.slug) {\n      input.slug = input.title.toLowerCase().replace(/\\s+/g, '-');\n    }\n    return input;\n  },\n];\n`;
+      } else if (type === 'validation') {
+        code = `export const add${cap}PreHook = [\n  async (input, context) => {\n    if (input.price !== undefined && input.price < 0) {\n      throw new Error('Price cannot be negative');\n    }\n    return input;\n  },\n];\n`;
+      } else if (type === 'bcrypt') {
+        code = `import bcrypt from 'bcryptjs';\n\nexport const add${cap}PreHook = [\n  async (input, context) => {\n    if (input.password) {\n      input.password = await bcrypt.hash(input.password, 10);\n    }\n    return input;\n  },\n];\n`;
+      } else if (type === 'email') {
+        code = `export const add${cap}PostHook = [\n  async (result, input, context) => {\n    console.log('Dispatching notification for ${cap}:', result.id);\n    return result;\n  },\n];\n`;
+      }
+      const editor = document.getElementById('hook-code-editor');
+      editor.value = code;
+      const gutter = document.getElementById('hook-editor-gutter');
+      if (gutter) {
+        const lines = code.split('\n').length;
+        let lineNumbers = '';
+        for (let i = 1; i <= lines; i++) lineNumbers += i + '\n';
+        gutter.innerText = lineNumbers;
+      }
+    }
+
+    async function saveHookFile() {
+      const name = document.getElementById('hook-name').value.trim() || 'customHooks';
+      const content = document.getElementById('hook-code-editor').value;
+
+      try {
+        const res = await fetch('/api/studio/hooks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, content })
+        });
+        const result = await res.json();
+        if (result.success) {
+          showToast(result.message);
+          onSchemaHookSelected();
+        } else {
+          showToast(result.error, 'danger');
+        }
+      } catch (err) {
+        showToast('Failed to save hook', 'danger');
+      }
+    }
+
+    async function loadWebhooksList() {
+      try {
+        const res = await fetch('/api/studio/webhooks');
+        const data = await res.json();
+        const container = document.getElementById('webhooks-list');
+        container.innerHTML = '';
+
+        if (data.data && data.data.length) {
+          data.data.forEach(w => {
+            const div = document.createElement('div');
+            div.className = 'schema-item';
+            div.innerHTML = `
+              <div>
+                <strong>${w.url}</strong>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">
+                  Events: ${w.events.join(', ')}
+                </div>
+              </div>
+              <button class="btn btn-danger" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;" onclick="deleteWebhook('${w.id}')">Remove</button>
+            `;
+            container.appendChild(div);
+          });
+        } else {
+          container.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem;">No active webhooks registered yet.</div>';
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function registerNewWebhook() {
+      const url = document.getElementById('webhook-url').value.trim();
+      const eventsStr = document.getElementById('webhook-events').value.trim();
+      const secret = document.getElementById('webhook-secret').value.trim();
+
+      if (!url) {
+        showToast('Webhook URL is required', 'danger');
+        return;
+      }
+
+      const events = eventsStr.split(',').map(e => e.trim()).filter(Boolean);
+
+      try {
+        const res = await fetch('/api/studio/webhooks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url, events, secret })
+        });
+        const result = await res.json();
+        if (result.success) {
+          showToast('Registered webhook successfully');
+          document.getElementById('webhook-url').value = '';
+          loadWebhooksList();
+        } else {
+          showToast(result.error, 'danger');
+        }
+      } catch (err) {
+        showToast('Failed to register webhook', 'danger');
+      }
+    }
+
+    async function deleteWebhook(id) {
+      try {
+        const res = await fetch(`/api/studio/webhooks/${id}`, { method: 'DELETE' });
+        const result = await res.json();
+        if (result.success) {
+          showToast('Webhook removed');
+          loadWebhooksList();
+        }
+      } catch (err) {
+        showToast('Failed to remove webhook', 'danger');
+      }
+    }
+
+    async function exportTypeScriptSDK() {
+      try {
+        const res = await fetch('/api/studio/sdk');
+        const data = await res.json();
+        if (data.data) {
+          navigator.clipboard.writeText(data.data);
+          showToast('TypeScript SDK copied to clipboard! 📋');
+        }
+      } catch (err) {
+        showToast('Failed to export SDK', 'danger');
+      }
+    }
+
+    async function exportSchemaSDL() {
+      try {
+        const res = await fetch('/api/studio/schema-dump');
+        const data = await res.json();
+        if (data.data) {
+          navigator.clipboard.writeText(data.data);
+          showToast('Full Schema SDL copied to clipboard! 📋');
+        }
+      } catch (err) {
+        showToast('Failed to dump SDL', 'danger');
+      }
+    }
+
+    async function loadDatabaseInfo() {
+      try {
+        const res = await fetch('/api/studio/db-info');
+        const data = await res.json();
+        if (data.data) {
+          document.getElementById('mongo-status-badge').innerText = data.data.mongodb.status;
+          document.getElementById('pg-status-badge').innerText = data.data.postgres.status;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function generateTestToken(role = 'ADMIN') {
+      try {
+        const res = await fetch('/api/studio/generate-token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role, userId: `usr_studio_${role.toLowerCase()}`, tenantId: 'tenant_enterprise_1' })
+        });
+        const data = await res.json();
+        if (data.token) {
+          document.getElementById('auth-token').value = 'Bearer ' + data.token;
+          showToast(`Generated ${role} JWT token`);
+        }
+      } catch (err) {
+        showToast('Failed to generate token', 'danger');
+      }
+    }
+
+    async function executeGraphQLQuery() {
+      const query = document.getElementById('graphql-query-input').value;
+      const authHeader = document.getElementById('auth-token').value;
+      const startTime = performance.now();
+
+      try {
+        const headers = { 'Content-Type': 'application/json' };
+        if (authHeader) headers['Authorization'] = authHeader;
+
+        const res = await fetch('/graphql/core', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ query })
+        });
+        const result = await res.json();
+        const latency = Math.round(performance.now() - startTime);
+        document.getElementById('query-latency').innerText = latency + ' ms';
+        const formatted = JSON.stringify(result, null, 2);
+        const respOutput = document.getElementById('graphql-response-output');
+        respOutput.value = formatted;
+        const gutter = document.getElementById('query-response-gutter');
+        if (gutter) {
+          const lines = formatted.split('\n').length;
+          let lineNumbers = '';
+          for (let i = 1; i <= lines; i++) lineNumbers += i + '\n';
+          gutter.innerText = lineNumbers;
+        }
+        showToast(`Query executed in ${latency}ms`);
+      } catch (err) {
+        document.getElementById('graphql-response-output').value = 'Error: ' + err.message;
+        showToast('GraphQL execution error', 'danger');
+      }
+    }
+
+    function loadSampleSchema(type) {
+      if (type === 'Course') {
+        document.getElementById('model-name').value = 'Course';
+        document.getElementById('fields-container').innerHTML = '';
+        addFieldRow('title', 'String', true, false);
+        addFieldRow('slug', 'String', true, true);
+        addFieldRow('price', 'Float', true, false);
+        addFieldRow('tags', '[String]', false, false);
+        addRelationRow('instructor', 'User', 'InstructorCourses', '1:1', 'IN');
+        updateSDLPreview();
+      } else if (type === 'Order') {
+        document.getElementById('model-name').value = 'Order';
+        document.getElementById('model-database').value = 'postgres';
+        document.getElementById('fields-container').innerHTML = '';
+        addFieldRow('orderNumber', 'String', true, true);
+        addFieldRow('totalAmount', 'Float', true, false);
+        addRelationRow('customer', 'User', 'UserOrders', '1:1', 'IN');
+        updateSDLPreview();
+      }
+    }
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      resetModelBuilder();
+      insertHookSnippet('slugify');
+      refreshSchemasList();
+      populateHooksSchemaDropdown();
+
+      // Attach Pro Code Editors
+      attachProCodeEditor('sdl-editor', 'sdl-editor-gutter', 'sdl-editor-status');
+      attachProCodeEditor('hook-code-editor', 'hook-editor-gutter', 'hook-editor-status');
+      attachProCodeEditor('graphql-query-input', 'query-input-gutter', 'query-input-status');
+      attachProCodeEditor('graphql-response-output', 'query-response-gutter', 'query-response-status');
+    });
+  </script>
+</body>
+</html>

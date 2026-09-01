@@ -31,6 +31,19 @@ export const registerModelRLSPolicy = (modelName, policy = {}) => {
 export const getModelRLSPolicy = (modelName) => rlsPolicyRegistry.get(modelName) || null;
 
 /**
+ * Lists all registered model RLS policies.
+ *
+ * @returns {Object}
+ */
+export const listRLSPolicies = () => {
+  const policies = {};
+  rlsPolicyRegistry.forEach((val, key) => {
+    policies[key] = val;
+  });
+  return policies;
+};
+
+/**
  * Extracts a claim value from GraphQL execution context or authenticated user/app tokens.
  *
  * @param {Object} context
