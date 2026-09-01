@@ -23,6 +23,7 @@ import { createDepthLimitRule, createComplexityLimitRule } from './autoGenerate/
 import db from './db';
 import { startOutboxWorker, stopOutboxWorker } from './birdwatch/outbox/worker';
 import { createPersistedQueryPlugin } from './persistedQueries';
+import studioRouter from './studio/studioRoutes';
 
 const http = require('http');
 
@@ -34,6 +35,9 @@ const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+// AutoGraphQL Studio & Console UI
+app.use(studioRouter);
 
 // Kubernetes Liveness & Readiness Probes
 app.get(['/health/live', '/live', '/healthz'], (req, res) => {

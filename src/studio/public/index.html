@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoGraphQL Studio — Visual Schema & Hook Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0d14;
+      --bg-secondary: #111724;
+      --bg-card: rgba(22, 29, 46, 0.7);
+      --bg-card-hover: rgba(30, 41, 64, 0.9);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-focus: #6366f1;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-accent: #a855f7;
+      --accent-primary: #6366f1;
+      --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+      --accent-green: #10b981;
+      --accent-blue: #3b82f6;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-display: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Background Glow */
+    .ambient-glow {
+      position: fixed;
+      top: -20%;
+      left: 20%;
+      width: 60vw;
+      height: 60vh;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, rgba(168, 85, 247, 0.05) 50%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(80px);
+    }
+
+    /* Header */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(10, 13, 20, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.85rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--accent-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: white;
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+    }
+
+    .brand-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.35rem;
+      letter-spacing: -0.02em;
+      background: linear-gradient(to right, #ffffff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      background: rgba(99, 102, 241, 0.2);
+      color: #818cf8;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .header-status {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 20px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      color: #34d399;
+      font-weight: 500;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* Main Container */
+    .studio-container {
+      position: relative;
+      z-index: 10;
+      max-width: 1560px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 3rem 2rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* Navigation Tabs */
+    .studio-tabs {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.75rem;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.6rem 1.25rem;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .tab-btn.active {
+      color: #ffffff;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+    }
+
+    /* Tab Panes */
+    .tab-pane {
+      display: none;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .tab-pane.active {
+      display: flex;
+    }
+
+    /* Grid Layouts */
+    .studio-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 1024px) {
+      .studio-grid-2 { grid-template-columns: 1fr; }
+    }
+
+    /* Card Panels */
+    .card-panel {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      transition: border-color 0.2s ease;
+    }
+
+    .card-panel:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.85rem;
+    }
+
+    .panel-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #ffffff;
+    }
+
+    /* Inputs & Form Controls */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    input, select, textarea {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.65rem 0.85rem;
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.25);
+    }
+
+    textarea.code-editor {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      min-height: 380px;
+      resize: vertical;
+      background: #060911;
+    }
+
+    /* Buttons */
+    .btn {
+      background: var(--accent-gradient);
+      color: white;
+      border: none;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 0.65rem 1.25rem;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      box-shadow: none;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      box-shadow: none;
+      transform: none;
+    }
+
+    .btn-danger {
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      color: #fb7185;
+      box-shadow: none;
+    }
+
+    .btn-danger:hover {
+      background: rgba(244, 63, 94, 0.3);
+    }
+
+    /* Dynamic Field Rows */
+    .field-row {
+      display: grid;
+      grid-template-columns: 2fr 1.5fr 1fr auto;
+      gap: 0.6rem;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 0.6rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .pill-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    /* Schema File List */
+    .schema-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-height: 480px;
+      overflow-y: auto;
+    }
+
+    .schema-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .schema-item:hover, .schema-item.active {
+      background: rgba(99, 102, 241, 0.1);
+      border-color: rgba(99, 102, 241, 0.4);
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    .badge-mongo { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .badge-pg { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+
+    /* Alert Banner */
+    .alert-banner {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #c7d2fe;
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient-glow"></div>
+
+  <!-- Header -->
+  <header>
+    <a href="/studio" class="brand">
+      <div class="brand-logo">⚡</div>
+      <div>
+        <div class="brand-title">AutoGraphQL Studio</div>
+      </div>
+      <span class="brand-badge">Engine 4.0</span>
+    </a>
+
+    <div class="header-status">
+      <div class="status-pill" id="db-status-pill">
+        <span class="status-dot"></span>
+        <span id="db-status-text">Core Engine Ready</span>
+      </div>
+      <a href="/graphql/core" target="_blank" class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
+        Playground ↗
+      </a>
+    </div>
+  </header>
+
+  <!-- Studio Main -->
+  <div class="studio-container">
+
+    <!-- Tabs Navigation -->
+    <div class="studio-tabs">
+      <button class="tab-btn active" onclick="switchTab('tab-schema')">
+        <span>📐</span> Schema Studio
+      </button>
+      <button class="tab-btn" onclick="switchTab('tab-hooks')">
+        <span>🪝</span> Lifecycle Hooks
+      </button>
+      <button class="tab-btn" onclick="switchTab('tab-database')">
+        <span>🗄️</span> Databases & RLS
+      </button>
+      <button class="tab-btn" onclick="switchTab('tab-explorer')">
+        <span>🚀</span> API Explorer
+      </button>
+    </div>
+
+    <!-- TAB 1: SCHEMA STUDIO -->
+    <div id="tab-schema" class="tab-pane active">
+      <div class="alert-banner">
+        💡 <strong>Drop-in Architecture:</strong> Schemas saved here are written directly to <code>schemas/&lt;Name&gt;.graphql</code> and compiled dynamically with zero manual imports!
+      </div>
+
+      <div class="studio-grid-2">
+        <!-- Visual Model Builder -->
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title"><span>✨</span> Visual Model Builder</div>
+            <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;" onclick="resetModelBuilder()">
+              Reset Form
+            </button>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label>Model / Type Name</label>
+              <input type="text" id="model-name" placeholder="e.g. Course, Order, Product" oninput="updateSDLPreview()">
+            </div>
+            <div class="form-group">
+              <label>Database Engine</label>
+              <select id="model-database" onchange="updateSDLPreview()">
+                <option value="default">Global Default (env)</option>
+                <option value="mongoose">🍃 MongoDB (Mongoose)</option>
+                <option value="postgres">🐘 PostgreSQL (Sequelize)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Model Directives</label>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+              <label class="pill-checkbox">
+                <input type="checkbox" id="dir-history" onchange="updateSDLPreview()"> @history (Audit log)
+              </label>
+              <label class="pill-checkbox">
+                <input type="checkbox" id="dir-tenant" onchange="updateSDLPreview()"> @tenantScoped (RLS Multi-Tenancy)
+              </label>
+              <label class="pill-checkbox">
+                <input type="checkbox" id="dir-owner" onchange="updateSDLPreview()"> @ownerScoped (User Ownership)
+              </label>
+            </div>
+          </div>
+
+          <div class="panel-header" style="padding-top: 0.5rem;">
+            <div class="panel-title" style="font-size: 0.95rem;">Fields & Constraints</div>
+            <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;" onclick="addFieldRow()">
+              + Add Field
+            </button>
+          </div>
+
+          <div id="fields-container" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 240px; overflow-y: auto;">
+            <!-- Dynamic field rows appended here -->
+          </div>
+
+          <div style="display: flex; gap: 0.75rem; margin-top: auto;">
+            <button class="btn" style="flex: 1;" onclick="saveCurrentSchema()">
+              💾 Save & Deploy to schemas/
+            </button>
+          </div>
+        </div>
+
+        <!-- Live SDL Code Editor -->
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title"><span>📝</span> GraphQL SDL Code</div>
+            <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;" onclick="loadSampleSchema('Product')">
+              Insert Sample
+            </button>
+          </div>
+
+          <textarea id="sdl-editor" class="code-editor" spellcheck="false"></textarea>
+
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.8rem; color: var(--text-muted);" id="schema-save-status">
+              Auto-compiles AST on save
+            </span>
+            <button class="btn btn-secondary" onclick="saveCurrentSchema()">
+              Deploy Editor Code ⚡
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Discovered Schemas List -->
+      <div class="card-panel">
+        <div class="panel-header">
+          <div class="panel-title"><span>📁</span> Discovered Schema Files (<code>schemas/</code>)</div>
+          <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;" onclick="refreshSchemasList()">
+            Refresh List
+          </button>
+        </div>
+        <div id="schemas-list" class="schema-list">
+          <div style="color: var(--text-muted); font-size: 0.85rem; padding: 0.5rem;">Loading discovered schemas...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: LIFECYCLE HOOKS STUDIO -->
+    <div id="tab-hooks" class="tab-pane">
+      <div class="alert-banner">
+        🪝 <strong>Pluggable Hooks:</strong> Pre-Hooks run <em>before</em> database writes (validation, slugify, password hashing), and Post-Hooks run <em>after</em> writes (emails, CRM sync, notifications).
+      </div>
+
+      <div class="studio-grid-2">
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title"><span>⚙️</span> Hook Configurator</div>
+          </div>
+
+          <div class="form-group">
+            <label>Target Entity / Hook Name</label>
+            <input type="text" id="hook-name" placeholder="e.g. courseHooks, userHooks" value="courseHooks">
+          </div>
+
+          <div class="form-group">
+            <label>Template Boilerplate</label>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.3rem 0.6rem;" onclick="insertHookSnippet('slugify')">Slug Generator</button>
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.3rem 0.6rem;" onclick="insertHookSnippet('validation')">Price Validator</button>
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.3rem 0.6rem;" onclick="insertHookSnippet('email')">Welcome Email</button>
+            </div>
+          </div>
+
+          <button class="btn" onclick="saveHookFile()">
+            💾 Save Hook to hooks/
+          </button>
+        </div>
+
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title"><span>💻</span> Hook Implementation (<code>hooks/*.js</code>)</div>
+          </div>
+          <textarea id="hook-code-editor" class="code-editor" spellcheck="false"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: DATABASES & RLS -->
+    <div id="tab-database" class="tab-pane">
+      <div class="studio-grid-2">
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title"><span>🍃</span> MongoDB Engine (Mongoose)</div>
+            <span class="badge badge-mongo" id="mongo-status-badge">Connected</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">
+            Stores document collections with embedded subdocuments, multi-key indexes, and dynamic aggregation pipelines.
+          </p>
+          <div id="mongo-models-list" style="font-size: 0.85rem; display: flex; flex-wrap: gap: 0.5rem;"></div>
+        </div>
+
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title"><span>🐘</span> PostgreSQL Engine (Sequelize)</div>
+            <span class="badge badge-pg" id="pg-status-badge">Configured</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">
+            Stores relational tables with GIN containment indexes, B-Tree indexes, and multi-tenant Row-Level Security.
+          </p>
+          <div id="pg-models-list" style="font-size: 0.85rem;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: API EXPLORER -->
+    <div id="tab-explorer" class="tab-pane">
+      <div class="studio-grid-2">
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title"><span>🚀</span> GraphQL Request</div>
+            <button class="btn btn-secondary" style="font-size: 0.75rem;" onclick="generateTestToken()">
+              🔑 Generate Token
+            </button>
+          </div>
+
+          <div class="form-group">
+            <label>Authorization Token (JWT)</label>
+            <input type="text" id="auth-token" placeholder="Bearer <JWT_TOKEN>">
+          </div>
+
+          <div class="form-group">
+            <label>GraphQL Query / Mutation</label>
+            <textarea id="graphql-query-input" class="code-editor" style="min-height: 240px;">query GetUsers {
+  users(first: 5) {
+    id
+    username
+    status
+    createdAt
+  }
+  usersMeta {
+    count
+  }
+}</textarea>
+          </div>
+
+          <button class="btn" onclick="executeGraphQLQuery()">
+            ▶ Execute Query
+          </button>
+        </div>
+
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title"><span>📦</span> Response</div>
+            <span id="query-latency" style="font-size: 0.75rem; color: var(--text-muted);">0 ms</span>
+          </div>
+          <textarea id="graphql-response-output" class="code-editor" readonly style="min-height: 380px;"></textarea>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // State
+    let currentFields = [];
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+      if (tabId === 'tab-schema') refreshSchemasList();
+      if (tabId === 'tab-database') loadDatabaseInfo();
+    }
+
+    function addFieldRow(name = '', type = 'String', required = false, unique = false, trim = false) {
+      const container = document.getElementById('fields-container');
+      const rowId = 'field_' + Math.random().toString(36).substr(2, 9);
+
+      const div = document.createElement('div');
+      div.className = 'field-row';
+      div.id = rowId;
+      div.innerHTML = `
+        <input type="text" placeholder="field name" value="${name}" oninput="updateSDLPreview()" style="font-size: 0.8rem; padding: 0.4rem;">
+        <select onchange="updateSDLPreview()" style="font-size: 0.8rem; padding: 0.4rem;">
+          <option value="String" ${type === 'String' ? 'selected' : ''}>String</option>
+          <option value="Int" ${type === 'Int' ? 'selected' : ''}>Int</option>
+          <option value="Float" ${type === 'Float' ? 'selected' : ''}>Float</option>
+          <option value="Boolean" ${type === 'Boolean' ? 'selected' : ''}>Boolean</option>
+          <option value="Date" ${type === 'Date' ? 'selected' : ''}>Date</option>
+          <option value="JSONB" ${type === 'JSONB' ? 'selected' : ''}>JSONB</option>
+          <option value="[String]" ${type === '[String]' ? 'selected' : ''}>[String]</option>
+        </select>
+        <div style="display: flex; gap: 0.4rem;">
+          <label class="pill-checkbox"><input type="checkbox" ${required ? 'checked' : ''} onchange="updateSDLPreview()"> Req</label>
+          <label class="pill-checkbox"><input type="checkbox" ${unique ? 'checked' : ''} onchange="updateSDLPreview()"> Uniq</label>
+        </div>
+        <button class="btn btn-danger" style="padding: 0.3rem 0.5rem; font-size: 0.75rem;" onclick="document.getElementById('${rowId}').remove(); updateSDLPreview();">✕</button>
+      `;
+      container.appendChild(div);
+      updateSDLPreview();
+    }
+
+    function updateSDLPreview() {
+      const modelName = document.getElementById('model-name').value.trim() || 'CustomModel';
+      const dbType = document.getElementById('model-database').value;
+      const isHistory = document.getElementById('dir-history').checked;
+      const isTenant = document.getElementById('dir-tenant').checked;
+      const isOwner = document.getElementById('dir-owner').checked;
+
+      let directives = '@model';
+      if (dbType !== 'default') directives += `(database: ${dbType})`;
+      if (isHistory) directives += ' @history';
+      if (isTenant) directives += ' @tenantScoped(field: "tenantId", claim: "tenantId")';
+      if (isOwner) directives += ' @ownerScoped(field: "userId", claim: "userId")';
+
+      const rows = document.querySelectorAll('#fields-container .field-row');
+      let fieldsSDL = '  id: ID!\n';
+
+      rows.forEach(row => {
+        const name = row.querySelector('input[type="text"]').value.trim();
+        const type = row.querySelector('select').value;
+        const checkboxes = row.querySelectorAll('input[type="checkbox"]');
+        const req = checkboxes[0].checked;
+        const uniq = checkboxes[1].checked;
+
+        if (name) {
+          let line = `  ${name}: ${type}${req ? '!' : ''}`;
+          if (uniq) line += ' @unique';
+          fieldsSDL += line + '\n';
+        }
+      });
+
+      if (isTenant) fieldsSDL += '  tenantId: String!\n';
+      fieldsSDL += '  createdAt: Date!\n  updatedAt: Date!';
+
+      const fullSDL = `type ${modelName} ${directives} {\n${fieldsSDL}\n}\n`;
+      document.getElementById('sdl-editor').value = fullSDL;
+    }
+
+    function resetModelBuilder() {
+      document.getElementById('model-name').value = 'Course';
+      document.getElementById('fields-container').innerHTML = '';
+      addFieldRow('title', 'String', true, false);
+      addFieldRow('slug', 'String', true, true);
+      addFieldRow('price', 'Float', true, false);
+      addFieldRow('tags', '[String]', false, false);
+      updateSDLPreview();
+    }
+
+    async function refreshSchemasList() {
+      try {
+        const res = await fetch('/api/studio/schemas');
+        const data = await res.json();
+        const container = document.getElementById('schemas-list');
+        container.innerHTML = '';
+
+        if (data.data && data.data.schemas && data.data.schemas.length) {
+          data.data.schemas.forEach(s => {
+            const div = document.createElement('div');
+            div.className = 'schema-item';
+            div.innerHTML = `
+              <div>
+                <strong>${s.name}</strong> <span style="color: var(--text-muted); font-size: 0.8rem;">(${s.filename})</span>
+              </div>
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.2rem 0.5rem;" onclick="loadSchemaContent('${s.name}')">Load in Editor</button>
+            `;
+            container.appendChild(div);
+          });
+        } else {
+          container.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem;">No user schemas in schemas/ yet. Create one above!</div>';
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadSchemaContent(name) {
+      const res = await fetch('/api/studio/schemas');
+      const data = await res.json();
+      const s = data.data.schemas.find(x => x.name === name);
+      if (s) {
+        document.getElementById('model-name').value = s.name;
+        document.getElementById('sdl-editor').value = s.content;
+      }
+    }
+
+    async function saveCurrentSchema() {
+      const name = document.getElementById('model-name').value.trim() || 'NewModel';
+      const content = document.getElementById('sdl-editor').value;
+
+      try {
+        const res = await fetch('/api/studio/schemas', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, content })
+        });
+        const result = await res.json();
+        if (result.success) {
+          document.getElementById('schema-save-status').innerText = `✅ Saved ${name}.graphql`;
+          refreshSchemasList();
+        } else {
+          alert('Error: ' + result.error);
+        }
+      } catch (err) {
+        alert('Failed to save schema');
+      }
+    }
+
+    function insertHookSnippet(type) {
+      let code = '';
+      if (type === 'slugify') {
+        code = `export const addCoursePreHook = [\n  async (input, context) => {\n    if (input.title && !input.slug) {\n      input.slug = input.title.toLowerCase().replace(/\\s+/g, '-');\n    }\n    return input;\n  },\n];\n`;
+      } else if (type === 'validation') {
+        code = `export const addCoursePreHook = [\n  async (input, context) => {\n    if (input.price < 0) {\n      throw new Error('Price cannot be negative');\n    }\n    return input;\n  },\n];\n`;
+      } else if (type === 'email') {
+        code = `export const addUserPostHook = [\n  async (result, input, context) => {\n    console.log('Sending welcome email to:', result.email);\n    return result;\n  },\n];\n`;
+      }
+      document.getElementById('hook-code-editor').value = code;
+    }
+
+    async function saveHookFile() {
+      const name = document.getElementById('hook-name').value.trim() || 'customHooks';
+      const content = document.getElementById('hook-code-editor').value;
+
+      const res = await fetch('/api/studio/hooks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, content })
+      });
+      const result = await res.json();
+      if (result.success) {
+        alert(result.message);
+      }
+    }
+
+    async function loadDatabaseInfo() {
+      const res = await fetch('/api/studio/db-info');
+      const data = await res.json();
+      if (data.data) {
+        document.getElementById('mongo-status-badge').innerText = data.data.mongodb.status;
+        document.getElementById('pg-status-badge').innerText = data.data.postgres.status;
+      }
+    }
+
+    async function generateTestToken() {
+      const res = await fetch('/api/studio/generate-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: 'ADMIN', userId: 'usr_studio_admin', tenantId: 'tenant_enterprise_1' })
+      });
+      const data = await res.json();
+      if (data.token) {
+        document.getElementById('auth-token').value = 'Bearer ' + data.token;
+      }
+    }
+
+    async function executeGraphQLQuery() {
+      const query = document.getElementById('graphql-query-input').value;
+      const authHeader = document.getElementById('auth-token').value;
+      const startTime = performance.now();
+
+      try {
+        const headers = { 'Content-Type': 'application/json' };
+        if (authHeader) headers['Authorization'] = authHeader;
+
+        const res = await fetch('/graphql/core', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ query })
+        });
+        const result = await res.json();
+        const latency = Math.round(performance.now() - startTime);
+        document.getElementById('query-latency').innerText = latency + ' ms';
+        document.getElementById('graphql-response-output').value = JSON.stringify(result, null, 2);
+      } catch (err) {
+        document.getElementById('graphql-response-output').value = 'Error: ' + err.message;
+      }
+    }
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      resetModelBuilder();
+      insertHookSnippet('slugify');
+      refreshSchemasList();
+    });
+  </script>
+</body>
+</html>
