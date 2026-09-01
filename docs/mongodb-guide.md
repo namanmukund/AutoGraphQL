@@ -21,7 +21,7 @@ This guide provides a comprehensive walkthrough of defining, querying, mutating,
 
 ## 1. Defining MongoDB Schemas
 
-In AutoGraphQL, types annotated with `@model` default to MongoDB (using Mongoose). You can also explicitly declare `database: mongoose`:
+In AutoGraphQL, types annotated with `@model` route to MongoDB whenever `DEFAULT_DATABASE_DIALECT=mongoose` (the default) in `.env`, or when explicitly configured via `@model(database: mongoose)`:
 
 ```graphql
 # graphqlSchema/core/types/collections/User.graphql

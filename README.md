@@ -445,13 +445,29 @@ const appData = verifyAppToken(appToken);
 ## 💾 Multi-Database Architecture (MongoDB & PostgreSQL)
 
 AutoGraphQL provides seamless support for dual databases:
-- **MongoDB (Primary)**: Powered by Mongoose for unstructured/semi-structured application models.
-- **PostgreSQL (Secondary)**: Powered by Sequelize for relational schemas, transactional ledger data, and analytical tables.
+- **MongoDB**: Powered by Mongoose for unstructured/semi-structured application models.
+- **PostgreSQL**: Powered by Sequelize for relational schemas, transactional ledger data, and analytical tables.
 
 > [!TIP]
 > 📖 **Comprehensive Guides & Examples**:
 > - 🍃 **[MongoDB Guide & Examples (`docs/mongodb-guide.md`)](docs/mongodb-guide.md)**: Embedded sub-documents, multi-key indexes, aggregations, and real-time subscriptions.
 > - 🐘 **[PostgreSQL Guide & Examples (`docs/postgresql-guide.md`)](docs/postgresql-guide.md)**: Sequelize data types, B-Tree and GIN indexes, 1:1 / 1:N / N:N relational joins, ILIKE filter operators, and multi-tenant RLS.
+
+### ⚙️ Environment-Configurable Default Database Engine (`.env`)
+
+You can configure the global default database engine for all `@model` entities via `DEFAULT_DATABASE_DIALECT` in `.env`:
+
+```bash
+# Option A: MongoDB as default database engine (default)
+DEFAULT_DATABASE_DIALECT=mongoose # accepts 'mongoose' or 'mongodb'
+
+# Option B: PostgreSQL as default database engine
+DEFAULT_DATABASE_DIALECT=postgres # accepts 'postgres' or 'postgresql'
+```
+
+- When `DEFAULT_DATABASE_DIALECT=postgres`, all `@model` types automatically compile into PostgreSQL Sequelize tables by default.
+- When `DEFAULT_DATABASE_DIALECT=mongoose` (or unset), all `@model` types compile into MongoDB Mongoose collections.
+- **Per-Model Override**: You can always override the engine on specific types using `@model(database: postgres)` or `@model(database: mongoose)`.
 
 ### Dynamic PostgreSQL Model Compilation
 Declare a model with `database: postgres` in GraphQL SDL, and AutoGraphQL automatically compiles the AST into a Sequelize model at startup:

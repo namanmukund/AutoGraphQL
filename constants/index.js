@@ -173,8 +173,23 @@ const HEADER_VARIABLES = {
 const DATABASE_DIALECTS = {
   mongoose: 'mongoose',
   postgres: 'postgres',
+  mongo: 'mongoose',
+  mongodb: 'mongoose',
+  postgresql: 'postgres',
+  sql: 'postgres',
+  sequelize: 'postgres',
   MONGO: 'mongoose',
   POSTGRES: 'postgres',
+};
+
+const getDefaultDatabaseDialect = () => {
+  const envVal = (
+    process.env.DEFAULT_DATABASE_DIALECT
+    || process.env.DEFAULT_DATABASE
+    || process.env.DATABASE_DIALECT
+    || 'mongoose'
+  ).toLowerCase().trim();
+  return DATABASE_DIALECTS[envVal] || DATABASE_DIALECTS.mongoose;
 };
 
 const PG_MODEL_SUFFIX = 'PG';
@@ -249,6 +264,7 @@ export {
   ADDITIONAL_CONTEXT_VARIABLES_FROM_HEADER,
   HEADER_VARIABLES,
   DATABASE_DIALECTS,
+  getDefaultDatabaseDialect,
   PG_MODEL_SUFFIX,
   SECONDARY_APPLICATIONS,
   INACTIVE,
