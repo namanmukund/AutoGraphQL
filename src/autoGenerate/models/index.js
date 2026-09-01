@@ -11,6 +11,7 @@ import {
 } from '../utils';
 import { DATABASE_DIALECTS } from '../../../constants';
 import POSTGRES_MODELS from './postgresModels';
+import { createSequelizeModelFromAST } from './sqlModelGenerator';
 
 const { Schema } = mongoose;
 // uncomment below code to debug mongodb queries
@@ -128,7 +129,10 @@ const createMongooseModelsFromSchema = (allModelsSchema, typesSchema) => {
     const { databaseType, schema: model } = schemas[typeName];
     let createdModel;
     switch (databaseType) {
-      case DATABASE_DIALECTS.postgres: {
+      case DATABASE_DIALECTS.postgres:
+      case 'sql':
+      case 'sequelize': {
+        createdModel = createSequelizeModelFromAST(typeName, model);
         break;
       }
       case DATABASE_DIALECTS.mongoose:

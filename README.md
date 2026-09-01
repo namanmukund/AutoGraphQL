@@ -26,7 +26,8 @@
 - [🔍 Advanced Filtering & Operator Engine](#-advanced-filtering--operator-engine)
 - [🔐 Authentication & Token Lifecycle](#-authentication--token-lifecycle)
 - [💾 Multi-Database Architecture (MongoDB & PostgreSQL)](#-multi-database-architecture-mongodb--postgresql)
-- [🛡️ Production Reliability & Safeguards](#️-production-reliability--safeguards)
+- [🏢 Multi-Tenancy & Row-Level Security (RLS)](#-multi-tenancy--row-level-security-rls)
+- [🛡️ Production Reliability & Safeguards](#-production-reliability--safeguards)
 - [⚡ Event-Driven Automation & Webhooks (Birdwatch)](#-event-driven-automation--webhooks-birdwatch)
 - [🛠️ Developer & CI/CD Tooling](#️-developer--cicd-tooling)
 - [🧪 Automated Test Suite (`npm test`)](#-automated-test-suite-npm-test)
@@ -41,8 +42,10 @@
 | :--- | :--- |
 | 🚀 **Pure Schema-Driven (AST)** | Define `.graphql` or `.js` SDL types with `@model` and the AST compiler automatically generates GraphQL queries, mutations, subscriptions, inputs, and resolvers. |
 | 🗄️ **Multi-Database Models** | Dynamic **MongoDB (Mongoose)** and **PostgreSQL (Sequelize)** model compilation with automatic index sync and timestamps (`createdAt`, `updatedAt`). |
+| 🏢 **Declarative Multi-Tenancy (RLS)** | Row-Level Security directives (`@tenantScoped`, `@ownerScoped`) automatically inject tenant isolation constraints into queries and mutations, preventing cross-tenant data leaks. |
 | 🔗 **Relational Connectors** | Bidirectional (1-to-1, 1-to-N, N-to-N) and OneWay relation joins with automatic connector mutations (`ConnectId`, `ConnectIds`, `addTo<Relation>`, `removeFrom<Relation>`). |
-| ⚡ **DataLoader & N+1 Prevention** | Request-scoped DataLoader batching merges relational lookups into single database queries with in-memory tick memoization. |
+| ⚡ **DataLoader & N+1 Prevention** | Request-scoped DataLoader batching merges relational lookups into single database queries across MongoDB and PostgreSQL. |
+relational lookups into single database queries with in-memory tick memoization. |
 | 🛡️ **Query Depth & Complexity Protection** | AST visitor validation rules reject runaway, deeply-nested, or computationally prohibitive queries before resolver execution. |
 | 🩺 **Kubernetes Health Probes** | Cloud-native `/health/live` (liveness) and `/health/ready` (readiness verifying MongoDB, Postgres, and Redis connections) endpoints. |
 | 📡 **Transactional Outbox & Webhooks** | Guaranteed event delivery with HMAC-SHA256 signing, exponential backoff retries, and in-process Birdwatch listeners. |
@@ -257,6 +260,9 @@ query FetchActiveUsers {
 
 ### Aggregation & Metadata Queries
 
+> [!TIP]
+> 📖 **Full Guide**: See **[`docs/count-and-aggregations-guide.md`](docs/count-and-aggregations-guide.md)** for total counts, filtered counts, group-by segmentations (`@groupBy`), relational child counts (`@relationalMeta`), and multi-tenant RLS.
+
 ```graphql
 # Count total users matching filter criteria
 query CountActiveUsers {
@@ -363,6 +369,9 @@ subscription OnUserUpdated {
 
 ## 🛡️ Declarative Schema Directives Reference
 
+> [!TIP]
+> 📖 **Full Reference Guide**: See **[`docs/directives-reference.md`](docs/directives-reference.md)** for exhaustive documentation, arguments, behavior, and code examples for all 25+ supported schema directives.
+
 | Directive | Target | Purpose | Example |
 | :--- | :--- | :--- | :--- |
 | **`@model`** | `Type` | Registers type for dynamic database model compilation and GraphQL CRUD generation. | `type Post @model { ... }` |
@@ -439,14 +448,65 @@ AutoGraphQL provides seamless support for dual databases:
 - **MongoDB (Primary)**: Powered by Mongoose for unstructured/semi-structured application models.
 - **PostgreSQL (Secondary)**: Powered by Sequelize for relational schemas, transactional ledger data, and analytical tables.
 
+> [!TIP]
+> 📖 **Comprehensive Guides & Examples**:
+> - 🍃 **[MongoDB Guide & Examples (`docs/mongodb-guide.md`)](docs/mongodb-guide.md)**: Embedded sub-documents, multi-key indexes, aggregations, and real-time subscriptions.
+> - 🐘 **[PostgreSQL Guide & Examples (`docs/postgresql-guide.md`)](docs/postgresql-guide.md)**: Sequelize data types, B-Tree and GIN indexes, 1:1 / 1:N / N:N relational joins, ILIKE filter operators, and multi-tenant RLS.
+
+### Dynamic PostgreSQL Model Compilation
+Declare a model with `database: postgres` in GraphQL SDL, and AutoGraphQL automatically compiles the AST into a Sequelize model at startup:
+
 ```graphql
 # Direct a model to PostgreSQL instead of MongoDB:
 type SalesRecord @model(database: postgres) {
+  id: ID!
   transactionId: String! @unique
   amount: Float!
   currency: String!
+  isSettled: Boolean! @defaultValue(value: "false")
+  createdAt: Date!
 }
 ```
+
+- **Type Mapping**: Converts GraphQL types (`String`, `Int`, `Float`, `Boolean`, `Date`, `JSON`) into native Sequelize `DataTypes` (`STRING`, `INTEGER`, `FLOAT`, `BOOLEAN`, `DATE`, `JSONB`).
+- **Constraints & Indexes**: Automatically configures `unique`, `allowNull`, `defaultValue`, and `@createIndex` indexes.
+- **Polymorphic Execution**: `QueryController` and `DataLoader` automatically detect PostgreSQL models (`isPgModel: true`) and route operations through Sequelize (`findAll`, `findByPk`, `findOne`, `count`).
+
+---
+
+## 🏢 Multi-Tenancy & Row-Level Security (RLS)
+
+AutoGraphQL provides declarative Row-Level Security (RLS) and multi-tenancy enforcement directly within your GraphQL schema:
+
+### 1. Declarative Schema Directives
+
+```graphql
+# Enforce tenant isolation on organization-scoped entities
+type Project @model @tenantScoped(field: "organizationId", claim: "organizationId") {
+  id: ID!
+  name: String!
+  budget: Float
+  organizationId: String!
+}
+
+# Enforce user-ownership isolation on private documents
+type UserNote @model @ownerScoped(field: "userId", claim: "userId") {
+  id: ID!
+  content: String!
+  userId: String!
+}
+```
+
+### 2. Automatic Read Query Constraint Injection
+When a user or tenant queries a scoped entity (`projects`, `project(id: ...)`), the RLS engine automatically:
+- Extracts the tenant claim (`context.tenantId`, `context.user.organizationId`, or `context.app.tenantId`).
+- Injects the isolation filter: `{ organizationId: "org_123" }`.
+- **Anti-Spoofing Guarantee**: If a client passes `{ organizationId: "other_org" }` in the GraphQL filter argument, the RLS engine strictly overrides it with the verified token claim.
+
+### 3. Automatic Write Tagging & Mutation Ownership
+- **Create Mutations**: Automatically attaches `organizationId` or `userId` to the incoming record payload.
+- **Update & Delete Mutations**: Validates that the record belongs to the active tenant before allowing modifications, rejecting cross-tenant mutations with `PermissionDeniedError`.
+- **Admin Bypass**: Users with role `ADMIN`, `SYSTEM`, or internal bypass tokens (`context.bypass = true`) can query and manage data across all tenants freely.
 
 ---
 
@@ -455,10 +515,11 @@ type SalesRecord @model(database: postgres) {
 AutoGraphQL includes built-in protection against common GraphQL production vulnerabilities and bottlenecks:
 
 ### 1. Request-Scoped DataLoader (N+1 Query Resolution)
-When resolving nested relations (e.g., `users { profile { ... } }`), AutoGraphQL instantiates request-scoped DataLoaders inside the Apollo and WebSocket execution context. Sibling lookups are batched into a single `$in` query:
+When resolving nested relations (e.g., `users { profile { ... } }`), AutoGraphQL instantiates request-scoped DataLoaders inside the Apollo and WebSocket execution context. Sibling lookups are batched into a single `$in` query across MongoDB and PostgreSQL:
 ```javascript
 // Automatically batches individual lookups:
-// Model.find({ id: { $in: ['id1', 'id2', 'id3', ...] } })
+// MongoDB:   Model.find({ id: { $in: ['id1', 'id2', 'id3', ...] } })
+// Sequelize: Model.findAll({ where: { id: ['id1', 'id2', 'id3', ...] } })
 ```
 - **Memoization**: Duplicate IDs within the same request tick are deduplicated automatically.
 - **Isolation**: Fresh loaders are instantiated per request, preventing cross-tenant or cross-request memory leaks.
@@ -492,9 +553,10 @@ npm test
 - ✅ **Phase 1 Reliability & Performance**: Validates request-scoped DataLoader batching, ID deduplication, depth limiting, complexity limiting, and Kubernetes health probes.
 - ✅ **Phase 2 Event-Driven Automation**: Validates mutation event extraction, in-process listener argument mapping, transactional outbox persistence, HMAC-SHA256 signature generation, exponential backoff, and end-to-end HTTP webhook delivery.
 - ✅ **Phase 3 Developer & CI/CD Tooling**: Validates AST schema diffing & breaking-change detection, automated TypeScript client SDK compilation, and Automatic Persisted Queries (APQ) with safelisting.
+- ✅ **Phase 4 Architecture Expansion**: Validates dynamic PostgreSQL (Sequelize) AST model compilation, polymorphic queries, Sequelize DataLoader batching, and declarative Row-Level Security (RLS) multi-tenant isolation.
 
 ```
-  57 passing (41ms)
+  70 passing (53ms)
 ```
 
 ---
@@ -635,6 +697,12 @@ AutoGraphQL/
 ├── constants/                    # Directives, filters, scalar types & sanitized error definitions
 │   ├── errors/                   # Generic GraphQL & Database error classes
 │   └── roles.js                  # Standard framework roles (ADMIN, USER, GUEST)
+├── docs/                         # In-depth architectural guides & query/mutation examples
+│   ├── count-and-aggregations-guide.md # Total counts, filtered counts, groupBy, and relational counts
+│   ├── directives-reference.md   # Exhaustive reference guide for all 25+ schema directives
+│   ├── file-management-guide.md  # GraphQL multipart uploads, AWS S3/CloudFront, and entity linking
+│   ├── mongodb-guide.md          # Complete MongoDB schema, query, mutation & aggregation guide
+│   └── postgresql-guide.md       # Complete PostgreSQL joins, GIN indexes, and RLS guide
 ├── docker-compose.yml            # Docker stack (MongoDB, PostgreSQL, Redis)
 ├── graphqlSchema/                # GraphQL SDL models (User, UserProfile, Post, Comment, Category, Tag, File)
 ├── scripts/                      # DB index synchronization utilities

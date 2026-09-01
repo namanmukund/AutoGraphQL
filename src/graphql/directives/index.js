@@ -119,6 +119,17 @@ directive @clamp(
 # History model tracking
 directive @history on OBJECT | FIELD_DEFINITION
 directive @historyModel on OBJECT | FIELD_DEFINITION
+
+# Declarative Multi-Tenancy & Row-Level Security
+directive @tenantScoped(
+  field: String
+  claim: String
+) on OBJECT
+
+directive @ownerScoped(
+  field: String
+  claim: String
+) on OBJECT
 `;
 
 export default directive;
