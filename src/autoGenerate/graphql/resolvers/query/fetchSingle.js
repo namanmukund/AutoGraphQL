@@ -122,7 +122,7 @@ const fetchSingleQueryResolver = async (
       };
 
       // Fetch from local.
-      const existingPromise = modelQueries.fetchById(id).then((result) => toObject(result));
+      const existingPromise = modelQueries.fetchById(id, context).then((result) => toObject(result));
       // Fetch from remote applications.
       return remoteApplicationPromises(
         resultRemote,
@@ -144,7 +144,8 @@ const fetchSingleQueryResolver = async (
     typeName,
     parsedASTMap: ast,
     info,
-  }).then((result) => {
+    context,
+  }, context).then((result) => {
     // If there are no remote fields, return the result.
     if (!Object.keys(remoteFields).length) {
       return result;

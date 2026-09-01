@@ -45,6 +45,9 @@ export const ifAuthorized = (context, userToken) => {
   }
   obj.app = app;
   obj.user = user;
+  if (context && context.loaders) {
+    obj.loaders = context.loaders;
+  }
   return obj;
 };
 

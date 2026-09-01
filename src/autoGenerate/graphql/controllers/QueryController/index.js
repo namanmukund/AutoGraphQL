@@ -53,7 +53,7 @@ class QueryController extends MasterController {
     return getQueriedResult(this.Model, params, limitValue, skipValue, querySort);
   }
 
-  fetchById(id) {
+  fetchById(id, context) {
     return this.validatePermissions({ id }, true)
       .then((isAllowedParam) => {
         const isAllowed = isAllowedParam;
@@ -67,6 +67,15 @@ class QueryController extends MasterController {
             },
           });
         }
+        const requestLoaders = (context && context.loaders)
+          || this.loaders
+          || (this.authentication && this.authentication.loaders);
+        if (requestLoaders && typeof requestLoaders.getLoader === 'function') {
+          const loader = requestLoaders.getLoader(this.modelName);
+          if (loader) {
+            return loader.load(id);
+          }
+        }
         // use lean to get working object instead of mongoose
         return this.Model.findOne({ id })
           .lean()
@@ -76,7 +85,7 @@ class QueryController extends MasterController {
       .catch((err) => err);
   }
 
-  fetchOne(param, resolverInfoParams) {
+  fetchOne(param, resolverInfoParams, context) {
     return this.validatePermissions({ param }, true)
       .then((isAllowedParam) => {
         const isAllowed = isAllowedParam;
@@ -98,6 +107,17 @@ class QueryController extends MasterController {
               const result = await this.Model.aggregate(aggregationQuery).exec();
               return Array.isArray(result) ? result[0] : result;
             });
+        }
+        const paramKeys = param ? Object.keys(param) : [];
+        const requestLoaders = (context && context.loaders)
+          || (resolverInfoParams && resolverInfoParams.context && resolverInfoParams.context.loaders)
+          || this.loaders
+          || (this.authentication && this.authentication.loaders);
+        if (requestLoaders && typeof requestLoaders.getLoader === 'function' && paramKeys.length === 1 && param.id) {
+          const loader = requestLoaders.getLoader(this.modelName);
+          if (loader) {
+            return loader.load(param.id);
+          }
         }
         return this.Model.findOne(param).exec();
       })

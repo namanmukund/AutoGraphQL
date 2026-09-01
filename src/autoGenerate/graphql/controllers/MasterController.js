@@ -17,6 +17,7 @@ class MasterController {
     this.app = authentication && authentication.app;
     this.user = authentication && authentication.user;
     this.mutationOrQueryName = authentication && authentication.mutationOrQueryName;
+    this.loaders = authentication && authentication.loaders;
     this.authentication = authentication;
     this.apiType = this.getApiType(authentication);
   }
