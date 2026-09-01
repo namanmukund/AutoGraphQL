@@ -696,6 +696,7 @@ AutoGraphQL/
 │   └── roles.js                  # Standard framework roles (ADMIN, USER, GUEST)
 ├── docs/                         # In-depth architectural guides & query/mutation examples
 │   ├── directives-reference.md   # Exhaustive reference guide for all 25+ schema directives
+│   ├── file-management-guide.md  # GraphQL multipart uploads, AWS S3/CloudFront, and entity linking
 │   ├── mongodb-guide.md          # Complete MongoDB schema, query, mutation & aggregation guide
 │   └── postgresql-guide.md       # Complete PostgreSQL joins, GIN indexes, and RLS guide
 ├── docker-compose.yml            # Docker stack (MongoDB, PostgreSQL, Redis)
