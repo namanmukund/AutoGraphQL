@@ -260,6 +260,9 @@ query FetchActiveUsers {
 
 ### Aggregation & Metadata Queries
 
+> [!TIP]
+> 📖 **Full Guide**: See **[`docs/count-and-aggregations-guide.md`](docs/count-and-aggregations-guide.md)** for total counts, filtered counts, group-by segmentations (`@groupBy`), relational child counts (`@relationalMeta`), and multi-tenant RLS.
+
 ```graphql
 # Count total users matching filter criteria
 query CountActiveUsers {
@@ -695,6 +698,7 @@ AutoGraphQL/
 │   ├── errors/                   # Generic GraphQL & Database error classes
 │   └── roles.js                  # Standard framework roles (ADMIN, USER, GUEST)
 ├── docs/                         # In-depth architectural guides & query/mutation examples
+│   ├── count-and-aggregations-guide.md # Total counts, filtered counts, groupBy, and relational counts
 │   ├── directives-reference.md   # Exhaustive reference guide for all 25+ schema directives
 │   ├── file-management-guide.md  # GraphQL multipart uploads, AWS S3/CloudFront, and entity linking
 │   ├── mongodb-guide.md          # Complete MongoDB schema, query, mutation & aggregation guide

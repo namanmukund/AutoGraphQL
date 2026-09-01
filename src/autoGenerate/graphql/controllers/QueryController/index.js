@@ -273,8 +273,31 @@ Sample paramsForFetch argument
     return this.Model.find(inputParams).exec();
   }
 
-  fetchCount(paramsForFetch = {}) {
+  fetchCount(paramsForFetch = {}, context = null) {
+    const activeContext = context || this.authentication;
     let inputParams = { ...paramsForFetch };
+
+    try {
+      if (inputParams.filter) {
+        inputParams.filter = applyRowLevelSecurity({
+          modelName: this.modelName,
+          filter: inputParams.filter,
+          context: activeContext,
+        });
+      } else {
+        const secured = applyRowLevelSecurity({
+          modelName: this.modelName,
+          filter: {},
+          context: activeContext,
+        });
+        if (Object.keys(secured).length > 0) {
+          inputParams.filter = secured;
+        }
+      }
+    } catch (rlsErr) {
+      return Promise.reject(rlsErr);
+    }
+
     return this.validatePermissions(inputParams, true)
       .then(async (isAllowedParam) => {
         const isAllowed = isAllowedParam;
@@ -292,6 +315,32 @@ Sample paramsForFetch argument
           inputParams = isAllowed.data;
         }
         const { filter, groupBy } = inputParams;
+
+        // Polymorphic PostgreSQL (Sequelize) Count Execution
+        if (this.Model && (this.Model.isPgModel || (typeof this.Model.count === 'function' && !this.Model.find))) {
+          const effectiveFilter = filter || (inputParams.id ? { id: inputParams.id } : {});
+          const where = buildSequelizeWhereClause(effectiveFilter);
+          if (!groupBy) {
+            return this.Model.count({ where });
+          }
+          const seq = (this.Model.sequelize) || {};
+          const fn = seq.fn ? seq.fn('COUNT', (seq.col ? seq.col('id') : '*')) : 'COUNT';
+          const results = await this.Model.findAll({
+            attributes: [groupBy, [fn, 'count']],
+            where,
+            group: [groupBy],
+            raw: true,
+          });
+          const parsedResults = Array.isArray(results) ? results : [];
+          return {
+            groupByFieldName: groupBy,
+            groupByResult: parsedResults.map((r) => ({
+              _id: r[groupBy],
+              count: parseInt(r.count || 0, 10),
+            })),
+          };
+        }
+
         if (filter) {
           const queryParams = getQueryParams(inputParams, this.modelName);
           if (!groupBy) {
