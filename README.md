@@ -16,6 +16,7 @@
   - [4. Real-Time Chat & Collaborative Platforms](#4-real-time-chat--collaborative-platforms)
 - [⚡ Quickstart (60-Second Setup)](#-quickstart-60-second-setup)
 - [🛠️ How It Works: The 1-Step Workflow](#️-how-it-works-the-1-step-workflow)
+- [🧩 Developer Extension & Lifecycle Hooks (Pre/Post Hooks)](#-developer-extension--lifecycle-hooks)
 - [📖 GraphQL API Surface & Examples](#-graphql-api-surface--examples)
   - [Single & Plural Queries with Filtering and Pagination](#single--plural-queries-with-filtering-and-pagination)
   - [Aggregation & Metadata Queries](#aggregation--metadata-queries)
@@ -219,6 +220,19 @@ export default [Product];
 3. Generate CRUD mutations: `addProduct`, `updateProduct`, `updateProducts`, `deleteProduct`, `deleteProducts`.
 4. Generate relational connectors: `categoryConnectId`, `addToCategory`, `removeFromCategory`.
 5. Generate real-time subscriptions: `product(filter: ...)` WebSocket events.
+
+---
+
+## 🧩 Developer Extension & Lifecycle Hooks
+
+> [!TIP]
+> 📖 **Architecture & Hooks Guide**: See **[`docs/developer-extension-and-hooks-guide.md`](docs/developer-extension-and-hooks-guide.md)** for building custom domain schemas, attaching synchronous Pre/Post Hooks, setting up Birdwatch event listeners, and safely pulling upstream AutoGraphQL framework updates without merge conflicts.
+
+```
+AutoGraphQL/
+├── 🧠 FRAMEWORK CORE ENGINE (src/ - Never touch, auto-updated from upstream)
+└── 🎯 YOUR DOMAIN CODE (graphqlSchema/ & .env - Your business models & hooks)
+```
 
 ---
 
@@ -715,6 +729,7 @@ AutoGraphQL/
 │   └── roles.js                  # Standard framework roles (ADMIN, USER, GUEST)
 ├── docs/                         # In-depth architectural guides & query/mutation examples
 │   ├── count-and-aggregations-guide.md # Total counts, filtered counts, groupBy, and relational counts
+│   ├── developer-extension-and-hooks-guide.md # Clean architecture, pre/post hooks, and domain customization
 │   ├── directives-reference.md   # Exhaustive reference guide for all 25+ schema directives
 │   ├── file-management-guide.md  # GraphQL multipart uploads, AWS S3/CloudFront, and entity linking
 │   ├── mongodb-guide.md          # Complete MongoDB schema, query, mutation & aggregation guide
