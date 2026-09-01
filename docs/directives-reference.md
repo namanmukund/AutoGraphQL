@@ -30,7 +30,7 @@ directive @model(
 ```
 
 - **Arguments**:
-  - `database`: Specifies the backing database dialect:
+  - `database`: Specifies the backing database dialect (defaults to `DEFAULT_DATABASE_DIALECT` in `.env`, or `mongoose`):
     - `mongoose` (or `MONGO`): Compiles a dynamic Mongoose model with MongoDB collection.
     - `postgres` (or `POSTGRES`, `sql`, `sequelize`): Compiles a dynamic Sequelize model with PostgreSQL table.
   - `secondaryApplications`: Array of application names that have cross-app visibility to this model in multi-app setups.

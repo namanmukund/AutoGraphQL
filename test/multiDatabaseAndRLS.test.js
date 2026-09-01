@@ -437,4 +437,49 @@ describe('AutoGraphQL Phase 4: Architecture Expansion', () => {
       }, (err) => err.name === 'PermissionDeniedError' || (err.data && err.data.message.includes('Multi-Tenancy Access Denied')));
     });
   });
+
+  describe('8. Environment-Configurable Default Database Dialect Selection', () => {
+    const originalEnv = process.env.DEFAULT_DATABASE_DIALECT;
+
+    afterEach(() => {
+      if (originalEnv !== undefined) {
+        process.env.DEFAULT_DATABASE_DIALECT = originalEnv;
+      } else {
+        delete process.env.DEFAULT_DATABASE_DIALECT;
+      }
+    });
+
+    it('should default to mongoose when DEFAULT_DATABASE_DIALECT is unset', () => {
+      delete process.env.DEFAULT_DATABASE_DIALECT;
+      delete process.env.DEFAULT_DATABASE;
+      delete process.env.DATABASE_DIALECT;
+
+      const { getDefaultDatabaseDialect } = require('../constants');
+      assert.strictEqual(getDefaultDatabaseDialect(), 'mongoose');
+    });
+
+    it('should configure postgres as default when DEFAULT_DATABASE_DIALECT=postgres', () => {
+      process.env.DEFAULT_DATABASE_DIALECT = 'postgres';
+
+      const { getDefaultDatabaseDialect } = require('../constants');
+      assert.strictEqual(getDefaultDatabaseDialect(), 'postgres');
+    });
+
+    it('should handle dialect aliases and case-insensitivity (e.g. postgresql, SQL, Mongo, Sequelize)', () => {
+      const { getDefaultDatabaseDialect } = require('../constants');
+
+      process.env.DEFAULT_DATABASE_DIALECT = 'PostgreSQL';
+      assert.strictEqual(getDefaultDatabaseDialect(), 'postgres');
+
+      process.env.DEFAULT_DATABASE_DIALECT = 'SQL';
+      assert.strictEqual(getDefaultDatabaseDialect(), 'postgres');
+
+      process.env.DEFAULT_DATABASE_DIALECT = 'SEQUELIZE';
+      assert.strictEqual(getDefaultDatabaseDialect(), 'postgres');
+
+      process.env.DEFAULT_DATABASE_DIALECT = 'MongoDB';
+      assert.strictEqual(getDefaultDatabaseDialect(), 'mongoose');
+    });
+  });
 });
+

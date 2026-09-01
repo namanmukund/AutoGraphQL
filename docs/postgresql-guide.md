@@ -21,7 +21,9 @@ This guide provides a comprehensive walkthrough of defining, querying, mutating,
 
 ## 1. Defining PostgreSQL Schemas
 
-To route a GraphQL model to PostgreSQL instead of MongoDB, annotate the type with `database: postgres` in the `@model` directive (aliases `database: sql` and `database: sequelize` are also supported):
+To route a GraphQL model to PostgreSQL, you have two options:
+1. **Global Default (`.env`)**: Set `DEFAULT_DATABASE_DIALECT=postgres` in your `.env` file to make all standard `@model` types compile as PostgreSQL Sequelize tables by default.
+2. **Explicit Schema Directive**: Annotate specific types with `database: postgres` in the `@model` directive (aliases `database: sql` and `database: sequelize` are also supported):
 
 ```graphql
 # graphqlSchema/core/types/collections/Order.graphql

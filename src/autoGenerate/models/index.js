@@ -9,7 +9,7 @@ import getDirectiveArgumentValue, { getTypeDirectiveArgumentValue } from '../uti
 import {
   getEnumTypeMongooseSchema, visitField, hasDirective, getEnumDefinitionTypeObject,
 } from '../utils';
-import { DATABASE_DIALECTS } from '../../../constants';
+import { DATABASE_DIALECTS, getDefaultDatabaseDialect } from '../../../constants';
 import POSTGRES_MODELS from './postgresModels';
 import { createSequelizeModelFromAST } from './sqlModelGenerator';
 
@@ -269,7 +269,11 @@ Object.keys(parsedASTMap).forEach((type) => {
    */
   // model directives logic
   const isModel = directives && hasDirective(directives, 'model');
-  const modelDatabase = getTypeDirectiveArgumentValue(directives, 'model', 'database', DATABASE_DIALECTS.mongoose);
+  const defaultDialect = getDefaultDatabaseDialect();
+  const explicitDatabase = getTypeDirectiveArgumentValue(directives, 'model', 'database', null);
+  const modelDatabase = explicitDatabase
+    ? (DATABASE_DIALECTS[String(explicitDatabase).toLowerCase()] || explicitDatabase)
+    : defaultDialect;
 
   const isModelVersioningToBeDone = directives && hasDirective(directives, 'history');
   if (isModel) {
