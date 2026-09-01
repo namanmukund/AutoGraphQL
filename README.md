@@ -15,6 +15,7 @@
   - [3. E-Commerce & Marketplace Backend](#3-e-commerce--marketplace-backend)
   - [4. Real-Time Chat & Collaborative Platforms](#4-real-time-chat--collaborative-platforms)
 - [⚡ Quickstart (60-Second Setup)](#-quickstart-60-second-setup)
+- [🎨 AutoGraphQL Studio Platform (`/studio`)](#-autographql-studio-platform-studio)
 - [🛠️ How It Works: The 1-Step Workflow](#️-how-it-works-the-1-step-workflow)
 - [🧩 Developer Extension & Lifecycle Hooks (Pre/Post Hooks)](#-developer-extension--lifecycle-hooks)
 - [📖 GraphQL API Surface & Examples](#-graphql-api-surface--examples)
@@ -191,8 +192,27 @@ npm run db:up    # Starts MongoDB, PostgreSQL, and Redis via Docker Compose
 npm run dev
 ```
 
-### 4. Open GraphQL Playground
-Navigate to **`http://localhost:3000/graphql/core`** in your browser to start querying your API!
+### 4. Open AutoGraphQL Studio & Playground
+- **AutoGraphQL Studio UI:** Navigate to **`http://localhost:3000/studio`** (or `/console`) to visually design models, configure hooks, and explore APIs!
+- **GraphQL Playground:** Navigate to **`http://localhost:3000/graphql/core`** to run queries.
+
+---
+
+## 🎨 AutoGraphQL Studio Platform (`/studio`)
+
+> 📖 **Full Studio Guide**: Read **[`docs/studio-user-guide.md`](docs/studio-user-guide.md)** for an in-depth walkthrough of all Studio features, tutorials, and workflows.
+
+AutoGraphQL Studio is a **zero-code, visual developer console** that allows you to manage the entire application lifecycle directly from your browser:
+
+| Studio Tab | Capabilities |
+| :--- | :--- |
+| 📐 **Schema Studio** | Visual entity builder, data type selection (`String`, `Int`, `Float`, `Boolean`, `Date`, `JSONB`), directive toggles (`@history`, `@tenantScoped`, `@ownerScoped`), Pro SDL editor with line numbers, and safe schema deletion. |
+| 🔗 **Connected Schemas** | Visual cross-schema relationship graph mapping 1:1, 1:N, and N:N relations (`@relation(name, direction)`). |
+| 🪝 **Lifecycle Hooks** | **Schema-to-Hooks Finder** with interactive Mutation Lifecycle Matrix (`add`, `update`, `delete`) and 1-click presets for slug generation, validation, bcrypt hashing, and welcome emails. |
+| 📡 **Webhooks & Events** | Birdwatch Transactional Outbox manager, event subscription filters (`addOrder`, `updateUser:*`), and HMAC-SHA256 signing. |
+| 🗄️ **Databases & RLS** | Real-time database diagnostics across MongoDB (Mongoose) and PostgreSQL (Sequelize) with multi-tenant RLS policy inspector. |
+| 🚀 **API Playground** | Interactive query console with **1-Click Admin & User JWT generation** and real-time latency diagnostics. |
+| 📦 **1-Click Exports** | **`📦 Export SDK`** (generates type-safe TypeScript Client SDK) and **`📄 Dump SDL`** (exports consolidated GraphQL schema). |
 
 ---
 
