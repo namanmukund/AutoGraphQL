@@ -4,7 +4,7 @@ import {
 } from './index';
 import { commonUserValidation } from '../preHookFunctions/validation/utils';
 import { EitherEmailOrPhoneRequiredError } from '../../../../constants/errors';
-import getUserPasswordObject from '../resolvers/mutation/user/utils/getUserPasswordObject';
+import getUserPasswordObject from '../../utils/getUserPasswordObject';
 
 const addUserValidation = async (input, context) => {
   const {

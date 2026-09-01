@@ -1,7 +1,8 @@
-import createLeadSquared from './createLeadSquared';
-import updateLeadSquared from './updateLeadSquared';
+// Birdwatch event actions
+export const sampleAction = async (payload) => {
+  // Action logic
+};
 
-export {
-  createLeadSquared,
-  updateLeadSquared,
+export default {
+  sampleAction,
 };

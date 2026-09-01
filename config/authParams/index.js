@@ -1,6 +1,6 @@
-const SECRET = process.env.SECRET;
-const FORGOT_PASSWORD_SECRET = process.env.FORGOT_PASSWORD_SECRET;
-const LINK_TOKEN_SECRET = process.env.LINK_TOKEN_SECRET;
+const SECRET = process.env.SECRET || 'default_jwt_secret_change_in_production';
+const FORGOT_PASSWORD_SECRET = process.env.FORGOT_PASSWORD_SECRET || 'default_forgot_pwd_secret';
+const LINK_TOKEN_SECRET = process.env.LINK_TOKEN_SECRET || 'default_link_token_secret';
 
 const coreAuthParams = {
   SECRET,
@@ -10,15 +10,14 @@ const coreAuthParams = {
   FRONTEND_STATIC_APP_TOKEN_EXPIRY_DATE: '10y',
   BACKEND_STATIC_APP_TOKEN_EXPIRY_DATE: '10y',
   SUPER_ADMIN_TOKEN_EXPIRY_DATE: '2h',
-  MENTOR_TOKEN_TEKIE_WEB_APP_EXPIRY_DATE: '30d',
-  TEKIE_WEB_APP_USER_SIGN_UP_EXPIRY_DATE: '1y',
+  ADMIN_TOKEN_EXPIRY_DATE: '30d',
+  USER_SIGN_UP_EXPIRY_DATE: '1y',
   ALGORITHM: 'HS256',
   SALT: 12,
   OTP_EXPIRATION_TIME_IN_SEC: 300,
   LINK_TOKEN_SECRET,
   DEFAULT_EXPIRY_TOKEN_TIME_IN_HOUR: 24,
   DEFAULT_EXPIRY_TOKEN_TIME_IN_HOUR_FOR_WEB: 1,
-  LIVE_CLASS_EXPIRY_DATE: '2h',
 };
 
 export default coreAuthParams;

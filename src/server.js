@@ -1,8 +1,3 @@
-/* eslint-disable no-unused-vars */
-
-// Requires are for running in production mode.
-require('@babel/polyfill');
-
 // Check app inheritance.
 const inherit = require('./inherit');
 

@@ -6,7 +6,6 @@ import { toObject, log } from '../../utils';
 import { STATIC } from '../../constants';
 import { DatabaseRecordNotFoundError } from '../../constants/errors';
 import appSpecificAuthTokens from '../../constants/appSpecificAuthTokens';
-import validateBuddyToken from './utils/validateBuddyToken';
 import APM from '../APM';
 
 const application = process.env.APPLICATION || 'core';
@@ -200,17 +199,7 @@ const authMiddleware = async (req, res, next) => {
   if (userToken && isValidToken && isUserTokenValid) {
     await extractAndUpdateUserTokenInfoInRequest(req, userToken, 'currentUser');
   }
-  const userDeviceId = req.headers['user-device-id'];
-  const batchSessionId = req.headers['batchsession-id'];
-  if (userDeviceId && batchSessionId && req.currentUser) {
-    // Setting buddyLogin flow active when userDeviceId and batchSessionId is passed in headers
-    Object.assign(req.currentUser, {
-      isBuddyLoginFlowActive: true,
-    });
-    // To Validate if the buddy token is valid
-    await validateBuddyToken(batchSessionId, userDeviceId, req);
-  }
-  // Set user info in APM i.e sentry
+  // Set user info in APM (Sentry)
   APM.setUser(req.currentUser);
   next();
 };

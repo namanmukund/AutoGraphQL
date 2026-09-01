@@ -5,7 +5,7 @@ export const NestingLevelExceedingError = createError('NestingLevelExceedingErro
 });
 
 export const BiDirectionalRelationsRequiredError = createError('BiDirectionalRelationsRequiredError', {
-  message: 'relation needs to exist on both types',
+  message: 'Relation must be defined on both associated types',
 });
 
 export const NoUniqueFieldError = createError('NoUniqueFieldError', {
@@ -17,18 +17,19 @@ export const RelationAppliedOnSameFieldsError = createError('RelationAppliedOnSa
 });
 
 export const RemoteRelationError = createError('RemoteRelationError', {
-  message: 'If a relation field belongs to a remote application',
+  message: 'Error resolving relation across remote applications',
 });
+
 export const DefaultDirectiveAppliedOnWrongFieldError = createError('DefaultDirectiveAppliedOnWrongFieldError', {
-  message: 'Default field is allowed only on scalar and enum types.',
+  message: 'Default directive is allowed only on scalar and enum types.',
 });
 
 export const InvalidDateFormatError = createError('InvalidDateFormatError', {
-  message: 'Input Date is of invalid format',
+  message: 'Input Date format is invalid',
 });
 
 export const UnsupportedListFieldInsideSubDocumentObjectError = createError('UnsupportedListFieldInsideSubDocumentObjectError', {
-  message: 'List field inside sub document object is not supported. Prefer flat hierarchy here.',
+  message: 'List fields inside sub-documents are not supported. Prefer flat hierarchy here.',
 });
 
 export const InvalidRuleValueError = createError('InvalidRuleValueError', {
@@ -36,29 +37,9 @@ export const InvalidRuleValueError = createError('InvalidRuleValueError', {
 });
 
 export const SubscriptionKeyNotDefinedError = createError('SubscriptionKeyNotDefinedError', {
-  message: 'Subscription Key is Required To Iterate! \n For Example: [\'POST_CREATED\'], now you can use this key to publish data using PubSub.',
+  message: 'Subscription Key is required to iterate.',
 });
 
 export const InvalidSubscriptionKeyError = createError('InvalidSubscriptionKeyError', {
-  message: 'Subscription Key Must Be An Array!',
-});
-
-export const CommsError = createError('CommsError', {
-  message: 'Comms failed to send',
-});
-
-export const MultipleRegistrationError = createError('MultipleRegistrationError', {
-  message: 'Cannot register two or more user at the same time',
-});
-
-export const AlreadyRegisteredForEvent = createError('AlreadyRegisteredForEvent', {
-  message: 'Child is already registered for event',
-});
-
-export const RegistrationClosedForEvent = createError('RegistrationClosedForEvent', {
-  message: 'Registration closed for this event',
-});
-
-export const EventCancelledError = createError('EventCancelledError', {
-  message: 'Event is cancelled',
+  message: 'Subscription Key must be an array.',
 });

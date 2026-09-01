@@ -1,152 +1,50 @@
 const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
 const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+const region = process.env.AWS_REGION || 'us-east-1';
+const bucket = process.env.AWS_S3_BUCKET || 'autographql-storage';
 const cloudFrontUri = process.env.CLOUDFRONT_URI;
 const cloudFrontKeypairId = process.env.CLOUDFRONT_KEYPAIR_ID;
-const cloudFrontPrivateKeyString = '-----BEGIN RSA PRIVATE KEY-----\n'
-  + 'MIIEpAIBAAKCAQEAjetoFQGmFh5aSo/HR6SU45hXr0C2/2qbSwJ5xB5/1owWglj0\n'
-  + '+TISqR+qcS4bAFWFkvNqTX5ZeMVjMGoayihtuuPzjKQa3pydKpMwUG9lDGYaR4xA\n'
-  + 'VeHZTY5fGnCJ0UPoOZ/5MCNNOFtwO4vJf9rTf1FEU6hNy7prjEMVBjf1rS+uIG41\n'
-  + 'TCsouN+zZAGrENuyCEfXMEJxPGPY9YBxk/fGDhmspjtafcZcYJ57gDecZejBPpzR\n'
-  + 'g0N4xnZhmBp4sv17oSPdhBatu7a3lC0h89bxiRoju7SMM82Gu0tEEwj7LGm2HpWW\n'
-  + '31nzhn6CDXdNPEM49Y+YbbbUzfvzvyMlBLUk+QIDAQABAoIBABOkFr2BgujgvoI/\n'
-  + 'L8c8gdaVyNzaSflDWcahyxRXXD3nGV5kzVKHmYmKdl4/kUEUlO3nfjjHWb6bIsUa\n'
-  + 'iiacPcN1tMksFQPmDOJNiIw5PnTe1Jg+UtEP9rEDGSphlNE/Yq5G84ez+wXnsbqr\n'
-  + '9/EX6dle9+PUESA25pd82TYJHJkhIVYwF6tmXhlDZUuKn3BsCdzzTEO5jGTE891g\n'
-  + 'T08hHH0szMhLtjJsNoM7oFfcUWWrd3FpNChSFTcrVFbMldW04iNKXkHnBOtfLhXz\n'
-  + 'gjgH38oq0p8IPTK+RkQAw8Ba1d14SKeknmnQ2YRMU5Nj3RpYWEnKoB2j1a7+x32q\n'
-  + '5lg/YwECgYEAyJUPcq3ncqGGyJ4zfvHBJtMVqz8wFL7EspMbwb3rIapArfERjkPY\n'
-  + '7j4gdOeNIxczWRMRQJV1pUKjz9I0L6mrYu75swHl6Itk8R30/oPIxLnMiL7VUD1K\n'
-  + 'BbdWvK5av+qM6Zzm5uVU0AmelJEp/kbETL8RDdGMwaZXfsauiDayi5ECgYEAtSE0\n'
-  + 'Qe1LEF1qdQxetnNXcfJiEDIp5cSKhyFNPado8spv4vW6WhS3J9BallUFNa5PbVa2\n'
-  + 'B1FRevdcJswGyFKSgpdHwi5+7hqVXGrFe+hY63CQIzSQT5RrM7pQxlwVamJflvAP\n'
-  + '8unz4kF+cT9aG889ByK2CMSVdiT56IK/ID53PukCgYEAtKq+jVbif7fKBW2piJAM\n'
-  + 'oAHFJMf3cNgbp5UljS6ZWWtWctYOMAwgmwbOiT3/PDorf/HSuk9k9gO+NPRrGPtE\n'
-  + 'agpCUuBEy16y/xMylwTwk3GfLxRkYq+xutBWigCpsO99GPbAa/zolbH0anEOWAA5\n'
-  + '077Nh5rVo59Gc+RVVE+gJmECgYB3sv/D6btHj1SBEbGtxT+ur82agmwpyd76Okm/\n'
-  + 'StkSSjHyvQ1v5my7xPd4jasptI4M5dbZsyWzq7CcewyoadkksDDd5LhBRhQaxPzJ\n'
-  + 'S90ninXWrjAIRz8pKiGjVMtaSLR/HRqNH4rqpPmYgZNc+XGNO6Us2i0jrH/y5iTE\n'
-  + 'fEN1sQKBgQCPrL0COiH/ExSQC6Cl8FMI+K+KoTBBByx/HVyjp3O/uDDXJmDABV/X\n'
-  + '868tY+Msmof9svCiDsKLRqMF5cq6oxctM0lDdYi9u7hgV8n1vRttxNPm5sj8i5s0\n'
-  + 'hL4nMmX3PSuDBRv0YHlIrm/A/mGCOx3Lt3ps9lFUahbVj6wIQp0CIw==\n'
-  + '-----END RSA PRIVATE KEY-----';
+const cloudFrontPrivateKeyString = process.env.CLOUDFRONT_PRIVATE_KEY || '';
 
-// aws simple email service credentials
-const sesAccessKeyId = process.env.SES_ACCESS_KEY_ID;
-const sesSecretAccessKey = process.env.SES_SECRET_ACCESS_KEY;
+// AWS Simple Email Service credentials
+const sesAccessKeyId = process.env.SES_ACCESS_KEY_ID || accessKeyId;
+const sesSecretAccessKey = process.env.SES_SECRET_ACCESS_KEY || secretAccessKey;
+const sesRegion = process.env.AWS_SES_REGION || region;
+
+const envConfig = {
+  aws: {
+    accessKeyId,
+    secretAccessKey,
+    region,
+  },
+  s3: {
+    bucket,
+  },
+  ACL: {
+    publicReadWrite: 'public-read-write',
+    publicRead: 'public-read',
+    authenticatedRead: 'authenticated-read',
+    private: 'private',
+    public: 'public',
+  },
+  cloudFront: {
+    uri: cloudFrontUri,
+    keypairId: cloudFrontKeypairId,
+    privateKeyString: cloudFrontPrivateKeyString,
+    expireTime: new Date().getTime() + 8000000000,
+  },
+  ses: {
+    region: sesRegion,
+    accessKeyId: sesAccessKeyId,
+    secretAccessKey: sesSecretAccessKey,
+  },
+};
 
 const awsConfig = {
-  production: {
-    aws: {
-      accessKeyId,
-      secretAccessKey,
-      region: 'ap-south-1',
-    },
-    s3: {
-      bucket: 'tekie-production',
-    },
-    ACL: {
-      publicReadWrite: 'public-read-write',
-      publicRead: 'public-read',
-      authenticatedRead: 'authenticated-read',
-      private: 'private',
-      public: 'public',
-    },
-    cloudFront: {
-      uri: cloudFrontUri,
-      keypairId: cloudFrontKeypairId,
-      privateKeyString: cloudFrontPrivateKeyString,
-      expireTime: new Date().getTime() + 8000000000,
-    },
-    ses: {
-      region: 'ap-south-1',
-      accessKeyId: sesAccessKeyId,
-      secretAccessKey: sesSecretAccessKey,
-    },
-  },
-  staging: {
-    aws: {
-      accessKeyId,
-      secretAccessKey,
-      region: 'us-east-1',
-    },
-    s3: {
-      bucket: 'tekie-tms-test',
-    },
-    ACL: {
-      publicReadWrite: 'public-read-write',
-      publicRead: 'public-read',
-      authenticatedRead: 'authenticated-read',
-      private: 'private',
-      public: 'public',
-    },
-    cloudFront: {
-      uri: cloudFrontUri,
-      keypairId: cloudFrontKeypairId,
-      privateKeyString: cloudFrontPrivateKeyString,
-      expireTime: new Date().getTime() + 8000000000,
-    },
-    ses: {
-      region: 'ap-south-1',
-      accessKeyId: sesAccessKeyId,
-      secretAccessKey: sesSecretAccessKey,
-    },
-  },
-  development: {
-    aws: {
-      accessKeyId,
-      secretAccessKey,
-      region: 'us-east-1',
-    },
-    s3: {
-      bucket: 'tekie-tms-test',
-    },
-    cloudFront: {
-      uri: cloudFrontUri,
-      keypairId: cloudFrontKeypairId,
-      privateKeyString: cloudFrontPrivateKeyString,
-      expireTime: new Date().getTime() + 8000000000,
-    },
-    ACL: {
-      publicReadWrite: 'public-read-write',
-      publicRead: 'public-read',
-      authenticatedRead: 'authenticated-read',
-      private: 'private',
-      public: 'public',
-    },
-    ses: {
-      region: 'ap-south-1',
-      accessKeyId: sesAccessKeyId,
-      secretAccessKey: sesSecretAccessKey,
-    },
-  },
-  test: {
-    aws: {
-      accessKeyId,
-      secretAccessKey,
-      region: 'us-east-1',
-    },
-    s3: {
-      bucket: 'tekie-tms-test',
-    },
-    ACL: {
-      publicReadWrite: 'public-read-write',
-      publicRead: 'public-read',
-      authenticatedRead: 'authenticated-read',
-      private: 'private',
-      public: 'public',
-    },
-    cloudFront: {
-      uri: cloudFrontUri,
-      keypairId: cloudFrontKeypairId,
-      privateKeyString: cloudFrontPrivateKeyString,
-      expireTime: new Date().getTime() + 8000000000,
-    },
-    ses: {
-      region: 'ap-south-1',
-      accessKeyId: sesAccessKeyId,
-      secretAccessKey: sesSecretAccessKey,
-    },
-  },
+  production: envConfig,
+  staging: envConfig,
+  development: envConfig,
+  test: envConfig,
 };
 
 export default awsConfig;

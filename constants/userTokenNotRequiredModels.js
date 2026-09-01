@@ -1,17 +1,12 @@
+// Models that do not require an active user session for public access
 const userTokenNotRequiredModels = [
-  'UserApprovedCodeTagMapping',
-  'UserApprovedCode',
-  'UserApprovedCodeTag',
-  'EventCertificate',
-  'IqaReport',
-  'UserCourse',
-  'ContentTag',
   'File',
-  'EventCategory',
-  'Event',
-  'EventJoinReason',
-  'EventPrize',
-  'ShortLink',
+  'Post',
+  'Comment',
+  'Category',
+  'Tag',
+  'AppToken',
+  'BlacklistedToken',
 ];
 
 export default userTokenNotRequiredModels;

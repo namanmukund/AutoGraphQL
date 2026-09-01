@@ -8,10 +8,11 @@ const File = `
     usageCount: Int @defaultValue(value: 0)
     uri: String! @unique
     signedUri: String
-    fileBucket: FileBucket! @defaultValue(value: "python")
+    fileBucket: FileBucket! @defaultValue(value: "default")
     type: FileType!
     usageKind: FileUsageKind
     mimeType: String!
-  }`;
+  }
+`;
 
 export default [File, FileType, FileUsageKind];

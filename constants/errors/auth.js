@@ -5,7 +5,7 @@ export const UserTokenNotRequiredError = createError('UserTokenNotRequiredError'
 });
 
 export const UnknownUserError = createError('UnknownUserError', {
-  message: 'No user found with that username',
+  message: 'No user found with that username or email',
 });
 
 export const PasswordMismatchError = createError('PasswordMismatchError', {
@@ -13,7 +13,7 @@ export const PasswordMismatchError = createError('PasswordMismatchError', {
 });
 
 export const OTPMismatchError = createError('OTPMismatchError', {
-  message: 'Incorrect otp provided',
+  message: 'Incorrect OTP provided',
 });
 
 export const UnauthenticatedUserError = createError('UnauthenticatedUserError', {
@@ -27,23 +27,25 @@ export const UnauthenticatedAppError = createError('UnauthenticatedAppError', {
 export const AlreadyActiveUser = createError('AlreadyActiveUser', {
   message: 'User is already active',
 });
+
 export const UserPasswordAlreadySetError = createError('UserPasswordAlreadySetError', {
   message: 'User password is already set',
 });
+
 export const UserPasswordNotSetError = createError('UserPasswordNotSetError', {
   message: 'User password is not set',
 });
-export const AlreadySubscribedError = createError('AlreadySubscribedError', {
-  message: 'User is already subscribed',
-});
+
 export const AppTokenNotRequiredError = createError('AppTokenNotRequiredError', {
   message: 'The current request does not require any app token',
 });
+
 export const InvalidApplicationNameError = createError('InvalidApplicationNameError', {
-  message: 'Wrong application name is provided',
+  message: 'Invalid application name provided',
 });
+
 export const InvalidStaticToken = createError('InvalidStaticToken', {
-  message: 'Invalid static token is provided',
+  message: 'Invalid static token provided',
 });
 
 export const MandatoryFieldNotSetError = createError('MandatoryFieldNotSetError', {
@@ -70,20 +72,10 @@ export const ResetPasswordLinkExpired = createError('ResetPasswordLinkExpired', 
   message: 'Reset Password link expired',
 });
 
-export const PasswordMismatchMessageError = createError('PasswordMismatchMessageError', {
-  message: 'Password Mismatched',
-});
-export const RollNumberMismatchMessageError = createError('RollNumberMismatchMessageError', {
-  message: 'Incorrect Roll Number',
-});
 export const InvalidUserIdError = createError('InvalidUserIdError', {
   message: 'Invalid User',
 });
 
 export const UserAlreadyLoggedInIntoAnotherSystemError = createError('UserAlreadyLoggedInIntoAnotherSystemError', {
-  message: 'User is already loggedIn into another system',
-});
-
-export const ComponentTrackerIdAlreadyGenerated = createError('ComponentTrackerIdAlreadyGenerated', {
-  message: 'Component tracker id is already created',
+  message: 'User is already logged in from another device or session',
 });

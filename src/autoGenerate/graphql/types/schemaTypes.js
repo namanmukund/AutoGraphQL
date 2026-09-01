@@ -1,31 +1,24 @@
 import schema from '../../../../graphqlSchema';
 import getParsedASTMap from '../../utils/getParsedASTMap';
 import updateSchemaWithDefaultFields from './updateSchemaWithDefaultFields';
-import updateSchemaWithUserToken from './updateSchemaWithUserToken';
 import updateSchemaWithAdditionalRelationalFields from './updateSchemaWithAdditionalRelationalFields';
 import updateSchemaWithRelationalMetaFields from './updateSchemaWithRelationalMetaFields';
-import updateSchemaWithParentChildToken from './updateSchemaWithParentChildToken';
 
 // get schema types from config
 const application = process.env.APPLICATION || 'core';
 const graphqlTypes = schema[application].types;
 
-// default fields
-const updatedSchemaWithDefaultFields = updateSchemaWithDefaultFields(
-  graphqlTypes,
-);
-// user token
-const updatedSchemaWithUserToken = updateSchemaWithUserToken(
+// 1. Inject default system fields (id, createdAt, updatedAt)
+const updatedSchemaWithDefaultFields = updateSchemaWithDefaultFields(graphqlTypes);
+
+// 2. Inject relational join fields
+const parsedASTMapForAdditionalRelationalFields = getParsedASTMap(updatedSchemaWithDefaultFields);
+const updatedSchemaWithAdditionalRelationalFields = updateSchemaWithAdditionalRelationalFields(
+  parsedASTMapForAdditionalRelationalFields,
   updatedSchemaWithDefaultFields,
 );
 
-// additional relational fields
-const parsedASTMapForAdditionalRelationalFields = getParsedASTMap(updatedSchemaWithUserToken);
-const updatedSchemaWithAdditionalRelationalFields = updateSchemaWithAdditionalRelationalFields(
-  parsedASTMapForAdditionalRelationalFields,
-  updatedSchemaWithUserToken,
-);
-// relational meta fields
+// 3. Inject relational aggregation/meta fields
 const parsedAstMapForRelationalMetaFields = getParsedASTMap(
   updatedSchemaWithAdditionalRelationalFields,
 );
@@ -34,10 +27,5 @@ const updatedSchemaWithRelationalMetaFields = updateSchemaWithRelationalMetaFiel
   updatedSchemaWithAdditionalRelationalFields,
 );
 
-// parent child token
-const updatedSchemaWithParentChildToken = updateSchemaWithParentChildToken(
-  updatedSchemaWithRelationalMetaFields,
-);
-
-// export final schema
-export default updatedSchemaWithParentChildToken;
+// export pure schema types
+export default updatedSchemaWithRelationalMetaFields;

@@ -1,6 +1,6 @@
 const SERVICE_NAME = process.env.WINSTON_SERVICE_NAME || process.env.SECONDARY_APPLICATION_NAME || process.env.APPLICATION || 'core';
 const TIMEZONE = process.env.TZ || 'Asia/Kolkata';
-const LOG_DIR = '/var/log/tekie';
+const LOG_DIR = process.env.LOG_DIR || './logs';
 
 const winstonConfig = {
   serviceName: SERVICE_NAME,

@@ -1,28 +1,19 @@
 import { createError } from 'apollo-errors';
-import { BULK_MENTOR_SESSION_DAYS_LIMIT } from '../index';
 
 export const DatabaseRecordNotFoundError = createError('DatabaseRecordNotFoundError', {
   message: 'Database record not found',
 });
 
 export const FileUploadConnectionFailedError = createError('FileUploadConnectionFailedError', {
-  message: 'File uploaded but connection failed due to connection record not found',
+  message: 'File uploaded but connection failed due to target record not found',
 });
 
 export const UserAlreadyExistsError = createError('UserAlreadyExistsError', {
-  message: 'User already exist',
-});
-
-export const EmailOrPhoneMismatchError = createError('EmailOrPhoneMismatchError', {
-  message: 'To add a sibling parent must use the same email and phone number that was used to register the first kid',
-});
-
-export const ChildAlreadyRegisteredError = createError('ChildAlreadyRegisteredError', {
-  message: 'A child is already registered with the above credentials. You can login to continue.',
+  message: 'User already exists',
 });
 
 export const ConnectRecordsNotFoundInDBError = createError('ConnectRecordsNotFoundInDBError', {
-  message: 'One or more records sent in Connect are not present in db',
+  message: 'One or more records sent in Connect are not present in database',
 });
 
 export const AdditionalFieldUpdateDeniedError = createError('AdditionalFieldUpdateDeniedError', {
@@ -30,324 +21,41 @@ export const AdditionalFieldUpdateDeniedError = createError('AdditionalFieldUpda
 });
 
 export const FileWriteError = createError('FileWriteError', {
-  message: 'File write could not happen',
-});
-
-export const ChapterIsPublishedError = createError('ChapterIsPublishedError', {
-  message: 'Can not perform the current operation as chapter is published',
-});
-
-export const TopicIsPublishedError = createError('TopicIsPublishedError', {
-  message: 'Can not perform the current operation as topic is published',
-});
-
-export const VideoIsPublishedError = createError('VideoIsPublishedError', {
-  message: 'Can not perform the current operation as video is published',
-});
-
-export const LearningObjectiveIsPublishedError = createError('LearningObjectiveIsPublishedError', {
-  message: 'Can not perform the current operation as learning objective is published',
-});
-
-export const QuestionIsPublishedError = createError('QuestionIsPublishedError', {
-  message: 'Can not perform the current operation as question is published',
-});
-
-export const ApprovedCodeTagIsAddedToCodeError = createError('ApprovedCodeTagIsAddedToCodeError', {
-  message: 'Cannot delete as Tag is added to some Approved Code',
-});
-
-export const MessageIsPublishedError = createError('MessageIsPublishedError', {
-  message: 'Can not perform the current operation as message is published',
-});
-
-export const BannerIsPublishedError = createError('BannerIsPublishedError', {
-  message: 'Can not perform the current operation as banner is published',
-});
-
-export const BannerExistsError = createError('BannerExistsError', {
-  message: 'Cannot perform the current operation as banner with similar type already published',
-});
-
-export const ComponentLockedError = createError('ComponentLockedError', {
-  message: 'Component is locked',
+  message: 'File write operation failed',
 });
 
 export const OrderAlreadyExistsError = createError('OrderAlreadyExistsError', {
-  message: 'Cannot perform the current operation as order already exists, order has to be unique',
-});
-
-export const TopicIdRequiredError = createError('TopicIdRequiredError', {
-  message: 'Cannot perform the current operation as TopicConnectId is not provided',
+  message: 'Cannot perform the current operation as order already exists; order must be unique',
 });
 
 export const ConnectIdRequiredError = createError('ConnectIdRequiredError', {
-  message: 'Cannot perform the current operation as one of the mandatory connectId/connectIds is not provided',
-});
-
-export const PaidComponentLockedError = createError('PaidComponentLockedError', {
-  message: 'Component is not free',
+  message: 'Cannot perform the current operation as mandatory connectId/connectIds is not provided',
 });
 
 export const SendOtpFirstError = createError('SendOtpFirstError', {
-  message: 'Send otp via login first',
+  message: 'Please send and verify OTP first',
 });
 
 export const SimilarDocumentAlreadyExistError = createError('SimilarDocumentAlreadyExistError', {
-  message: 'Similar document has already been added from before',
-});
-
-export const PastDateOrSlotError = createError('PastDateOrSlotError', {
-  message: 'Can not delete as either date or slot is of past',
-});
-
-export const NoSlotsAvailableForBooking = createError('NoSlotsAvailableForBooking', {
-  message: 'No slot is available for booking',
-});
-
-export const WorkbookIsPublished = createError('WorkbookIsPublished', {
-  message: 'Can not perform the current operation as workbook is published',
-});
-
-export const ProjectIsPublishedError = createError('ProjectIsPublishedError', {
-  message: 'Can not perform the current operation as project is published',
-});
-
-export const CheatSheetIsPublishedError = createError('CheatSheetIsPublishedError', {
-  message: 'Can not perform the current operation as cheatSheet is published',
-});
-
-export const OtherDiscountAlreadySetToDefault = createError('OtherDiscountAlreadySetToDefault', {
-  message: 'Cannot set discount as default as another discount is already set to default',
-});
-
-export const ProductTypeAlreadyAdded = createError('ProductTypeAlreadyAdded', {
-  message: 'Cannot perform the current operation as product with similar type already published',
-});
-
-export const ProductIsPublishedError = createError('ProductIsPublishedError', {
-  message: 'Cannot perform the current operation as product is published',
-});
-export const CoursePackageIsPublishedError = createError('CoursePackageIsPublishedError', {
-  message: 'Cannot perform the current operation as course package is published',
-});
-
-export const CoursePackageIsLinkedError = createError('CoursePackageIsLinkedError', {
-  message: 'Cannot perform the current operation as course package is linked to a batch',
-});
-
-export const ProductWithSimilarTypeAlreadyPublished = createError('ProductWithSimilarTypeAlreadyPublished', {
-  message: 'Product with similar type already published',
-});
-
-export const UserCheatSheetAlreadyExists = createError('UserCheatSheetAlreadyExists', {
-  message: 'User cheatsheet already exists.',
-});
-
-export const AlreadyBookmarkedCheatSheet = createError('AlreadyBookmarkedCheatSheet', {
-  message: 'Already bookmarked this cheatsheet',
-});
-
-export const GradeSectionCombinationAlreadyExists = createError('GradeSectionCombinationAlreadyExists', {
-  message: 'Provided grade and section combination already exists',
-});
-
-export const StudentsLinked = createError('StudentsLinked', {
-  message: 'Cannot perform the current operation as students are linked to the entity',
-});
-
-export const SlotsOccupiedError = createError('SlotsOccupiedError', {
-  message: 'Session exists on one of the provided slots',
-});
-
-export const NoSectionExists = createError('No Section Exists', {
-  message: 'Cannot perform batch creation on basis of \'section\'. No section exists in any of the selected schoolClasses',
-});
-
-export const StartEndDateError = createError('StartEndDateError', {
-  message: 'End date should be greater than start date',
-});
-
-export const MaxMentorSessionDaysError = createError('MaxMentorSessionDaysError', {
-  message: `End date should not exceed start date by ${BULK_MENTOR_SESSION_DAYS_LIMIT} days`,
-});
-
-export const BookingDateInvalidError = createError('BookingDateInvalidError', {
-  message: 'Booking date provided in input is not valid.',
-});
-
-export const SlotsInvalidError = createError('SlotsInvalidError', {
-  message: 'Exactly one slot provided in input must be true.',
-});
-
-export const AllottedMentorIdInvalidError = createError('AllottedMentorIdInvalidError', {
-  message: 'Allotted Mentor Connect ID is mandatory.',
-});
-
-export const MentorSessionIdInvalidError = createError('MentorSessionIdInvalidError', {
-  message: 'Mentor Session Connect ID is invalid.',
-});
-
-export const BatchFullError = createError('BatchFullError', {
-  message: 'Batch is full.',
-});
-
-export const MentorMandatoryError = createError('MentorMandatoryError', {
-  message: 'Allotted mentor is mandatory in batch while starting a session',
-});
-
-export const MentorProfileAlreadyExist = createError('MentorProfileAlreadyExist', {
-  message: 'Mentor Profile already exist for the user',
-});
-
-export const OrderAndAuditTypeExists = createError('OrderAndAuditTypeExists', {
-  message: 'Question with given order and audit type already exists.',
-});
-
-export const MCQOptionNotProvided = createError('MCQOptionNotProvided', {
-  message: 'Atleast one mcq option is mandatory.',
-});
-
-export const MaxRatingAndDisplayTypeNotFound = createError('MaxRatingAndDisplayTypeNotFound', {
-  message: 'maxRating and ratingDisplayType should be passed.',
-});
-
-export const BDEProfileAlreadyExist = createError('BDEProfileAlreadyExist', {
-  message: 'BDE Profile already exist for the user',
-});
-
-export const SalesExecutiveProfileAlreadyExist = createError('SalesExecutiveProfileAlreadyExist', {
-  message: 'Sales Executive Profile already exist for the user',
-});
-
-export const ChapterWithSimilarTitleAlreadyExist = createError('ChapterWithSimilarTitleAlreadyExist', {
-  message: 'Chapter with similar title already exist.',
-});
-
-export const LeadPartnerWithSimilarTitleAlreadyExist = createError('LeadPartnerWithSimilarTitleAlreadyExist', {
-  message: 'Lead Partner with similar title already exist.',
-});
-
-export const TopicWithSimilarTitleAlreadyExist = createError('TopicWithSimilarTitleAlreadyExist', {
-  message: 'Topic with similar title already exist.',
-});
-
-export const TopicWithSimilarOrderAlreadyExist = createError('TopicWithSimilarOrderAlreadyExist', {
-  message: 'Topic with similar order already exist.',
-});
-
-export const AssignmentQuestionIdPublished = createError('AssignmentQuestionIdPublished', {
-  message: 'Can not perform the current operation as Assignment Question is published',
-});
-
-export const BlockBasedProjectIsPublished = createError('BlockBasedProjectIsPublished', {
-  message: 'Can not perform the current operation as Block Based is published',
-});
-
-export const AssignmentWithSimilarStatementAlreadyExist = createError('AssignmentWithSimilarStatementAlreadyExist', {
-  message: 'Assignment with similar statement already exist.',
-});
-
-export const ProjectWithSimilarTitleAlreadyExist = createError('ProjectWithSimilarTitleAlreadyExist', {
-  message: 'Project with similar name already exist.',
-});
-
-export const ProjectWithSimilarOrderAlreadyExist = createError('ProjectWithSimilarOrderAlreadyExist', {
-  message: 'Project with similar order already exist.',
-});
-
-export const VideoWithSimilarTitleAlreadyExist = createError('VideoWithSimilarTitleAlreadyExist', {
-  message: 'Video with similar title already exist.',
-});
-
-export const LOWithSimilarTitleAlreadyExist = createError('LOWithSimilarTitleAlreadyExist', {
-  message: 'LO with similar title already exist.',
-});
-
-export const BatchMustHaveAtleastOneSession = createError('BatchMustHaveAtleastOneSession', {
-  message: 'B2B batch must have atleast one batch session for adding Adhoc session.',
-});
-
-export const SessionMustBeCompletedError = createError('SessionMustBeCompletedError', {
-  message: 'Batch Session must be completed to add Adhoc session of same topic.',
-});
-
-export const NotBroadcastedMentor = createError('NotBroadcastedMentor', {
-  message: 'Slot not broadcasted to the mentor',
-});
-
-export const LateToAcceptRequest = createError('LateToAcceptRequest', {
-  message: 'Late to accept request',
-});
-
-export const SlotAlreadyOpened = createError('SlotAlreadyOpened', {
-  message: 'Accepted slot is already opened',
-});
-
-export const SlotAlreadyFilled = createError('SlotAlreadyFilled', {
-  message: 'You were late as slot already filled',
-});
-
-export const SessionAlreadyAssigned = createError('SessionAlreadyAssigned', {
-  message: 'The session is already assigned',
+  message: 'A similar record already exists in the database',
 });
 
 export const FileNameAlreadyExists = createError('FileNameAlreadyExists', {
-  message: 'File with same name already exists!',
-});
-
-export const SenseiProfileAlreadyExist = createError('SenseiProfileAlreadyExist', {
-  message: 'Sensei Profile already exist for the user',
-});
-
-export const UserWithSimilarNumberAlreadyExist = createError('UserWithSimilarNumberAlreadyExist', {
-  message: 'User with similar phone number already exist.',
-});
-
-export const UserWithSimilarEmailAlreadyExist = createError('UserWithSimilarEmailAlreadyExist', {
-  message: 'User with similar email already exist.',
-});
-
-export const CurrentChildIsMentorChild = createError('CurrentChildIsMentorChild', {
-  message: 'Sales Operation is not permitted for Mentor.',
-});
-
-export const MentorIdIsMandatoryError = createError('MentorIdIsMandatoryError', {
-  message: 'Input mentorId is Mandatory!',
-});
-
-export const SpeakerProfileAlreadyExist = createError('SpeakerProfileAlreadyExist', {
-  message: 'Speaker Profile already exist for the user',
-});
-
-export const CommsVariableAlreadyExist = createError('CommsVariableAlreadyExist', {
-  message: 'Variables with similar data field already exist',
+  message: 'File with similar name already exists',
 });
 
 export const CategoryAlreadyExist = createError('CategoryAlreadyExist', {
-  message: 'Category with similar title already exist',
-});
-
-export const EmailOrUsernameRequired = createError('EmailOrUsernameRequired', {
-  message: 'Either Email or Username is required',
-});
-
-export const CannotScheduleOutsideWorkingHoursError = createError('CannotScheduleOutsideWorkingHoursError', {
-  message: 'Cannot Schedule Sessions outside working hours.',
-});
-
-export const MentorHasExistingSessionsError = createError('MentorHasExistingSessionsError', {
-  message: 'Mentor has existing sessions',
-});
-
-export const MentorIsInactiveError = createError(' MentorIsInactiveError', {
-  message: 'Mentor is not active',
-});
-
-export const PracticeQuestionsNotFound = createError(' PracticeQuestionsNotFound', {
-  message: 'Practice Questions were not found for the given document',
+  message: 'Category with similar name already exists',
 });
 
 export const UserWithSimilarUsernameAlreadyExist = createError('UserWithSimilarUsernameAlreadyExist', {
-  message: 'User with similar Username already exist.',
+  message: 'User with similar username already exists',
+});
+
+export const UserWithSimilarEmailAlreadyExist = createError('UserWithSimilarEmailAlreadyExist', {
+  message: 'User with similar email already exists',
+});
+
+export const UserWithSimilarNumberAlreadyExist = createError('UserWithSimilarNumberAlreadyExist', {
+  message: 'User with similar phone number already exists',
 });

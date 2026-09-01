@@ -1,9 +1,4 @@
-import { TWA, TLA, TMS } from './index';
-
-const appSpecificAuthTokens = {
-  [TWA]: 'currentMentor',
-  [TLA]: 'currentMentor',
-  [TMS]: 'currentMentor',
-};
+// Map specific applications to their respective context keys
+const appSpecificAuthTokens = {};
 
 export default appSpecificAuthTokens;
