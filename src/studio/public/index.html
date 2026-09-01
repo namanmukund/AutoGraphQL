@@ -11,8 +11,8 @@
     :root {
       --bg-primary: #0a0d14;
       --bg-secondary: #111724;
-      --bg-card: rgba(22, 29, 46, 0.7);
-      --bg-card-hover: rgba(30, 41, 64, 0.9);
+      --bg-card: rgba(22, 29, 46, 0.75);
+      --bg-card-hover: rgba(30, 41, 64, 0.95);
       --border-color: rgba(255, 255, 255, 0.08);
       --border-focus: #6366f1;
       --text-main: #f1f5f9;
@@ -40,7 +40,6 @@
       overflow-x: hidden;
     }
 
-    /* Ambient Background Glow */
     .ambient-glow {
       position: fixed;
       top: -20%;
@@ -53,7 +52,6 @@
       filter: blur(80px);
     }
 
-    /* Header */
     header {
       position: sticky;
       top: 0;
@@ -142,7 +140,6 @@
       50% { opacity: 0.4; }
     }
 
-    /* Main Container */
     .studio-container {
       position: relative;
       z-index: 10;
@@ -156,7 +153,6 @@
       gap: 1.5rem;
     }
 
-    /* Navigation Tabs */
     .studio-tabs {
       display: flex;
       gap: 0.5rem;
@@ -192,7 +188,6 @@
       box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
     }
 
-    /* Tab Panes */
     .tab-pane {
       display: none;
       flex-direction: column;
@@ -203,7 +198,6 @@
       display: flex;
     }
 
-    /* Grid Layouts */
     .studio-grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -214,7 +208,6 @@
       .studio-grid-2 { grid-template-columns: 1fr; }
     }
 
-    /* Card Panels */
     .card-panel {
       background: var(--bg-card);
       backdrop-filter: blur(12px);
@@ -249,7 +242,6 @@
       color: #ffffff;
     }
 
-    /* Inputs & Form Controls */
     .form-group {
       display: flex;
       flex-direction: column;
@@ -290,7 +282,6 @@
       background: #060911;
     }
 
-    /* Buttons */
     .btn {
       background: var(--accent-gradient);
       color: white;
@@ -336,6 +327,14 @@
 
     .btn-danger:hover {
       background: rgba(244, 63, 94, 0.3);
+      color: white;
+    }
+
+    .btn-success {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      box-shadow: none;
     }
 
     /* Dynamic Field Rows */
@@ -344,10 +343,17 @@
       grid-template-columns: 2fr 1.5fr 1fr auto;
       gap: 0.6rem;
       align-items: center;
-      background: rgba(0, 0, 0, 0.2);
+      background: rgba(0, 0, 0, 0.25);
       padding: 0.6rem;
       border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      transition: all 0.2s;
+    }
+
+    .field-row.relation-row {
+      grid-template-columns: 1.5fr 1.5fr 1.5fr 1.5fr auto;
+      background: rgba(99, 102, 241, 0.08);
+      border-color: rgba(99, 102, 241, 0.2);
     }
 
     .pill-checkbox {
@@ -363,7 +369,7 @@
     .schema-list {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.6rem;
       max-height: 480px;
       overflow-y: auto;
     }
@@ -372,11 +378,10 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.75rem 1rem;
+      padding: 0.85rem 1.15rem;
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--border-color);
-      border-radius: 8px;
-      cursor: pointer;
+      border-radius: 10px;
       transition: all 0.2s;
     }
 
@@ -394,6 +399,7 @@
 
     .badge-mongo { background: rgba(16, 185, 129, 0.15); color: #34d399; }
     .badge-pg { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .badge-rel { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
 
     /* Alert Banner */
     .alert-banner {
@@ -407,10 +413,62 @@
       border: 1px solid rgba(99, 102, 241, 0.3);
       color: #c7d2fe;
     }
+
+    /* Toast Notification */
+    #toast-container {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .toast {
+      padding: 0.85rem 1.25rem;
+      border-radius: 10px;
+      background: rgba(17, 24, 39, 0.95);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      color: white;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      animation: slideUp 0.3s ease;
+    }
+
+    .toast-success { border-color: rgba(16, 185, 129, 0.5); color: #34d399; }
+    .toast-danger { border-color: rgba(244, 63, 94, 0.5); color: #fb7185; }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Relations Grid */
+    .relations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    .relation-card {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
   </style>
 </head>
 <body>
   <div class="ambient-glow"></div>
+  <div id="toast-container"></div>
 
   <!-- Header -->
   <header>
@@ -441,6 +499,9 @@
       <button class="tab-btn active" onclick="switchTab('tab-schema')">
         <span>📐</span> Schema Studio
       </button>
+      <button class="tab-btn" onclick="switchTab('tab-relations')">
+        <span>🔗</span> Connected Schemas
+      </button>
       <button class="tab-btn" onclick="switchTab('tab-hooks')">
         <span>🪝</span> Lifecycle Hooks
       </button>
@@ -455,7 +516,7 @@
     <!-- TAB 1: SCHEMA STUDIO -->
     <div id="tab-schema" class="tab-pane active">
       <div class="alert-banner">
-        💡 <strong>Drop-in Architecture:</strong> Schemas saved here are written directly to <code>schemas/&lt;Name&gt;.graphql</code> and compiled dynamically with zero manual imports!
+        💡 <strong>Zero-Config Drop-in:</strong> Schemas saved here are written to <code>schemas/&lt;Name&gt;.graphql</code> and compiled dynamically. You can create, edit, link, and delete schemas directly from this interface.
       </div>
 
       <div class="studio-grid-2">
@@ -463,9 +524,14 @@
         <div class="card-panel">
           <div class="panel-header">
             <div class="panel-title"><span>✨</span> Visual Model Builder</div>
-            <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;" onclick="resetModelBuilder()">
-              Reset Form
-            </button>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;" onclick="resetModelBuilder()">
+                + New Model
+              </button>
+              <button id="btn-delete-active-schema" class="btn btn-danger" style="font-size: 0.8rem; padding: 0.35rem 0.75rem; display: none;" onclick="deleteActiveSchema()">
+                🗑️ Delete Schema
+              </button>
+            </div>
           </div>
 
           <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
@@ -476,7 +542,7 @@
             <div class="form-group">
               <label>Database Engine</label>
               <select id="model-database" onchange="updateSDLPreview()">
-                <option value="default">Global Default (env)</option>
+                <option value="default">Global Default (.env)</option>
                 <option value="mongoose">🍃 MongoDB (Mongoose)</option>
                 <option value="postgres">🐘 PostgreSQL (Sequelize)</option>
               </select>
@@ -498,14 +564,20 @@
             </div>
           </div>
 
+          <!-- Fields Section -->
           <div class="panel-header" style="padding-top: 0.5rem;">
             <div class="panel-title" style="font-size: 0.95rem;">Fields & Constraints</div>
-            <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;" onclick="addFieldRow()">
-              + Add Field
-            </button>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;" onclick="addFieldRow()">
+                + Add Field
+              </button>
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-color: rgba(168, 85, 247, 0.4); color: #c084fc;" onclick="addRelationRow()">
+                🔗 Connect Schema
+              </button>
+            </div>
           </div>
 
-          <div id="fields-container" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 240px; overflow-y: auto;">
+          <div id="fields-container" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 280px; overflow-y: auto;">
             <!-- Dynamic field rows appended here -->
           </div>
 
@@ -519,10 +591,15 @@
         <!-- Live SDL Code Editor -->
         <div class="card-panel">
           <div class="panel-header">
-            <div class="panel-title"><span>📝</span> GraphQL SDL Code</div>
-            <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;" onclick="loadSampleSchema('Product')">
-              Insert Sample
-            </button>
+            <div class="panel-title"><span>📝</span> Live GraphQL SDL Editor</div>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;" onclick="loadSampleSchema('Course')">
+                Sample Course
+              </button>
+              <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;" onclick="loadSampleSchema('Order')">
+                Sample Order (PG)
+              </button>
+            </div>
           </div>
 
           <textarea id="sdl-editor" class="code-editor" spellcheck="false"></textarea>
@@ -541,10 +618,13 @@
       <!-- Discovered Schemas List -->
       <div class="card-panel">
         <div class="panel-header">
-          <div class="panel-title"><span>📁</span> Discovered Schema Files (<code>schemas/</code>)</div>
-          <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;" onclick="refreshSchemasList()">
-            Refresh List
-          </button>
+          <div class="panel-title"><span>📁</span> Managed Schema Files (<code>schemas/</code>)</div>
+          <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <input type="text" id="schema-search" placeholder="Search schemas..." oninput="filterSchemasList()" style="font-size: 0.8rem; padding: 0.3rem 0.6rem; width: 180px;">
+            <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;" onclick="refreshSchemasList()">
+              Refresh
+            </button>
+          </div>
         </div>
         <div id="schemas-list" class="schema-list">
           <div style="color: var(--text-muted); font-size: 0.85rem; padding: 0.5rem;">Loading discovered schemas...</div>
@@ -552,7 +632,27 @@
       </div>
     </div>
 
-    <!-- TAB 2: LIFECYCLE HOOKS STUDIO -->
+    <!-- TAB 2: CONNECTED SCHEMAS & RELATIONSHIPS GRAPH -->
+    <div id="tab-relations" class="tab-pane">
+      <div class="alert-banner">
+        🔗 <strong>Multi-Schema Relational Connectors:</strong> Visual breakdown of foreign keys, 1:1, 1:N, and N:N relations wired across your GraphQL entities using <code>@relation(name, direction)</code>.
+      </div>
+
+      <div class="card-panel">
+        <div class="panel-header">
+          <div class="panel-title"><span>🌐</span> Active Cross-Schema Relations</div>
+          <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;" onclick="loadRelationsGraph()">
+            Refresh Graph
+          </button>
+        </div>
+
+        <div id="relations-container" class="relations-grid">
+          <div style="color: var(--text-muted); font-size: 0.85rem;">No active relations detected yet. Connect schemas in the Schema Studio!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: LIFECYCLE HOOKS STUDIO -->
     <div id="tab-hooks" class="tab-pane">
       <div class="alert-banner">
         🪝 <strong>Pluggable Hooks:</strong> Pre-Hooks run <em>before</em> database writes (validation, slugify, password hashing), and Post-Hooks run <em>after</em> writes (emails, CRM sync, notifications).
@@ -565,7 +665,7 @@
           </div>
 
           <div class="form-group">
-            <label>Target Entity / Hook Name</label>
+            <label>Target Entity / Hook File</label>
             <input type="text" id="hook-name" placeholder="e.g. courseHooks, userHooks" value="courseHooks">
           </div>
 
@@ -592,7 +692,7 @@
       </div>
     </div>
 
-    <!-- TAB 3: DATABASES & RLS -->
+    <!-- TAB 4: DATABASES & RLS -->
     <div id="tab-database" class="tab-pane">
       <div class="studio-grid-2">
         <div class="card-panel">
@@ -603,7 +703,7 @@
           <p style="font-size: 0.85rem; color: var(--text-muted);">
             Stores document collections with embedded subdocuments, multi-key indexes, and dynamic aggregation pipelines.
           </p>
-          <div id="mongo-models-list" style="font-size: 0.85rem; display: flex; flex-wrap: gap: 0.5rem;"></div>
+          <div id="mongo-models-list" style="font-size: 0.85rem;"></div>
         </div>
 
         <div class="card-panel">
@@ -619,7 +719,7 @@
       </div>
     </div>
 
-    <!-- TAB 4: API EXPLORER -->
+    <!-- TAB 5: API EXPLORER -->
     <div id="tab-explorer" class="tab-pane">
       <div class="studio-grid-2">
         <div class="card-panel">
@@ -669,7 +769,17 @@
 
   <script>
     // State
-    let currentFields = [];
+    let availableModels = ['User', 'UserProfile', 'Post', 'Comment', 'Category', 'Tag', 'File'];
+    let rawSchemas = [];
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type === 'danger' ? 'toast-danger' : 'toast-success'}`;
+      toast.innerHTML = `<span>${type === 'danger' ? '⚠️' : '✅'}</span> <span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
 
     function switchTab(tabId) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -677,10 +787,11 @@
       event.currentTarget.classList.add('active');
       document.getElementById(tabId).classList.add('active');
       if (tabId === 'tab-schema') refreshSchemasList();
+      if (tabId === 'tab-relations') loadRelationsGraph();
       if (tabId === 'tab-database') loadDatabaseInfo();
     }
 
-    function addFieldRow(name = '', type = 'String', required = false, unique = false, trim = false) {
+    function addFieldRow(name = '', type = 'String', required = false, unique = false) {
       const container = document.getElementById('fields-container');
       const rowId = 'field_' + Math.random().toString(36).substr(2, 9);
 
@@ -708,6 +819,35 @@
       updateSDLPreview();
     }
 
+    function addRelationRow(fieldName = '', targetModel = '', relationName = '', cardinality = '1:1', direction = 'IN') {
+      const container = document.getElementById('fields-container');
+      const rowId = 'rel_' + Math.random().toString(36).substr(2, 9);
+
+      let targetOptions = '';
+      availableModels.forEach(m => {
+        targetOptions += `<option value="${m}" ${targetModel === m ? 'selected' : ''}>${m}</option>`;
+      });
+
+      const div = document.createElement('div');
+      div.className = 'field-row relation-row';
+      div.id = rowId;
+      div.innerHTML = `
+        <input type="text" placeholder="relation field (e.g. instructor)" value="${fieldName}" oninput="updateSDLPreview()" style="font-size: 0.8rem; padding: 0.4rem;">
+        <select onchange="updateSDLPreview()" style="font-size: 0.8rem; padding: 0.4rem;" title="Target Schema">
+          ${targetOptions}
+        </select>
+        <select onchange="updateSDLPreview()" style="font-size: 0.8rem; padding: 0.4rem;" title="Cardinality">
+          <option value="1:1" ${cardinality === '1:1' ? 'selected' : ''}>1:1 (Single)</option>
+          <option value="1:N" ${cardinality === '1:N' ? 'selected' : ''}>1:N (Array [Target])</option>
+          <option value="N:N" ${cardinality === 'N:N' ? 'selected' : ''}>N:N (Many-to-Many)</option>
+        </select>
+        <input type="text" placeholder="Relation Name" value="${relationName}" oninput="updateSDLPreview()" style="font-size: 0.8rem; padding: 0.4rem;">
+        <button class="btn btn-danger" style="padding: 0.3rem 0.5rem; font-size: 0.75rem;" onclick="document.getElementById('${rowId}').remove(); updateSDLPreview();">✕</button>
+      `;
+      container.appendChild(div);
+      updateSDLPreview();
+    }
+
     function updateSDLPreview() {
       const modelName = document.getElementById('model-name').value.trim() || 'CustomModel';
       const dbType = document.getElementById('model-database').value;
@@ -721,10 +861,11 @@
       if (isTenant) directives += ' @tenantScoped(field: "tenantId", claim: "tenantId")';
       if (isOwner) directives += ' @ownerScoped(field: "userId", claim: "userId")';
 
-      const rows = document.querySelectorAll('#fields-container .field-row');
       let fieldsSDL = '  id: ID!\n';
 
-      rows.forEach(row => {
+      // Standard fields
+      const standardRows = document.querySelectorAll('#fields-container .field-row:not(.relation-row)');
+      standardRows.forEach(row => {
         const name = row.querySelector('input[type="text"]').value.trim();
         const type = row.querySelector('select').value;
         const checkboxes = row.querySelectorAll('input[type="checkbox"]');
@@ -738,6 +879,22 @@
         }
       });
 
+      // Relational fields
+      const relationRows = document.querySelectorAll('#fields-container .relation-row');
+      relationRows.forEach(row => {
+        const inputs = row.querySelectorAll('input[type="text"]');
+        const selects = row.querySelectorAll('select');
+        const relField = inputs[0].value.trim();
+        const targetModel = selects[0].value;
+        const cardinality = selects[1].value;
+        const relName = inputs[1].value.trim() || `${modelName}${targetModel}Relation`;
+
+        if (relField) {
+          const typeStr = (cardinality === '1:N' || cardinality === 'N:N') ? `[${targetModel}]` : targetModel;
+          fieldsSDL += `  ${relField}: ${typeStr} @relation(name: "${relName}")\n`;
+        }
+      });
+
       if (isTenant) fieldsSDL += '  tenantId: String!\n';
       fieldsSDL += '  createdAt: Date!\n  updatedAt: Date!';
 
@@ -746,12 +903,12 @@
     }
 
     function resetModelBuilder() {
-      document.getElementById('model-name').value = 'Course';
+      document.getElementById('model-name').value = '';
       document.getElementById('fields-container').innerHTML = '';
+      document.getElementById('btn-delete-active-schema').style.display = 'none';
       addFieldRow('title', 'String', true, false);
       addFieldRow('slug', 'String', true, true);
       addFieldRow('price', 'Float', true, false);
-      addFieldRow('tags', '[String]', false, false);
       updateSDLPreview();
     }
 
@@ -759,37 +916,83 @@
       try {
         const res = await fetch('/api/studio/schemas');
         const data = await res.json();
-        const container = document.getElementById('schemas-list');
-        container.innerHTML = '';
-
-        if (data.data && data.data.schemas && data.data.schemas.length) {
-          data.data.schemas.forEach(s => {
-            const div = document.createElement('div');
-            div.className = 'schema-item';
-            div.innerHTML = `
-              <div>
-                <strong>${s.name}</strong> <span style="color: var(--text-muted); font-size: 0.8rem;">(${s.filename})</span>
-              </div>
-              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.2rem 0.5rem;" onclick="loadSchemaContent('${s.name}')">Load in Editor</button>
-            `;
-            container.appendChild(div);
-          });
-        } else {
-          container.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem;">No user schemas in schemas/ yet. Create one above!</div>';
+        rawSchemas = (data.data && data.data.schemas) || [];
+        if (data.data && data.data.allModels) {
+          availableModels = data.data.allModels;
         }
+        renderSchemasList(rawSchemas);
       } catch (err) {
         console.error(err);
       }
     }
 
+    function renderSchemasList(schemas) {
+      const container = document.getElementById('schemas-list');
+      container.innerHTML = '';
+
+      if (schemas.length) {
+        schemas.forEach(s => {
+          const div = document.createElement('div');
+          div.className = 'schema-item';
+          div.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <span style="font-size: 1.1rem;">📄</span>
+              <div>
+                <strong>${s.name}</strong>
+                <span style="color: var(--text-muted); font-size: 0.8rem; margin-left: 0.4rem;">(${s.filename})</span>
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;" onclick="loadSchemaContent('${s.name}')">✏️ Edit</button>
+              <button class="btn btn-danger" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;" onclick="deleteSchemaByName('${s.name}')">🗑️ Delete</button>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      } else {
+        container.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; padding: 0.5rem;">No user schemas in schemas/ yet. Create one above!</div>';
+      }
+    }
+
+    function filterSchemasList() {
+      const query = document.getElementById('schema-search').value.toLowerCase().trim();
+      const filtered = rawSchemas.filter(s => s.name.toLowerCase().includes(query) || s.filename.toLowerCase().includes(query));
+      renderSchemasList(filtered);
+    }
+
     async function loadSchemaContent(name) {
-      const res = await fetch('/api/studio/schemas');
-      const data = await res.json();
-      const s = data.data.schemas.find(x => x.name === name);
+      const s = rawSchemas.find(x => x.name === name);
       if (s) {
         document.getElementById('model-name').value = s.name;
         document.getElementById('sdl-editor').value = s.content;
+        document.getElementById('btn-delete-active-schema').style.display = 'inline-flex';
+        showToast(`Loaded ${s.name} into editor`);
       }
+    }
+
+    async function deleteSchemaByName(name) {
+      if (!confirm(`Are you sure you want to delete schema '${name}.graphql'?`)) return;
+
+      try {
+        const res = await fetch(`/api/studio/schemas/${name}`, { method: 'DELETE' });
+        const result = await res.json();
+        if (result.success) {
+          showToast(`Deleted ${name}.graphql`, 'danger');
+          if (document.getElementById('model-name').value === name) {
+            resetModelBuilder();
+          }
+          refreshSchemasList();
+        } else {
+          showToast(result.error, 'danger');
+        }
+      } catch (err) {
+        showToast('Failed to delete schema', 'danger');
+      }
+    }
+
+    function deleteActiveSchema() {
+      const name = document.getElementById('model-name').value.trim();
+      if (name) deleteSchemaByName(name);
     }
 
     async function saveCurrentSchema() {
@@ -804,13 +1007,47 @@
         });
         const result = await res.json();
         if (result.success) {
-          document.getElementById('schema-save-status').innerText = `✅ Saved ${name}.graphql`;
+          showToast(`Saved ${name}.graphql`);
+          document.getElementById('btn-delete-active-schema').style.display = 'inline-flex';
           refreshSchemasList();
         } else {
-          alert('Error: ' + result.error);
+          showToast(result.error, 'danger');
         }
       } catch (err) {
-        alert('Failed to save schema');
+        showToast('Failed to save schema', 'danger');
+      }
+    }
+
+    async function loadRelationsGraph() {
+      try {
+        const res = await fetch('/api/studio/schemas');
+        const data = await res.json();
+        const container = document.getElementById('relations-container');
+        container.innerHTML = '';
+
+        const relations = (data.data && data.data.relations) || [];
+        if (relations.length) {
+          relations.forEach(r => {
+            const card = document.createElement('div');
+            card.className = 'relation-card';
+            card.innerHTML = `
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span class="badge badge-rel">@relation</span>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">${r.relationName}</span>
+              </div>
+              <div style="font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; margin-top: 0.3rem;">
+                <span>${r.source}</span>
+                <span style="color: var(--accent-primary);">──( ${r.field} )──►</span>
+                <span style="color: #c084fc;">${r.target}</span>
+              </div>
+            `;
+            container.appendChild(card);
+          });
+        } else {
+          container.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem;">No active relations detected yet. Connect schemas using "🔗 Connect Schema" in Schema Studio!</div>';
+        }
+      } catch (err) {
+        console.error(err);
       }
     }
 
@@ -830,35 +1067,50 @@
       const name = document.getElementById('hook-name').value.trim() || 'customHooks';
       const content = document.getElementById('hook-code-editor').value;
 
-      const res = await fetch('/api/studio/hooks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, content })
-      });
-      const result = await res.json();
-      if (result.success) {
-        alert(result.message);
+      try {
+        const res = await fetch('/api/studio/hooks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, content })
+        });
+        const result = await res.json();
+        if (result.success) {
+          showToast(result.message);
+        } else {
+          showToast(result.error, 'danger');
+        }
+      } catch (err) {
+        showToast('Failed to save hook', 'danger');
       }
     }
 
     async function loadDatabaseInfo() {
-      const res = await fetch('/api/studio/db-info');
-      const data = await res.json();
-      if (data.data) {
-        document.getElementById('mongo-status-badge').innerText = data.data.mongodb.status;
-        document.getElementById('pg-status-badge').innerText = data.data.postgres.status;
+      try {
+        const res = await fetch('/api/studio/db-info');
+        const data = await res.json();
+        if (data.data) {
+          document.getElementById('mongo-status-badge').innerText = data.data.mongodb.status;
+          document.getElementById('pg-status-badge').innerText = data.data.postgres.status;
+        }
+      } catch (err) {
+        console.error(err);
       }
     }
 
     async function generateTestToken() {
-      const res = await fetch('/api/studio/generate-token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role: 'ADMIN', userId: 'usr_studio_admin', tenantId: 'tenant_enterprise_1' })
-      });
-      const data = await res.json();
-      if (data.token) {
-        document.getElementById('auth-token').value = 'Bearer ' + data.token;
+      try {
+        const res = await fetch('/api/studio/generate-token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role: 'ADMIN', userId: 'usr_studio_admin', tenantId: 'tenant_enterprise_1' })
+        });
+        const data = await res.json();
+        if (data.token) {
+          document.getElementById('auth-token').value = 'Bearer ' + data.token;
+          showToast('Generated Admin JWT token');
+        }
+      } catch (err) {
+        showToast('Failed to generate token', 'danger');
       }
     }
 
@@ -880,8 +1132,31 @@
         const latency = Math.round(performance.now() - startTime);
         document.getElementById('query-latency').innerText = latency + ' ms';
         document.getElementById('graphql-response-output').value = JSON.stringify(result, null, 2);
+        showToast(`Query executed in ${latency}ms`);
       } catch (err) {
         document.getElementById('graphql-response-output').value = 'Error: ' + err.message;
+        showToast('GraphQL execution error', 'danger');
+      }
+    }
+
+    function loadSampleSchema(type) {
+      if (type === 'Course') {
+        document.getElementById('model-name').value = 'Course';
+        document.getElementById('fields-container').innerHTML = '';
+        addFieldRow('title', 'String', true, false);
+        addFieldRow('slug', 'String', true, true);
+        addFieldRow('price', 'Float', true, false);
+        addFieldRow('tags', '[String]', false, false);
+        addRelationRow('instructor', 'User', 'InstructorCourses', '1:1', 'IN');
+        updateSDLPreview();
+      } else if (type === 'Order') {
+        document.getElementById('model-name').value = 'Order';
+        document.getElementById('model-database').value = 'postgres';
+        document.getElementById('fields-container').innerHTML = '';
+        addFieldRow('orderNumber', 'String', true, true);
+        addFieldRow('totalAmount', 'Float', true, false);
+        addRelationRow('customer', 'User', 'UserOrders', '1:1', 'IN');
+        updateSDLPreview();
       }
     }
 

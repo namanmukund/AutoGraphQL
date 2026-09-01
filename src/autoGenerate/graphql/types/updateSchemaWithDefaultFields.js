@@ -5,22 +5,32 @@ const defaultFieldsString = ',id: ID! @unique,createdAt: Date @readOnly @createI
 
 const updateSchemaWithDefaultFields = (graphqlTypes) => {
   const schemaTypes = graphqlTypes.map((type) => {
-    let appendedTypeString;
     if (!type.includes('@model')) {
       return type;
     }
     const stringEndIndex = type.lastIndexOf('}');
-    // @TODO: get type name from type string
     const typeName = getTypeNameFromSchemaString(type);
-    if (type.includes('@history')) {
-      const defaultStringWithHistory = `${defaultFieldsString}, history: [${typeName}History] @relation(name: "${typeName}HistoryRelation")`;
-      appendedTypeString = insertSubString(type, stringEndIndex, defaultStringWithHistory);
-    } else {
-      appendedTypeString = insertSubString(type, stringEndIndex, defaultFieldsString);
-    }
-    // append default fields at end
 
-    return appendedTypeString;
+    const fieldsToInject = [];
+    if (!type.match(/\bid\s*:/)) {
+      fieldsToInject.push('id: ID! @unique');
+    }
+    if (!type.match(/\bcreatedAt\s*:/)) {
+      fieldsToInject.push('createdAt: Date @readOnly @createIndex(value: 1)');
+    }
+    if (!type.match(/\bupdatedAt\s*:/)) {
+      fieldsToInject.push('updatedAt: Date @readOnly');
+    }
+    if (type.includes('@history') && !type.match(/\bhistory\s*:/)) {
+      fieldsToInject.push(`history: [${typeName}History] @relation(name: "${typeName}HistoryRelation")`);
+    }
+
+    if (fieldsToInject.length === 0) {
+      return type;
+    }
+
+    const injectionString = `, ${fieldsToInject.join(', ')}`;
+    return insertSubString(type, stringEndIndex, injectionString);
   });
   return schemaTypes;
 };

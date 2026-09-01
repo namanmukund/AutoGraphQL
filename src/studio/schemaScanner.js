@@ -4,6 +4,8 @@ import { getDefaultDatabaseDialect, DATABASE_DIALECTS } from '../../constants';
 import { getModelRLSPolicy, listRLSPolicies } from '../security/rls';
 import db from '../db';
 
+const BUILT_IN_MODELS = ['User', 'UserProfile', 'Post', 'Comment', 'Category', 'Tag', 'File'];
+
 /**
  * Returns metadata about all discovered schemas, models, fields, and directives.
  *
@@ -12,6 +14,8 @@ import db from '../db';
 export const getStudioSchemaMetadata = () => {
   const schemasDir = path.resolve(process.cwd(), 'schemas');
   const userSchemas = [];
+  const allModelNames = new Set(BUILT_IN_MODELS);
+  const relations = [];
 
   if (fs.existsSync(schemasDir)) {
     const files = fs.readdirSync(schemasDir);
@@ -19,8 +23,25 @@ export const getStudioSchemaMetadata = () => {
       if (file.endsWith('.graphql') || file.endsWith('.gql')) {
         const fullPath = path.join(schemasDir, file);
         const content = fs.readFileSync(fullPath, 'utf8');
+        const modelName = file.replace(/\.(graphql|gql)$/, '');
+        allModelNames.add(modelName);
+
+        // Parse relations from content
+        const relationMatches = content.matchAll(/(\w+)\s*:\s*(\[?\w+\]?)\s*@relation\s*\(\s*name\s*:\s*"(\w+)"(?:,\s*direction\s*:\s*"(\w+)")?\s*\)/g);
+        for (const match of relationMatches) {
+          const [, fieldName, targetTypeRaw, relationName, direction = 'BOTH'] = match;
+          const targetType = targetTypeRaw.replace(/[\[\]!]/g, '');
+          relations.push({
+            source: modelName,
+            field: fieldName,
+            target: targetType,
+            relationName,
+            direction,
+          });
+        }
+
         userSchemas.push({
-          name: file.replace(/\.(graphql|gql)$/, ''),
+          name: modelName,
           filename: file,
           path: fullPath,
           content,
@@ -35,6 +56,8 @@ export const getStudioSchemaMetadata = () => {
     defaultDatabaseDialect: defaultDialect,
     schemasCount: userSchemas.length,
     schemas: userSchemas,
+    allModels: Array.from(allModelNames),
+    relations,
     rlsPolicies: listRLSPolicies(),
   };
 };

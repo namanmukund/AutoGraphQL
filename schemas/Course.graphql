@@ -1,0 +1,9 @@
+type Course @model {
+  id: ID!
+  title: String!
+  slug: String! @unique
+  price: Float!
+  tags: [String]
+  createdAt: Date!
+  updatedAt: Date!
+}
