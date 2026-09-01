@@ -3,7 +3,9 @@ import path from 'path';
 import fs from 'fs';
 import jwt from 'jsonwebtoken';
 import { printSchema } from 'graphql';
-import { getStudioSchemaMetadata, getStudioDatabaseInfo, getStudioHooksList } from './schemaScanner';
+import {
+  getStudioSchemaMetadata, getStudioDatabaseInfo, getStudioHooksList, getHooksForSchema,
+} from './schemaScanner';
 import { listWebhooks, registerWebhook, unregisterWebhook } from '../birdwatch/webhooks/manager';
 import { generateTypeScriptSDK } from '../codegen/sdkGenerator';
 import schema from '../graphql';
@@ -119,6 +121,17 @@ router.get('/api/studio/hooks', (req, res) => {
   try {
     const hooks = getStudioHooksList();
     res.json({ success: true, data: hooks });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 5b. GET /api/studio/hooks/schema/:name - Get all hooks for a specific schema
+router.get('/api/studio/hooks/schema/:name', (req, res) => {
+  try {
+    const { name } = req.params;
+    const hooksInfo = getHooksForSchema(name);
+    res.json({ success: true, data: hooksInfo });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

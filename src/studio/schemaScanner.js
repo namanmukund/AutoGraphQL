@@ -96,9 +96,9 @@ export const getStudioDatabaseInfo = () => {
 };
 
 /**
- * Returns list of custom hooks discovered from root `hooks/` folder.
+ * Returns list of custom hooks discovered from root `hooks/` folder with exported hook mappings.
  *
- * @returns {Array} List of hook files and code
+ * @returns {Array} List of hook files, content, and exported hook function names
  */
 export const getStudioHooksList = () => {
   const hooksDir = path.resolve(process.cwd(), 'hooks');
@@ -110,15 +110,62 @@ export const getStudioHooksList = () => {
       if (file.endsWith('.js') && !file.startsWith('_')) {
         const fullPath = path.join(hooksDir, file);
         const content = fs.readFileSync(fullPath, 'utf8');
+
+        // Extract exported hook function names
+        const exportedHooks = [];
+        const matches = content.matchAll(/(?:export\s+const\s+|const\s+)(\w+PreHook|\w+PostHook)/g);
+        for (const m of matches) {
+          exportedHooks.push(m[1]);
+        }
+
         hooks.push({
           name: file.replace(/\.js$/, ''),
           filename: file,
           path: fullPath,
           content,
+          exportedHooks,
         });
       }
     });
   }
 
   return hooks;
+};
+
+/**
+ * Returns all configured and available Pre/Post hooks for a specific schema/model.
+ *
+ * @param {string} schemaName e.g. "Course", "User", "Order"
+ * @returns {Object} Hook details for add, update, delete mutations
+ */
+export const getHooksForSchema = (schemaName) => {
+  if (!schemaName) return {};
+  const capitalized = schemaName.charAt(0).toUpperCase() + schemaName.slice(1);
+  const hooksList = getStudioHooksList();
+
+  const hookOperations = {
+    addPreHook: { name: `add${capitalized}PreHook`, file: null, configured: false },
+    addPostHook: { name: `add${capitalized}PostHook`, file: null, configured: false },
+    updatePreHook: { name: `update${capitalized}PreHook`, file: null, configured: false },
+    updatePostHook: { name: `update${capitalized}PostHook`, file: null, configured: false },
+    deletePreHook: { name: `delete${capitalized}PreHook`, file: null, configured: false },
+    deletePostHook: { name: `delete${capitalized}PostHook`, file: null, configured: false },
+  };
+
+  hooksList.forEach((h) => {
+    Object.keys(hookOperations).forEach((opKey) => {
+      const targetHookName = hookOperations[opKey].name;
+      if (h.exportedHooks && h.exportedHooks.includes(targetHookName)) {
+        hookOperations[opKey].configured = true;
+        hookOperations[opKey].file = h.filename;
+        hookOperations[opKey].hookFileName = h.name;
+      }
+    });
+  });
+
+  return {
+    schemaName: capitalized,
+    defaultHookFileName: `${schemaName.charAt(0).toLowerCase() + schemaName.slice(1)}Hooks`,
+    operations: hookOperations,
+  };
 };
