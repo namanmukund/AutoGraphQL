@@ -266,7 +266,7 @@
       letter-spacing: 0.05em;
     }
 
-    input, select, textarea {
+    input, select {
       background: var(--bg-input);
       border: 1px solid var(--border-color);
       border-radius: 9px;
@@ -278,21 +278,132 @@
       transition: all 0.2s;
     }
 
-    input:focus, select:focus, textarea:focus {
+    input:focus, select:focus {
       border-color: var(--border-focus);
       box-shadow: 0 0 12px rgba(99, 102, 241, 0.3);
     }
 
-    textarea.code-editor {
+    /* === PRO CODE EDITOR COMPONENT === */
+    .code-editor-wrapper {
+      display: flex;
+      flex-direction: column;
+      background: #020617;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.65);
+      font-family: var(--font-mono);
+    }
+
+    .code-editor-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #090e1a;
+      padding: 0.45rem 0.85rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .editor-tab {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      border-left: 2px solid var(--accent-primary);
+    }
+
+    .editor-tools {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .editor-lang-badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.12);
+      padding: 0.18rem 0.45rem;
+      border-radius: 4px;
+    }
+
+    .editor-tool-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 5px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: all 0.15s;
+    }
+
+    .editor-tool-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .code-editor-body {
+      display: flex;
+      position: relative;
+      min-height: 380px;
+      background: #020617;
+    }
+
+    .code-gutter {
+      width: 44px;
+      padding: 0.85rem 0.4rem;
+      background: #070c18;
+      color: #475569;
+      text-align: right;
+      user-select: none;
+      font-size: 0.82rem;
+      line-height: 1.55;
+      font-family: var(--font-mono);
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
+      white-space: pre-line;
+      overflow: hidden;
+    }
+
+    .code-textarea {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #f1f5f9;
       font-family: var(--font-mono);
       font-size: 0.85rem;
       line-height: 1.55;
-      min-height: 400px;
+      padding: 0.85rem 1rem;
+      outline: none;
       resize: vertical;
-      background: #040711;
-      border-color: rgba(255, 255, 255, 0.06);
+      white-space: pre;
+      overflow-x: auto;
+      tab-size: 2;
     }
 
+    .code-editor-statusbar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1.25rem;
+      background: #070c18;
+      padding: 0.3rem 0.85rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.72rem;
+      color: #64748b;
+      font-family: var(--font-mono);
+    }
+
+    /* Buttons */
     .btn {
       background: var(--gradient-main);
       color: white;
@@ -473,7 +584,6 @@
       transform: translateY(-2px);
     }
 
-    /* Hooks Matrix Card */
     .hook-matrix-row {
       display: grid;
       grid-template-columns: 1.2fr 1.5fr 1.5fr;
@@ -652,7 +762,28 @@
             </div>
           </div>
 
-          <textarea id="sdl-editor" class="code-editor" spellcheck="false"></textarea>
+          <!-- Pro Code Editor Wrapper -->
+          <div class="code-editor-wrapper">
+            <div class="code-editor-toolbar">
+              <div class="editor-tab">
+                <span>📄</span>
+                <span id="sdl-editor-filename">schema.graphql</span>
+              </div>
+              <div class="editor-tools">
+                <span class="editor-lang-badge">GraphQL SDL</span>
+                <button class="editor-tool-btn" onclick="copyEditorCode('sdl-editor')">📋 Copy</button>
+              </div>
+            </div>
+            <div class="code-editor-body">
+              <div class="code-gutter" id="sdl-editor-gutter">1</div>
+              <textarea id="sdl-editor" class="code-textarea" spellcheck="false"></textarea>
+            </div>
+            <div class="code-editor-statusbar">
+              <span id="sdl-editor-status">Line 1, Col 1</span>
+              <span>UTF-8</span>
+              <span>GraphQL</span>
+            </div>
+          </div>
 
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span style="font-size: 0.8rem; color: var(--text-muted);" id="schema-save-status">
@@ -733,7 +864,7 @@
 
           <div class="form-group">
             <label>Target Hook File (<code>hooks/*.js</code>)</label>
-            <input type="text" id="hook-name" placeholder="e.g. courseHooks, userHooks" value="courseHooks">
+            <input type="text" id="hook-name" placeholder="e.g. courseHooks, userHooks" value="courseHooks" oninput="updateHookEditorTabName()">
           </div>
 
           <div class="form-group">
@@ -755,7 +886,29 @@
           <div class="panel-header">
             <div class="panel-title"><span>💻</span> Active Hook Implementation</div>
           </div>
-          <textarea id="hook-code-editor" class="code-editor" spellcheck="false"></textarea>
+
+          <!-- Pro Code Editor Wrapper for Hooks -->
+          <div class="code-editor-wrapper">
+            <div class="code-editor-toolbar">
+              <div class="editor-tab">
+                <span>📄</span>
+                <span id="hook-editor-filename">courseHooks.js</span>
+              </div>
+              <div class="editor-tools">
+                <span class="editor-lang-badge">JavaScript</span>
+                <button class="editor-tool-btn" onclick="copyEditorCode('hook-code-editor')">📋 Copy</button>
+              </div>
+            </div>
+            <div class="code-editor-body">
+              <div class="code-gutter" id="hook-editor-gutter">1</div>
+              <textarea id="hook-code-editor" class="code-textarea" spellcheck="false"></textarea>
+            </div>
+            <div class="code-editor-statusbar">
+              <span id="hook-editor-status">Line 1, Col 1</span>
+              <span>UTF-8</span>
+              <span>JavaScript ES6</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -852,9 +1005,21 @@
             <input type="text" id="auth-token" placeholder="Bearer <JWT_TOKEN>">
           </div>
 
-          <div class="form-group">
-            <label>GraphQL Query / Mutation</label>
-            <textarea id="graphql-query-input" class="code-editor" style="min-height: 240px;">query GetUsers {
+          <!-- Query Editor Wrapper -->
+          <div class="code-editor-wrapper">
+            <div class="code-editor-toolbar">
+              <div class="editor-tab">
+                <span>⚡</span>
+                <span>Query.graphql</span>
+              </div>
+              <div class="editor-tools">
+                <span class="editor-lang-badge">GraphQL</span>
+                <button class="editor-tool-btn" onclick="copyEditorCode('graphql-query-input')">📋 Copy</button>
+              </div>
+            </div>
+            <div class="code-editor-body" style="min-height: 220px;">
+              <div class="code-gutter" id="query-input-gutter">1</div>
+              <textarea id="graphql-query-input" class="code-textarea" style="min-height: 220px;">query GetUsers {
   users(first: 5) {
     id
     username
@@ -865,6 +1030,11 @@
     count
   }
 }</textarea>
+            </div>
+            <div class="code-editor-statusbar">
+              <span id="query-input-status">Line 1, Col 1</span>
+              <span>GraphQL</span>
+            </div>
           </div>
 
           <button class="btn" onclick="executeGraphQLQuery()">
@@ -877,7 +1047,28 @@
             <div class="panel-title"><span>📦</span> Response</div>
             <span id="query-latency" style="font-size: 0.75rem; color: var(--text-muted);">0 ms</span>
           </div>
-          <textarea id="graphql-response-output" class="code-editor" readonly style="min-height: 380px;"></textarea>
+
+          <!-- Response Editor Wrapper -->
+          <div class="code-editor-wrapper">
+            <div class="code-editor-toolbar">
+              <div class="editor-tab">
+                <span>📦</span>
+                <span>response.json</span>
+              </div>
+              <div class="editor-tools">
+                <span class="editor-lang-badge">JSON</span>
+                <button class="editor-tool-btn" onclick="copyEditorCode('graphql-response-output')">📋 Copy</button>
+              </div>
+            </div>
+            <div class="code-editor-body" style="min-height: 380px;">
+              <div class="code-gutter" id="query-response-gutter">1</div>
+              <textarea id="graphql-response-output" class="code-textarea" readonly style="min-height: 380px;"></textarea>
+            </div>
+            <div class="code-editor-statusbar">
+              <span id="query-response-status">Readonly</span>
+              <span>JSON</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -897,6 +1088,74 @@
       toast.innerHTML = `<span>${type === 'danger' ? '⚠️' : '✅'}</span> <span>${message}</span>`;
       container.appendChild(toast);
       setTimeout(() => toast.remove(), 3500);
+    }
+
+    /* === PRO CODE EDITOR HELPER === */
+    function attachProCodeEditor(textareaId, gutterId, statusId) {
+      const textarea = document.getElementById(textareaId);
+      const gutter = document.getElementById(gutterId);
+      const status = document.getElementById(statusId);
+      if (!textarea || !gutter) return;
+
+      const updateGutter = () => {
+        const lines = (textarea.value || '').split('\n').length;
+        let lineNumbers = '';
+        for (let i = 1; i <= lines; i++) {
+          lineNumbers += i + '\n';
+        }
+        gutter.innerText = lineNumbers;
+      };
+
+      const updateCursorStatus = () => {
+        if (!status) return;
+        const text = textarea.value.substr(0, textarea.selectionStart);
+        const lines = text.split('\n');
+        const line = lines.length;
+        const col = lines[lines.length - 1].length + 1;
+        status.innerText = `Line ${line}, Col ${col}`;
+      };
+
+      textarea.addEventListener('input', () => {
+        updateGutter();
+        updateCursorStatus();
+      });
+
+      textarea.addEventListener('scroll', () => {
+        gutter.scrollTop = textarea.scrollTop;
+      });
+
+      textarea.addEventListener('click', updateCursorStatus);
+      textarea.addEventListener('keyup', updateCursorStatus);
+
+      // Handle Tab key (indent with 2 spaces)
+      textarea.addEventListener('keydown', (e) => {
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          const start = textarea.selectionStart;
+          const end = textarea.selectionEnd;
+          textarea.value = textarea.value.substring(0, start) + '  ' + textarea.value.substring(end);
+          textarea.selectionStart = textarea.selectionEnd = start + 2;
+          updateGutter();
+          updateCursorStatus();
+        }
+      });
+
+      updateGutter();
+    }
+
+    function copyEditorCode(textareaId) {
+      const el = document.getElementById(textareaId);
+      if (el) {
+        navigator.clipboard.writeText(el.value);
+        showToast('Code copied to clipboard! 📋');
+      }
+    }
+
+    function updateHookEditorTabName() {
+      const name = document.getElementById('hook-name').value.trim() || 'customHooks';
+      const filename = name.endsWith('.js') ? name : `${name}.js`;
+      const tab = document.getElementById('hook-editor-filename');
+      if (tab) tab.innerText = filename;
     }
 
     function openDeleteModal(name) {
@@ -1070,7 +1329,16 @@
       fieldsSDL += '  createdAt: Date!\n  updatedAt: Date!';
 
       const fullSDL = `type ${modelName} ${directives} {\n${fieldsSDL}\n}\n`;
-      document.getElementById('sdl-editor').value = fullSDL;
+      const sdlEditor = document.getElementById('sdl-editor');
+      sdlEditor.value = fullSDL;
+      document.getElementById('sdl-editor-filename').innerText = `${modelName}.graphql`;
+      const gutter = document.getElementById('sdl-editor-gutter');
+      if (gutter) {
+        const lines = fullSDL.split('\n').length;
+        let lineNumbers = '';
+        for (let i = 1; i <= lines; i++) lineNumbers += i + '\n';
+        gutter.innerText = lineNumbers;
+      }
     }
 
     function resetModelBuilder() {
@@ -1139,8 +1407,16 @@
       if (s) {
         document.getElementById('model-name').value = s.name;
         document.getElementById('sdl-editor').value = s.content;
+        document.getElementById('sdl-editor-filename').innerText = s.filename || `${s.name}.graphql`;
         document.getElementById('btn-delete-active-schema').style.display = 'inline-flex';
         document.getElementById('btn-manage-hooks-active').style.display = 'inline-flex';
+        const gutter = document.getElementById('sdl-editor-gutter');
+        if (gutter) {
+          const lines = s.content.split('\n').length;
+          let lineNumbers = '';
+          for (let i = 1; i <= lines; i++) lineNumbers += i + '\n';
+          gutter.innerText = lineNumbers;
+        }
         showToast(`Loaded ${s.name} into editor`);
       }
     }
@@ -1284,6 +1560,7 @@
     async function loadOrGenerateHook(schemaName, hookFunctionName, hookType) {
       const hookFileName = `${schemaName.charAt(0).toLowerCase() + schemaName.slice(1)}Hooks`;
       document.getElementById('hook-name').value = hookFileName;
+      updateHookEditorTabName();
 
       try {
         const res = await fetch('/api/studio/hooks');
@@ -1292,7 +1569,16 @@
         const existing = hooksList.find(h => h.name === hookFileName || (h.exportedHooks && h.exportedHooks.includes(hookFunctionName)));
 
         if (existing) {
-          document.getElementById('hook-code-editor').value = existing.content;
+          const editor = document.getElementById('hook-code-editor');
+          editor.value = existing.content;
+          document.getElementById('hook-editor-filename').innerText = existing.filename;
+          const gutter = document.getElementById('hook-editor-gutter');
+          if (gutter) {
+            const lines = existing.content.split('\n').length;
+            let lineNumbers = '';
+            for (let i = 1; i <= lines; i++) lineNumbers += i + '\n';
+            gutter.innerText = lineNumbers;
+          }
           showToast(`Loaded ${existing.filename} into editor`);
         } else {
           // Generate tailored boilerplate
@@ -1302,7 +1588,16 @@
           } else {
             snippet = `/**\n * Post-Hook for ${hookFunctionName}\n * Executed synchronously AFTER database write succeeds.\n * Use for async welcome emails, push notifications, CRM sync, and background queues.\n */\nexport const ${hookFunctionName} = [\n  async (result, input, context) => {\n    console.log('${hookFunctionName} triggered for record ID:', result.id);\n    // Trigger async side-effects\n    return result;\n  },\n];\n`;
           }
-          document.getElementById('hook-code-editor').value = snippet;
+          const editor = document.getElementById('hook-code-editor');
+          editor.value = snippet;
+          document.getElementById('hook-editor-filename').innerText = `${hookFileName}.js`;
+          const gutter = document.getElementById('hook-editor-gutter');
+          if (gutter) {
+            const lines = snippet.split('\n').length;
+            let lineNumbers = '';
+            for (let i = 1; i <= lines; i++) lineNumbers += i + '\n';
+            gutter.innerText = lineNumbers;
+          }
           showToast(`Generated boilerplate for ${hookFunctionName}`);
         }
       } catch (err) {
@@ -1323,7 +1618,15 @@
       } else if (type === 'email') {
         code = `export const add${cap}PostHook = [\n  async (result, input, context) => {\n    console.log('Dispatching notification for ${cap}:', result.id);\n    return result;\n  },\n];\n`;
       }
-      document.getElementById('hook-code-editor').value = code;
+      const editor = document.getElementById('hook-code-editor');
+      editor.value = code;
+      const gutter = document.getElementById('hook-editor-gutter');
+      if (gutter) {
+        const lines = code.split('\n').length;
+        let lineNumbers = '';
+        for (let i = 1; i <= lines; i++) lineNumbers += i + '\n';
+        gutter.innerText = lineNumbers;
+      }
     }
 
     async function saveHookFile() {
@@ -1495,7 +1798,16 @@
         const result = await res.json();
         const latency = Math.round(performance.now() - startTime);
         document.getElementById('query-latency').innerText = latency + ' ms';
-        document.getElementById('graphql-response-output').value = JSON.stringify(result, null, 2);
+        const formatted = JSON.stringify(result, null, 2);
+        const respOutput = document.getElementById('graphql-response-output');
+        respOutput.value = formatted;
+        const gutter = document.getElementById('query-response-gutter');
+        if (gutter) {
+          const lines = formatted.split('\n').length;
+          let lineNumbers = '';
+          for (let i = 1; i <= lines; i++) lineNumbers += i + '\n';
+          gutter.innerText = lineNumbers;
+        }
         showToast(`Query executed in ${latency}ms`);
       } catch (err) {
         document.getElementById('graphql-response-output').value = 'Error: ' + err.message;
@@ -1530,6 +1842,12 @@
       insertHookSnippet('slugify');
       refreshSchemasList();
       populateHooksSchemaDropdown();
+
+      // Attach Pro Code Editors
+      attachProCodeEditor('sdl-editor', 'sdl-editor-gutter', 'sdl-editor-status');
+      attachProCodeEditor('hook-code-editor', 'hook-editor-gutter', 'hook-editor-status');
+      attachProCodeEditor('graphql-query-input', 'query-input-gutter', 'query-input-status');
+      attachProCodeEditor('graphql-response-output', 'query-response-gutter', 'query-response-status');
     });
   </script>
 </body>
