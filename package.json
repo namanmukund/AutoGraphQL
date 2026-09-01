@@ -12,6 +12,9 @@
     "db:down": "docker-compose down",
     "db:logs": "docker-compose logs -f",
     "syncDBIndexes": "cross-env BABEL_ENV=ssr babel-node scripts/syncDBIndexes",
+    "schema:dump": "cross-env BABEL_ENV=ssr APPLICATION=core babel-node scripts/dumpSchema",
+    "schema:diff": "cross-env BABEL_ENV=ssr APPLICATION=core babel-node scripts/schemaDiff",
+    "codegen:sdk": "cross-env BABEL_ENV=ssr APPLICATION=core babel-node scripts/generateSDK",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "test": "cross-env APPLICATION=core NODE_ENV=test PORT=3000 mocha ./test --timeout 5000 --recursive --require @babel/register --exit"
