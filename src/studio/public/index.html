@@ -6,24 +6,31 @@
   <title>AutoGraphQL Studio — Visual Schema & Hook Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-primary: #0a0d14;
-      --bg-secondary: #111724;
-      --bg-card: rgba(22, 29, 46, 0.75);
-      --bg-card-hover: rgba(30, 41, 64, 0.95);
+      --bg-base: #07090e;
+      --bg-primary: #0b0f19;
+      --bg-secondary: #111827;
+      --bg-card: rgba(17, 24, 39, 0.75);
+      --bg-card-hover: rgba(30, 41, 59, 0.95);
+      --bg-input: #080d1a;
       --border-color: rgba(255, 255, 255, 0.08);
       --border-focus: #6366f1;
-      --text-main: #f1f5f9;
+      --text-main: #f8fafc;
       --text-muted: #94a3b8;
-      --text-accent: #a855f7;
+      --text-dim: #64748b;
       --accent-primary: #6366f1;
-      --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
-      --accent-green: #10b981;
+      --accent-purple: #a855f7;
+      --accent-pink: #ec4899;
+      --accent-emerald: #10b981;
       --accent-blue: #3b82f6;
       --accent-amber: #f59e0b;
       --accent-rose: #f43f5e;
+      --accent-cyan: #06b6d4;
+      --gradient-main: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+      --gradient-emerald: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+      --gradient-blue: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
       --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       --font-display: 'Outfit', sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
@@ -31,7 +38,7 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background-color: var(--bg-primary);
+      background-color: var(--bg-base);
       color: var(--text-main);
       font-family: var(--font-sans);
       min-height: 100vh;
@@ -40,26 +47,28 @@
       overflow-x: hidden;
     }
 
+    /* Ambient Cyber Glow */
     .ambient-glow {
       position: fixed;
       top: -20%;
-      left: 20%;
-      width: 60vw;
-      height: 60vh;
-      background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, rgba(168, 85, 247, 0.05) 50%, transparent 70%);
+      left: 15%;
+      width: 70vw;
+      height: 70vh;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.08) 45%, transparent 70%);
       pointer-events: none;
       z-index: 0;
-      filter: blur(80px);
+      filter: blur(90px);
     }
 
+    /* Top Navigation Bar */
     header {
       position: sticky;
       top: 0;
-      z-index: 50;
-      background: rgba(10, 13, 20, 0.85);
-      backdrop-filter: blur(16px);
+      z-index: 100;
+      background: rgba(11, 15, 25, 0.88);
+      backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border-color);
-      padding: 0.85rem 2rem;
+      padding: 0.75rem 2rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -68,29 +77,29 @@
     .brand {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.85rem;
       text-decoration: none;
     }
 
     .brand-logo {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: var(--accent-gradient);
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      background: var(--gradient-main);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.25rem;
-      font-weight: 800;
+      font-size: 1.3rem;
+      font-weight: 900;
       color: white;
-      box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+      box-shadow: 0 0 25px rgba(99, 102, 241, 0.55);
     }
 
     .brand-title {
       font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1.35rem;
-      letter-spacing: -0.02em;
+      font-weight: 800;
+      font-size: 1.4rem;
+      letter-spacing: -0.025em;
       background: linear-gradient(to right, #ffffff, #cbd5e1);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -98,32 +107,33 @@
 
     .brand-badge {
       font-size: 0.7rem;
-      font-weight: 700;
+      font-weight: 800;
       text-transform: uppercase;
-      padding: 0.2rem 0.5rem;
+      letter-spacing: 0.06em;
+      padding: 0.2rem 0.6rem;
       border-radius: 6px;
-      background: rgba(99, 102, 241, 0.2);
+      background: rgba(99, 102, 241, 0.18);
       color: #818cf8;
-      border: 1px solid rgba(99, 102, 241, 0.3);
+      border: 1px solid rgba(99, 102, 241, 0.35);
     }
 
-    .header-status {
+    .header-actions {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.85rem;
     }
 
     .status-pill {
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.45rem;
       font-size: 0.8rem;
-      padding: 0.3rem 0.75rem;
+      padding: 0.35rem 0.85rem;
       border-radius: 20px;
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.25);
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
       color: #34d399;
-      font-weight: 500;
+      font-weight: 600;
     }
 
     .status-dot {
@@ -131,19 +141,20 @@
       height: 7px;
       border-radius: 50%;
       background: #10b981;
-      box-shadow: 0 0 8px #10b981;
+      box-shadow: 0 0 10px #10b981;
       animation: pulse 2s infinite;
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
     }
 
+    /* Main Container */
     .studio-container {
       position: relative;
       z-index: 10;
-      max-width: 1560px;
+      max-width: 1680px;
       width: 100%;
       margin: 0 auto;
       padding: 1.5rem 2rem 3rem 2rem;
@@ -153,11 +164,13 @@
       gap: 1.5rem;
     }
 
+    /* Navigation Tabs */
     .studio-tabs {
       display: flex;
       gap: 0.5rem;
       border-bottom: 1px solid var(--border-color);
-      padding-bottom: 0.75rem;
+      padding-bottom: 0.85rem;
+      overflow-x: auto;
     }
 
     .tab-btn {
@@ -165,15 +178,16 @@
       border: none;
       color: var(--text-muted);
       font-family: var(--font-sans);
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       font-weight: 600;
-      padding: 0.6rem 1.25rem;
-      border-radius: 8px;
+      padding: 0.65rem 1.25rem;
+      border-radius: 9px;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.55rem;
       transition: all 0.2s ease;
+      white-space: nowrap;
     }
 
     .tab-btn:hover {
@@ -183,11 +197,12 @@
 
     .tab-btn.active {
       color: #ffffff;
-      background: rgba(99, 102, 241, 0.15);
-      border: 1px solid rgba(99, 102, 241, 0.3);
-      box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+      background: rgba(99, 102, 241, 0.16);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.25);
     }
 
+    /* Tab Panes */
     .tab-pane {
       display: none;
       flex-direction: column;
@@ -198,30 +213,38 @@
       display: flex;
     }
 
+    /* Grid Layouts */
     .studio-grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1.5rem;
     }
 
-    @media (max-width: 1024px) {
-      .studio-grid-2 { grid-template-columns: 1fr; }
+    .studio-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
     }
 
+    @media (max-width: 1180px) {
+      .studio-grid-2, .studio-grid-3 { grid-template-columns: 1fr; }
+    }
+
+    /* Cards */
     .card-panel {
       background: var(--bg-card);
-      backdrop-filter: blur(12px);
+      backdrop-filter: blur(16px);
       border: 1px solid var(--border-color);
-      border-radius: 14px;
+      border-radius: 15px;
       padding: 1.5rem;
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
-      transition: border-color 0.2s ease;
+      transition: border-color 0.25s ease, transform 0.2s ease;
     }
 
     .card-panel:hover {
-      border-color: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.16);
     }
 
     .panel-header {
@@ -238,28 +261,29 @@
       font-weight: 700;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.55rem;
       color: #ffffff;
     }
 
+    /* Form Controls */
     .form-group {
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
+      gap: 0.45rem;
     }
 
     label {
-      font-size: 0.8rem;
-      font-weight: 600;
+      font-size: 0.78rem;
+      font-weight: 700;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
 
     input, select, textarea {
-      background: var(--bg-secondary);
+      background: var(--bg-input);
       border: 1px solid var(--border-color);
-      border-radius: 8px;
+      border-radius: 9px;
       padding: 0.65rem 0.85rem;
       color: var(--text-main);
       font-family: var(--font-sans);
@@ -270,39 +294,41 @@
 
     input:focus, select:focus, textarea:focus {
       border-color: var(--border-focus);
-      box-shadow: 0 0 10px rgba(99, 102, 241, 0.25);
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.3);
     }
 
     textarea.code-editor {
       font-family: var(--font-mono);
       font-size: 0.85rem;
-      line-height: 1.5;
-      min-height: 380px;
+      line-height: 1.55;
+      min-height: 400px;
       resize: vertical;
-      background: #060911;
+      background: #040711;
+      border-color: rgba(255, 255, 255, 0.06);
     }
 
+    /* Buttons */
     .btn {
-      background: var(--accent-gradient);
+      background: var(--gradient-main);
       color: white;
       border: none;
       font-family: var(--font-sans);
       font-weight: 600;
       font-size: 0.9rem;
-      padding: 0.65rem 1.25rem;
-      border-radius: 8px;
+      padding: 0.65rem 1.35rem;
+      border-radius: 9px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
       transition: all 0.2s ease;
-      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
     }
 
     .btn:hover {
       transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+      box-shadow: 0 6px 22px rgba(99, 102, 241, 0.5);
     }
 
     .btn-secondary {
@@ -313,39 +339,47 @@
     }
 
     .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.12);
       box-shadow: none;
       transform: none;
     }
 
     .btn-danger {
       background: rgba(244, 63, 94, 0.15);
-      border: 1px solid rgba(244, 63, 94, 0.3);
+      border: 1px solid rgba(244, 63, 94, 0.35);
       color: #fb7185;
       box-shadow: none;
     }
 
     .btn-danger:hover {
-      background: rgba(244, 63, 94, 0.3);
+      background: rgba(244, 63, 94, 0.35);
       color: white;
     }
 
+    .btn-success {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      box-shadow: none;
+    }
+
+    /* Dynamic Field Rows */
     .field-row {
       display: grid;
-      grid-template-columns: 2fr 1.5fr 1fr auto;
+      grid-template-columns: 2fr 1.4fr 1.2fr auto;
       gap: 0.6rem;
       align-items: center;
-      background: rgba(0, 0, 0, 0.25);
-      padding: 0.6rem;
-      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 0.65rem;
+      border-radius: 9px;
       border: 1px solid rgba(255, 255, 255, 0.04);
       transition: all 0.2s;
     }
 
     .field-row.relation-row {
       grid-template-columns: 1.5fr 1.5fr 1.5fr 1.5fr auto;
-      background: rgba(99, 102, 241, 0.08);
-      border-color: rgba(99, 102, 241, 0.2);
+      background: rgba(99, 102, 241, 0.1);
+      border-color: rgba(99, 102, 241, 0.25);
     }
 
     .pill-checkbox {
@@ -357,6 +391,7 @@
       cursor: pointer;
     }
 
+    /* Schema File List */
     .schema-list {
       display: flex;
       flex-direction: column;
@@ -369,10 +404,10 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.85rem 1.15rem;
+      padding: 0.9rem 1.2rem;
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--border-color);
-      border-radius: 10px;
+      border-radius: 11px;
       transition: all 0.2s;
     }
 
@@ -382,28 +417,31 @@
     }
 
     .badge {
-      font-size: 0.7rem;
+      font-size: 0.72rem;
       font-weight: 700;
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
+      padding: 0.25rem 0.55rem;
+      border-radius: 5px;
     }
 
     .badge-mongo { background: rgba(16, 185, 129, 0.15); color: #34d399; }
     .badge-pg { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
-    .badge-rel { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+    .badge-rel { background: rgba(168, 85, 247, 0.18); color: #c084fc; }
+    .badge-live { background: rgba(16, 185, 129, 0.2); color: #10b981; }
 
+    /* Alert Banner */
     .alert-banner {
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      font-size: 0.85rem;
+      padding: 0.85rem 1.2rem;
+      border-radius: 10px;
+      font-size: 0.88rem;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.6rem;
       background: rgba(99, 102, 241, 0.1);
       border: 1px solid rgba(99, 102, 241, 0.3);
       color: #c7d2fe;
     }
 
+    /* Toast Notification */
     #toast-container {
       position: fixed;
       bottom: 2rem;
@@ -411,21 +449,22 @@
       z-index: 10000;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.6rem;
     }
 
     .toast {
-      padding: 0.85rem 1.25rem;
-      border-radius: 10px;
-      background: rgba(17, 24, 39, 0.95);
-      backdrop-filter: blur(16px);
+      padding: 0.9rem 1.35rem;
+      border-radius: 11px;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(18px);
       border: 1px solid var(--border-color);
       color: white;
-      font-size: 0.85rem;
+      font-size: 0.88rem;
+      font-weight: 500;
       display: flex;
       align-items: center;
-      gap: 0.6rem;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      gap: 0.65rem;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
       animation: slideUp 0.3s ease;
     }
 
@@ -437,20 +476,27 @@
       to { transform: translateY(0); opacity: 1; }
     }
 
+    /* Relations Grid */
     .relations-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1rem;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.25rem;
     }
 
     .relation-card {
-      background: rgba(0, 0, 0, 0.2);
+      background: rgba(0, 0, 0, 0.28);
       border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 1rem;
+      border-radius: 12px;
+      padding: 1.15rem;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.65rem;
+      transition: all 0.2s;
+    }
+
+    .relation-card:hover {
+      border-color: rgba(168, 85, 247, 0.4);
+      transform: translateY(-2px);
     }
   </style>
 </head>
@@ -459,17 +505,17 @@
   <div id="toast-container"></div>
 
   <!-- In-App Delete Confirmation Modal -->
-  <div id="delete-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center;">
-    <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 14px; padding: 1.75rem; max-width: 440px; width: 90%; display: flex; flex-direction: column; gap: 1rem; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
-      <div style="display: flex; align-items: center; gap: 0.75rem;">
-        <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(244, 63, 94, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">🗑️</div>
+  <div id="delete-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 15px; padding: 1.85rem; max-width: 450px; width: 90%; display: flex; flex-direction: column; gap: 1.1rem; box-shadow: 0 25px 50px rgba(0,0,0,0.7);">
+      <div style="display: flex; align-items: center; gap: 0.85rem;">
+        <div style="width: 44px; height: 44px; border-radius: 11px; background: rgba(244, 63, 94, 0.16); display: flex; align-items: center; justify-content: center; font-size: 1.35rem;">🗑️</div>
         <div>
-          <h3 style="font-size: 1.1rem; color: #fff;">Delete Schema?</h3>
+          <h3 style="font-size: 1.15rem; color: #fff;">Delete Schema?</h3>
           <p style="font-size: 0.85rem; color: var(--text-muted);" id="delete-modal-msg">Are you sure you want to delete this schema?</p>
         </div>
       </div>
-      <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">This will permanently remove the <code>.graphql</code> file from <code>schemas/</code> and unload the model AST.</p>
-      <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.5rem;">
+      <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.45;">This will permanently delete the <code>.graphql</code> file from <code>schemas/</code> and unload the compiled AST model from the API.</p>
+      <div style="display: flex; justify-content: flex-end; gap: 0.85rem; margin-top: 0.5rem;">
         <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
         <button id="btn-confirm-delete" class="btn btn-danger">Yes, Delete Schema</button>
       </div>
@@ -486,11 +532,17 @@
       <span class="brand-badge">Engine 4.0</span>
     </a>
 
-    <div class="header-status">
+    <div class="header-actions">
       <div class="status-pill" id="db-status-pill">
         <span class="status-dot"></span>
-        <span id="db-status-text">Core Engine Ready</span>
+        <span id="db-status-text">Server Online :3000</span>
       </div>
+      <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;" onclick="exportTypeScriptSDK()">
+        📦 Export SDK
+      </button>
+      <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;" onclick="exportSchemaSDL()">
+        📄 Dump SDL
+      </button>
       <a href="/graphql/core" target="_blank" class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
         Playground ↗
       </a>
@@ -511,18 +563,21 @@
       <button class="tab-btn" onclick="switchTab('tab-hooks')">
         <span>🪝</span> Lifecycle Hooks
       </button>
+      <button class="tab-btn" onclick="switchTab('tab-webhooks')">
+        <span>📡</span> Webhooks & Events
+      </button>
       <button class="tab-btn" onclick="switchTab('tab-database')">
         <span>🗄️</span> Databases & RLS
       </button>
       <button class="tab-btn" onclick="switchTab('tab-explorer')">
-        <span>🚀</span> API Explorer
+        <span>🚀</span> API Playground
       </button>
     </div>
 
     <!-- TAB 1: SCHEMA STUDIO -->
     <div id="tab-schema" class="tab-pane active">
       <div class="alert-banner">
-        💡 <strong>Zero-Config Drop-in:</strong> Schemas saved here are written to <code>schemas/&lt;Name&gt;.graphql</code> and compiled dynamically. You can create, edit, link, and delete schemas directly from this interface.
+        💡 <strong>Zero-Code Schema Management:</strong> Define entities, relational connectors, and directives below. Schemas are automatically compiled into GraphQL resolvers, Mongoose/Sequelize models, and DataLoaders.
       </div>
 
       <div class="studio-grid-2">
@@ -546,7 +601,7 @@
               <input type="text" id="model-name" placeholder="e.g. Course, Order, Product" oninput="updateSDLPreview()">
             </div>
             <div class="form-group">
-              <label>Database Engine</label>
+              <label>Database Dialect</label>
               <select id="model-database" onchange="updateSDLPreview()">
                 <option value="default">Global Default (.env)</option>
                 <option value="mongoose">🍃 MongoDB (Mongoose)</option>
@@ -562,7 +617,7 @@
                 <input type="checkbox" id="dir-history" onchange="updateSDLPreview()"> @history (Audit log)
               </label>
               <label class="pill-checkbox">
-                <input type="checkbox" id="dir-tenant" onchange="updateSDLPreview()"> @tenantScoped (RLS Multi-Tenancy)
+                <input type="checkbox" id="dir-tenant" onchange="updateSDLPreview()"> @tenantScoped (Multi-Tenancy)
               </label>
               <label class="pill-checkbox">
                 <input type="checkbox" id="dir-owner" onchange="updateSDLPreview()"> @ownerScoped (User Ownership)
@@ -641,7 +696,7 @@
     <!-- TAB 2: CONNECTED SCHEMAS & RELATIONSHIPS GRAPH -->
     <div id="tab-relations" class="tab-pane">
       <div class="alert-banner">
-        🔗 <strong>Multi-Schema Relational Connectors:</strong> Visual breakdown of foreign keys, 1:1, 1:N, and N:N relations wired across your GraphQL entities using <code>@relation(name, direction)</code>.
+        🔗 <strong>Multi-Schema Relational Connectors:</strong> Real-time mapping of foreign key connectors, 1:1, 1:N, and N:N relations wired across your GraphQL entities using <code>@relation(name, direction)</code>.
       </div>
 
       <div class="card-panel">
@@ -653,7 +708,7 @@
         </div>
 
         <div id="relations-container" class="relations-grid">
-          <div style="color: var(--text-muted); font-size: 0.85rem;">No active relations detected yet. Connect schemas in the Schema Studio!</div>
+          <div style="color: var(--text-muted); font-size: 0.85rem;">No active relations detected yet. Connect schemas using "🔗 Connect Schema" in Schema Studio!</div>
         </div>
       </div>
     </div>
@@ -676,11 +731,12 @@
           </div>
 
           <div class="form-group">
-            <label>Template Boilerplate</label>
+            <label>1-Click Preset Boilerplates</label>
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.3rem 0.6rem;" onclick="insertHookSnippet('slugify')">Slug Generator</button>
-              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.3rem 0.6rem;" onclick="insertHookSnippet('validation')">Price Validator</button>
-              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.3rem 0.6rem;" onclick="insertHookSnippet('email')">Welcome Email</button>
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.35rem 0.65rem;" onclick="insertHookSnippet('slugify')">🔗 Slug Generator</button>
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.35rem 0.65rem;" onclick="insertHookSnippet('validation')">🛡️ Price Validator</button>
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.35rem 0.65rem;" onclick="insertHookSnippet('bcrypt')">🔐 Password Hasher</button>
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.35rem 0.65rem;" onclick="insertHookSnippet('email')">✉️ Welcome Email</button>
             </div>
           </div>
 
@@ -698,7 +754,51 @@
       </div>
     </div>
 
-    <!-- TAB 4: DATABASES & RLS -->
+    <!-- TAB 4: WEBHOOKS & EVENTS -->
+    <div id="tab-webhooks" class="tab-pane">
+      <div class="alert-banner">
+        📡 <strong>Birdwatch Event-Driven Automation:</strong> Outgoing mutation events are signed with HMAC-SHA256 and dispatched via a Transactional Outbox with exponential backoff retry.
+      </div>
+
+      <div class="studio-grid-2">
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title"><span>➕</span> Register Webhook</div>
+          </div>
+
+          <div class="form-group">
+            <label>Endpoint URL</label>
+            <input type="text" id="webhook-url" placeholder="https://api.mycrm.com/webhooks/autographql">
+          </div>
+
+          <div class="form-group">
+            <label>Subscribed Events (Comma-separated or * for all)</label>
+            <input type="text" id="webhook-events" placeholder="addOrder, updateUser, deleteUser" value="*">
+          </div>
+
+          <div class="form-group">
+            <label>HMAC Secret Key</label>
+            <input type="text" id="webhook-secret" placeholder="autographql_secret_key" value="studio_secret_2026">
+          </div>
+
+          <button class="btn" onclick="registerNewWebhook()">
+            🚀 Register Webhook Subscription
+          </button>
+        </div>
+
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title"><span>📋</span> Active Webhooks</div>
+            <button class="btn btn-secondary" style="font-size: 0.75rem;" onclick="loadWebhooksList()">Refresh</button>
+          </div>
+          <div id="webhooks-list" style="display: flex; flex-direction: column; gap: 0.65rem;">
+            <div style="color: var(--text-muted); font-size: 0.85rem;">Loading webhooks...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: DATABASES & RLS -->
     <div id="tab-database" class="tab-pane">
       <div class="studio-grid-2">
         <div class="card-panel">
@@ -725,15 +825,20 @@
       </div>
     </div>
 
-    <!-- TAB 5: API EXPLORER -->
+    <!-- TAB 6: API PLAYGROUND -->
     <div id="tab-explorer" class="tab-pane">
       <div class="studio-grid-2">
         <div class="card-panel">
           <div class="panel-header">
             <div class="panel-title"><span>🚀</span> GraphQL Request</div>
-            <button class="btn btn-secondary" style="font-size: 0.75rem;" onclick="generateTestToken()">
-              🔑 Generate Token
-            </button>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-secondary" style="font-size: 0.75rem;" onclick="generateTestToken('ADMIN')">
+                🔑 Admin JWT
+              </button>
+              <button class="btn btn-secondary" style="font-size: 0.75rem;" onclick="generateTestToken('USER')">
+                👤 User JWT
+              </button>
+            </div>
           </div>
 
           <div class="form-group">
@@ -811,6 +916,7 @@
             resetModelBuilder();
           }
           await refreshSchemasList();
+          await loadRelationsGraph();
         } else {
           showToast(result.error || 'Failed to delete schema', 'danger');
         }
@@ -835,6 +941,7 @@
       document.getElementById(tabId).classList.add('active');
       if (tabId === 'tab-schema') refreshSchemasList();
       if (tabId === 'tab-relations') loadRelationsGraph();
+      if (tabId === 'tab-webhooks') loadWebhooksList();
       if (tabId === 'tab-database') loadDatabaseInfo();
     }
 
@@ -980,16 +1087,16 @@
           const div = document.createElement('div');
           div.className = 'schema-item';
           div.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-              <span style="font-size: 1.1rem;">📄</span>
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+              <span style="font-size: 1.25rem;">📄</span>
               <div>
                 <strong>${s.name}</strong>
                 <span style="color: var(--text-muted); font-size: 0.8rem; margin-left: 0.4rem;">(${s.filename})</span>
               </div>
             </div>
             <div style="display: flex; gap: 0.5rem;">
-              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;" onclick="loadSchemaContent('${s.name}')">✏️ Edit</button>
-              <button class="btn btn-danger" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;" onclick="deleteSchemaByName('${s.name}')">🗑️ Delete</button>
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.3rem 0.65rem;" onclick="loadSchemaContent('${s.name}')">✏️ Edit</button>
+              <button class="btn btn-danger" style="font-size: 0.75rem; padding: 0.3rem 0.65rem;" onclick="deleteSchemaByName('${s.name}')">🗑️ Delete</button>
             </div>
           `;
           container.appendChild(div);
@@ -1029,7 +1136,8 @@
         if (result.success) {
           showToast(`Saved ${name}.graphql`);
           document.getElementById('btn-delete-active-schema').style.display = 'inline-flex';
-          refreshSchemasList();
+          await refreshSchemasList();
+          await loadRelationsGraph();
         } else {
           showToast(result.error, 'danger');
         }
@@ -1055,9 +1163,9 @@
                 <span class="badge badge-rel">@relation</span>
                 <span style="font-size: 0.75rem; color: var(--text-muted);">${r.relationName}</span>
               </div>
-              <div style="font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; margin-top: 0.3rem;">
-                <span>${r.source}</span>
-                <span style="color: var(--accent-primary);">──( ${r.field} )──►</span>
+              <div style="font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; margin-top: 0.4rem;">
+                <span style="color: #fff;">${r.source}</span>
+                <span style="color: var(--accent-primary); font-size: 0.9rem;">──[ ${r.field} ]──►</span>
                 <span style="color: #c084fc;">${r.target}</span>
               </div>
             `;
@@ -1077,8 +1185,10 @@
         code = `export const addCoursePreHook = [\n  async (input, context) => {\n    if (input.title && !input.slug) {\n      input.slug = input.title.toLowerCase().replace(/\\s+/g, '-');\n    }\n    return input;\n  },\n];\n`;
       } else if (type === 'validation') {
         code = `export const addCoursePreHook = [\n  async (input, context) => {\n    if (input.price < 0) {\n      throw new Error('Price cannot be negative');\n    }\n    return input;\n  },\n];\n`;
+      } else if (type === 'bcrypt') {
+        code = `import bcrypt from 'bcryptjs';\n\nexport const addUserPreHook = [\n  async (input, context) => {\n    if (input.password) {\n      input.password = await bcrypt.hash(input.password, 10);\n    }\n    return input;\n  },\n];\n`;
       } else if (type === 'email') {
-        code = `export const addUserPostHook = [\n  async (result, input, context) => {\n    console.log('Sending welcome email to:', result.email);\n    return result;\n  },\n];\n`;
+        code = `export const addUserPostHook = [\n  async (result, input, context) => {\n    console.log('Dispatching welcome email to:', result.email);\n    return result;\n  },\n];\n`;
       }
       document.getElementById('hook-code-editor').value = code;
     }
@@ -1104,6 +1214,106 @@
       }
     }
 
+    async function loadWebhooksList() {
+      try {
+        const res = await fetch('/api/studio/webhooks');
+        const data = await res.json();
+        const container = document.getElementById('webhooks-list');
+        container.innerHTML = '';
+
+        if (data.data && data.data.length) {
+          data.data.forEach(w => {
+            const div = document.createElement('div');
+            div.className = 'schema-item';
+            div.innerHTML = `
+              <div>
+                <strong>${w.url}</strong>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">
+                  Events: ${w.events.join(', ')}
+                </div>
+              </div>
+              <button class="btn btn-danger" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;" onclick="deleteWebhook('${w.id}')">Remove</button>
+            `;
+            container.appendChild(div);
+          });
+        } else {
+          container.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem;">No active webhooks registered yet.</div>';
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function registerNewWebhook() {
+      const url = document.getElementById('webhook-url').value.trim();
+      const eventsStr = document.getElementById('webhook-events').value.trim();
+      const secret = document.getElementById('webhook-secret').value.trim();
+
+      if (!url) {
+        showToast('Webhook URL is required', 'danger');
+        return;
+      }
+
+      const events = eventsStr.split(',').map(e => e.trim()).filter(Boolean);
+
+      try {
+        const res = await fetch('/api/studio/webhooks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url, events, secret })
+        });
+        const result = await res.json();
+        if (result.success) {
+          showToast('Registered webhook successfully');
+          document.getElementById('webhook-url').value = '';
+          loadWebhooksList();
+        } else {
+          showToast(result.error, 'danger');
+        }
+      } catch (err) {
+        showToast('Failed to register webhook', 'danger');
+      }
+    }
+
+    async function deleteWebhook(id) {
+      try {
+        const res = await fetch(`/api/studio/webhooks/${id}`, { method: 'DELETE' });
+        const result = await res.json();
+        if (result.success) {
+          showToast('Webhook removed');
+          loadWebhooksList();
+        }
+      } catch (err) {
+        showToast('Failed to remove webhook', 'danger');
+      }
+    }
+
+    async function exportTypeScriptSDK() {
+      try {
+        const res = await fetch('/api/studio/sdk');
+        const data = await res.json();
+        if (data.data) {
+          navigator.clipboard.writeText(data.data);
+          showToast('TypeScript SDK copied to clipboard! 📋');
+        }
+      } catch (err) {
+        showToast('Failed to export SDK', 'danger');
+      }
+    }
+
+    async function exportSchemaSDL() {
+      try {
+        const res = await fetch('/api/studio/schema-dump');
+        const data = await res.json();
+        if (data.data) {
+          navigator.clipboard.writeText(data.data);
+          showToast('Full Schema SDL copied to clipboard! 📋');
+        }
+      } catch (err) {
+        showToast('Failed to dump SDL', 'danger');
+      }
+    }
+
     async function loadDatabaseInfo() {
       try {
         const res = await fetch('/api/studio/db-info');
@@ -1117,17 +1327,17 @@
       }
     }
 
-    async function generateTestToken() {
+    async function generateTestToken(role = 'ADMIN') {
       try {
         const res = await fetch('/api/studio/generate-token', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ role: 'ADMIN', userId: 'usr_studio_admin', tenantId: 'tenant_enterprise_1' })
+          body: JSON.stringify({ role, userId: `usr_studio_${role.toLowerCase()}`, tenantId: 'tenant_enterprise_1' })
         });
         const data = await res.json();
         if (data.token) {
           document.getElementById('auth-token').value = 'Bearer ' + data.token;
-          showToast('Generated Admin JWT token');
+          showToast(`Generated ${role} JWT token`);
         }
       } catch (err) {
         showToast('Failed to generate token', 'danger');

@@ -2,7 +2,11 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import jwt from 'jsonwebtoken';
+import { printSchema } from 'graphql';
 import { getStudioSchemaMetadata, getStudioDatabaseInfo, getStudioHooksList } from './schemaScanner';
+import { listWebhooks, registerWebhook, unregisterWebhook } from '../birdwatch/webhooks/manager';
+import { generateTypeScriptSDK } from '../codegen/sdkGenerator';
+import schema from '../graphql';
 import authParams from '../../config/authParams';
 
 const router = express.Router();
@@ -148,7 +152,25 @@ router.post('/api/studio/hooks', (req, res) => {
   }
 });
 
-// 7. GET /api/studio/db-info - Database diagnostics
+// 7. DELETE /api/studio/hooks/:name - Delete a hook file
+router.delete('/api/studio/hooks/:name', (req, res) => {
+  try {
+    const { name } = req.params;
+    const cleanName = name.replace(/\.js$/, '').replace(/[^a-zA-Z0-9_-]/g, '');
+    const filePath = path.join(process.cwd(), 'hooks', `${cleanName}.js`);
+
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+      res.json({ success: true, message: `Hook '${cleanName}.js' deleted successfully` });
+    } else {
+      res.status(404).json({ success: false, error: `Hook '${cleanName}.js' not found` });
+    }
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 8. GET /api/studio/db-info - Database diagnostics
 router.get('/api/studio/db-info', (req, res) => {
   try {
     const info = getStudioDatabaseInfo();
@@ -158,7 +180,60 @@ router.get('/api/studio/db-info', (req, res) => {
   }
 });
 
-// 8. POST /api/studio/generate-token - Generate test JWT tokens
+// 9. Webhooks APIs (Birdwatch)
+router.get('/api/studio/webhooks', (req, res) => {
+  try {
+    const webhooks = listWebhooks();
+    res.json({ success: true, data: webhooks });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.post('/api/studio/webhooks', (req, res) => {
+  try {
+    const { url, events = ['*'], secret } = req.body;
+    if (!url) {
+      return res.status(400).json({ success: false, error: 'Webhook URL is required' });
+    }
+    const webhook = registerWebhook({ url, events, secret });
+    res.json({ success: true, message: 'Webhook registered successfully', data: webhook });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.delete('/api/studio/webhooks/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const removed = unregisterWebhook(id);
+    res.json({ success: true, message: 'Webhook removed', removed });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 10. TypeScript SDK Generator
+router.get('/api/studio/sdk', (req, res) => {
+  try {
+    const sdkCode = generateTypeScriptSDK(schema);
+    res.json({ success: true, data: sdkCode });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 11. Full Schema SDL Dump
+router.get('/api/studio/schema-dump', (req, res) => {
+  try {
+    const sdl = printSchema(schema);
+    res.json({ success: true, data: sdl });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 12. POST /api/studio/generate-token - Generate test JWT tokens
 router.post('/api/studio/generate-token', (req, res) => {
   try {
     const {
