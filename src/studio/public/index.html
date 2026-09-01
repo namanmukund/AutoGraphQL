@@ -330,14 +330,6 @@
       color: white;
     }
 
-    .btn-success {
-      background: rgba(16, 185, 129, 0.2);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      color: #34d399;
-      box-shadow: none;
-    }
-
-    /* Dynamic Field Rows */
     .field-row {
       display: grid;
       grid-template-columns: 2fr 1.5fr 1fr auto;
@@ -365,7 +357,6 @@
       cursor: pointer;
     }
 
-    /* Schema File List */
     .schema-list {
       display: flex;
       flex-direction: column;
@@ -385,7 +376,7 @@
       transition: all 0.2s;
     }
 
-    .schema-item:hover, .schema-item.active {
+    .schema-item:hover {
       background: rgba(99, 102, 241, 0.1);
       border-color: rgba(99, 102, 241, 0.4);
     }
@@ -401,7 +392,6 @@
     .badge-pg { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
     .badge-rel { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
 
-    /* Alert Banner */
     .alert-banner {
       padding: 0.75rem 1rem;
       border-radius: 8px;
@@ -414,12 +404,11 @@
       color: #c7d2fe;
     }
 
-    /* Toast Notification */
     #toast-container {
       position: fixed;
       bottom: 2rem;
       right: 2rem;
-      z-index: 1000;
+      z-index: 10000;
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
@@ -448,7 +437,6 @@
       to { transform: translateY(0); opacity: 1; }
     }
 
-    /* Relations Grid */
     .relations-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -469,6 +457,24 @@
 <body>
   <div class="ambient-glow"></div>
   <div id="toast-container"></div>
+
+  <!-- In-App Delete Confirmation Modal -->
+  <div id="delete-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 14px; padding: 1.75rem; max-width: 440px; width: 90%; display: flex; flex-direction: column; gap: 1rem; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(244, 63, 94, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">🗑️</div>
+        <div>
+          <h3 style="font-size: 1.1rem; color: #fff;">Delete Schema?</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted);" id="delete-modal-msg">Are you sure you want to delete this schema?</p>
+        </div>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">This will permanently remove the <code>.graphql</code> file from <code>schemas/</code> and unload the model AST.</p>
+      <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.5rem;">
+        <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+        <button id="btn-confirm-delete" class="btn btn-danger">Yes, Delete Schema</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Header -->
   <header>
@@ -771,6 +777,7 @@
     // State
     let availableModels = ['User', 'UserProfile', 'Post', 'Comment', 'Category', 'Tag', 'File'];
     let rawSchemas = [];
+    let schemaToDelete = null;
 
     function showToast(message, type = 'success') {
       const container = document.getElementById('toast-container');
@@ -779,6 +786,46 @@
       toast.innerHTML = `<span>${type === 'danger' ? '⚠️' : '✅'}</span> <span>${message}</span>`;
       container.appendChild(toast);
       setTimeout(() => toast.remove(), 3500);
+    }
+
+    function openDeleteModal(name) {
+      schemaToDelete = name;
+      document.getElementById('delete-modal-msg').innerText = `Delete schema '${name}.graphql'?`;
+      document.getElementById('delete-modal').style.display = 'flex';
+      document.getElementById('btn-confirm-delete').onclick = () => executeDeleteSchema(name);
+    }
+
+    function closeDeleteModal() {
+      schemaToDelete = null;
+      document.getElementById('delete-modal').style.display = 'none';
+    }
+
+    async function executeDeleteSchema(name) {
+      closeDeleteModal();
+      try {
+        const res = await fetch(`/api/studio/schemas/${encodeURIComponent(name)}`, { method: 'DELETE' });
+        const result = await res.json();
+        if (result.success) {
+          showToast(`Deleted ${name}.graphql`, 'danger');
+          if (document.getElementById('model-name').value === name) {
+            resetModelBuilder();
+          }
+          await refreshSchemasList();
+        } else {
+          showToast(result.error || 'Failed to delete schema', 'danger');
+        }
+      } catch (err) {
+        showToast('Error deleting schema: ' + err.message, 'danger');
+      }
+    }
+
+    function deleteSchemaByName(name) {
+      openDeleteModal(name);
+    }
+
+    function deleteActiveSchema() {
+      const name = document.getElementById('model-name').value.trim();
+      if (name) openDeleteModal(name);
     }
 
     function switchTab(tabId) {
@@ -863,7 +910,6 @@
 
       let fieldsSDL = '  id: ID!\n';
 
-      // Standard fields
       const standardRows = document.querySelectorAll('#fields-container .field-row:not(.relation-row)');
       standardRows.forEach(row => {
         const name = row.querySelector('input[type="text"]').value.trim();
@@ -879,7 +925,6 @@
         }
       });
 
-      // Relational fields
       const relationRows = document.querySelectorAll('#fields-container .relation-row');
       relationRows.forEach(row => {
         const inputs = row.querySelectorAll('input[type="text"]');
@@ -930,7 +975,7 @@
       const container = document.getElementById('schemas-list');
       container.innerHTML = '';
 
-      if (schemas.length) {
+      if (schemas && schemas.length) {
         schemas.forEach(s => {
           const div = document.createElement('div');
           div.className = 'schema-item';
@@ -968,31 +1013,6 @@
         document.getElementById('btn-delete-active-schema').style.display = 'inline-flex';
         showToast(`Loaded ${s.name} into editor`);
       }
-    }
-
-    async function deleteSchemaByName(name) {
-      if (!confirm(`Are you sure you want to delete schema '${name}.graphql'?`)) return;
-
-      try {
-        const res = await fetch(`/api/studio/schemas/${name}`, { method: 'DELETE' });
-        const result = await res.json();
-        if (result.success) {
-          showToast(`Deleted ${name}.graphql`, 'danger');
-          if (document.getElementById('model-name').value === name) {
-            resetModelBuilder();
-          }
-          refreshSchemasList();
-        } else {
-          showToast(result.error, 'danger');
-        }
-      } catch (err) {
-        showToast('Failed to delete schema', 'danger');
-      }
-    }
-
-    function deleteActiveSchema() {
-      const name = document.getElementById('model-name').value.trim();
-      if (name) deleteSchemaByName(name);
     }
 
     async function saveCurrentSchema() {

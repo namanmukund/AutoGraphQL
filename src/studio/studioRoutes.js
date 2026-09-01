@@ -55,18 +55,55 @@ router.post('/api/studio/schemas', (req, res) => {
   }
 });
 
+const findSchemaFile = (name) => {
+  const schemasDir = path.resolve(process.cwd(), 'schemas');
+  if (!fs.existsSync(schemasDir)) return null;
+
+  const baseName = name.replace(/\.(graphql|gql)$/i, '').replace(/[^a-zA-Z0-9_-]/g, '');
+  const directPaths = [
+    path.join(schemasDir, `${baseName}.graphql`),
+    path.join(schemasDir, `${baseName}.gql`),
+    path.join(schemasDir, name),
+  ];
+
+  for (let i = 0; i < directPaths.length; i += 1) {
+    const p = directPaths[i];
+    if (fs.existsSync(p) && fs.statSync(p).isFile()) return p;
+  }
+
+  // Recursive search in schemas/
+  const searchRecursive = (dir) => {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (let i = 0; i < entries.length; i += 1) {
+      const entry = entries[i];
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        const found = searchRecursive(fullPath);
+        if (found) return found;
+      } else if (
+        entry.isFile()
+        && (entry.name === `${baseName}.graphql` || entry.name === `${baseName}.gql` || entry.name === name)
+      ) {
+        return fullPath;
+      }
+    }
+    return null;
+  };
+
+  return searchRecursive(schemasDir);
+};
+
 // 4. DELETE /api/studio/schemas/:name - Delete a schema file
 router.delete('/api/studio/schemas/:name', (req, res) => {
   try {
     const { name } = req.params;
-    const cleanName = name.replace(/[^a-zA-Z0-9_-]/g, '');
-    const filePath = path.join(process.cwd(), 'schemas', `${cleanName}.graphql`);
+    const targetPath = findSchemaFile(name);
 
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-      res.json({ success: true, message: `Schema '${cleanName}.graphql' deleted successfully` });
+    if (targetPath && fs.existsSync(targetPath)) {
+      fs.unlinkSync(targetPath);
+      res.json({ success: true, message: `Schema '${path.basename(targetPath)}' deleted successfully` });
     } else {
-      res.status(404).json({ success: false, error: `Schema '${cleanName}.graphql' not found` });
+      res.status(404).json({ success: false, error: `Schema '${name}' not found` });
     }
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
