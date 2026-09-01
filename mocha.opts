@@ -3,3 +3,4 @@
 --reporter spec
 --compilers js:@babel/register
 --timeout 4000
+--exit

@@ -18,6 +18,9 @@ import redis from './redis';
 import pubsub from './pubsub';
 import { ALLOWED_HEADERS, TBA } from '../constants';
 import getAdditionalContextData from '../utils/getAdditionalContextData';
+import { createDataLoaders } from './dataloader';
+import { createDepthLimitRule, createComplexityLimitRule } from './autoGenerate/graphql/validation/rules';
+import db from './db';
 
 const http = require('http');
 
@@ -30,7 +33,83 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.get('/health', (req, res) => res.status(200).json({ status: 'ok', time: new Date() }));
+// Kubernetes Liveness & Readiness Probes
+app.get(['/health/live', '/live', '/healthz'], (req, res) => {
+  res.status(200).json({
+    status: 'alive',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
+});
+
+app.get(['/health/ready', '/ready', '/readyz'], async (req, res) => {
+  const checks = {
+    mongodb: 'disconnected',
+    postgres: 'disabled',
+    redis: 'disabled',
+  };
+
+  let isReady = true;
+
+  // MongoDB check
+  if (db && db.mongoose) {
+    if (db.mongoose.readyState === 1) {
+      checks.mongodb = 'connected';
+    } else {
+      checks.mongodb = `not_ready (state: ${db.mongoose.readyState})`;
+      if (process.env.NODE_ENV !== 'test') {
+        isReady = false;
+      }
+    }
+  }
+
+  // PostgreSQL check
+  if (db && db.sequelize) {
+    try {
+      await Promise.race([
+        db.sequelize.authenticate(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000)),
+      ]);
+      checks.postgres = 'connected';
+    } catch (err) {
+      checks.postgres = `error: ${err.message}`;
+    }
+  }
+
+  // Redis check
+  if (process.env.ENABLE_REDIS_CACHE === 'true' && redis) {
+    if (redis.status === 'ready') {
+      checks.redis = 'ready';
+    } else {
+      checks.redis = `status: ${redis.status}`;
+      if (process.env.REDIS_REQUIRED === 'true') {
+        isReady = false;
+      }
+    }
+  }
+
+  const statusCode = isReady ? 200 : 503;
+  return res.status(statusCode).json({
+    status: isReady ? 'ready' : 'unhealthy',
+    checks,
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
+});
+
+app.get('/health', (req, res) => {
+  const mongoReady = db && db.mongoose && db.mongoose.readyState === 1;
+  res.status(200).json({
+    status: 'ok',
+    uptime: process.uptime(),
+    time: new Date().toISOString(),
+    services: {
+      mongodb: mongoReady ? 'connected' : 'disconnected',
+      redis: redis ? redis.status : 'disabled',
+    },
+  });
+});
+
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 app.get('/robots.txt', (req, res) => res.status(204).end());
 
@@ -88,6 +167,7 @@ const socketServer = useSocketServer({
       pubsub,
       parsedASTMap,
       redis,
+      loaders: createDataLoaders(),
       ...additionalContextDataFromHeader,
     };
   },
@@ -103,9 +183,16 @@ const socketServerPlugin = {
   },
 };
 
+const maxDepth = Number(process.env.GRAPHQL_MAX_DEPTH) || 8;
+const maxComplexity = Number(process.env.GRAPHQL_MAX_COMPLEXITY) || 1000;
+
 // using apollo-server
 const server = new ApolloServer({
   schema,
+  validationRules: [
+    createDepthLimitRule(maxDepth, { ignore: ['__schema', '__type'] }),
+    createComplexityLimitRule(maxComplexity, { ignore: ['__schema', '__type'] }),
+  ],
   introspection: process.env.ENABLE_GRAPHQL_INTROSPECTION !== 'false',
   plugins: [
     socketServerPlugin,
@@ -148,6 +235,7 @@ const server = new ApolloServer({
         headers: req.headers,
       });
     }
+    const loaders = createDataLoaders();
     if (connection) {
       // context comes in connection in case WS
       return {
@@ -156,6 +244,7 @@ const server = new ApolloServer({
         parsedASTMap,
         redis,
         res,
+        loaders,
         ...additionalContextDataFromHeader,
       };
     }
@@ -219,6 +308,7 @@ const server = new ApolloServer({
       parsedASTMap,
       redis,
       res,
+      loaders,
       ...additionalContextDataFromHeader,
     };
   },

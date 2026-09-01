@@ -14,7 +14,7 @@
     "syncDBIndexes": "cross-env BABEL_ENV=ssr babel-node scripts/syncDBIndexes",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "test": "cross-env APPLICATION=core NODE_ENV=test PORT=3000 mocha ./test --timeout 5000 --recursive --require @babel/register"
+    "test": "cross-env APPLICATION=core NODE_ENV=test PORT=3000 mocha ./test --timeout 5000 --recursive --require @babel/register --exit"
   },
   "dependencies": {
     "@pdf-lib/fontkit": "^1.1.1",

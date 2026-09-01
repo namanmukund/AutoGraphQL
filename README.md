@@ -26,6 +26,7 @@
 - [🔍 Advanced Filtering & Operator Engine](#-advanced-filtering--operator-engine)
 - [🔐 Authentication & Token Lifecycle](#-authentication--token-lifecycle)
 - [💾 Multi-Database Architecture (MongoDB & PostgreSQL)](#-multi-database-architecture-mongodb--postgresql)
+- [🛡️ Production Reliability & Safeguards](#️-production-reliability--safeguards)
 - [🧪 Automated Test Suite (`npm test`)](#-automated-test-suite-npm-test)
 - [🔌 Lifecycle Hooks & Event Bus (Birdwatch)](#-lifecycle-hooks--event-bus-birdwatch)
 - [📁 Project Directory Structure](#-project-directory-structure)
@@ -40,13 +41,16 @@
 | 🚀 **Pure Schema-Driven (AST)** | Define `.graphql` or `.js` SDL types with `@model` and the AST compiler automatically generates GraphQL queries, mutations, subscriptions, inputs, and resolvers. |
 | 🗄️ **Multi-Database Models** | Dynamic **MongoDB (Mongoose)** and **PostgreSQL (Sequelize)** model compilation with automatic index sync and timestamps (`createdAt`, `updatedAt`). |
 | 🔗 **Relational Connectors** | Bidirectional (1-to-1, 1-to-N, N-to-N) and OneWay relation joins with automatic connector mutations (`ConnectId`, `ConnectIds`, `addTo<Relation>`, `removeFrom<Relation>`). |
+| ⚡ **DataLoader & N+1 Prevention** | Request-scoped DataLoader batching merges relational lookups into single database queries with in-memory tick memoization. |
+| 🛡️ **Query Depth & Complexity Protection** | AST visitor validation rules reject runaway, deeply-nested, or computationally prohibitive queries before resolver execution. |
+| 🩺 **Kubernetes Health Probes** | Cloud-native `/health/live` (liveness) and `/health/ready` (readiness verifying MongoDB, Postgres, and Redis connections) endpoints. |
 | 🔍 **Powerful Filter Engine** | Nested boolean logic (`and`, `or`), string matchers (`contains`, `startsWith`, `endsWith`), numerical/date ranges (`gt`, `gte`, `lt`, `lte`), and array operators. |
 | ⚡ **Real-Time Subscriptions** | Instant WebSocket subscriptions over `subscriptions-transport-ws` and `graphql-ws` with optional Redis PubSub clustering. |
 | 🛡️ **Declarative RBAC & Directives** | Enforce field and model level permissions with `@allow` / `@deny` rules across standard framework roles (`ADMIN`, `USER`, `GUEST`). |
 | 🔑 **Built-in JWT Authentication** | Signed user tokens, application tokens, static service tokens, configurable expiry, and token blacklisting. |
 | 📁 **Multipart File Management** | Built-in `File` model with MIME validation, AWS S3 storage support, and CloudFront CDN asset signing. |
 | 🎮 **Interactive GraphQL Playground** | Embedded dark-mode GraphQL IDE available out of the box at `http://localhost:3000/graphql/core`. |
-| 🧪 **Comprehensive Test Suite** | Pre-configured Mocha/Babel test suite validating AST generation, models, auth, and query execution. |
+| 🧪 **Comprehensive Test Suite** | Pre-configured Mocha/Babel test suite validating AST generation, models, auth, execution, and reliability safeguards. |
 
 ---
 
@@ -441,6 +445,32 @@ type SalesRecord @model(database: postgres) {
 
 ---
 
+## 🛡️ Production Reliability & Safeguards
+
+AutoGraphQL includes built-in protection against common GraphQL production vulnerabilities and bottlenecks:
+
+### 1. Request-Scoped DataLoader (N+1 Query Resolution)
+When resolving nested relations (e.g., `users { profile { ... } }`), AutoGraphQL instantiates request-scoped DataLoaders inside the Apollo and WebSocket execution context. Sibling lookups are batched into a single `$in` query:
+```javascript
+// Automatically batches individual lookups:
+// Model.find({ id: { $in: ['id1', 'id2', 'id3', ...] } })
+```
+- **Memoization**: Duplicate IDs within the same request tick are deduplicated automatically.
+- **Isolation**: Fresh loaders are instantiated per request, preventing cross-tenant or cross-request memory leaks.
+
+### 2. Query Depth & Complexity Limiting
+Protect production servers from denial-of-service (DoS) and runaway recursive queries before resolvers touch the database:
+- **Depth Limiting**: Enforces a maximum selection depth (configured via `GRAPHQL_MAX_DEPTH`, default `8`). Introspection queries (`__schema`, `__type`) are automatically exempted.
+- **Complexity / Cost Analysis**: Computes computational cost based on scalar fields, relations, and pagination multipliers (`first`, `last`). Rejects queries exceeding `GRAPHQL_MAX_COMPLEXITY` (default `1000`).
+
+### 3. Kubernetes Health & Readiness Probes
+Cloud-native health endpoints designed for Kubernetes, ECS, or Docker Swarm:
+- `GET /health/live` (or `/live`, `/healthz`): Liveness probe verifying process responsiveness and uptime.
+- `GET /health/ready` (or `/ready`, `/readyz`): Readiness probe validating active connections to MongoDB (`readyState === 1`), PostgreSQL, and Redis. Returns HTTP 503 if critical dependencies are down.
+- `GET /health`: Detailed service health breakdown with backward compatibility.
+
+---
+
 ## 🧪 Automated Test Suite (`npm test`)
 
 AutoGraphQL includes a complete automated test suite verifying all core features using `User` and `UserProfile` as baseline models:
@@ -454,9 +484,10 @@ npm test
 - ✅ **Dynamic Database Models**: Validates Mongoose schema compilation, path mappings, and auto-timestamps.
 - ✅ **Authentication & Token Lifecycle**: Validates JWT creation, expiry calculation, tamper resistance, and RBAC roles.
 - ✅ **Execution Engine**: Validates AST introspection and end-to-end `graphql()` query execution.
+- ✅ **Phase 1 Reliability & Performance**: Validates request-scoped DataLoader batching, ID deduplication, depth limiting, complexity limiting, and Kubernetes health probes.
 
 ```
-  22 passing (14ms)
+  34 passing (21ms)
 ```
 
 ---
