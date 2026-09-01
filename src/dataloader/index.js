@@ -22,7 +22,10 @@ export const createDataLoaders = (models = defaultModels) => {
     if (loaders[modelName]) return loaders[modelName];
 
     const Model = models && models[modelName];
-    if (!Model || typeof Model.find !== 'function') {
+    const isMongoose = Model && typeof Model.find === 'function';
+    const isSequelize = Model && (Model.isPgModel || typeof Model.findAll === 'function');
+
+    if (!Model || (!isMongoose && !isSequelize)) {
       return null;
     }
 
@@ -31,8 +34,16 @@ export const createDataLoaders = (models = defaultModels) => {
         if (!ids || ids.length === 0) return [];
         const stringIds = ids.map((id) => String(id));
 
-        // Single batched database query using $in
-        const docs = await Model.find({ id: { $in: stringIds } }).lean().exec();
+        // Single batched database query across Mongoose ($in) or Sequelize (where id in)
+        let docs = [];
+        if (isSequelize) {
+          const records = await Model.findAll({ where: { id: stringIds } });
+          docs = Array.isArray(records)
+            ? records.map((r) => (r && r.toJSON ? r.toJSON() : r))
+            : [];
+        } else {
+          docs = await Model.find({ id: { $in: stringIds } }).lean().exec();
+        }
 
         const docMap = new Map();
         if (Array.isArray(docs)) {
