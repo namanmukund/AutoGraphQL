@@ -18,4 +18,5 @@ main.py
 __pycache__/
 .graphqlconfig
 schema.graphql
+sdk/
 var

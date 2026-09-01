@@ -22,6 +22,7 @@ import { createDataLoaders } from './dataloader';
 import { createDepthLimitRule, createComplexityLimitRule } from './autoGenerate/graphql/validation/rules';
 import db from './db';
 import { startOutboxWorker, stopOutboxWorker } from './birdwatch/outbox/worker';
+import { createPersistedQueryPlugin } from './persistedQueries';
 
 const http = require('http');
 
@@ -198,6 +199,7 @@ const server = new ApolloServer({
   introspection: process.env.ENABLE_GRAPHQL_INTROSPECTION !== 'false',
   plugins: [
     socketServerPlugin,
+    createPersistedQueryPlugin(),
     ApolloServerPluginLandingPageGraphQLPlayground({
       settings: {
         'editor.theme': 'dark',

@@ -28,6 +28,7 @@
 - [💾 Multi-Database Architecture (MongoDB & PostgreSQL)](#-multi-database-architecture-mongodb--postgresql)
 - [🛡️ Production Reliability & Safeguards](#️-production-reliability--safeguards)
 - [⚡ Event-Driven Automation & Webhooks (Birdwatch)](#-event-driven-automation--webhooks-birdwatch)
+- [🛠️ Developer & CI/CD Tooling](#️-developer--cicd-tooling)
 - [🧪 Automated Test Suite (`npm test`)](#-automated-test-suite-npm-test)
 - [📁 Project Directory Structure](#-project-directory-structure)
 - [📄 License](#-license)
@@ -45,6 +46,9 @@
 | 🛡️ **Query Depth & Complexity Protection** | AST visitor validation rules reject runaway, deeply-nested, or computationally prohibitive queries before resolver execution. |
 | 🩺 **Kubernetes Health Probes** | Cloud-native `/health/live` (liveness) and `/health/ready` (readiness verifying MongoDB, Postgres, and Redis connections) endpoints. |
 | 📡 **Transactional Outbox & Webhooks** | Guaranteed event delivery with HMAC-SHA256 signing, exponential backoff retries, and in-process Birdwatch listeners. |
+| 🛡️ **Schema Governance & Diffing** | Automated breaking-change detection in CI/CD pipelines classifying `BREAKING`, `DANGEROUS`, and `SAFE` changes. |
+| 📦 **Automated TypeScript SDK** | One-command compilation of schema AST into strongly-typed TypeScript models, input types, and `AutoGraphQLClient`. |
+| ⚡ **Persisted Queries (APQ) & Safelisting** | Automatic Persisted Queries with SHA256 hashing and optional production safelisting (`PERSISTED_QUERIES_ONLY=true`). |
 | 🔍 **Powerful Filter Engine** | Nested boolean logic (`and`, `or`), string matchers (`contains`, `startsWith`, `endsWith`), numerical/date ranges (`gt`, `gte`, `lt`, `lte`), and array operators. |
 | ⚡ **Real-Time Subscriptions** | Instant WebSocket subscriptions over `subscriptions-transport-ws` and `graphql-ws` with optional Redis PubSub clustering. |
 | 🛡️ **Declarative RBAC & Directives** | Enforce field and model level permissions with `@allow` / `@deny` rules across standard framework roles (`ADMIN`, `USER`, `GUEST`). |
@@ -487,9 +491,10 @@ npm test
 - ✅ **Execution Engine**: Validates AST introspection and end-to-end `graphql()` query execution.
 - ✅ **Phase 1 Reliability & Performance**: Validates request-scoped DataLoader batching, ID deduplication, depth limiting, complexity limiting, and Kubernetes health probes.
 - ✅ **Phase 2 Event-Driven Automation**: Validates mutation event extraction, in-process listener argument mapping, transactional outbox persistence, HMAC-SHA256 signature generation, exponential backoff, and end-to-end HTTP webhook delivery.
+- ✅ **Phase 3 Developer & CI/CD Tooling**: Validates AST schema diffing & breaking-change detection, automated TypeScript client SDK compilation, and Automatic Persisted Queries (APQ) with safelisting.
 
 ```
-  48 passing (35ms)
+  57 passing (41ms)
 ```
 
 ---
@@ -561,6 +566,60 @@ registerWebhook({
 - **Non-Blocking**: User mutations return immediately; events are enqueued to the Outbox.
 - **Reliable Worker**: The background outbox worker polls and delivers events to all registered webhooks.
 - **Exponential Backoff**: If an endpoint returns HTTP 4xx/5xx or encounters network errors, retries are scheduled with exponential delays ($\min(2^{\text{attempt}} \times 1000, 60000)\text{ms}$). Events are marked permanently `FAILED` only after exceeding max attempts (default 5).
+
+---
+
+## 🛠️ Developer & CI/CD Tooling
+
+### 1. Schema Governance & Breaking-Change Linter
+Prevent breaking GraphQL schema changes from reaching production:
+
+```bash
+# 1. Export current executable schema to baseline file
+npm run schema:dump
+
+# 2. Compare current schema against baseline in CI/CD (exits with code 1 on breaking changes)
+npm run schema:diff -- --base schema.graphql
+```
+
+#### Diff Report Formats:
+- `--format console` (default): Colored terminal output for developer CLI workflows.
+- `--format markdown`: GitHub Actions PR comment markdown table.
+- `--format json`: Machine-readable JSON output for automated pipelines.
+
+### 2. Automated TypeScript Client SDK Generator
+Generate a fully type-safe TypeScript client and interfaces directly from your schema AST:
+
+```bash
+npm run codegen:sdk
+```
+
+Outputs `sdk/index.ts` containing:
+- TypeScript interfaces for all `@model` entities (`User`, `UserProfile`, `Post`, etc.).
+- Input types (`CreateUserInput`, `UpdateUserInput`, `UsersFilter`, etc.).
+- `AutoGraphQLClient` with type-safe methods:
+
+```typescript
+import { AutoGraphQLClient } from './sdk';
+
+const client = new AutoGraphQLClient({
+  endpoint: 'http://localhost:3000/graphql/core',
+  token: 'user_jwt_token',
+});
+
+// Type-safe entity queries and mutations
+const user = await client.user.findById('usr_123', 'id name email');
+const users = await client.user.findMany({ name: { contains: 'Alice' } }, 'id name');
+const newUser = await client.user.create({ name: 'Bob', email: 'bob@example.com' }, 'id name');
+const updated = await client.user.update('usr_123', { name: 'Alice Smith' });
+await client.user.delete('usr_123');
+```
+
+### 3. Automatic Persisted Queries (APQ) & Production Safelisting
+Reduce bandwidth and protect production servers from arbitrary large queries:
+
+- **Standard APQ**: Clients send `{ extensions: { persistedQuery: { version: 1, sha256Hash: "<hash>" } } }`. The server caches queries in memory or Redis and resolves hashes instantly.
+- **Production Safelisting (`PERSISTED_QUERIES_ONLY=true`)**: Locks down execution to only pre-approved queries loaded from `PERSISTED_QUERIES_MANIFEST` (e.g. `persisted-queries.json`). Any unregistered arbitrary queries are rejected with `PERSISTED_QUERY_NOT_SUPPORTED`.
 
 ---
 
