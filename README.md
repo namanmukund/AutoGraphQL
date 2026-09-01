@@ -27,8 +27,8 @@
 - [🔐 Authentication & Token Lifecycle](#-authentication--token-lifecycle)
 - [💾 Multi-Database Architecture (MongoDB & PostgreSQL)](#-multi-database-architecture-mongodb--postgresql)
 - [🛡️ Production Reliability & Safeguards](#️-production-reliability--safeguards)
+- [⚡ Event-Driven Automation & Webhooks (Birdwatch)](#-event-driven-automation--webhooks-birdwatch)
 - [🧪 Automated Test Suite (`npm test`)](#-automated-test-suite-npm-test)
-- [🔌 Lifecycle Hooks & Event Bus (Birdwatch)](#-lifecycle-hooks--event-bus-birdwatch)
 - [📁 Project Directory Structure](#-project-directory-structure)
 - [📄 License](#-license)
 
@@ -44,6 +44,7 @@
 | ⚡ **DataLoader & N+1 Prevention** | Request-scoped DataLoader batching merges relational lookups into single database queries with in-memory tick memoization. |
 | 🛡️ **Query Depth & Complexity Protection** | AST visitor validation rules reject runaway, deeply-nested, or computationally prohibitive queries before resolver execution. |
 | 🩺 **Kubernetes Health Probes** | Cloud-native `/health/live` (liveness) and `/health/ready` (readiness verifying MongoDB, Postgres, and Redis connections) endpoints. |
+| 📡 **Transactional Outbox & Webhooks** | Guaranteed event delivery with HMAC-SHA256 signing, exponential backoff retries, and in-process Birdwatch listeners. |
 | 🔍 **Powerful Filter Engine** | Nested boolean logic (`and`, `or`), string matchers (`contains`, `startsWith`, `endsWith`), numerical/date ranges (`gt`, `gte`, `lt`, `lte`), and array operators. |
 | ⚡ **Real-Time Subscriptions** | Instant WebSocket subscriptions over `subscriptions-transport-ws` and `graphql-ws` with optional Redis PubSub clustering. |
 | 🛡️ **Declarative RBAC & Directives** | Enforce field and model level permissions with `@allow` / `@deny` rules across standard framework roles (`ADMIN`, `USER`, `GUEST`). |
@@ -485,17 +486,39 @@ npm test
 - ✅ **Authentication & Token Lifecycle**: Validates JWT creation, expiry calculation, tamper resistance, and RBAC roles.
 - ✅ **Execution Engine**: Validates AST introspection and end-to-end `graphql()` query execution.
 - ✅ **Phase 1 Reliability & Performance**: Validates request-scoped DataLoader batching, ID deduplication, depth limiting, complexity limiting, and Kubernetes health probes.
+- ✅ **Phase 2 Event-Driven Automation**: Validates mutation event extraction, in-process listener argument mapping, transactional outbox persistence, HMAC-SHA256 signature generation, exponential backoff, and end-to-end HTTP webhook delivery.
 
 ```
-  34 passing (21ms)
+  48 passing (35ms)
 ```
 
 ---
 
-## 🔌 Lifecycle Hooks & Event Bus (Birdwatch)
+## ⚡ Event-Driven Automation & Webhooks (Birdwatch)
 
-Attach custom asynchronous side-effects, event listeners, and business logic before and after mutations execute:
+AutoGraphQL features a production-grade, event-driven engine combining **in-process listeners**, a **Transactional Outbox**, and an **authenticated HTTP Webhook Dispatcher**.
 
+### 1. Standard Event Schema
+Every successful mutation produces a standardized event payload:
+```json
+{
+  "id": "evt_clx123abc456",
+  "event": "addUser",
+  "operation": "CREATE",
+  "entityName": "User",
+  "data": { "id": "u_1", "name": "Alice", "email": "alice@example.com" },
+  "params": { "input": { "name": "Alice" } },
+  "metadata": {
+    "timestamp": "2026-09-01T10:00:00.000Z",
+    "appName": "admin-portal",
+    "userId": "usr_999",
+    "userRole": "ADMIN"
+  }
+}
+```
+
+### 2. In-Process Mutation Listeners (`birdwatchConfig.js`)
+Trigger asynchronous in-process tasks, analytics, or background side-effects:
 ```javascript
 // src/birdwatch/birdwatchConfig.js
 const birdWatch = [
@@ -503,15 +526,41 @@ const birdWatch = [
     on: ['addUser', 'addPost'],
     do: [
       {
-        action: async ({ record, operation, context }) => {
-          // Trigger email notification, analytics tracking, webhook, etc.
-          console.log(`Event triggered for ${operation}:`, record.id);
+        action: async ({ record, operation, context, event }) => {
+          // Send welcome email, trigger notification, or sync to CRM
+          console.log(`Event triggered for ${operation} on ${record.id}`);
         },
       },
     ],
   },
 ];
 ```
+
+### 3. Outgoing Webhooks & HMAC-SHA256 Signing
+Subscribe external microservices, Zapier, Make, or custom HTTP endpoints to mutation events:
+```javascript
+import { registerWebhook } from './src/birdwatch';
+
+registerWebhook({
+  url: 'https://api.external-service.com/webhooks/autographql',
+  events: ['addUser', 'update*'], // Exact names or wildcard patterns
+  secret: process.env.AUTOGRAPHQL_WEBHOOK_SECRET,
+  headers: {
+    Authorization: 'Bearer external-api-token',
+  },
+});
+```
+
+#### Security Headers Sent to Webhooks:
+- `X-AutoGraphQL-Event`: The name of the mutation event (e.g. `addUser`).
+- `X-AutoGraphQL-Delivery`: Unique delivery attempt ID (`del_...`).
+- `X-AutoGraphQL-Signature`: HMAC-SHA256 signature (`sha256=<hex>`) calculated over the raw JSON payload using the configured secret.
+- `X-AutoGraphQL-Timestamp`: ISO timestamp to guard against replay attacks.
+
+### 4. Transactional Outbox & Exponential Backoff
+- **Non-Blocking**: User mutations return immediately; events are enqueued to the Outbox.
+- **Reliable Worker**: The background outbox worker polls and delivers events to all registered webhooks.
+- **Exponential Backoff**: If an endpoint returns HTTP 4xx/5xx or encounters network errors, retries are scheduled with exponential delays ($\min(2^{\text{attempt}} \times 1000, 60000)\text{ms}$). Events are marked permanently `FAILED` only after exceeding max attempts (default 5).
 
 ---
 
