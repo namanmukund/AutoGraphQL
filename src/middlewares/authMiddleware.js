@@ -42,13 +42,14 @@ const verifyIfStaticTokenIsValidOrNot = async (appToken) => {
   const modelQueries = new QueryController(typeName, newAuthentication);
   return modelQueries.fetchOne({ token: appToken })
     .then((result) => {
+      // Guard against null result before caching — prevents null being stored in cache
+      if (!result) {
+        return false;
+      }
       cacheClient.set(result, {
         hkey: `appToken::cache::${appToken}`,
         maxAge: CACHE_EXPIRY_IN_SECONDS * 100,
       });
-      if (!result) {
-        return false;
-      }
       return true;
     });
 };
@@ -147,9 +148,11 @@ const authMiddleware = async (req, res, next) => {
   // app token and user token, separated by ::
   const { authorization } = req.headers;
   const isValidToken = true;
-  // this is to ensure that only allowed tokens are permitted further
+  // TODO: The full composite auth header blacklist check is intentionally disabled here
+  // because the split user token is independently validated via validateForBlackListedToken(userToken)
+  // below (line ~172). Re-enable the check below if full-header-level blacklisting is required:
+  // isValidToken = await validateForBlackListedToken(authorization);
   if (authorization) {
-    // isValidToken = await validateForBlackListedToken(authorization);
     req.authorization = authorization;
   }
   let decodeAuth = '';

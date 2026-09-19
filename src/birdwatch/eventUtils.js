@@ -26,7 +26,7 @@ export const extractOperationAndEntity = (mutationName = '') => {
     };
   }
 
-  if (mutationName.startsWith('addUser') || mutationName.startsWith('add')) {
+  if (mutationName.startsWith('add')) {
     return {
       operation: 'CREATE',
       entityName: mutationName.slice(3) || 'Entity',

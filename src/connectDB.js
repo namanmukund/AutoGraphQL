@@ -28,16 +28,22 @@ if (sequelize) {
 }
 
 // 2. Initialize MongoDB connection with auto-reconnection
+const MAX_RECONNECT_ATTEMPTS = 10;
 let dbReconnectCount = 1;
 if (mongoose) {
   mongoose.on('error', (err) => {
     log(`Failed to connect to MongoDB: ${err.message || err}`, 'error');
     if (err.message && err.message.match(/failed to connect to server .* on first connect/)) {
+      if (dbReconnectCount >= MAX_RECONNECT_ATTEMPTS) {
+        log(`MongoDB reconnect attempts exhausted after ${MAX_RECONNECT_ATTEMPTS} retries. Giving up.`, 'error');
+        return;
+      }
+      const backoffMs = Math.min((2 ** dbReconnectCount) * 1000, 30000);
       setTimeout(() => {
-        log(`Retry count ${dbReconnectCount}. Reconnecting to MongoDB...`, 'status');
+        log(`Retry ${dbReconnectCount}/${MAX_RECONNECT_ATTEMPTS}. Reconnecting to MongoDB in ${backoffMs}ms...`, 'status');
         dbReconnectCount += 1;
         mongoose.openUri(dbConfig.dbUri);
-      }, 5000);
+      }, backoffMs);
     }
   });
 

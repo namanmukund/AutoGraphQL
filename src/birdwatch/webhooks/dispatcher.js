@@ -10,10 +10,16 @@ import { log } from '../../../utils';
  * @param {string} secret - Webhook secret key
  * @returns {string} Hex-encoded HMAC signature
  */
-export const computeSignature = (payloadString, secret) => crypto
-  .createHmac('sha256', secret || 'default_secret')
-  .update(payloadString)
-  .digest('hex');
+export const computeSignature = (payloadString, secret) => {
+  const signingSecret = secret || 'default_secret';
+  if (signingSecret === 'default_secret' && process.env.NODE_ENV !== 'test') {
+    log('WARNING: Webhook is being signed with the insecure default_secret. Set AUTOGRAPHQL_WEBHOOK_SECRET in your environment.', 'error');
+  }
+  return crypto
+    .createHmac('sha256', signingSecret)
+    .update(payloadString)
+    .digest('hex');
+};
 
 /**
  * Calculates exponential backoff delay in milliseconds.
@@ -51,12 +57,16 @@ export const dispatchWebhook = async (webhook, eventPayload, timeoutMs = 5000) =
     ...(webhook.headers || {}),
   };
 
+  // Use AbortController for reliable timeouts (node-fetch v3 dropped the non-standard `timeout` option)
+  const controller = new AbortController();
+  const timeoutHandle = setTimeout(() => controller.abort(), timeoutMs);
+
   try {
     const response = await fetch(webhook.url, {
       method: 'POST',
       headers: requestHeaders,
       body: bodyString,
-      timeout: timeoutMs,
+      signal: controller.signal,
     });
 
     if (response.ok) {
@@ -74,11 +84,16 @@ export const dispatchWebhook = async (webhook, eventPayload, timeoutMs = 5000) =
       error: `Webhook returned HTTP ${response.status}: ${errorBody.slice(0, 200)}`,
     };
   } catch (err) {
+    const isTimeout = err.name === 'AbortError';
     return {
       success: false,
       statusCode: null,
-      error: `Network/connection error: ${err.message}`,
+      error: isTimeout
+        ? `Webhook timed out after ${timeoutMs}ms`
+        : `Network/connection error: ${err.message}`,
     };
+  } finally {
+    clearTimeout(timeoutHandle);
   }
 };
 

@@ -105,18 +105,20 @@ export const birdwatch = async (input, mutationName, context = {}, params = {}) 
 
   // 1. Process in-process listeners from birdwatchConfig
   if (Array.isArray(birdWatchConfig)) {
-    birdWatchConfig.forEach((listener) => {
+    for (const listener of birdWatchConfig) {
       const isSubscribed = Array.isArray(listener.on)
         && listener.on.some((pattern) => matchesEventPattern(pattern, mutationName));
 
       if (isSubscribed && Array.isArray(listener.do)) {
-        listener.do.forEach(async (task) => {
+        // Use for...of so each async task is properly awaited and errors are caught
+        for (const task of listener.do) {
           try {
             const { fields: taskFields, action, ...rest } = task;
             const extracted = getParameterValues(taskFields, input, params, context);
             const actionArgs = getActionArgument(extracted, taskFields);
 
             if (typeof action === 'function') {
+              // eslint-disable-next-line no-await-in-loop
               await action({
                 ...actionArgs,
                 event: eventPayload,
@@ -130,9 +132,9 @@ export const birdwatch = async (input, mutationName, context = {}, params = {}) 
           } catch (err) {
             log(`Error in Birdwatch in-process listener for "${mutationName}": ${err.message}`, 'error');
           }
-        });
+        }
       }
-    });
+    }
   }
 
   // 2. Enqueue event into Transactional Outbox for webhooks
