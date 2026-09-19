@@ -11,7 +11,13 @@ import { generateTypeScriptSDK } from '../codegen/sdkGenerator';
 import schema from '../graphql';
 import authParams from '../../config/authParams';
 
+import dataRoutes from './api/dataRoutes';
+import telemetryRoutes from './api/telemetryRoutes';
+
 const router = express.Router();
+
+router.use(dataRoutes);
+router.use(telemetryRoutes);
 
 // 1. Serve Studio Single-Page Application
 router.get(['/studio', '/console'], (req, res) => {

@@ -1,0 +1,12 @@
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+type Payment @model {
+  amount: Float!
+  status: PaymentStatus!
+  referenceCode: String @unique @trim
+}
