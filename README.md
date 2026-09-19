@@ -20,6 +20,7 @@ Watch the complete visual explainer video for an overview of AutoGraphQL, its ar
 
 - [📺 Video Overview & Architecture Walkthrough](#-video-overview--architecture-walkthrough)
 - [🌟 Core Features Overview](#-core-features-overview)
+- [🏆 Why AutoGraphQL? Competitor Comparison](#-why-autographql-competitor-comparison)
 - [📦 Starter Template & Reference Schema (User & UserProfile)](#-starter-template--reference-schema-user--userprofile)
 - [🎯 Real-World Use Cases](#-real-world-use-cases)
   - [1. Headless CMS & Content Publishing](#1-headless-cms--content-publishing)
@@ -73,6 +74,26 @@ relational lookups into single database queries with in-memory tick memoization.
 | 📁 **Multipart File Management** | Built-in `File` model with MIME validation, AWS S3 storage support, and CloudFront CDN asset signing. |
 | 🎮 **Interactive GraphQL Playground** | Embedded dark-mode GraphQL IDE available out of the box at `http://localhost:3000/graphql/core`. |
 | 🧪 **Comprehensive Test Suite** | Pre-configured Mocha/Babel test suite validating AST generation, models, auth, execution, and reliability safeguards. |
+
+---
+
+## 🏆 Why AutoGraphQL? Competitor Comparison
+
+> 📊 **Interactive Slide Deck**: Open **[`http://localhost:3000/slides`](http://localhost:3000/slides)** for the executive 16:9 presentation slide deck!  
+> 📖 **Full Analysis**: Read the detailed technical breakdown in **[`docs/competitor-analysis.md`](docs/competitor-analysis.md)**.
+
+| Capability | ⚡ AutoGraphQL | 🐘 Hasura | 💎 Prisma | 📜 PostGraphile | 🚀 Strapi |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Architecture Core** | **AST-Driven Engine** | Haskell Proxy | ORM Layer Only | SQL-to-GQL Proxy | Headless CMS |
+| **Runtime Environment** | **100% Native Node.js** | Haskell / Go | Node.js / Rust | Node.js | Node.js |
+| **Multi-Database Polyglot** | ✅ **Native Mongo + Postgres** | ⚠️ SQL-first (Mongo weak) | ⚠️ ORM only, no API | ❌ Postgres only | ⚠️ SQL-first |
+| **Schema-First Workflow** | ✅ **Pure GraphQL SDL** | ❌ DB-first + YAML | ❌ Proprietary DSL | ❌ DB DDL-first | ❌ Admin UI-first |
+| **Resolver Generation** | ✅ **100% Zero-Code** | ✅ Auto-generated | ❌ Manual (Apollo/Pothos) | ✅ Auto-generated | ⚠️ Opinionated CMS |
+| **Visual Studio Platform** | ✅ **Data + ERD + RBAC + Seeder** | ⚠️ Complex Console | ⚠️ Basic Data only | ❌ None (GraphiQL) | ✅ Heavy CMS Admin |
+| **In-Process Lifecycle Hooks** | ✅ **Native JS Pre/Post** | ❌ External HTTP Webhooks | ✅ Native Middleware | ⚠️ SQL Functions | ✅ Lifecycle Hooks |
+| **Row-Level Security (RLS)** | ✅ **Directives (`@tenantScoped`)** | ⚠️ Complex Permissions DSL | ❌ Manual Query Filters | ⚠️ Postgres RLS | ⚠️ Plugin-based |
+| **Transactional Outbox** | ✅ **Built-in Birdwatch + HMAC** | ⚠️ SQL Triggers | ❌ Needs Kafka/Debezium | ❌ External triggers | ⚠️ Basic Webhooks |
+| **Total Cost of Ownership (TCO)** | 🟢 **100% Free & Open Source** | 🔴 Expensive Enterprise Tier | 🟢 Open-source (High Dev Cost) | 🟢 Free & Open Source | 🟡 Paid Enterprise Tiers |
 
 ---
 

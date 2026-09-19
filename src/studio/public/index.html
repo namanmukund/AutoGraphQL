@@ -885,6 +885,9 @@
       <button class="btn btn-secondary" onclick="exportSchemaSDL()">
         📄 Dump SDL
       </button>
+      <a href="/slides" target="_blank" class="btn btn-secondary" title="View Competitor Analysis Slide Deck" style="border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.08); color: #34d399;">
+        🏆 Why AutoGraphQL?
+      </a>
       <a href="/graphql/core" target="_blank" class="btn btn-secondary">
         Playground ↗
       </a>
@@ -3247,7 +3250,8 @@ export const preHook = async (input) => {
         { title: 'Export TypeScript SDK', icon: '📦', action: () => exportTypeScriptSDK() },
         { title: 'Dump GraphQL SDL', icon: '📄', action: () => exportSchemaSDL() },
         { title: 'Auto-Layout ERD Canvas', icon: '✨', action: () => { switchTab('tab-erd'); loadERDDiagram(); } },
-        { title: 'Clear Server Logs', icon: '🧹', action: () => { switchTab('tab-telemetry'); clearLogConsole(); } }
+        { title: 'Clear Server Logs', icon: '🧹', action: () => { switchTab('tab-telemetry'); clearLogConsole(); } },
+        { title: '🏆 View Competitor Analysis Slide (Hasura, Prisma, Strapi)', icon: '🏆', action: () => window.open('/slides', '_blank') }
       ].filter(a => !q || a.title.toLowerCase().includes(q));
 
       let html = '';
