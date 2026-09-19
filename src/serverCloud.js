@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { log } from '../utils';
 
 /* eslint-disable no-unused-vars */

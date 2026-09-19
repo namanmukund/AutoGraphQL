@@ -20,3 +20,7 @@ __pycache__/
 schema.graphql
 sdk/
 var
+FUTURE_PLAN.md
+FUTURE_ROADMAP.md
+docs/future-plan.md
+docs/future-roadmap.md
