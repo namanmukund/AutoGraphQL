@@ -877,6 +877,34 @@
             </div>
           </div>
 
+          <!-- Custom Enums Manager Section -->
+          <div style="border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <label style="margin: 0; display: flex; align-items: center; gap: 0.35rem;">
+                <span>🏷️</span> Custom GraphQL Enums
+              </label>
+              <button type="button" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.72rem;" onclick="toggleEnumBuilder()">
+                + Create Enum
+              </button>
+            </div>
+            <div id="enum-builder-form" style="display: none; background: rgba(0,0,0,0.3); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 0.75rem;">
+              <div style="display: grid; grid-template-columns: 1.2fr 2fr auto; gap: 0.5rem; align-items: end;">
+                <div>
+                  <label style="font-size: 0.7rem;">Enum Name</label>
+                  <input type="text" id="new-enum-name" placeholder="e.g. OrderStatus, Priority" style="font-size: 0.78rem; padding: 0.35rem;">
+                </div>
+                <div>
+                  <label style="font-size: 0.7rem;">Values (comma-separated)</label>
+                  <input type="text" id="new-enum-values" placeholder="PENDING, PAID, SHIPPED, DELIVERED" style="font-size: 0.78rem; padding: 0.35rem;">
+                </div>
+                <button type="button" class="btn btn-primary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;" onclick="addCustomEnum()">Save Enum</button>
+              </div>
+            </div>
+            <div id="custom-enums-list" style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+              <!-- Enums rendered dynamically -->
+            </div>
+          </div>
+
           <!-- Relational Connector Section -->
           <div style="border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 1rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
@@ -1311,6 +1339,10 @@ query GetUsers {
         if (!data.success) throw new Error(data.error);
 
         allModelsMeta = data.models || [];
+        if (data.enums) {
+          discoveredEnums = Object.keys(data.enums).filter(e => !e.startsWith('Sort') && !e.startsWith('Permission') && !e.startsWith('FileConnected'));
+          refreshAllFieldTypeSelects();
+        }
         const select = document.getElementById('data-model-select');
         select.innerHTML = '';
 
@@ -1967,35 +1999,183 @@ volumes:
     }
 
     /* =========================================================================
-       7. SCHEMA STUDIO & HOOKS CONTROLLER
+       7. SCHEMA STUDIO & HOOKS CONTROLLER (WITH COMPLETE DIRECTIVES & ENUMS)
        ========================================================================= */
-    function addFieldRow(name = '', type = 'String', required = false, unique = false) {
+    let customEnums = [];
+    let discoveredEnums = [
+      'Status', 'UserRole', 'Gender', 'PostStatus', 'CommentStatus', 'FileType'
+    ];
+
+    function toggleEnumBuilder() {
+      const form = document.getElementById('enum-builder-form');
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function addCustomEnum() {
+      const name = document.getElementById('new-enum-name').value.trim();
+      const rawVals = document.getElementById('new-enum-values').value.trim();
+      if (!name) {
+        showToast('Enum name is required', 'danger');
+        return;
+      }
+      const values = rawVals.split(',').map(v => v.trim()).filter(Boolean);
+      if (values.length === 0) {
+        showToast('At least one enum value is required', 'danger');
+        return;
+      }
+
+      customEnums = customEnums.filter(e => e.name !== name);
+      customEnums.push({ name, values });
+      document.getElementById('new-enum-name').value = '';
+      document.getElementById('new-enum-values').value = '';
+      document.getElementById('enum-builder-form').style.display = 'none';
+
+      renderCustomEnumsList();
+      refreshAllFieldTypeSelects();
+      updateSDLPreview();
+      showToast(`Custom Enum '${name}' created! 🏷️`);
+    }
+
+    function removeCustomEnum(name) {
+      customEnums = customEnums.filter(e => e.name !== name);
+      renderCustomEnumsList();
+      refreshAllFieldTypeSelects();
+      updateSDLPreview();
+      showToast(`Removed Enum '${name}'`);
+    }
+
+    function renderCustomEnumsList() {
+      const container = document.getElementById('custom-enums-list');
+      if (!container) return;
+      if (customEnums.length === 0) {
+        container.innerHTML = '<span style="color: var(--text-dim); font-size: 0.75rem;">No custom enums yet. Click "+ Create Enum" to add one.</span>';
+        return;
+      }
+      container.innerHTML = customEnums.map(e => `
+        <span class="cell-badge" style="background: rgba(99,102,241,0.2); color: #a5b4fc; padding: 0.25rem 0.6rem; font-size: 0.75rem;">
+          <strong>enum ${e.name}</strong> (${e.values.join(' | ')})
+          <span style="cursor: pointer; margin-left: 0.35rem; color: var(--rose);" onclick="removeCustomEnum('${e.name}')">✕</span>
+        </span>
+      `).join('');
+    }
+
+    function getEnumsOptionsHtml(selectedType = '') {
+      const allEnumNames = Array.from(new Set([...customEnums.map(e => e.name), ...discoveredEnums]));
+      if (allEnumNames.length === 0) return '';
+      return `
+        <optgroup label="GraphQL Enums">
+          ${allEnumNames.map(en => `<option value="${en}" ${selectedType === en ? 'selected' : ''}>🏷️ ${en}</option>`).join('')}
+        </optgroup>
+      `;
+    }
+
+    function refreshAllFieldTypeSelects() {
+      document.querySelectorAll('#fields-container .field-row-card').forEach(card => {
+        const select = card.querySelector('.field-type-select');
+        if (!select) return;
+        const currentVal = select.value;
+        const scalarsGroup = `
+          <optgroup label="Core Scalars">
+            <option value="String" ${currentVal === 'String' ? 'selected' : ''}>String</option>
+            <option value="Int" ${currentVal === 'Int' ? 'selected' : ''}>Int</option>
+            <option value="Float" ${currentVal === 'Float' ? 'selected' : ''}>Float</option>
+            <option value="Boolean" ${currentVal === 'Boolean' ? 'selected' : ''}>Boolean</option>
+            <option value="Date" ${currentVal === 'Date' ? 'selected' : ''}>Date</option>
+            <option value="JSONB" ${currentVal === 'JSONB' ? 'selected' : ''}>JSONB</option>
+            <option value="[String]" ${currentVal === '[String]' ? 'selected' : ''}>[String]</option>
+          </optgroup>
+        `;
+        select.innerHTML = scalarsGroup + getEnumsOptionsHtml(currentVal);
+      });
+    }
+
+    function toggleDirectivesDrawer(rowId) {
+      const drawer = document.getElementById(`drawer_${rowId}`);
+      if (!drawer) return;
+      drawer.style.display = drawer.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function addFieldRow(name = '', type = 'String', required = false, unique = false, directivesConfig = {}) {
       const container = document.getElementById('fields-container');
       const rowId = 'field_' + Math.random().toString(36).substr(2, 9);
       const div = document.createElement('div');
-      div.className = 'field-row';
+      div.className = 'field-row-card';
       div.id = rowId;
-      div.style.display = 'grid';
-      div.style.gridTemplateColumns = '2fr 1.5fr auto auto';
-      div.style.gap = '0.5rem';
-      div.style.alignItems = 'center';
+      div.style.background = 'rgba(0, 0, 0, 0.25)';
+      div.style.border = '1px solid var(--border)';
+      div.style.borderRadius = '8px';
+      div.style.padding = '0.65rem';
+      div.style.marginBottom = '0.4rem';
+
+      const enumsMarkup = getEnumsOptionsHtml(type);
 
       div.innerHTML = `
-        <input type="text" placeholder="field name" value="${name}" oninput="updateSDLPreview()" style="font-size: 0.8rem; padding: 0.4rem;">
-        <select onchange="updateSDLPreview()" style="font-size: 0.8rem; padding: 0.4rem;">
-          <option value="String" ${type === 'String' ? 'selected' : ''}>String</option>
-          <option value="Int" ${type === 'Int' ? 'selected' : ''}>Int</option>
-          <option value="Float" ${type === 'Float' ? 'selected' : ''}>Float</option>
-          <option value="Boolean" ${type === 'Boolean' ? 'selected' : ''}>Boolean</option>
-          <option value="Date" ${type === 'Date' ? 'selected' : ''}>Date</option>
-          <option value="JSONB" ${type === 'JSONB' ? 'selected' : ''}>JSONB</option>
-          <option value="[String]" ${type === '[String]' ? 'selected' : ''}>[String]</option>
-        </select>
-        <div style="display: flex; gap: 0.35rem;">
-          <label style="margin:0; font-size: 0.72rem;"><input type="checkbox" ${required ? 'checked' : ''} onchange="updateSDLPreview()"> Req!</label>
-          <label style="margin:0; font-size: 0.72rem;"><input type="checkbox" ${unique ? 'checked' : ''} onchange="updateSDLPreview()"> @unique</label>
+        <div style="display: grid; grid-template-columns: 2fr 1.6fr auto auto auto; gap: 0.5rem; align-items: center;">
+          <input type="text" class="field-name-input" placeholder="field name" value="${name}" oninput="updateSDLPreview()" style="font-size: 0.8rem; padding: 0.35rem 0.5rem;">
+          <select class="field-type-select" onchange="updateSDLPreview()" style="font-size: 0.8rem; padding: 0.35rem 0.5rem;">
+            <optgroup label="Core Scalars">
+              <option value="String" ${type === 'String' ? 'selected' : ''}>String</option>
+              <option value="Int" ${type === 'Int' ? 'selected' : ''}>Int</option>
+              <option value="Float" ${type === 'Float' ? 'selected' : ''}>Float</option>
+              <option value="Boolean" ${type === 'Boolean' ? 'selected' : ''}>Boolean</option>
+              <option value="Date" ${type === 'Date' ? 'selected' : ''}>Date</option>
+              <option value="JSONB" ${type === 'JSONB' ? 'selected' : ''}>JSONB</option>
+              <option value="[String]" ${type === '[String]' ? 'selected' : ''}>[String]</option>
+            </optgroup>
+            ${enumsMarkup}
+          </select>
+          <label style="margin:0; font-size: 0.72rem; cursor: pointer; display: flex; align-items: center; gap: 0.25rem;">
+            <input type="checkbox" class="field-req-check" ${required ? 'checked' : ''} onchange="updateSDLPreview()"> Req!
+          </label>
+          <button type="button" class="btn btn-secondary btn-directives-toggle" style="padding: 0.25rem 0.55rem; font-size: 0.72rem;" onclick="toggleDirectivesDrawer('${rowId}')">
+            ⚙️ Directives <span class="dir-badge" style="display: none; background: var(--accent); border-radius: 999px; padding: 0.1rem 0.4rem; font-size: 0.62rem; margin-left: 0.2rem;">0</span>
+          </button>
+          <button type="button" class="btn btn-danger" style="padding: 0.25rem 0.45rem; font-size: 0.72rem;" onclick="document.getElementById('${rowId}').remove(); updateSDLPreview();">✕</button>
         </div>
-        <button class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="document.getElementById('${rowId}').remove(); updateSDLPreview();">✕</button>
+
+        <!-- Directives Drawer (Expandable) -->
+        <div class="field-directives-drawer" id="drawer_${rowId}" style="display: none; background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 6px; padding: 0.65rem; margin-top: 0.5rem;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; margin-bottom: 0.5rem;">
+            <div>
+              <label style="font-size: 0.68rem; color: var(--text-muted);">Default Value (@defaultValue)</label>
+              <input type="text" class="dir-default-val" placeholder='e.g. "active", 0, "false"' oninput="updateSDLPreview()" style="font-size: 0.75rem; padding: 0.25rem 0.45rem;">
+            </div>
+            <div>
+              <label style="font-size: 0.68rem; color: var(--text-muted);">Format Regex (@validate)</label>
+              <input type="text" class="dir-validate-regex" placeholder='e.g. ^[A-Z0-9]{8}$' oninput="updateSDLPreview()" style="font-size: 0.75rem; padding: 0.25rem 0.45rem;">
+            </div>
+          </div>
+
+          <div style="margin-bottom: 0.5rem;">
+            <label style="font-size: 0.68rem; color: var(--text-muted);">Numeric Range Constraints (@clamp)</label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+              <input type="number" class="dir-clamp-min" placeholder="Min value (e.g. 0)" oninput="updateSDLPreview()" style="font-size: 0.75rem; padding: 0.25rem 0.45rem;">
+              <input type="number" class="dir-clamp-max" placeholder="Max value (e.g. 1000)" oninput="updateSDLPreview()" style="font-size: 0.75rem; padding: 0.25rem 0.45rem;">
+            </div>
+          </div>
+
+          <div style="margin-bottom: 0.5rem;">
+            <label style="font-size: 0.68rem; color: var(--text-muted);">Text Case & Transformations</label>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              <label style="font-size: 0.72rem; cursor: pointer;"><input type="checkbox" class="dir-trim" onchange="updateSDLPreview()"> @trim</label>
+              <label style="font-size: 0.72rem; cursor: pointer;"><input type="checkbox" class="dir-namecase" onchange="updateSDLPreview()"> @nameCase</label>
+              <label style="font-size: 0.72rem; cursor: pointer;"><input type="checkbox" class="dir-uppercase" onchange="updateSDLPreview()"> @upperCase</label>
+              <label style="font-size: 0.72rem; cursor: pointer;"><input type="checkbox" class="dir-lowercase" onchange="updateSDLPreview()"> @lowerCase</label>
+            </div>
+          </div>
+
+          <div>
+            <label style="font-size: 0.68rem; color: var(--text-muted);">Constraints, Access & Privacy</label>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              <label style="font-size: 0.72rem; cursor: pointer;"><input type="checkbox" class="dir-unique" ${unique ? 'checked' : ''} onchange="updateSDLPreview()"> @unique</label>
+              <label style="font-size: 0.72rem; cursor: pointer;"><input type="checkbox" class="dir-unique-empty" onchange="updateSDLPreview()"> @uniqueOrEmpty</label>
+              <label style="font-size: 0.72rem; cursor: pointer;"><input type="checkbox" class="dir-readonly" onchange="updateSDLPreview()"> @readOnly</label>
+              <label style="font-size: 0.72rem; cursor: pointer;"><input type="checkbox" class="dir-writeonly" onchange="updateSDLPreview()"> @writeOnly</label>
+              <label style="font-size: 0.72rem; cursor: pointer;"><input type="checkbox" class="dir-filteroff" onchange="updateSDLPreview()"> @filterOff</label>
+              <label style="font-size: 0.72rem; cursor: pointer;"><input type="checkbox" class="dir-encrypted" onchange="updateSDLPreview()"> @encrypted</label>
+            </div>
+          </div>
+        </div>
       `;
       container.appendChild(div);
       updateSDLPreview();
@@ -2042,18 +2222,113 @@ volumes:
       if (isTenant) directives += ' @tenantScoped';
       if (isOwner) directives += ' @ownerScoped';
 
-      const fieldRows = document.querySelectorAll('#fields-container .field-row');
+      // 1. Build Custom Enums SDL
+      let enumsSdl = '';
+      if (customEnums.length > 0) {
+        enumsSdl = customEnums.map(e => `enum ${e.name} {\n  ${e.values.join('\n  ')}\n}\n\n`).join('');
+      }
+
+      // 2. Build Fields SDL with all directives
+      const fieldCards = document.querySelectorAll('#fields-container .field-row-card');
       let fieldsSdl = '';
 
-      fieldRows.forEach(row => {
-        const fieldName = row.querySelector('input[type="text"]').value.trim();
-        const fieldType = row.querySelector('select').value;
-        const checkboxes = row.querySelectorAll('input[type="checkbox"]');
-        const req = checkboxes[0].checked ? '!' : '';
-        const uniq = checkboxes[1].checked ? ' @unique' : '';
+      fieldCards.forEach(card => {
+        const fieldNameInput = card.querySelector('.field-name-input');
+        const fieldTypeSelect = card.querySelector('.field-type-select');
+        const reqCheck = card.querySelector('.field-req-check');
+        if (!fieldNameInput || !fieldTypeSelect) return;
+
+        const fieldName = fieldNameInput.value.trim();
+        const fieldType = fieldTypeSelect.value;
+        const req = reqCheck && reqCheck.checked ? '!' : '';
+
+        // Read directives drawer inputs
+        const defaultValInput = card.querySelector('.dir-default-val');
+        const validateRegexInput = card.querySelector('.dir-validate-regex');
+        const clampMinInput = card.querySelector('.dir-clamp-min');
+        const clampMaxInput = card.querySelector('.dir-clamp-max');
+
+        const trimCheck = card.querySelector('.dir-trim');
+        const nameCaseCheck = card.querySelector('.dir-namecase');
+        const upperCaseCheck = card.querySelector('.dir-uppercase');
+        const lowerCaseCheck = card.querySelector('.dir-lowercase');
+
+        const uniqueCheck = card.querySelector('.dir-unique');
+        const uniqueEmptyCheck = card.querySelector('.dir-unique-empty');
+        const readOnlyCheck = card.querySelector('.dir-readonly');
+        const writeOnlyCheck = card.querySelector('.dir-writeonly');
+        const filterOffCheck = card.querySelector('.dir-filteroff');
+        const encryptedCheck = card.querySelector('.dir-encrypted');
+
+        let fieldDirectives = '';
+        let count = 0;
+
+        // Transformations
+        if (trimCheck && trimCheck.checked) { fieldDirectives += ' @trim'; count++; }
+        if (nameCaseCheck && nameCaseCheck.checked) { fieldDirectives += ' @nameCase'; count++; }
+        if (upperCaseCheck && upperCaseCheck.checked) { fieldDirectives += ' @upperCase'; count++; }
+        if (lowerCaseCheck && lowerCaseCheck.checked) { fieldDirectives += ' @lowerCase'; count++; }
+
+        // Constraints
+        if (uniqueCheck && uniqueCheck.checked) { fieldDirectives += ' @unique'; count++; }
+        if (uniqueEmptyCheck && uniqueEmptyCheck.checked) { fieldDirectives += ' @uniqueOrEmpty'; count++; }
+        if (readOnlyCheck && readOnlyCheck.checked) { fieldDirectives += ' @readOnly'; count++; }
+        if (writeOnlyCheck && writeOnlyCheck.checked) { fieldDirectives += ' @writeOnly'; count++; }
+        if (filterOffCheck && filterOffCheck.checked) { fieldDirectives += ' @filterOff'; count++; }
+        if (encryptedCheck && encryptedCheck.checked) { fieldDirectives += ' @encrypted'; count++; }
+
+        // Clamp
+        const minVal = clampMinInput ? clampMinInput.value.trim() : '';
+        const maxVal = clampMaxInput ? clampMaxInput.value.trim() : '';
+        if (minVal !== '' || maxVal !== '') {
+          const args = [];
+          if (minVal !== '') args.push(`min: ${minVal}`);
+          if (maxVal !== '') args.push(`max: ${maxVal}`);
+          fieldDirectives += ` @clamp(${args.join(', ')})`;
+          count++;
+        }
+
+        // Validate
+        const regexVal = validateRegexInput ? validateRegexInput.value.trim() : '';
+        if (regexVal !== '') {
+          fieldDirectives += ` @validate(regex: "${regexVal}")`;
+          count++;
+        }
+
+        // Default Value
+        const defVal = defaultValInput ? defaultValInput.value.trim() : '';
+        if (defVal !== '') {
+          const cleanDef = (defVal.startsWith('"') || !isNaN(defVal) || defVal === 'true' || defVal === 'false')
+            ? defVal
+            : `"${defVal}"`;
+          fieldDirectives += ` @defaultValue(value: ${cleanDef})`;
+          count++;
+        }
+
+        // Update badge count
+        const badge = card.querySelector('.dir-badge');
+        if (badge) {
+          badge.innerText = count;
+          badge.style.display = count > 0 ? 'inline-block' : 'none';
+        }
 
         if (fieldName) {
-          fieldsSdl += `  ${fieldName}: ${fieldType}${req}${uniq}\n`;
+          fieldsSdl += `  ${fieldName}: ${fieldType}${req}${fieldDirectives}\n`;
+        }
+      });
+
+      // 3. Build Relations SDL
+      const relRows = document.querySelectorAll('#relations-inputs-container > div');
+      relRows.forEach(row => {
+        const inputs = row.querySelectorAll('input, select');
+        if (inputs.length >= 3) {
+          const fieldName = inputs[0].value.trim();
+          const target = inputs[1].value;
+          const card = inputs[2].value;
+          if (fieldName) {
+            const relType = card === '1:N' ? `[${target}]` : target;
+            fieldsSdl += `  ${fieldName}: ${relType} @relation(name: "${name}${target}")\n`;
+          }
         }
       });
 
@@ -2061,7 +2336,7 @@ volumes:
         fieldsSdl = '  name: String!\n';
       }
 
-      const sdl = `type ${name} ${directives} {\n${fieldsSdl}}`;
+      const sdl = `${enumsSdl}type ${name} ${directives} {\n${fieldsSdl}}`;
       document.getElementById('schema-sdl-editor').value = sdl;
       document.getElementById('sdl-line-numbers').innerText = sdl.split('\n').map((_, i) => i + 1).join('\n');
     }
@@ -2073,8 +2348,10 @@ volumes:
       document.getElementById('dir-history').checked = false;
       document.getElementById('dir-tenant').checked = false;
       document.getElementById('dir-owner').checked = false;
+      customEnums = [];
+      renderCustomEnumsList();
       addFieldRow('title', 'String', true, false);
-      addFieldRow('status', 'String', true, false);
+      addFieldRow('price', 'Float', true, false);
       updateSDLPreview();
     }
 
