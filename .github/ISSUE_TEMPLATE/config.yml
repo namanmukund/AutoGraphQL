@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 GitHub Discussions & Questions
+    url: https://github.com/namanmukund/AutoGraphQL/discussions
+    about: Ask questions, share architectures, and connect with the AutoGraphQL community.
+  - name: 📖 AutoGraphQL Documentation
+    url: https://github.com/namanmukund/AutoGraphQL#readme
+    about: Read the official setup, directives reference, and Studio guides.
+  - name: 🛡️ Security Vulnerability Reporting
+    url: https://github.com/namanmukund/AutoGraphQL/security/advisories
+    about: Privately report a security vulnerability to project maintainers.

@@ -1,0 +1,84 @@
+name: "🐛 Bug Report"
+description: File a bug report to help us improve AutoGraphQL
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report an issue with AutoGraphQL!
+        Please fill out the form below as completely as possible.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+      placeholder: Describe what happened unexpectedly...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Detailed steps to reproduce the issue.
+      placeholder: |
+        1. Define schema in `schemas/Course.graphql`: `...`
+        2. Execute query `query { courses { ... } }`
+        3. See error ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: A clear and concise description of what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: schema
+    attributes:
+      label: GraphQL Schema Definition or Query (if applicable)
+      description: Provide the relevant SDL or mutation / query payload.
+      render: graphql
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Server Logs / Stack Trace
+      description: Paste any terminal logs, stack traces, or Studio console errors.
+      render: shell
+
+  - type: dropdown
+    id: dialect
+    attributes:
+      label: Database Dialect
+      options:
+        - MongoDB (Mongoose)
+        - PostgreSQL (Sequelize)
+        - Both / In-Memory
+        - Other / N/A
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment Info
+      description: Node.js version, OS, AutoGraphQL version (e.g. Node 18.20.8 on macOS / Ubuntu 22.04).
+      placeholder: Node 18.20.8, macOS Sonoma, AutoGraphQL v1.0.0
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checkboxes
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues to ensure this is not a duplicate.
+          required: true
+        - label: I have verified that this issue occurs on the latest version of AutoGraphQL.
+          required: false
