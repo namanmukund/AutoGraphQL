@@ -5,8 +5,20 @@
 
 ---
 
+## 📺 Video Overview & Architecture Walkthrough
+
+Watch the complete visual explainer video for an overview of AutoGraphQL, its architecture, and how to get started:
+
+[![AutoGraphQL Video Walkthrough](https://img.youtube.com/vi/h7C2RLe4sik/maxresdefault.jpg)](https://www.youtube.com/watch?v=h7C2RLe4sik)
+
+> 🎥 **[Watch the Full Video Walkthrough on YouTube](https://www.youtube.com/watch?v=h7C2RLe4sik)**  
+> *A comprehensive guide covering the schema-first architecture, AST compilation, dynamic database generation, and developer workflow.*
+
+---
+
 ## 📑 Table of Contents
 
+- [📺 Video Overview & Architecture Walkthrough](#-video-overview--architecture-walkthrough)
 - [🌟 Core Features Overview](#-core-features-overview)
 - [📦 Starter Template & Reference Schema (User & UserProfile)](#-starter-template--reference-schema-user--userprofile)
 - [🎯 Real-World Use Cases](#-real-world-use-cases)
@@ -195,6 +207,8 @@ npm run dev
 ### 4. Open AutoGraphQL Studio & Playground
 - **AutoGraphQL Studio UI:** Navigate to **`http://localhost:3000/studio`** (or `/console`) to visually design models, configure hooks, and explore APIs!
 - **GraphQL Playground:** Navigate to **`http://localhost:3000/graphql/core`** to run queries.
+
+> 💡 **Onboarding Video**: Follow along with the [AutoGraphQL Architecture & Setup Video Walkthrough](https://www.youtube.com/watch?v=h7C2RLe4sik) for a step-by-step visual demonstration.
 
 ---
 
