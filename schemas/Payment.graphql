@@ -6,8 +6,7 @@ enum PaymentStatus {
 }
 
 type Payment @model {
-  id: ID! @id
   amount: Float!
   status: PaymentStatus!
-  createdAt: DateTime! @defaultValue(value: "now")
+  referenceCode: String @unique @trim
 }
