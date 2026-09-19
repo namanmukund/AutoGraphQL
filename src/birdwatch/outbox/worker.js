@@ -47,17 +47,18 @@ export const processPendingEvents = async () => {
       }
 
       let allSuccessful = true;
-      let lastErrorMessage = null;
+      const failedErrors = [];
 
-      // Dispatch to each un-delivered webhook
+      // Dispatch to each un-delivered webhook independently; do not stop on first failure
       for (const webhook of remainingWebhooks) {
+        // eslint-disable-next-line no-await-in-loop
         const result = await dispatchWebhook(webhook, eventPayload);
         if (result.success) {
+          // eslint-disable-next-line no-await-in-loop
           await recordWebhookDelivery(record.id, webhook.id);
         } else {
           allSuccessful = false;
-          lastErrorMessage = result.error;
-          break; // Stop and schedule retry with backoff for remaining webhooks
+          failedErrors.push(result.error);
         }
       }
 
@@ -72,7 +73,7 @@ export const processPendingEvents = async () => {
         const backoffMs = calculateBackoffMs(record.attempts || 0);
         const nextAttemptAt = new Date(Date.now() + backoffMs);
 
-        await markFailed(record.id, lastErrorMessage, nextAttemptAt, maxExceeded);
+        await markFailed(record.id, failedErrors.join('; '), nextAttemptAt, maxExceeded);
         stats.failed += 1;
       }
     }

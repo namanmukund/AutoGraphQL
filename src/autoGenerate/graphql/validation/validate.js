@@ -113,6 +113,7 @@ const validate = (
     if (!validAccess) {
       throw new InvalidReadAccessError();
     }
+    return true;
   } else if (operation === ADD || operation === UPDATE) {
     // check if user is not trying to add readOnly fields
     const writeValidation = validateAccess(

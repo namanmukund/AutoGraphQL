@@ -278,7 +278,7 @@ Object.keys(parsedASTMap).forEach((type) => {
           mutationOrQueryName: modelPlural,
         });
         setAPMTransactionNameAndTag(modelPlural, graphQlOperations.query);
-        await prehook('', modelSingular, context, params);
+        await prehook('', modelPlural, context, params);
         return fetchListQueryResolver(
           root,
           params,
@@ -289,7 +289,7 @@ Object.keys(parsedASTMap).forEach((type) => {
           context,
         ).then(async (result) => {
           const newResult = toObject(result);
-          const postHookResult = await posthook(newResult, modelSingular, context, params, info);
+          const postHookResult = await posthook(newResult, modelPlural, context, params, info);
           return postHookResult;
         });
       });

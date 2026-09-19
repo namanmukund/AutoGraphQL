@@ -1,4 +1,5 @@
 import cuid from 'cuid';
+import { log } from '../../../utils';
 
 // In-memory webhook registry
 const webhookRegistry = new Map();
@@ -49,6 +50,10 @@ export const registerWebhook = ({
 }) => {
   if (!url) {
     throw new Error('Webhook URL is required');
+  }
+
+  if ((!process.env.AUTOGRAPHQL_WEBHOOK_SECRET || secret === 'default_secret') && process.env.NODE_ENV !== 'test') {
+    log('WARNING: Registering webhook without a configured secret (AUTOGRAPHQL_WEBHOOK_SECRET). Payloads will use the insecure default_secret.', 'error');
   }
 
   const normalizedEvents = Array.isArray(events) ? events : [events];
