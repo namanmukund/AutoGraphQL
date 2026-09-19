@@ -3401,7 +3401,13 @@ export const preHook = async (input) => {
     // Initialize on load
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('db-status-text').innerText = `Server Online :${window.location.port || 3001}`;
-      loadDataModels();
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetTab = urlParams.get('tab') || window.location.hash.replace('#', '');
+      if (targetTab && document.getElementById(targetTab)) {
+        switchTab(targetTab);
+      } else {
+        loadDataModels();
+      }
       resetModelBuilder();
       loadDevOpsTemplates();
     });

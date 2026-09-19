@@ -14,6 +14,14 @@ Watch the complete visual explainer video for an overview of AutoGraphQL, its ar
 > 🎥 **[Watch the Full Video Walkthrough on YouTube](https://www.youtube.com/watch?v=h7C2RLe4sik)**  
 > *A comprehensive guide covering the schema-first architecture, AST compilation, dynamic database generation, and developer workflow.*
 
+<div align="center">
+  <br />
+  <a href="#-autographql-studio-platform-studio">
+    <img src="docs/assets/studio/01-studio-data-browser.png" alt="AutoGraphQL Studio — Universal Data Browser & Developer Console" width="100%" style="border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);" />
+  </a>
+  <p><em>AutoGraphQL Studio: Zero-code visual developer platform, universal data browser, schema designer, and interactive ERD canvas.</em></p>
+</div>
+
 ---
 
 ## 📑 Table of Contents
@@ -237,17 +245,86 @@ npm run dev
 
 > 📖 **Full Studio Guide**: Read **[`docs/studio-user-guide.md`](docs/studio-user-guide.md)** for an in-depth walkthrough of all Studio features, tutorials, and workflows.
 
-AutoGraphQL Studio is a **zero-code, visual developer console** that allows you to manage the entire application lifecycle directly from your browser:
+AutoGraphQL Studio is a **zero-code, visual developer console** that allows you to manage the entire application lifecycle directly from your browser. Access it anytime at **`http://localhost:3000/studio`** (or `/console`).
 
-| Studio Tab | Capabilities |
-| :--- | :--- |
-| 📐 **Schema Studio** | Visual entity builder, data type selection (`String`, `Int`, `Float`, `Boolean`, `Date`, `JSONB`), directive toggles (`@history`, `@tenantScoped`, `@ownerScoped`), Pro SDL editor with line numbers, and safe schema deletion. |
-| 🔗 **Connected Schemas** | Visual cross-schema relationship graph mapping 1:1, 1:N, and N:N relations (`@relation(name, direction)`). |
-| 🪝 **Lifecycle Hooks** | **Schema-to-Hooks Finder** with interactive Mutation Lifecycle Matrix (`add`, `update`, `delete`) and 1-click presets for slug generation, validation, bcrypt hashing, and welcome emails. |
-| 📡 **Webhooks & Events** | Birdwatch Transactional Outbox manager, event subscription filters (`addOrder`, `updateUser:*`), and HMAC-SHA256 signing. |
-| 🗄️ **Databases & RLS** | Real-time database diagnostics across MongoDB (Mongoose) and PostgreSQL (Sequelize) with multi-tenant RLS policy inspector. |
-| 🚀 **API Playground** | Interactive query console with **1-Click Admin & User JWT generation** and real-time latency diagnostics. |
-| 📦 **1-Click Exports** | **`📦 Export SDK`** (generates type-safe TypeScript Client SDK) and **`📄 Dump SDL`** (exports consolidated GraphQL schema). |
+---
+
+### 1. 🗂️ Universal Data Browser & Content Manager
+Inspect, filter, insert, and inline-edit live database records across MongoDB and PostgreSQL without leaving your browser.
+
+<div align="center">
+  <img src="docs/assets/studio/01-studio-data-browser.png" alt="AutoGraphQL Universal Data Browser" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
+</div>
+
+- **Inline Cell Editing:** Click any table cell to immediately edit values in place with automatic type validation.
+- **Advanced Filtering & Full-Text Search:** Filter by any field using operators (`contains`, `equals`, `gt`, `lt`, `startsWith`).
+- **🎲 Synthetic Mock Seeder:** Generate realistic test data with 1-click presets for rapid prototyping.
+- **Batch CSV & JSON Portability:** Export your datasets or import external records in a single click.
+
+---
+
+### 2. 📐 Schema Studio & Visual Model Builder
+Design database models visually or write standard GraphQL SDL with real-time AST syntax validation.
+
+<div align="center">
+  <img src="docs/assets/studio/02-studio-schema-studio.png" alt="AutoGraphQL Schema Studio & Visual Model Builder" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
+</div>
+
+- **Declarative Directive Toggles:** Easily apply `@model`, `@unique`, `@defaultValue`, `@trim`, `@clamp`, `@history`, and `@tenantScoped`.
+- **Dual-Pane Live Sync:** Visual form field edits automatically sync with the right-hand GraphQL SDL Code Editor in real time.
+- **Multi-Database Dialect Selection:** Target MongoDB (Mongoose) or PostgreSQL (Sequelize) on a per-model basis.
+- **Managed Schemas (`schemas/`):** Auto-discovers, saves, and hot-reloads schemas instantly.
+
+---
+
+### 3. 🔗 Interactive Visual Entity-Relationship Diagram (ERD)
+Explore and understand your entire application data graph visually.
+
+<div align="center">
+  <img src="docs/assets/studio/03-studio-visual-erd.png" alt="AutoGraphQL Visual ERD Canvas" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
+</div>
+
+- **Automatic Relationship Mapping:** Introspects `@relation` directives and foreign keys to visualize 1:1, 1:N, and N:N connections.
+- **Engine Badge Identifiers:** See at a glance which collections reside in MongoDB (`🍃 Mongo`) vs. relational tables in PostgreSQL (`🐘 Postgres`).
+- **Interactive Canvas:** Zoom, pan, search for specific entities, and use Auto-Layout to organize complex enterprise schemas.
+
+---
+
+### 4. 🛡️ Role-Based Access Control (RBAC) & Multi-Tenant RLS Matrix
+Audit and enforce security policies across all models and user roles.
+
+<div align="center">
+  <img src="docs/assets/studio/04-studio-access-rbac.png" alt="AutoGraphQL Access Control and RBAC Matrix" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
+</div>
+
+- **Granular Permission Matrix:** View CRUD capabilities across roles (`ADMIN`, `USER`, `GUEST`).
+- **Row-Level Security (RLS) Diagnostics:** Verify tenant isolation policies (`@tenantScoped`) to guarantee multi-tenant data safety.
+- **1-Click Test JWT Generator:** Generate scoped tokens directly in Studio to test auth rules against live endpoints.
+
+---
+
+### 5. 📡 Birdwatch Webhooks & Transactional Outbox
+Monitor and trigger asynchronous event delivery with guaranteed at-least-once reliability.
+
+<div align="center">
+  <img src="docs/assets/studio/05-studio-webhooks-outbox.png" alt="AutoGraphQL Webhooks and Transactional Outbox" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
+</div>
+
+- **Transactional Outbox Worker:** Dispatches events asynchronously with automated retries and exponential backoff.
+- **HMAC-SHA256 Signatures:** Cryptographically sign outgoing payloads to ensure consumer integrity.
+- **Wildcard Subscriptions:** Subscribe endpoints to specific events (e.g. `addUser`, `order:paid`, `post:*`).
+
+---
+
+### 6. 📊 Real-Time Telemetry, Health Diagnostics & Live Logs
+Track system health, memory footprint, and query execution without third-party APM overhead.
+
+<div align="center">
+  <img src="docs/assets/studio/06-studio-telemetry-metrics.png" alt="AutoGraphQL Telemetry and Live Server Logs" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
+</div>
+
+- **Real-Time Health Probes:** Live server uptime, heap memory consumption, and active DB connection status.
+- **Streaming Winston Console:** Live log stream with log-level filtering (`INFO`, `WARN`, `ERROR`), search, and auto-scroll.
 
 ---
 
