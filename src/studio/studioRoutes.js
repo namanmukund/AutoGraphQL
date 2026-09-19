@@ -29,6 +29,16 @@ router.get(['/studio', '/console'], (req, res) => {
   }
 });
 
+// 1b. Serve Competitor Analysis Presentation Slide
+router.get(['/slides', '/slides/competitor-analysis'], (req, res) => {
+  const slidePath = path.resolve(__dirname, 'public', 'slides.html');
+  if (fs.existsSync(slidePath)) {
+    res.sendFile(slidePath);
+  } else {
+    res.status(404).send('Competitor Analysis Slide not found');
+  }
+});
+
 // 2. GET /api/studio/schemas - List all schemas
 router.get('/api/studio/schemas', (req, res) => {
   try {

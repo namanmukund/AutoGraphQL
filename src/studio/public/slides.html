@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoGraphQL — Competitor Analysis & Architecture Shootout</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07090e;
+      --card-bg: rgba(18, 24, 38, 0.85);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #10b981;
+      --primary-glow: rgba(16, 185, 129, 0.25);
+      --accent: #6366f1;
+      --accent-glow: rgba(99, 102, 241, 0.2);
+      --text: #f3f4f6;
+      --text-muted: #94a3b8;
+      --border: #1e293b;
+      --badge-green: #064e3b;
+      --badge-green-text: #34d399;
+      --badge-yellow: #78350f;
+      --badge-yellow-text: #fcd34d;
+      --badge-red: #7f1d1d;
+      --badge-red-text: #f87171;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+    }
+
+    /* Top Presentation Bar */
+    .pres-header {
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--card-border);
+      backdrop-filter: blur(12px);
+      background: rgba(7, 9, 14, 0.85);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .brand-icon {
+      font-size: 1.5rem;
+      background: linear-gradient(135deg, #10b981, #6366f1);
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    .brand-title {
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .slide-nav {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .slide-indicators {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .indicator-pill {
+      height: 6px;
+      width: 28px;
+      border-radius: 999px;
+      background: var(--border);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .indicator-pill.active {
+      background: var(--primary);
+      width: 44px;
+      box-shadow: 0 0 12px var(--primary);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      background: var(--card-bg);
+      color: var(--text);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #10b981, #059669);
+      border-color: #10b981;
+      color: #fff;
+      box-shadow: 0 0 15px var(--primary-glow);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #059669, #047857);
+    }
+
+    /* Presentation Viewport */
+    .pres-viewport {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .slide-container {
+      width: 100%;
+      max-width: 1400px;
+      min-height: 720px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 3rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      display: none;
+      flex-direction: column;
+      position: relative;
+      animation: fadeIn 0.35s ease forwards;
+    }
+
+    .slide-container.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px) scale(0.99); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Slide Content Typography */
+    .slide-header {
+      margin-bottom: 2rem;
+    }
+
+    .slide-category {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .slide-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+    }
+
+    .slide-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    /* Comparison Table (Slide 1) */
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      background: rgba(10, 14, 23, 0.6);
+    }
+
+    .comp-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.88rem;
+    }
+
+    .comp-table th, .comp-table td {
+      padding: 1rem 1.1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .comp-table th {
+      background: rgba(15, 23, 42, 0.8);
+      font-weight: 700;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .comp-table th.col-highlight,
+    .comp-table td.col-highlight {
+      background: rgba(16, 185, 129, 0.06);
+      border-left: 2px solid var(--primary);
+      border-right: 2px solid var(--primary);
+      font-weight: 600;
+    }
+
+    .comp-table th.col-highlight {
+      border-top: 2px solid var(--primary);
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.12);
+    }
+
+    .comp-table tr:last-child td.col-highlight {
+      border-bottom: 2px solid var(--primary);
+    }
+
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge-status.yes {
+      background: var(--badge-green);
+      color: var(--badge-green-text);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+    }
+
+    .badge-status.partial {
+      background: var(--badge-yellow);
+      color: var(--badge-yellow-text);
+      border: 1px solid rgba(252, 211, 77, 0.3);
+    }
+
+    .badge-status.no {
+      background: var(--badge-red);
+      color: var(--badge-red-text);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+    }
+
+    /* 6 Unfair Advantages Grid (Slide 2) */
+    .grid-advantages {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      flex: 1;
+    }
+
+    .adv-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .adv-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(16, 185, 129, 0.4);
+      background: rgba(16, 185, 129, 0.03);
+      box-shadow: 0 12px 24px -8px var(--primary-glow);
+    }
+
+    .adv-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .adv-card:nth-child(1) .adv-icon { color: #34d399; background: rgba(16, 185, 129, 0.15); }
+    .adv-card:nth-child(2) .adv-icon { color: #818cf8; background: rgba(99, 102, 241, 0.15); }
+    .adv-card:nth-child(3) .adv-icon { color: #f472b6; background: rgba(236, 72, 153, 0.15); }
+    .adv-card:nth-child(4) .adv-icon { color: #fbbf24; background: rgba(245, 158, 11, 0.15); }
+    .adv-card:nth-child(5) .adv-icon { color: #38bdf8; background: rgba(14, 165, 233, 0.15); }
+    .adv-card:nth-child(6) .adv-icon { color: #a78bfa; background: rgba(139, 92, 246, 0.15); }
+
+    .adv-title {
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: #fff;
+    }
+
+    .adv-desc {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .adv-versus {
+      margin-top: auto;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+
+    .adv-versus strong {
+      color: #e2e8f0;
+    }
+
+    /* Velocity & Architecture (Slide 3) */
+    .velocity-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      flex: 1;
+    }
+
+    .velocity-box {
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .velocity-box.highlight {
+      border-color: rgba(16, 185, 129, 0.4);
+      background: rgba(16, 185, 129, 0.04);
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.1);
+    }
+
+    .velocity-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .velocity-title {
+      font-weight: 700;
+      font-size: 1.25rem;
+    }
+
+    .velocity-badge {
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .velocity-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .timeline-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      font-size: 0.88rem;
+    }
+
+    .timeline-bullet {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .velocity-box.highlight .timeline-bullet {
+      background: var(--primary);
+      color: #000;
+    }
+
+    .timeline-content strong {
+      display: block;
+      color: #fff;
+      margin-bottom: 0.2rem;
+    }
+
+    .timeline-content span {
+      color: var(--text-muted);
+      font-size: 0.82rem;
+    }
+
+    /* Economics / TCO (Slide 4) */
+    .tco-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .tco-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 1.75rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .tco-metric {
+      font-size: 2.75rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+    }
+
+    .tco-metric.green {
+      color: #34d399;
+      text-shadow: 0 0 25px rgba(52, 211, 153, 0.4);
+    }
+
+    .tco-metric.purple {
+      color: #818cf8;
+      text-shadow: 0 0 25px rgba(129, 140, 248, 0.4);
+    }
+
+    .tco-metric.blue {
+      color: #38bdf8;
+      text-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+    }
+
+    .tco-label {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: #fff;
+    }
+
+    .tco-sub {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .decision-matrix {
+      background: rgba(16, 185, 129, 0.05);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 14px;
+      padding: 1.5rem;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+
+    .decision-col h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #34d399;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .decision-col p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Footer Controls */
+    .pres-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .keyboard-hint {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .kbd {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+      padding: 0.15rem 0.4rem;
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: #fff;
+    }
+
+    /* Print styles for slide deck export */
+    @media print {
+      body {
+        background: #fff !important;
+        color: #000 !important;
+      }
+      .pres-header, .pres-footer, .slide-nav {
+        display: none !important;
+      }
+      .slide-container {
+        display: flex !important;
+        page-break-after: always;
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        background: #fff !important;
+        color: #000 !important;
+        min-height: auto;
+      }
+      .slide-title, .adv-title, .velocity-title {
+        color: #000 !important;
+      }
+      .comp-table th.col-highlight,
+      .comp-table td.col-highlight {
+        background: #e6fffa !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header class="pres-header">
+    <a href="/studio" class="brand">
+      <div class="brand-icon">⚡</div>
+      <div>
+        <div class="brand-title">AutoGraphQL</div>
+        <div class="brand-subtitle">Executive Competitor Shootout & Architecture Analysis</div>
+      </div>
+    </a>
+
+    <div class="slide-nav">
+      <div class="slide-indicators" id="indicators">
+        <div class="indicator-pill active" onclick="goToSlide(0)" title="Slide 1: Executive Matrix"></div>
+        <div class="indicator-pill" onclick="goToSlide(1)" title="Slide 2: 6 Unfair Advantages"></div>
+        <div class="indicator-pill" onclick="goToSlide(2)" title="Slide 3: Developer Velocity"></div>
+        <div class="indicator-pill" onclick="goToSlide(3)" title="Slide 4: Economics & TCO"></div>
+      </div>
+
+      <button class="btn" onclick="prevSlide()" id="btn-prev">‹ Previous</button>
+      <button class="btn" onclick="nextSlide()" id="btn-next">Next ›</button>
+      <button class="btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">⛶</button>
+      <button class="btn" onclick="window.print()" title="Export / Print PDF">🖨️ PDF</button>
+      <a href="/studio" class="btn btn-primary">🚀 Launch Studio</a>
+    </div>
+  </header>
+
+  <!-- Main Viewport -->
+  <main class="pres-viewport">
+
+    <!-- SLIDE 1: The Executive Matrix -->
+    <section class="slide-container active" id="slide-0">
+      <div class="slide-header">
+        <div class="slide-category">🏆 Executive Head-to-Head Comparison</div>
+        <h1 class="slide-title">AutoGraphQL vs. The Competition</h1>
+        <p class="slide-subtitle">How AutoGraphQL compares with Hasura, Prisma, PostGraphile, Strapi, and AWS AppSync across enterprise metrics.</p>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="comp-table">
+          <thead>
+            <tr>
+              <th>Evaluation Dimension</th>
+              <th class="col-highlight">⚡ AutoGraphQL</th>
+              <th>🐘 Hasura</th>
+              <th>💎 Prisma</th>
+              <th>📜 PostGraphile</th>
+              <th>🚀 Strapi</th>
+              <th>☁️ AWS AppSync</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Architecture Core</strong></td>
+              <td class="col-highlight"><span class="badge-status yes">AST-Driven Engine</span></td>
+              <td>Haskell Proxy</td>
+              <td>ORM Layer Only</td>
+              <td>SQL-to-GQL Proxy</td>
+              <td>Monolithic CMS</td>
+              <td>Managed Cloud Proxy</td>
+            </tr>
+            <tr>
+              <td><strong>Runtime Environment</strong></td>
+              <td class="col-highlight"><span class="badge-status yes">100% Native Node.js</span></td>
+              <td>Haskell Container</td>
+              <td>Node.js / Rust</td>
+              <td>Node.js</td>
+              <td>Node.js</td>
+              <td>AWS Cloud Only</td>
+            </tr>
+            <tr>
+              <td><strong>Multi-Database Polyglot</strong></td>
+              <td class="col-highlight"><span class="badge-status yes">✅ Mongo + Postgres</span></td>
+              <td><span class="badge-status partial">⚠️ SQL-first (Mongo weak)</span></td>
+              <td><span class="badge-status partial">⚠️ ORM only, no API</span></td>
+              <td><span class="badge-status no">❌ Postgres only</span></td>
+              <td><span class="badge-status partial">⚠️ SQL-first</span></td>
+              <td><span class="badge-status partial">⚠️ DynamoDB/Aurora</span></td>
+            </tr>
+            <tr>
+              <td><strong>Schema-First Workflow</strong></td>
+              <td class="col-highlight"><span class="badge-status yes">✅ Pure GraphQL SDL</span></td>
+              <td><span class="badge-status no">❌ DB-first + YAML</span></td>
+              <td><span class="badge-status partial">⚠️ Proprietary DSL</span></td>
+              <td><span class="badge-status no">❌ DB DDL-first</span></td>
+              <td><span class="badge-status no">❌ Admin UI-first</span></td>
+              <td><span class="badge-status partial">⚠️ AWS Console</span></td>
+            </tr>
+            <tr>
+              <td><strong>Resolver Generation</strong></td>
+              <td class="col-highlight"><span class="badge-status yes">✅ 100% Zero-Code</span></td>
+              <td><span class="badge-status yes">✅ Auto-generated</span></td>
+              <td><span class="badge-status no">❌ 100% Manual Hand-coding</span></td>
+              <td><span class="badge-status yes">✅ Auto-generated</span></td>
+              <td><span class="badge-status partial">⚠️ Opinionated CMS</span></td>
+              <td><span class="badge-status no">❌ Manual VTL/JS</span></td>
+            </tr>
+            <tr>
+              <td><strong>Visual Studio Platform</strong></td>
+              <td class="col-highlight"><span class="badge-status yes">✅ Data + ERD + RBAC + Seeder</span></td>
+              <td><span class="badge-status partial">⚠️ Complex Metadata Console</span></td>
+              <td><span class="badge-status partial">⚠️ Prisma Studio (Basic Data)</span></td>
+              <td><span class="badge-status no">❌ None (GraphiQL only)</span></td>
+              <td><span class="badge-status yes">✅ Full CMS Admin</span></td>
+              <td><span class="badge-status partial">⚠️ AWS Console</span></td>
+            </tr>
+            <tr>
+              <td><strong>In-Process Lifecycle Hooks</strong></td>
+              <td class="col-highlight"><span class="badge-status yes">✅ Native Node.js Pre/Post</span></td>
+              <td><span class="badge-status no">❌ External Actions (HTTP)</span></td>
+              <td><span class="badge-status yes">✅ Native Middleware</span></td>
+              <td><span class="badge-status partial">⚠️ SQL Functions / Plugins</span></td>
+              <td><span class="badge-status yes">✅ Lifecycle Hooks</span></td>
+              <td><span class="badge-status no">❌ VTL / Lambda calls</span></td>
+            </tr>
+            <tr>
+              <td><strong>Row-Level Security (RLS)</strong></td>
+              <td class="col-highlight"><span class="badge-status yes">✅ Directives (@tenantScoped)</span></td>
+              <td><span class="badge-status partial">⚠️ Complex Permissions DSL</span></td>
+              <td><span class="badge-status no">❌ Manual Query Filters</span></td>
+              <td><span class="badge-status partial">⚠️ Postgres RLS</span></td>
+              <td><span class="badge-status partial">⚠️ Plugin-based</span></td>
+              <td><span class="badge-status partial">⚠️ IAM / Cognito</span></td>
+            </tr>
+            <tr>
+              <td><strong>Transactional Outbox & Webhooks</strong></td>
+              <td class="col-highlight"><span class="badge-status yes">✅ Built-in Birdwatch + HMAC</span></td>
+              <td><span class="badge-status partial">⚠️ SQL Triggers</span></td>
+              <td><span class="badge-status no">❌ Needs Kafka/Debezium</span></td>
+              <td><span class="badge-status no">❌ External triggers</span></td>
+              <td><span class="badge-status partial">⚠️ Basic Webhooks</span></td>
+              <td><span class="badge-status partial">⚠️ EventBridge</span></td>
+            </tr>
+            <tr>
+              <td><strong>Enterprise Licensing & TCO</strong></td>
+              <td class="col-highlight"><span class="badge-status yes">🟢 100% Free & Open Source</span></td>
+              <td><span class="badge-status no">🔴 Expensive Core License</span></td>
+              <td><span class="badge-status yes">🟢 Free ORM (High dev cost)</span></td>
+              <td><span class="badge-status yes">🟢 Free & Open Source</span></td>
+              <td><span class="badge-status partial">🟡 Paid Enterprise Tiers</span></td>
+              <td><span class="badge-status no">🔴 Compounding AWS bill</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pres-footer">
+        <div class="keyboard-hint">Use <span class="kbd">←</span> <span class="kbd">→</span> or <span class="kbd">Space</span> to navigate slides</div>
+        <div style="color: var(--primary); font-weight: 700; font-size: 0.85rem;">Slide 1 of 4: Grand Shootout</div>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: The 6 Unfair Advantages -->
+    <section class="slide-container" id="slide-1">
+      <div class="slide-header">
+        <div class="slide-category">⚡ Architecture Highlights</div>
+        <h1 class="slide-title">The 6 Unfair Advantages of AutoGraphQL</h1>
+        <p class="slide-subtitle">Why developers ship in minutes instead of months with our AST compiler.</p>
+      </div>
+
+      <div class="grid-advantages">
+        <div class="adv-card">
+          <div class="adv-icon">🎯</div>
+          <h3 class="adv-title">Pure Schema-First SDL</h3>
+          <p class="adv-desc">Write standard GraphQL SDL. Declarative directives (`@model`, `@relation`, `@unique`, `@trim`) generate databases, CRUD resolvers, and validation automatically.</p>
+          <div class="adv-versus">vs <strong>Hasura/Prisma:</strong> No proprietary YAML metadata or Prisma DSL required.</div>
+        </div>
+
+        <div class="adv-card">
+          <div class="adv-icon">🗄️</div>
+          <h3 class="adv-title">True Polyglot Multi-DB</h3>
+          <p class="adv-desc">Run MongoDB (Mongoose) and PostgreSQL (Sequelize) side-by-side in the exact same schema. High-volume docs and relational ACID data unified under 1 GraphQL endpoint.</p>
+          <div class="adv-versus">vs <strong>PostGraphile/Hasura:</strong> Not locked into Postgres or relational SQL.</div>
+        </div>
+
+        <div class="adv-card">
+          <div class="adv-icon">🖥️</div>
+          <h3 class="adv-title">Enterprise Studio Cockpit</h3>
+          <p class="adv-desc">Universal Data Browser (CRUD Grid), Interactive Visual ERD Canvas with Bezier links, Synthetic Mock Seeder, RBAC matrix, and Spotlight Command Palette (`⌘K`).</p>
+          <div class="adv-versus">vs <strong>Prisma/PostGraphile:</strong> Complete zero-code operational cockpit out of the box.</div>
+        </div>
+
+        <div class="adv-card">
+          <div class="adv-icon">⚡</div>
+          <h3 class="adv-title">Zero-Latency In-Process Hooks</h3>
+          <p class="adv-desc">Add custom validation, slug generation, encryption, or external APIs directly in JavaScript Pre-Hooks and Post-Hooks running inside the Node.js event loop.</p>
+          <div class="adv-versus">vs <strong>Hasura:</strong> No HTTP Action microservice network lag or serialization costs.</div>
+        </div>
+
+        <div class="adv-card">
+          <div class="adv-icon">📡</div>
+          <h3 class="adv-title">Built-in Transactional Outbox</h3>
+          <p class="adv-desc">Birdwatch transactional outbox guarantees reliable event persistence and webhook delivery with HMAC-SHA256 signing, exponential backoff, and deduplication.</p>
+          <div class="adv-versus">vs <strong>Prisma/Apollo:</strong> Zero need to deploy Kafka, RabbitMQ, or Debezium clusters.</div>
+        </div>
+
+        <div class="adv-card">
+          <div class="adv-icon">💰</div>
+          <h3 class="adv-title">Zero Lock-In & Open Source</h3>
+          <p class="adv-desc">Deploy anywhere Node.js runs: Docker, Kubernetes, AWS ECS, GCP Cloud Run, or a $5 VPS. Zero per-core enterprise tax, zero proprietary cloud runtime dependencies.</p>
+          <div class="adv-versus">vs <strong>AWS AppSync/Hasura Enterprise:</strong> Predictable, transparent open-source economics.</div>
+        </div>
+      </div>
+
+      <div class="pres-footer">
+        <div class="keyboard-hint">Press <span class="kbd">F</span> for Fullscreen, <span class="kbd">P</span> for Print/PDF</div>
+        <div style="color: var(--primary); font-weight: 700; font-size: 0.85rem;">Slide 2 of 4: Key Differentiators</div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: Developer Velocity Shootout -->
+    <section class="slide-container" id="slide-2">
+      <div class="slide-header">
+        <div class="slide-category">⏱️ Time to Production</div>
+        <h1 class="slide-title">Developer Velocity Shootout</h1>
+        <p class="slide-subtitle">Comparing the hours spent shipping 10 production-ready entities with relationships, filtering, and admin tools.</p>
+      </div>
+
+      <div class="velocity-split">
+        <div class="velocity-box">
+          <div class="velocity-header">
+            <div class="velocity-title">Traditional Stack (Prisma + Apollo)</div>
+            <span class="velocity-badge" style="background: var(--badge-red); color: var(--badge-red-text);">2–3 Days</span>
+          </div>
+
+          <div class="velocity-timeline">
+            <div class="timeline-item">
+              <div class="timeline-bullet">1</div>
+              <div class="timeline-content">
+                <strong>Define Prisma Schema & Run Migrations (30 mins)</strong>
+                <span>Write schema.prisma, create SQL migrations, generate Prisma Client.</span>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-bullet">2</div>
+              <div class="timeline-content">
+                <strong>Hand-Code 50+ GraphQL Resolvers & Inputs (6–8 hours)</strong>
+                <span>Write queries, mutations, type definitions, and input types for every model.</span>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-bullet">3</div>
+              <div class="timeline-content">
+                <strong>Implement DataLoader & N+1 Prevention (4 hours)</strong>
+                <span>Configure request-scoped data loaders for nested relationships.</span>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-bullet">4</div>
+              <div class="timeline-content">
+                <strong>Build Custom Admin Panel (1–2 days)</strong>
+                <span>Spin up Retool or custom React dashboard for operations team CRUD.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="velocity-box highlight">
+          <div class="velocity-header">
+            <div class="velocity-title" style="color: #34d399;">⚡ AutoGraphQL Platform</div>
+            <span class="velocity-badge" style="background: var(--badge-green); color: var(--badge-green-text); box-shadow: 0 0 15px var(--primary-glow);">⚡ Under 10 Minutes</span>
+          </div>
+
+          <div class="velocity-timeline">
+            <div class="timeline-item">
+              <div class="timeline-bullet">✓</div>
+              <div class="timeline-content">
+                <strong>Drop `.graphql` SDL files in `schemas/` (5 mins)</strong>
+                <span>Add models with `@model`, `@relation`, `@unique`, `@trim`. AutoGraphQL compiles databases instantly.</span>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-bullet">✓</div>
+              <div class="timeline-content">
+                <strong>100% Instant Resolvers, Inputs & DataLoader (0 mins)</strong>
+                <span>Full CRUD queries, batch mutations, relational connectors, and request DataLoader are ready automatically.</span>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-bullet">✓</div>
+              <div class="timeline-content">
+                <strong>Seed 50 Realistic Mock Records in Studio (10 secs)</strong>
+                <span>Click `🎲 Seed Mock Records` in Studio for instant prototype datasets with valid CUIDs.</span>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-bullet">✓</div>
+              <div class="timeline-content">
+                <strong>Built-in Enterprise Studio Cockpit Ready (0 mins)</strong>
+                <span>Data browser, ERD canvas, RBAC matrix, and command palette (`⌘K`) ready immediately at `/studio`.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pres-footer">
+        <div class="keyboard-hint">Shipping velocity multiplier: <strong>15x faster time to market</strong></div>
+        <div style="color: var(--primary); font-weight: 700; font-size: 0.85rem;">Slide 3 of 4: Velocity Shootout</div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: Economics & Decision Matrix -->
+    <section class="slide-container" id="slide-3">
+      <div class="slide-header">
+        <div class="slide-category">💰 TCO & Economics</div>
+        <h1 class="slide-title">Total Cost of Ownership & Decision Framework</h1>
+        <p class="slide-subtitle">Eliminating license sprawl, vendor lock-in, and maintenance overhead.</p>
+      </div>
+
+      <div class="tco-grid">
+        <div class="tco-card">
+          <div class="tco-metric green">$0 / mo</div>
+          <div class="tco-label">No Enterprise Licensing</div>
+          <p class="tco-sub">Hasura Enterprise charges per-core fees. AutoGraphQL is 100% open source under Apache 2.0 with no feature paywalls.</p>
+        </div>
+
+        <div class="tco-card">
+          <div class="tco-metric purple">80% Less</div>
+          <div class="tco-label">Boilerplate Maintenance</div>
+          <p class="tco-sub">Zero handwritten resolvers, zero migration drift, zero manual DataLoader wiring across MongoDB and Postgres.</p>
+        </div>
+
+        <div class="tco-card">
+          <div class="tco-metric blue">100% Native</div>
+          <div class="tco-label">Node.js Ecosystem</div>
+          <p class="tco-sub">Runs seamlessly in your existing JavaScript/TypeScript CI/CD pipelines, npm packages, and container infrastructure.</p>
+        </div>
+      </div>
+
+      <div class="decision-matrix">
+        <div class="decision-col">
+          <h4>🚀 Rapid MVP to Scale</h4>
+          <p>Launch complete GraphQL APIs and admin tooling in minutes without accumulating technical debt.</p>
+        </div>
+        <div class="decision-col">
+          <h4>🗄️ Polyglot Architecture</h4>
+          <p>Combine high-write MongoDB document stores and relational PostgreSQL ACID tables in a single unified schema.</p>
+        </div>
+        <div class="decision-col">
+          <h4>🏢 Multi-Tenant SaaS</h4>
+          <p>Enforce strict Row-Level Security (`@tenantScoped`) at the GraphQL AST layer before queries touch the database.</p>
+        </div>
+        <div class="decision-col">
+          <h4>🛠️ Operational Cockpit</h4>
+          <p>Empower engineers, QA, and operations teams with instant CRUD, mock seeding, and visual ERD relationships.</p>
+        </div>
+      </div>
+
+      <div class="pres-footer">
+        <div class="keyboard-hint">Ready to build? Launch Studio or explore the documentation</div>
+        <div style="color: var(--primary); font-weight: 700; font-size: 0.85rem;">Slide 4 of 4: TCO & Decision Framework</div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide-container');
+    const pills = document.querySelectorAll('.indicator-pill');
+    const totalSlides = slides.length;
+
+    function goToSlide(index) {
+      if (index < 0 || index >= totalSlides) return;
+      slides[currentSlide].classList.remove('active');
+      pills[currentSlide].classList.remove('active');
+      currentSlide = index;
+      slides[currentSlide].classList.add('active');
+      pills[currentSlide].classList.add('active');
+      updateNavButtons();
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        goToSlide(currentSlide + 1);
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        goToSlide(currentSlide - 1);
+      }
+    }
+
+    function updateNavButtons() {
+      document.getElementById('btn-prev').style.opacity = currentSlide === 0 ? '0.5' : '1';
+      document.getElementById('btn-next').style.opacity = currentSlide === totalSlides - 1 ? '0.5' : '1';
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key.toLowerCase() === 'f') {
+        toggleFullscreen();
+      } else if (e.key.toLowerCase() === 'p') {
+        window.print();
+      } else if (e.key >= '1' && e.key <= '4') {
+        goToSlide(parseInt(e.key, 10) - 1);
+      }
+    });
+
+    updateNavButtons();
+  </script>
+</body>
+</html>
