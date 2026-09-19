@@ -1,0 +1,13 @@
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+type Payment @model {
+  id: ID! @id
+  amount: Float!
+  status: PaymentStatus!
+  createdAt: DateTime! @defaultValue(value: "now")
+}
