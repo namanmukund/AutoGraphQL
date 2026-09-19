@@ -1,0 +1,56 @@
+name: "💡 Feature Request"
+description: Propose a new feature, schema directive, or enhancement for AutoGraphQL
+title: "[Feature]: "
+labels: ["enhancement", "discussion"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve AutoGraphQL! Please describe your proposed feature or enhancement below.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or Motivation
+      description: Is your feature request related to a problem or limitation? Please describe it.
+      placeholder: I am frustrated when trying to... / Our team needs support for...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution / API Design
+      description: Describe the solution you'd like, including proposed GraphQL SDL directives, Studio features, or CLI commands.
+      placeholder: |
+        e.g. Add `@searchable` directive to automatically generate full-text search indexes...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: A description of any alternative solutions or features you've considered.
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Affected Component
+      options:
+        - Schema Directives & AST Engine
+        - AutoGraphQL Studio & Web UI
+        - Multi-Database Connectors (MongoDB / Postgres)
+        - DataLoader & Reliability Safeguards
+        - Birdwatch & Webhooks Outbox
+        - TypeScript SDK Codegen & Tooling
+        - Documentation
+        - Other
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I would be interested in submitting a Pull Request to implement this feature.
+          required: false

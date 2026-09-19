@@ -41,9 +41,28 @@ Navigate to:
 
 ---
 
+## 🗂️ Universal Data Browser & Content Manager
+
+The **Data Browser** tab provides an interactive CRUD data grid to inspect, filter, insert, and inline-edit live database records across MongoDB and PostgreSQL.
+
+<div align="center">
+  <img src="assets/studio/01-studio-data-browser.png" alt="AutoGraphQL Universal Data Browser" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
+</div>
+
+- **Inline Editing:** Double-click any table cell to immediately edit strings, numbers, booleans, or enums in place.
+- **Search & Filter:** Apply field-specific filters with operators (`contains`, `equals`, `gt`, `lt`, `startsWith`).
+- **🎲 Synthetic Mock Seeder:** Populate models with 10, 50, or 100 realistic records for development testing.
+- **Batch CSV & JSON Portability:** Export collections with one click or import external datasets.
+
+---
+
 ## 📐 Schema Studio
 
 The **Schema Studio** tab is your central hub for designing GraphQL entities and generating dynamic database models for MongoDB or PostgreSQL.
+
+<div align="center">
+  <img src="assets/studio/02-studio-schema-studio.png" alt="AutoGraphQL Schema Studio & Visual Model Builder" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
+</div>
 
 ### Visual Model Builder
 - **Model Name:** Enter the entity name (e.g. `Course`, `Order`, `Product`, `Invoice`).
@@ -82,23 +101,27 @@ Click **`🔗 Connect Schema`** to link the model to another entity:
 
 ---
 
-## 🔗 Connected Schemas Graph
+## 🔗 Connected Schemas Graph (Visual ERD)
 
-The **Connected Schemas** tab renders an interactive map of all cross-entity relationships wired across your GraphQL types:
+The **Visual ERD** tab renders an interactive map of all cross-entity relationships wired across your GraphQL types:
 
-```text
-Course ──( instructor )──► User
-Order  ──( customer )────► User
-Post   ──( tags )────────► Tag
-```
+<div align="center">
+  <img src="assets/studio/03-studio-visual-erd.png" alt="AutoGraphQL Visual ERD Canvas" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
+</div>
 
-Use this visual graph to audit foreign keys, verify relation names, and inspect join directions.
+- **Foreign Key Connectors:** Trace relations across models with color-coded connector links.
+- **Database Engine Badges:** Distinguishes MongoDB collections (`🍃 Mongo`) from PostgreSQL tables (`🐘 Postgres`).
+- **Auto-Layout & Zoom:** Drag nodes to rearrange or click Auto-Layout to instantly organize complex multi-schema architectures.
 
 ---
 
 ## 🪝 Lifecycle Hooks Studio
 
 The **Lifecycle Hooks** tab allows you to find, inspect, edit, and create Pre-Hooks and Post-Hooks for any schema.
+
+<div align="center">
+  <img src="assets/studio/07-studio-lifecycle-hooks.png" alt="AutoGraphQL Lifecycle Hooks Studio" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
+</div>
 
 ### Mutation Lifecycle Matrix
 Select any schema from the **Active Schema** dropdown:
@@ -125,6 +148,11 @@ Select any schema from the **Active Schema** dropdown:
 ## 📡 Birdwatch Webhooks & Transactional Outbox
 
 Manage event-driven webhooks directly from the UI:
+
+<div align="center">
+  <img src="assets/studio/05-studio-webhooks-outbox.png" alt="AutoGraphQL Webhooks and Transactional Outbox" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
+</div>
+
 1. Enter the target **Endpoint URL** (e.g. `https://api.mycrm.com/webhooks`).
 2. Specify **Subscribed Events** (e.g. `addOrder`, `updateUser:*`, or `*` for all).
 3. Set your **HMAC Secret Key** for payload signature verification (`x-autographql-signature`).
@@ -134,6 +162,10 @@ Manage event-driven webhooks directly from the UI:
 ---
 
 ## 🗄️ Databases & Multi-Tenancy (RLS)
+
+<div align="center">
+  <img src="assets/studio/08-studio-databases-rls.png" alt="AutoGraphQL Databases & RLS Diagnostics" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
+</div>
 
 - **MongoDB Status:** Document collections, connection state, and active Mongoose models.
 - **PostgreSQL Status:** Relational tables, Sequelize connection, and B-Tree/GIN index states.
