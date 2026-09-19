@@ -109,8 +109,9 @@ describe('AutoGraphQL Phase 2: Event-Driven Automation', () => {
 
   describe('3. Transactional Outbox Engine', () => {
     it('should enqueue event to outbox with PENDING status', async () => {
+      const testId = `evt_test_1_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
       const event = {
-        id: 'evt_test_1',
+        id: testId,
         event: 'addUser',
         operation: 'CREATE',
         entityName: 'User',
@@ -120,18 +121,19 @@ describe('AutoGraphQL Phase 2: Event-Driven Automation', () => {
       };
 
       const record = await enqueueEvent(event);
-      assert.strictEqual(record.id, 'evt_test_1');
+      assert.strictEqual(record.id, testId);
       assert.strictEqual(record.status, 'PENDING');
       assert.strictEqual(record.attempts, 0);
 
       const pending = await getPendingEvents();
-      const match = pending.find((e) => e.id === 'evt_test_1');
+      const match = pending.find((e) => e.id === testId);
       assert.ok(match, 'Enqueued event must appear in pending list');
     });
 
     it('should transition event status to DELIVERED upon completion', async () => {
+      const testId = `evt_test_2_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
       const event = {
-        id: 'evt_test_2',
+        id: testId,
         event: 'updateUser',
         operation: 'UPDATE',
         entityName: 'User',
@@ -139,16 +141,17 @@ describe('AutoGraphQL Phase 2: Event-Driven Automation', () => {
       };
 
       await enqueueEvent(event);
-      await markDelivered('evt_test_2');
+      await markDelivered(testId);
 
       const pending = await getPendingEvents();
-      const match = pending.find((e) => e.id === 'evt_test_2');
+      const match = pending.find((e) => e.id === testId);
       assert.strictEqual(match, undefined, 'Delivered event must no longer be pending');
     });
 
     it('should record failure, increment attempts, and mark FAILED when max attempts exceeded', async () => {
+      const testId = `evt_test_3_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
       const event = {
-        id: 'evt_test_3',
+        id: testId,
         event: 'deleteUser',
         operation: 'DELETE',
         entityName: 'User',
@@ -159,13 +162,13 @@ describe('AutoGraphQL Phase 2: Event-Driven Automation', () => {
 
       // Attempt 1: Failed with backoff
       const nextDate = new Date(Date.now() + 5000);
-      await markFailed('evt_test_3', 'Network timeout', nextDate, false);
+      await markFailed(testId, 'Network timeout', nextDate, false);
 
       // Attempt 5 (max attempts): Mark permanently FAILED
-      await markFailed('evt_test_3', 'Permanent failure: 404 Not Found', nextDate, true);
+      await markFailed(testId, 'Permanent failure: 404 Not Found', nextDate, true);
 
       const pending = await getPendingEvents();
-      const match = pending.find((e) => e.id === 'evt_test_3');
+      const match = pending.find((e) => e.id === testId);
       assert.strictEqual(match, undefined, 'FAILED event must no longer be pending');
     });
   });
@@ -345,12 +348,14 @@ describe('AutoGraphQL Phase 2: Event-Driven Automation', () => {
       const port1 = server1.address().port;
       const port2 = server2.address().port;
 
-      registerWebhook({ id: 'wh_succ', url: `http://127.0.0.1:${port1}/ok`, events: ['testEvent'] });
-      registerWebhook({ id: 'wh_fail', url: `http://127.0.0.1:${port2}/retry`, events: ['testEvent'] });
+      const testEventId = `evt_dedup_test_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+      const testEventName = `testEvent_${Date.now()}`;
+      registerWebhook({ id: `wh_succ_${Date.now()}`, url: `http://127.0.0.1:${port1}/ok`, events: [testEventName] });
+      registerWebhook({ id: `wh_fail_${Date.now()}`, url: `http://127.0.0.1:${port2}/retry`, events: [testEventName] });
 
       const event = {
-        id: 'evt_dedup_test',
-        event: 'testEvent',
+        id: testEventId,
+        event: testEventName,
         operation: 'CUSTOM',
         entityName: 'Test',
         data: { id: 't1' },
@@ -365,7 +370,7 @@ describe('AutoGraphQL Phase 2: Event-Driven Automation', () => {
       assert.strictEqual(stats1.failed, 1, 'Batch marked failed due to Webhook 2 failure');
 
       // Reset nextAttemptAt to the past to simulate elapsed backoff timer
-      await setEventNextAttempt('evt_dedup_test', new Date(Date.now() - 1000));
+      await setEventNextAttempt(testEventId, new Date(Date.now() - 1000));
 
       // Attempt 2: wh_succ should be SKIPPED, wh_fail should succeed
       const stats2 = await processPendingEvents();

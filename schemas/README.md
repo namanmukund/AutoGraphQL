@@ -45,3 +45,9 @@ type Order @model(database: postgres) {
   createdAt: Date!
 }
 ```
+
+---
+
+## 📺 Video Guide
+For an end-to-end visual walkthrough of how AutoGraphQL discovers, compiles, and serves schemas, watch the [AutoGraphQL Explainer Video on YouTube](https://www.youtube.com/watch?v=h7C2RLe4sik).
+
