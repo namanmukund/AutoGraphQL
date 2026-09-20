@@ -13,11 +13,13 @@ import authParams from '../../config/authParams';
 
 import dataRoutes from './api/dataRoutes';
 import telemetryRoutes from './api/telemetryRoutes';
+import aiRoutes from './api/aiRoutes';
 
 const router = express.Router();
 
 router.use(dataRoutes);
 router.use(telemetryRoutes);
+router.use(aiRoutes);
 
 // 1. Serve Studio Single-Page Application
 router.get(['/studio', '/console'], (req, res) => {

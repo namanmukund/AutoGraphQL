@@ -872,6 +872,10 @@
         <span class="status-dot"></span>
         <span id="db-status-text">Server Online</span>
       </div>
+      <button class="btn btn-secondary" onclick="openAISettingsModal()" id="btn-ai-status-pill" title="Configure AI & Universal LLM Connection" style="border-color: rgba(99, 102, 241, 0.4); background: rgba(99, 102, 241, 0.08); color: #a5b4fc;">
+        <span>🤖</span>
+        <span id="ai-status-label">Connect LLM</span>
+      </button>
       <button class="btn btn-secondary" onclick="openSpotlight()" title="Spotlight Command Search (⌘K)">
         <span style="opacity: 0.6; font-size: 0.72rem; font-family: var(--font-mono); background: rgba(255,255,255,0.1); padding: 0.1rem 0.35rem; border-radius: 4px;">⌘K</span>
         <span>Search</span>
@@ -1031,6 +1035,51 @@
         📐 <strong>Zero-Code Schema Management:</strong> Design models with full directive coverage (`@defaultValue`, `@trim`, `@clamp`, `@unique`, `@validate`, `@readOnly`) and GraphQL Enums.
       </div>
 
+      <!-- AI SCHEMA COPILOT PANEL -->
+      <div class="card-panel" style="margin-bottom: 1.25rem; background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(168, 85, 247, 0.05) 100%); border: 1px solid rgba(99, 102, 241, 0.3); box-shadow: 0 4px 20px rgba(99, 102, 241, 0.08);">
+        <div class="panel-header" style="margin-bottom: 0.75rem;">
+          <div class="panel-title" style="display: flex; align-items: center; gap: 0.5rem;">
+            <span>🤖</span>
+            <span style="background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700; letter-spacing: -0.01em;">AI Schema Architect & Copilot</span>
+            <span class="brand-badge" style="font-size: 0.65rem; background: rgba(99, 102, 241, 0.2); border-color: rgba(99, 102, 241, 0.4); color: #c7d2fe;">Universal LLM</span>
+          </div>
+          <div style="display: flex; gap: 0.65rem; align-items: center;">
+            <div id="ai-active-model-badge" style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono); background: rgba(0,0,0,0.3); padding: 0.2rem 0.55rem; border-radius: 6px; border: 1px solid var(--border);">
+              Model: <span id="ai-badge-model-name" style="color: #a5b4fc;">Not Connected</span>
+            </div>
+            <button class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; border-color: rgba(99, 102, 241, 0.4);" onclick="openAISettingsModal()">
+              ⚙️ Connect LLM
+            </button>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 0.65rem; align-items: center; margin-bottom: 0.75rem;">
+          <div>
+            <input type="text" id="ai-prompt-input" placeholder="Describe in plain English (e.g., 'E-Commerce Order with @history, enum OrderStatus, clamped total, and 1:N items link')..." style="width: 100%; padding: 0.65rem 0.95rem; border-radius: 8px; font-size: 0.85rem; background: var(--bg-input); border: 1px solid var(--border-focus);" onkeydown="if (event.key === 'Enter') generateSchemaWithAI();">
+          </div>
+          <div>
+            <select id="ai-generate-mode" style="padding: 0.65rem 0.8rem; font-size: 0.8rem; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border);">
+              <option value="create">✨ New Model</option>
+              <option value="enhance">🛠️ Enhance Active Model</option>
+            </select>
+          </div>
+          <div>
+            <button class="btn btn-primary" id="btn-generate-ai" onclick="generateSchemaWithAI()" style="padding: 0.65rem 1.25rem; font-size: 0.85rem; font-weight: 600; min-width: 160px; display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
+              <span id="ai-btn-text">Generate SDL ⚡</span>
+            </button>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;">
+          <span style="font-size: 0.7rem; color: var(--text-dim); font-weight: 600;">Presets:</span>
+          <span class="preset-chip" onclick="fillAIPrompt('E-commerce Order with status enum (PENDING, PAID, SHIPPED, DELIVERED), price clamp 0-100000, customer relation, @history audit trail, PostgreSQL database')">📦 E-Commerce Order (Postgres)</span>
+          <span class="preset-chip" onclick="fillAIPrompt('Multi-tenant SaaS Invoice with @tenantScoped isolation, dueDate Date, lineItems JSONB, and currencyCode with @upperCase')">🏢 Multi-Tenant Invoice (RLS)</span>
+          <span class="preset-chip" onclick="fillAIPrompt('Stripe Payment record with @ownerScoped, encrypted secretKey with @encrypted, amount Float with @clamp(min: 1), and status Enum')">💳 Payment (@encrypted)</span>
+          <span class="preset-chip" onclick="fillAIPrompt('Social Network Post with @ownerScoped author, tags [String], @databaseController(mode: aggregation), and comments relation')">📱 Post & Feed (Aggregation)</span>
+          <span class="preset-chip" onclick="fillAIPrompt('User Profile with validated email regex, unique handle, and fullName formatted with @nameCase')">👤 User Profile (@validate)</span>
+        </div>
+      </div>
+
       <div class="studio-grid-2">
         <!-- Visual Model Builder -->
         <div class="card-panel">
@@ -1165,10 +1214,18 @@
             </div>
           </div>
 
-          <div style="display: flex; justify-content: flex-end;">
-            <button class="btn btn-secondary" onclick="saveCurrentSchema()">
-              Deploy Editor Code ⚡
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+            <button class="btn btn-secondary" onclick="syncSDLIntoVisualBuilder(document.getElementById('schema-sdl-editor').value)" style="font-size: 0.78rem; padding: 0.35rem 0.75rem;" title="Parse SDL into Visual Model Builder inputs">
+              ⚡ Sync to Visual Builder
             </button>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-secondary" style="font-size: 0.78rem; padding: 0.35rem 0.75rem;" onclick="copyEditorCode('schema-sdl-editor')">
+                📋 Copy SDL
+              </button>
+              <button class="btn btn-primary" onclick="saveCurrentSchema()">
+                Deploy Model ⚡
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -1603,6 +1660,102 @@ query GetUsers {
       <div style="display: flex; justify-content: flex-end; margin-top: 1.25rem;">
         <button class="btn btn-secondary" onclick="closeModal('record-inspect-modal')">Close</button>
       </div>
+    </div>
+  </div>
+
+  <!-- UNIVERSAL LLM SETTINGS MODAL -->
+  <div id="ai-settings-modal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 540px;">
+      <div class="panel-header">
+        <div class="panel-title" style="display: flex; align-items: center; gap: 0.5rem;">
+          <span>🤖</span>
+          <span>Connect Universal LLM</span>
+          <span class="brand-badge" style="font-size: 0.65rem;">BYO-LLM</span>
+        </div>
+        <button class="btn btn-secondary" style="padding: 0.2rem 0.5rem;" onclick="closeModal('ai-settings-modal')">✕</button>
+      </div>
+
+      <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.45;">
+        Connect any commercial AI provider or local offline LLM (Ollama) to generate and edit GraphQL SDL with complete AutoGraphQL directive knowledge.
+      </p>
+
+      <form id="ai-settings-form" onsubmit="saveAISettings(event)">
+        <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.25rem;">
+          <div>
+            <label style="font-size: 0.78rem; font-weight: 600;">LLM Provider</label>
+            <select id="ai-cfg-provider" onchange="onAIProviderChange()" style="width: 100%; padding: 0.5rem 0.75rem; font-size: 0.82rem;">
+              <option value="openai">OpenAI (GPT-4o, GPT-4o-mini)</option>
+              <option value="vertex-ai">☁️ Google Cloud Vertex AI (Gemini via Google SDK)</option>
+              <option value="gemini">Google Gemini API (Google AI Studio Key)</option>
+              <option value="claude">Anthropic Claude (Claude 3.5 Sonnet)</option>
+              <option value="ollama">🦙 Ollama (Local Offline / localhost:11434)</option>
+              <option value="groq">⚡ Groq (Ultra-Fast Llama 3.3)</option>
+              <option value="openrouter">🌐 OpenRouter (Universal Gateway)</option>
+              <option value="custom">🛠️ Custom OpenAI-Compatible Base URL</option>
+            </select>
+          </div>
+
+          <!-- Vertex AI Options (conditional) -->
+          <div id="ai-vertex-options" style="display: none; background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem;">
+            <div style="font-size: 0.75rem; color: #a5b4fc; font-weight: 600; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.35rem;">
+              <span>☁️</span> Google Cloud Vertex AI Configuration
+            </div>
+            <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 0.75rem;">
+              <div>
+                <label style="font-size: 0.72rem; font-weight: 600;">GCP Project ID</label>
+                <input type="text" id="ai-cfg-project" placeholder="e.g. my-gcp-project" style="width: 100%; padding: 0.45rem 0.65rem; font-size: 0.8rem; font-family: var(--font-mono);">
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; font-weight: 600;">Location / Region</label>
+                <input type="text" id="ai-cfg-location" placeholder="us-central1" style="width: 100%; padding: 0.45rem 0.65rem; font-size: 0.8rem; font-family: var(--font-mono);">
+              </div>
+            </div>
+            <div style="font-size: 0.7rem; color: var(--text-dim); margin-top: 0.45rem;">
+              💡 Authenticate once via Google SDK: <code style="color: #34d399;">gcloud auth application-default login</code>
+            </div>
+          </div>
+
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <label style="font-size: 0.78rem; font-weight: 600;">API Key / Access Token</label>
+              <span id="ai-key-hint" style="font-size: 0.7rem; color: var(--text-dim);">Stored locally in browser</span>
+            </div>
+            <input type="password" id="ai-cfg-key" placeholder="sk-..." autocomplete="off" style="width: 100%; padding: 0.5rem 0.75rem; font-size: 0.82rem; font-family: var(--font-mono);">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 0.75rem;">
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 600;">API Base URL (Optional)</label>
+              <input type="text" id="ai-cfg-baseurl" placeholder="https://api.openai.com/v1" style="width: 100%; padding: 0.5rem 0.75rem; font-size: 0.82rem; font-family: var(--font-mono);">
+            </div>
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 600;">Model Name</label>
+              <input type="text" id="ai-cfg-model" placeholder="gpt-4o" style="width: 100%; padding: 0.5rem 0.75rem; font-size: 0.82rem; font-family: var(--font-mono);">
+            </div>
+          </div>
+
+          <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 8px; padding: 0.75rem; font-size: 0.75rem; color: var(--text-muted); display: flex; gap: 0.5rem; align-items: flex-start;">
+            <span>🔒</span>
+            <div>
+              <strong>Privacy Guarantee:</strong> API keys are held strictly in your local browser's <code style="color: #a5b4fc;">localStorage</code>. They are forwarded ephemerally via secure request headers and never persisted to the server file system.
+            </div>
+          </div>
+
+          <div id="ai-test-result-box" style="display: none; padding: 0.6rem 0.85rem; border-radius: 6px; font-size: 0.78rem; font-family: var(--font-mono);">
+            <!-- Connection test status -->
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <button type="button" class="btn btn-secondary" id="btn-test-ai" onclick="testAIConnection()" style="font-size: 0.78rem; padding: 0.4rem 0.85rem;">
+            Ping & Test Connection ⚡
+          </button>
+          <div style="display: flex; gap: 0.5rem;">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('ai-settings-modal')">Cancel</button>
+            <button type="submit" class="btn btn-primary" style="font-weight: 600;">Save & Connect</button>
+          </div>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -3398,9 +3551,465 @@ export const preHook = async (input) => {
       }
     });
 
+    /* =========================================================================
+       11. AI SCHEMA COPILOT & UNIVERSAL LLM CLIENT CONTROLLER
+       ========================================================================= */
+    const AI_PROVIDERS = {
+      openai: {
+        name: 'OpenAI',
+        defaultModel: 'gpt-4o',
+        baseUrl: 'https://api.openai.com/v1',
+        keyHint: 'sk-...',
+      },
+      'vertex-ai': {
+        name: 'Vertex AI (Gemini)',
+        defaultModel: 'gemini-1.5-pro',
+        baseUrl: '',
+        keyHint: 'Optional if logged in via `gcloud auth application-default login`',
+        isVertex: true,
+      },
+      gemini: {
+        name: 'Google Gemini (AI Studio)',
+        defaultModel: 'gemini-2.0-flash',
+        baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai',
+        keyHint: 'AIzaSy...',
+      },
+      claude: {
+        name: 'Anthropic Claude',
+        defaultModel: 'claude-3-5-sonnet-20241022',
+        baseUrl: 'https://api.anthropic.com/v1',
+        keyHint: 'sk-ant-...',
+      },
+      ollama: {
+        name: 'Ollama (Local)',
+        defaultModel: 'llama3.2',
+        baseUrl: 'http://localhost:11434/v1',
+        keyHint: 'No API key needed for local Ollama',
+      },
+      groq: {
+        name: 'Groq',
+        defaultModel: 'llama-3.3-70b-versatile',
+        baseUrl: 'https://api.groq.com/openai/v1',
+        keyHint: 'gsk_...',
+      },
+      openrouter: {
+        name: 'OpenRouter',
+        defaultModel: 'openai/gpt-4o-mini',
+        baseUrl: 'https://openrouter.ai/api/v1',
+        keyHint: 'sk-or-...',
+      },
+      custom: {
+        name: 'Custom Endpoint',
+        defaultModel: 'custom-model',
+        baseUrl: 'http://localhost:8000/v1',
+        keyHint: 'API Key (Optional)',
+      },
+    };
+
+    function getAIConfig() {
+      const provider = localStorage.getItem('autographql_ai_provider') || 'openai';
+      const meta = AI_PROVIDERS[provider] || AI_PROVIDERS.openai;
+      return {
+        provider,
+        apiKey: localStorage.getItem('autographql_ai_key') || '',
+        baseUrl: localStorage.getItem('autographql_ai_baseurl') || meta.baseUrl,
+        model: localStorage.getItem('autographql_ai_model') || meta.defaultModel,
+        projectId: localStorage.getItem('autographql_ai_project') || '',
+        location: localStorage.getItem('autographql_ai_location') || 'us-central1',
+      };
+    }
+
+    function updateAIStatusBadge() {
+      const cfg = getAIConfig();
+      const hasKey = cfg.apiKey || cfg.provider === 'ollama' || cfg.provider === 'vertex-ai';
+
+      const labelEl = document.getElementById('ai-status-label');
+      const badgeBtn = document.getElementById('btn-ai-status-pill');
+      const modelBadge = document.getElementById('ai-badge-model-name');
+
+      if (labelEl && badgeBtn) {
+        if (hasKey) {
+          labelEl.innerText = `${AI_PROVIDERS[cfg.provider]?.name || cfg.provider} (${cfg.model})`;
+          badgeBtn.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+          badgeBtn.style.background = 'rgba(16, 185, 129, 0.08)';
+          badgeBtn.style.color = '#34d399';
+        } else {
+          labelEl.innerText = 'Connect LLM';
+          badgeBtn.style.borderColor = 'rgba(99, 102, 241, 0.4)';
+          badgeBtn.style.background = 'rgba(99, 102, 241, 0.08)';
+          badgeBtn.style.color = '#a5b4fc';
+        }
+      }
+
+      if (modelBadge) {
+        if (hasKey) {
+          modelBadge.innerText = `${cfg.provider} / ${cfg.model}`;
+          modelBadge.style.color = '#34d399';
+        } else {
+          modelBadge.innerText = 'Not Connected';
+          modelBadge.style.color = '#f43f5e';
+        }
+      }
+    }
+
+    function openAISettingsModal() {
+      const cfg = getAIConfig();
+      document.getElementById('ai-cfg-provider').value = cfg.provider;
+      document.getElementById('ai-cfg-key').value = cfg.apiKey;
+      document.getElementById('ai-cfg-baseurl').value = cfg.baseUrl;
+      document.getElementById('ai-cfg-model').value = cfg.model;
+      const projectInput = document.getElementById('ai-cfg-project');
+      const locationInput = document.getElementById('ai-cfg-location');
+      if (projectInput) projectInput.value = cfg.projectId || '';
+      if (locationInput) locationInput.value = cfg.location || 'us-central1';
+      onAIProviderChange();
+
+      const resultBox = document.getElementById('ai-test-result-box');
+      if (resultBox) {
+        resultBox.style.display = 'none';
+        resultBox.innerHTML = '';
+      }
+
+      const modal = document.getElementById('ai-settings-modal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function onAIProviderChange() {
+      const provider = document.getElementById('ai-cfg-provider').value;
+      const meta = AI_PROVIDERS[provider] || AI_PROVIDERS.openai;
+      const keyHint = document.getElementById('ai-key-hint');
+      const baseurlInput = document.getElementById('ai-cfg-baseurl');
+      const modelInput = document.getElementById('ai-cfg-model');
+      const vertexOptions = document.getElementById('ai-vertex-options');
+
+      if (vertexOptions) {
+        vertexOptions.style.display = provider === 'vertex-ai' ? 'block' : 'none';
+      }
+
+      if (keyHint) keyHint.innerText = meta.keyHint;
+      if (baseurlInput && !baseurlInput.value) baseurlInput.placeholder = meta.baseUrl || (provider === 'vertex-ai' ? 'Auto-constructed from project & region' : '');
+      if (modelInput && !modelInput.value) modelInput.placeholder = meta.defaultModel;
+    }
+
+    function saveAISettings(e) {
+      if (e) e.preventDefault();
+      const provider = document.getElementById('ai-cfg-provider').value;
+      const apiKey = document.getElementById('ai-cfg-key').value.trim();
+      const baseUrl = document.getElementById('ai-cfg-baseurl').value.trim();
+      const model = document.getElementById('ai-cfg-model').value.trim();
+      const projectId = document.getElementById('ai-cfg-project')?.value.trim() || '';
+      const location = document.getElementById('ai-cfg-location')?.value.trim() || 'us-central1';
+
+      const meta = AI_PROVIDERS[provider] || AI_PROVIDERS.openai;
+
+      localStorage.setItem('autographql_ai_provider', provider);
+      localStorage.setItem('autographql_ai_key', apiKey);
+      localStorage.setItem('autographql_ai_baseurl', baseUrl || meta.baseUrl);
+      localStorage.setItem('autographql_ai_model', model || meta.defaultModel);
+      localStorage.setItem('autographql_ai_project', projectId);
+      localStorage.setItem('autographql_ai_location', location);
+
+      updateAIStatusBadge();
+      closeModal('ai-settings-modal');
+      showToast(`LLM configuration saved (${provider} / ${model || meta.defaultModel})! 🤖`);
+    }
+
+    async function testAIConnection() {
+      const btn = document.getElementById('btn-test-ai');
+      const resultBox = document.getElementById('ai-test-result-box');
+      const provider = document.getElementById('ai-cfg-provider').value;
+      const apiKey = document.getElementById('ai-cfg-key').value.trim();
+      const baseUrl = document.getElementById('ai-cfg-baseurl').value.trim();
+      const model = document.getElementById('ai-cfg-model').value.trim();
+      const projectId = document.getElementById('ai-cfg-project')?.value.trim() || '';
+      const location = document.getElementById('ai-cfg-location')?.value.trim() || 'us-central1';
+
+      btn.disabled = true;
+      btn.innerText = 'Testing Connection... ⚡';
+      resultBox.style.display = 'block';
+      resultBox.style.background = 'rgba(99, 102, 241, 0.1)';
+      resultBox.style.color = '#a5b4fc';
+      resultBox.style.border = '1px solid rgba(99, 102, 241, 0.3)';
+      resultBox.innerText = provider === 'vertex-ai' ? 'Authenticating with Google Cloud / Vertex AI...' : 'Pinging configured model...';
+
+      try {
+        const res = await fetch('/api/studio/ai/test-connection', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-ai-provider': provider,
+            'x-ai-api-key': apiKey,
+            'x-ai-base-url': baseUrl,
+            'x-ai-model': model,
+            'x-ai-project-id': projectId,
+            'x-ai-location': location,
+          },
+          body: JSON.stringify({ provider, apiKey, baseUrl, model, projectId, location }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          resultBox.style.background = 'rgba(16, 185, 129, 0.1)';
+          resultBox.style.color = '#34d399';
+          resultBox.style.border = '1px solid rgba(16, 185, 129, 0.3)';
+          resultBox.innerHTML = `✅ ${data.message}`;
+          showToast('Connection verified! ⚡');
+        } else {
+          resultBox.style.background = 'rgba(244, 63, 94, 0.1)';
+          resultBox.style.color = '#f43f5e';
+          resultBox.style.border = '1px solid rgba(244, 63, 94, 0.3)';
+          resultBox.innerHTML = `❌ Connection Error: ${data.error}`;
+        }
+      } catch (err) {
+        resultBox.style.background = 'rgba(244, 63, 94, 0.1)';
+        resultBox.style.color = '#f43f5e';
+        resultBox.style.border = '1px solid rgba(244, 63, 94, 0.3)';
+        resultBox.innerHTML = `❌ Network Error: ${err.message}`;
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Ping & Test Connection ⚡';
+      }
+    }
+
+    function fillAIPrompt(text) {
+      const input = document.getElementById('ai-prompt-input');
+      if (input) {
+        input.value = text;
+        input.focus();
+      }
+    }
+
+    async function generateSchemaWithAI() {
+      const promptInput = document.getElementById('ai-prompt-input');
+      const prompt = promptInput ? promptInput.value.trim() : '';
+      if (!prompt) {
+        showToast('Please enter a natural language prompt for the AI', 'danger');
+        return;
+      }
+
+      const cfg = getAIConfig();
+      if (!cfg.apiKey && cfg.provider !== 'ollama' && cfg.provider !== 'vertex-ai') {
+        showToast('Please connect your LLM with an API key first', 'danger');
+        openAISettingsModal();
+        return;
+      }
+
+      const btn = document.getElementById('btn-generate-ai');
+      const btnText = document.getElementById('ai-btn-text');
+      const mode = document.getElementById('ai-generate-mode').value;
+      const activeSchemaName = document.getElementById('model-name').value.trim();
+      const activeSchemaContent = document.getElementById('schema-sdl-editor').value;
+
+      btn.disabled = true;
+      btnText.innerText = 'Compiling AST... ⚡';
+
+      try {
+        const res = await fetch('/api/studio/ai/generate-schema', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-ai-provider': cfg.provider,
+            'x-ai-api-key': cfg.apiKey,
+            'x-ai-base-url': cfg.baseUrl,
+            'x-ai-model': cfg.model,
+            'x-ai-project-id': cfg.projectId,
+            'x-ai-location': cfg.location,
+          },
+          body: JSON.stringify({
+            prompt,
+            mode,
+            activeSchemaName,
+            activeSchemaContent,
+            projectId: cfg.projectId,
+            location: cfg.location,
+          }),
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          const generatedSDL = data.data.sdl;
+          const editor = document.getElementById('schema-sdl-editor');
+          editor.value = generatedSDL;
+          document.getElementById('sdl-line-numbers').innerText = generatedSDL.split('\n').map((_, i) => i + 1).join('\n');
+
+          // Sync into Visual Builder
+          syncSDLIntoVisualBuilder(generatedSDL);
+
+          if (data.data.selfHealed) {
+            showToast(`AutoGraphQL AI Compiler self-healed syntax (${data.data.retriesCount} retry)`, 'success');
+          }
+          showToast(`Generated '${data.data.primaryModelName}' successfully! ⚡`);
+        } else {
+          showToast(data.error || 'Failed to generate schema', 'danger');
+        }
+      } catch (err) {
+        showToast(`AI generation error: ${err.message}`, 'danger');
+      } finally {
+        btn.disabled = false;
+        btnText.innerText = 'Generate SDL ⚡';
+      }
+    }
+
+    function syncSDLIntoVisualBuilder(sdl) {
+      if (!sdl || typeof sdl !== 'string') return;
+      try {
+        // 1. Extract Custom Enums: enum <Name> { VAL1 VAL2 }
+        const enumMatches = sdl.matchAll(/enum\s+(\w+)\s*\{([^}]+)\}/g);
+        for (const match of enumMatches) {
+          const enumName = match[1];
+          const enumVals = match[2]
+            .split(/[\s,\n]+/)
+            .map(v => v.trim())
+            .filter(v => v && !v.startsWith('#'));
+          if (enumVals.length > 0) {
+            customEnums = customEnums.filter(e => e.name !== enumName);
+            customEnums.push({ name: enumName, values: enumVals });
+          }
+        }
+        renderCustomEnumsList();
+
+        // 2. Extract Model Definition: type <Name> @model(...) { ... }
+        const typeMatch = sdl.match(/type\s+(\w+)\s*([^{]*)\{([^}]+)\}/);
+        if (!typeMatch) return;
+
+        const modelName = typeMatch[1];
+        const typeDirectivesStr = typeMatch[2] || '';
+        const fieldsBody = typeMatch[3];
+
+        document.getElementById('model-name').value = modelName;
+
+        // Database engine
+        const dbSelect = document.getElementById('model-db');
+        if (/database\s*:\s*(?:postgres|sql|sequelize)/i.test(typeDirectivesStr)) {
+          dbSelect.value = 'postgres';
+        } else if (/database\s*:\s*(?:mongoose|mongo)/i.test(typeDirectivesStr)) {
+          dbSelect.value = 'mongoose';
+        } else {
+          dbSelect.value = 'default';
+        }
+
+        // Model Directives
+        document.getElementById('dir-history').checked = /@history\b/i.test(typeDirectivesStr);
+        document.getElementById('dir-tenant').checked = /@tenantScoped\b/i.test(typeDirectivesStr);
+        document.getElementById('dir-owner').checked = /@ownerScoped\b/i.test(typeDirectivesStr);
+
+        // 3. Clear existing visual fields and relations
+        document.getElementById('fields-container').innerHTML = '';
+        document.getElementById('relations-inputs-container').innerHTML = '';
+
+        // 4. Parse fields & relations
+        const lines = fieldsBody.split('\n');
+        lines.forEach(line => {
+          const trimmed = line.trim();
+          if (!trimmed || trimmed.startsWith('#')) return;
+
+          // Check for @relation
+          const relMatch = trimmed.match(/^(\w+)\s*:\s*(\[?\w+\]?)\s*@relation\s*\(\s*name\s*:\s*"(\w+)"(?:,\s*direction\s*:\s*"(\w+)")?/);
+          if (relMatch) {
+            const [, fieldName, targetTypeRaw, relationName] = relMatch;
+            const isArray = targetTypeRaw.startsWith('[') && targetTypeRaw.endsWith(']');
+            const targetModel = targetTypeRaw.replace(/[\[\]!]/g, '');
+            addRelationRow();
+            const lastRow = document.querySelector('#relations-inputs-container > div:last-child');
+            if (lastRow) {
+              const inputs = lastRow.querySelectorAll('input, select');
+              if (inputs[0]) inputs[0].value = fieldName;
+              if (inputs[1]) inputs[1].value = targetModel;
+              if (inputs[2]) inputs[2].value = isArray ? '1:N' : '1:1';
+              if (inputs[3]) inputs[3].value = relationName;
+            }
+            return;
+          }
+
+          // Check for standard field: fieldName: Type! @dir
+          const fieldMatch = trimmed.match(/^(\w+)\s*:\s*(\[?\w+\]?)(!?)(.*)/);
+          if (!fieldMatch) return;
+
+          const [, fieldName, fieldType, reqBang, restDirectives] = fieldMatch;
+          const isRequired = reqBang === '!';
+          const isUnique = /@unique\b/.test(restDirectives);
+
+          addFieldRow(fieldName, fieldType, isRequired, isUnique);
+          const lastCard = document.querySelector('#fields-container .field-row-card:last-child');
+          if (lastCard && restDirectives) {
+            // Apply directives to drawer inputs
+            if (/@trim\b/.test(restDirectives)) {
+              const el = lastCard.querySelector('.dir-trim');
+              if (el) el.checked = true;
+            }
+            if (/@nameCase\b/.test(restDirectives)) {
+              const el = lastCard.querySelector('.dir-namecase');
+              if (el) el.checked = true;
+            }
+            if (/@upperCase\b/.test(restDirectives)) {
+              const el = lastCard.querySelector('.dir-uppercase');
+              if (el) el.checked = true;
+            }
+            if (/@lowerCase\b/.test(restDirectives)) {
+              const el = lastCard.querySelector('.dir-lowercase');
+              if (el) el.checked = true;
+            }
+            if (/@uniqueOrEmpty\b/.test(restDirectives)) {
+              const el = lastCard.querySelector('.dir-unique-empty');
+              if (el) el.checked = true;
+            }
+            if (/@readOnly\b/.test(restDirectives)) {
+              const el = lastCard.querySelector('.dir-readonly');
+              if (el) el.checked = true;
+            }
+            if (/@writeOnly\b/.test(restDirectives)) {
+              const el = lastCard.querySelector('.dir-writeonly');
+              if (el) el.checked = true;
+            }
+            if (/@filterOff\b/.test(restDirectives)) {
+              const el = lastCard.querySelector('.dir-filteroff');
+              if (el) el.checked = true;
+            }
+            if (/@encrypted\b/.test(restDirectives)) {
+              const el = lastCard.querySelector('.dir-encrypted');
+              if (el) el.checked = true;
+            }
+
+            // Clamps
+            const clampMatch = restDirectives.match(/@clamp\s*\(([^)]+)\)/);
+            if (clampMatch) {
+              const minM = clampMatch[1].match(/min\s*:\s*([\d.-]+)/);
+              const maxM = clampMatch[1].match(/max\s*:\s*([\d.-]+)/);
+              if (minM) {
+                const el = lastCard.querySelector('.dir-clamp-min');
+                if (el) el.value = minM[1];
+              }
+              if (maxM) {
+                const el = lastCard.querySelector('.dir-clamp-max');
+                if (el) el.value = maxM[1];
+              }
+            }
+
+            // Regex validate
+            const valMatch = restDirectives.match(/@validate\s*\(\s*regex\s*:\s*"([^"]+)"\s*\)/);
+            if (valMatch) {
+              const el = lastCard.querySelector('.dir-validate-regex');
+              if (el) el.value = valMatch[1];
+            }
+
+            // Default value
+            const defMatch = restDirectives.match(/@defaultValue\s*\(\s*value\s*:\s*([^)]+)\s*\)/);
+            if (defMatch) {
+              const el = lastCard.querySelector('.dir-default-val');
+              if (el) el.value = defMatch[1].replace(/^"|"$/g, '');
+            }
+          }
+        });
+
+        updateSDLPreview();
+      } catch (err) {
+        console.error('syncSDLIntoVisualBuilder error:', err);
+      }
+    }
+
     // Initialize on load
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('db-status-text').innerText = `Server Online :${window.location.port || 3001}`;
+      updateAIStatusBadge();
       const urlParams = new URLSearchParams(window.location.search);
       const targetTab = urlParams.get('tab') || window.location.hash.replace('#', '');
       if (targetTab && document.getElementById(targetTab)) {
