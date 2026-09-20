@@ -73,6 +73,7 @@ The **Schema Studio** tab is your central hub for designing GraphQL entities and
 AutoGraphQL Studio includes a built-in **Universal AI Schema Copilot** that converts natural language requirements into production-ready GraphQL SDL with complete knowledge of AutoGraphQL's custom AST directives and database architecture.
 
 - **Bring Your Own LLM (BYO-LLM):** Connect to:
+  - **Google Cloud Vertex AI (Gemini):** Native Google SDK authentication via Application Default Credentials (`gcloud auth application-default login`) — zero token pasting needed!
   - **Commercial Cloud Providers:** OpenAI (`gpt-4o`, `o3-mini`), Google Gemini (`gemini-2.0-flash`), Anthropic Claude (`claude-3-5-sonnet`), Groq (`llama-3.3-70b`), OpenRouter.
   - **Local & Offline LLMs:** Ollama (`localhost:11434`), vLLM, LocalAI, LM Studio.
   - **Custom Endpoints:** Any OpenAI-compatible gateway base URL.
