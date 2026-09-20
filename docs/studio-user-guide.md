@@ -64,6 +64,31 @@ The **Schema Studio** tab is your central hub for designing GraphQL entities and
   <img src="assets/studio/02-studio-schema-studio.png" alt="AutoGraphQL Schema Studio & Visual Model Builder" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
 </div>
 
+### 🤖 AI Schema Architect & Universal LLM Integration (BYO-LLM)
+
+<div align="center">
+  <img src="assets/studio/10-studio-ai-copilot.png" alt="AutoGraphQL AI Schema Copilot & Universal LLM Integration" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin-bottom: 1rem;" />
+</div>
+
+AutoGraphQL Studio includes a built-in **Universal AI Schema Copilot** that converts natural language requirements into production-ready GraphQL SDL with complete knowledge of AutoGraphQL's custom AST directives and database architecture.
+
+- **Bring Your Own LLM (BYO-LLM):** Connect to:
+  - **Commercial Cloud Providers:** OpenAI (`gpt-4o`, `o3-mini`), Google Gemini (`gemini-2.0-flash`), Anthropic Claude (`claude-3-5-sonnet`), Groq (`llama-3.3-70b`), OpenRouter.
+  - **Local & Offline LLMs:** Ollama (`localhost:11434`), vLLM, LocalAI, LM Studio.
+  - **Custom Endpoints:** Any OpenAI-compatible gateway base URL.
+- **🔒 Zero Server Storage (Privacy-First):** API keys are stored exclusively in your browser's `localStorage` and sent ephemerally over headers to the proxy route. They are never written to disk or logged.
+- **Deep AutoGraphQL Directive Nomenclature Awareness:** The AI automatically applies:
+  - `@model` with database selection (`database: postgres` or MongoDB default).
+  - Multi-tenancy & Security: `@tenantScoped(field, claim)`, `@ownerScoped(field, claim)`.
+  - Audit logs: `@history`.
+  - Relations: `@relation(name, direction: "OUT" | "IN" | "BOTH")` and `@relationalMeta`.
+  - Field Constraints: `@clamp(min, max)`, `@validate(regex)`, `@defaultValue(value)`, `@unique`.
+  - Sanitization: `@trim`, `@nameCase`, `@upperCase`, `@lowerCase`, `@slug`.
+  - Security: `@readOnly`, `@writeOnly`, `@filterOff`, `@encrypted`.
+- **RAG Active Schema Awareness:** Scans existing models in `schemas/` (e.g. `User`, `Category`) so generated relational connectors wire directly to existing types.
+- **AST Validation & Self-Correction:** Before rendering, generated SDL is parsed with `graphql/language`. If a syntax error occurs, the server automatically retries with AST error feedback to self-heal the output.
+- **Bi-Directional Visual Builder Sync:** Click **`⚡ Sync to Visual Builder`** to parse generated or edited SDL into the Visual Model Builder cards and custom enums.
+
 ### Visual Model Builder
 - **Model Name:** Enter the entity name (e.g. `Course`, `Order`, `Product`, `Invoice`).
 - **Database Dialect:** Choose between:

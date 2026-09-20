@@ -263,17 +263,30 @@ Inspect, filter, insert, and inline-edit live database records across MongoDB an
 
 ---
 
-### 2. 📐 Schema Studio & Visual Model Builder
-Design database models visually or write standard GraphQL SDL with real-time AST syntax validation.
+### 2. 📐 Schema Studio & AI Schema Architect (BYO-LLM)
+Design database models visually, edit raw SDL, or **generate production-grade schemas from plain English** using any connected LLM with full AutoGraphQL AST directive knowledge.
 
 <div align="center">
-  <img src="docs/assets/studio/02-studio-schema-studio.png" alt="AutoGraphQL Schema Studio & Visual Model Builder" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
+  <img src="docs/assets/studio/10-studio-ai-copilot.png" alt="AutoGraphQL Schema Studio & AI Schema Architect (BYO-LLM)" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
 </div>
 
-- **Declarative Directive Toggles:** Easily apply `@model`, `@unique`, `@defaultValue`, `@trim`, `@clamp`, `@history`, and `@tenantScoped`.
-- **Dual-Pane Live Sync:** Visual form field edits automatically sync with the right-hand GraphQL SDL Code Editor in real time.
-- **Multi-Database Dialect Selection:** Target MongoDB (Mongoose) or PostgreSQL (Sequelize) on a per-model basis.
-- **Managed Schemas (`schemas/`):** Auto-discovers, saves, and hot-reloads schemas instantly.
+- **🤖 Universal "Bring Your Own LLM" (BYO-LLM):** Connect seamlessly to:
+  - **Google Cloud Vertex AI (Gemini):** Native Google SDK authentication via Application Default Credentials (`gcloud auth application-default login`) — zero token pasting needed!
+  - **Commercial Cloud Models:** OpenAI (`gpt-4o`), Google Gemini (`gemini-2.0-flash`, `gemini-1.5-pro`), Anthropic Claude (`claude-3-5-sonnet`), Groq (`llama-3.3-70b`), OpenRouter.
+  - **Local Offline Models:** Ollama (`http://localhost:11434/v1` with `llama3.2`, `qwen3`, etc.), vLLM, LocalAI, LM Studio.
+  - **Custom Endpoints:** Any private or self-hosted OpenAI-compatible endpoint.
+- **🔒 Zero Server Storage (Privacy-First):** API keys are stored exclusively in your browser's `localStorage` and passed ephemerally via secure request headers.
+- **🧠 AutoGraphQL AST Directive Knowledge Base:** Generates schemas strictly conforming to AutoGraphQL directives:
+  - Backing Database: `@model(database: postgres)` or MongoDB default.
+  - Security & Multi-Tenancy: `@tenantScoped(field, claim)`, `@ownerScoped(field, claim)`.
+  - Immutable Audit Trails: `@history`.
+  - Relational Connectors: `@relation(name, direction: "OUT" | "IN" | "BOTH")` and `@relationalMeta`.
+  - Field Constraints: `@clamp(min, max)`, `@validate(regex)`, `@defaultValue(value)`, `@unique`.
+  - Transformations & Access: `@trim`, `@nameCase`, `@upperCase`, `@lowerCase`, `@slug`, `@readOnly`, `@writeOnly`, `@encrypted`.
+  - Custom Enums: Auto-generated `enum Status { ... }` definitions.
+- **🔄 RAG Active Schema Awareness:** Automatically injects existing project models (`schemas/`) into context so relations link seamlessly without breaking foreign keys.
+- **🛡️ AST Validation & Self-Healing:** Validates generated SDL with `graphql.parse` and automatically auto-corrects syntax variances.
+- **⚡ Bi-Directional Visual Builder Sync:** 1-click **`⚡ Sync to Visual Builder`** loads generated SDL back into the visual field cards and dropdowns, with instant **`Deploy Model ⚡`** compilation into `schemas/<Model>.graphql`.
 
 ---
 
