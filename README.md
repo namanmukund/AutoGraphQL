@@ -1,840 +1,288 @@
 # ⚡ AutoGraphQL
 
-> **Schema-First, AST-Driven Auto-Generated GraphQL Backend Engine & Database Framework for Node.js**  
-> Define your database models once using standard GraphQL SDL with declarative directives (`@model`, `@relation`, `@defaultValue`, `@unique`, `@readOnly`, `@writeOnly`, `@clamp`, `@allow`, `@deny`), and immediately get dynamic MongoDB / PostgreSQL models, full-featured CRUD APIs, complex nested filtering, batch mutations, relational connectors, and real-time WebSocket subscriptions.
+## Define your GraphQL schema. Get a production-ready backend automatically.
+
+AutoGraphQL is an open-source, schema-first backend framework for Node.js. It is built for developers who want to build and ship GraphQL APIs without writing repetitive CRUD resolvers, database models, and relational plumbing. By defining your data models once using standard GraphQL SDL and declarative directives, AutoGraphQL automatically compiles dynamic MongoDB and PostgreSQL models, relational connectors, filtering, authorization, subscriptions, and more.
+
+<p align="center">
+  <a href="https://github.com/namanmukund/AutoGraphQL/actions/workflows/ci.yml"><img src="https://github.com/namanmukund/AutoGraphQL/actions/workflows/ci.yml/badge.svg" alt="AutoGraphQL CI" /></a>
+  <a href="https://github.com/namanmukund/AutoGraphQL/stargazers"><img src="https://img.shields.io/github/stars/namanmukund/AutoGraphQL?style=flat&color=yellow" alt="GitHub Stars" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT" /></a>
+  <a href="package.json"><img src="https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg" alt="Node.js Version" /></a>
+  <a href="https://graphql.org"><img src="https://img.shields.io/badge/GraphQL-15.8-E10098.svg?logo=graphql&logoColor=white" alt="GraphQL" /></a>
+  <a href="docs/postgresql-guide.md"><img src="https://img.shields.io/badge/Databases-MongoDB%20%7C%20PostgreSQL-336791.svg" alt="Databases" /></a>
+  <a href="sdk"><img src="https://img.shields.io/badge/TypeScript-SDK%20Ready-3178C6.svg?logo=typescript&logoColor=white" alt="TypeScript SDK Ready" /></a>
+</p>
+
+<p align="center">
+  <a href="#-the-magic-example"><strong>The Magic Example</strong></a> •
+  <a href="#-who-is-autographql-for"><strong>Who It's For</strong></a> •
+  <a href="#-quick-start"><strong>Quick Start</strong></a> •
+  <a href="#-key-features"><strong>Features</strong></a> •
+  <a href="#-autographql-studio--visual-control-plane"><strong>Studio</strong></a> •
+  <a href="#️-what-happens-under-the-hood"><strong>Architecture</strong></a> •
+  <a href="#-documentation"><strong>Documentation</strong></a>
+</p>
+
+<p align="center">
+  <em>⭐ If you find AutoGraphQL useful, please consider <a href="https://github.com/namanmukund/AutoGraphQL">starring the repository</a>!</em>
+</p>
 
 ---
 
-## 📺 Video Overview & Architecture Walkthrough
+## 🪄 The Magic Example
 
-Watch the complete visual explainer video for an overview of AutoGraphQL, its architecture, and how to get started:
-
-[![AutoGraphQL Video Walkthrough](https://img.youtube.com/vi/h7C2RLe4sik/maxresdefault.jpg)](https://www.youtube.com/watch?v=h7C2RLe4sik)
-
-> 🎥 **[Watch the Full Video Walkthrough on YouTube](https://www.youtube.com/watch?v=h7C2RLe4sik)**  
-> *A comprehensive guide covering the schema-first architecture, AST compilation, dynamic database generation, and developer workflow.*
-
-<div align="center">
-  <br />
-  <a href="#-autographql-studio-platform-studio">
-    <img src="docs/assets/studio/01-studio-data-browser.png" alt="AutoGraphQL Studio — Universal Data Browser & Developer Console" width="100%" style="border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);" />
-  </a>
-  <p><em>AutoGraphQL Studio: Zero-code visual developer platform, universal data browser, schema designer, and interactive ERD canvas.</em></p>
-</div>
-
----
-
-## 📑 Table of Contents
-
-- [📺 Video Overview & Architecture Walkthrough](#-video-overview--architecture-walkthrough)
-- [🌟 Core Features Overview](#-core-features-overview)
-- [🏆 Why AutoGraphQL? Competitor Comparison](#-why-autographql-competitor-comparison)
-- [📦 Starter Template & Reference Schema (User & UserProfile)](#-starter-template--reference-schema-user--userprofile)
-- [🎯 Real-World Use Cases](#-real-world-use-cases)
-  - [1. Headless CMS & Content Publishing](#1-headless-cms--content-publishing)
-  - [2. Multi-Tenant B2B SaaS & Project Management](#2-multi-tenant-b2b-saas--project-management)
-  - [3. E-Commerce & Marketplace Backend](#3-e-commerce--marketplace-backend)
-  - [4. Real-Time Chat & Collaborative Platforms](#4-real-time-chat--collaborative-platforms)
-- [⚡ Quickstart (60-Second Setup)](#-quickstart-60-second-setup)
-- [🎨 AutoGraphQL Studio Platform (`/studio`)](#-autographql-studio-platform-studio)
-- [🛠️ How It Works: The 1-Step Workflow](#️-how-it-works-the-1-step-workflow)
-- [🧩 Developer Extension & Lifecycle Hooks (Pre/Post Hooks)](#-developer-extension--lifecycle-hooks)
-- [📖 GraphQL API Surface & Examples](#-graphql-api-surface--examples)
-  - [Single & Plural Queries with Filtering and Pagination](#single--plural-queries-with-filtering-and-pagination)
-  - [Aggregation & Metadata Queries](#aggregation--metadata-queries)
-  - [CRUD Mutations & Batch Operations](#crud-mutations--batch-operations)
-  - [Relational Connectors & Foreign Key Joins](#relational-connectors--foreign-key-joins)
-  - [Real-Time WebSocket Subscriptions](#real-time-websocket-subscriptions)
-- [🛡️ Declarative Schema Directives Reference](#️-declarative-schema-directives-reference)
-- [🔍 Advanced Filtering & Operator Engine](#-advanced-filtering--operator-engine)
-- [🔐 Authentication & Token Lifecycle](#-authentication--token-lifecycle)
-- [💾 Multi-Database Architecture (MongoDB & PostgreSQL)](#-multi-database-architecture-mongodb--postgresql)
-- [🏢 Multi-Tenancy & Row-Level Security (RLS)](#-multi-tenancy--row-level-security-rls)
-- [🛡️ Production Reliability & Safeguards](#-production-reliability--safeguards)
-- [⚡ Event-Driven Automation & Webhooks (Birdwatch)](#-event-driven-automation--webhooks-birdwatch)
-- [🛠️ Developer & CI/CD Tooling](#️-developer--cicd-tooling)
-- [🧪 Automated Test Suite (`npm test`)](#-automated-test-suite-npm-test)
-- [📁 Project Directory Structure](#-project-directory-structure)
-- [📄 License](#-license)
-
----
-
-## 🌟 Core Features Overview
-
-| Feature | Description |
-| :--- | :--- |
-| 🚀 **Pure Schema-Driven (AST)** | Define `.graphql` or `.js` SDL types with `@model` and the AST compiler automatically generates GraphQL queries, mutations, subscriptions, inputs, and resolvers. |
-| 🗄️ **Multi-Database Models** | Dynamic **MongoDB (Mongoose)** and **PostgreSQL (Sequelize)** model compilation with automatic index sync and timestamps (`createdAt`, `updatedAt`). |
-| 🏢 **Declarative Multi-Tenancy (RLS)** | Row-Level Security directives (`@tenantScoped`, `@ownerScoped`) automatically inject tenant isolation constraints into queries and mutations, preventing cross-tenant data leaks. |
-| 🔗 **Relational Connectors** | Bidirectional (1-to-1, 1-to-N, N-to-N) and OneWay relation joins with automatic connector mutations (`ConnectId`, `ConnectIds`, `addTo<Relation>`, `removeFrom<Relation>`). |
-| ⚡ **DataLoader & N+1 Prevention** | Request-scoped DataLoader batching merges relational lookups into single database queries across MongoDB and PostgreSQL. |
-relational lookups into single database queries with in-memory tick memoization. |
-| 🛡️ **Query Depth & Complexity Protection** | AST visitor validation rules reject runaway, deeply-nested, or computationally prohibitive queries before resolver execution. |
-| 🩺 **Kubernetes Health Probes** | Cloud-native `/health/live` (liveness) and `/health/ready` (readiness verifying MongoDB, Postgres, and Redis connections) endpoints. |
-| 📡 **Transactional Outbox & Webhooks** | Guaranteed event delivery with HMAC-SHA256 signing, exponential backoff retries, and in-process Birdwatch listeners. |
-| 🛡️ **Schema Governance & Diffing** | Automated breaking-change detection in CI/CD pipelines classifying `BREAKING`, `DANGEROUS`, and `SAFE` changes. |
-| 📦 **Automated TypeScript SDK** | One-command compilation of schema AST into strongly-typed TypeScript models, input types, and `AutoGraphQLClient`. |
-| ⚡ **Persisted Queries (APQ) & Safelisting** | Automatic Persisted Queries with SHA256 hashing and optional production safelisting (`PERSISTED_QUERIES_ONLY=true`). |
-| 🔍 **Powerful Filter Engine** | Nested boolean logic (`and`, `or`), string matchers (`contains`, `startsWith`, `endsWith`), numerical/date ranges (`gt`, `gte`, `lt`, `lte`), and array operators. |
-| ⚡ **Real-Time Subscriptions** | Instant WebSocket subscriptions over `subscriptions-transport-ws` and `graphql-ws` with optional Redis PubSub clustering. |
-| 🛡️ **Declarative RBAC & Directives** | Enforce field and model level permissions with `@allow` / `@deny` rules across standard framework roles (`ADMIN`, `USER`, `GUEST`). |
-| 🔑 **Built-in JWT Authentication** | Signed user tokens, application tokens, static service tokens, configurable expiry, and token blacklisting. |
-| 📁 **Multipart File Management** | Built-in `File` model with MIME validation, AWS S3 storage support, and CloudFront CDN asset signing. |
-| 🎮 **Interactive GraphQL Playground** | Embedded dark-mode GraphQL IDE available out of the box at `http://localhost:3000/graphql/core`. |
-| 🧪 **Comprehensive Test Suite** | Pre-configured Mocha/Babel test suite validating AST generation, models, auth, execution, and reliability safeguards. |
-
----
-
-## 🏆 Why AutoGraphQL? Competitor Comparison
-
-> 📊 **Interactive Slide Deck**: Open **[`http://localhost:3000/slides`](http://localhost:3000/slides)** for the executive 16:9 presentation slide deck!  
-> 📖 **Full Analysis**: Read the detailed technical breakdown in **[`docs/competitor-analysis.md`](docs/competitor-analysis.md)**.
-
-| Capability | ⚡ AutoGraphQL | 🐘 Hasura | 💎 Prisma | 📜 PostGraphile | 🚀 Strapi |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Architecture Core** | **AST-Driven Engine** | Haskell Proxy | ORM Layer Only | SQL-to-GQL Proxy | Headless CMS |
-| **Runtime Environment** | **100% Native Node.js** | Haskell / Go | Node.js / Rust | Node.js | Node.js |
-| **Multi-Database Polyglot** | ✅ **Native Mongo + Postgres** | ⚠️ SQL-first (Mongo weak) | ⚠️ ORM only, no API | ❌ Postgres only | ⚠️ SQL-first |
-| **Schema-First Workflow** | ✅ **Pure GraphQL SDL** | ❌ DB-first + YAML | ❌ Proprietary DSL | ❌ DB DDL-first | ❌ Admin UI-first |
-| **Resolver Generation** | ✅ **100% Zero-Code** | ✅ Auto-generated | ❌ Manual (Apollo/Pothos) | ✅ Auto-generated | ⚠️ Opinionated CMS |
-| **Visual Studio Platform** | ✅ **Data + ERD + RBAC + Seeder** | ⚠️ Complex Console | ⚠️ Basic Data only | ❌ None (GraphiQL) | ✅ Heavy CMS Admin |
-| **In-Process Lifecycle Hooks** | ✅ **Native JS Pre/Post** | ❌ External HTTP Webhooks | ✅ Native Middleware | ⚠️ SQL Functions | ✅ Lifecycle Hooks |
-| **Row-Level Security (RLS)** | ✅ **Directives (`@tenantScoped`)** | ⚠️ Complex Permissions DSL | ❌ Manual Query Filters | ⚠️ Postgres RLS | ⚠️ Plugin-based |
-| **Transactional Outbox** | ✅ **Built-in Birdwatch + HMAC** | ⚠️ SQL Triggers | ❌ Needs Kafka/Debezium | ❌ External triggers | ⚠️ Basic Webhooks |
-| **Total Cost of Ownership (TCO)** | 🟢 **100% Free & Open Source** | 🔴 Expensive Enterprise Tier | 🟢 Open-source (High Dev Cost) | 🟢 Free & Open Source | 🟡 Paid Enterprise Tiers |
-
----
-
-## 📦 Starter Template & Reference Schema (User & UserProfile)
-
-> 💡 **Educational Starter Reference**: The `User` and `UserProfile` types included in [`graphqlSchema/core/types/`](graphqlSchema/core/types/) are provided purely as a **starter template and reference schema**. They demonstrate 1-to-1 bidirectional relationships, declarative directives, and authentication handling.  
-> **You can freely modify, extend, or completely remove these types** to design whatever custom domain models your application needs!
-
-```graphql
-type User @model {
-  name: String @trim @nameCase
-  role: UserRole! @defaultValue(value: "user")
-  status: Status! @defaultValue(value: "active") @readOnly
-  username: String @uniqueOrEmpty @trim
-  password: String @filterOff @writeOnly
-  email: String @uniqueOrEmpty @trim
-  emailVerified: Boolean @defaultValue(value: "false") @readOnly
-  phone: Phone @uniqueOrEmpty
-  profile: UserProfile @relation(name: "UserProfileRelation")
-  posts: [Post] @relation(name: "UserPosts")
-  comments: [Comment] @relation(name: "UserComments")
-}
-
-type UserProfile @model {
-  user: User @relation(name: "UserProfileRelation")
-  headline: String @trim
-  bio: String
-  website: String @trim
-  github: String @trim
-  twitter: String @trim
-  linkedin: String @trim
-  location: String
-  company: String
-  skills: [String]
-}
-```
-
----
-
-## 🎯 Real-World Use Cases
-
-### 1. Headless CMS & Content Publishing
-Build backends for publishing platforms, blogs, and news feeds:
-- **Models**: `Post`, `Category`, `Tag`, `Comment`, `File`, `User`.
-- **Key Features**: Slug uniqueness, tag relations, media file attachments, and nested comment trees.
-
-```graphql
-type Post @model {
-  title: String! @trim
-  slug: String! @unique
-  content: String!
-  status: PostStatus! @defaultValue(value: "draft")
-  viewsCount: Int @defaultValue(value: "0")
-  author: User! @relation(name: "UserPosts")
-  category: Category @relation(name: "CategoryPosts", direction: "OneWay")
-  tags: [Tag] @relation(name: "TagPosts")
-  comments: [Comment] @relation(name: "PostComments")
-}
-```
-
----
-
-### 2. Multi-Tenant B2B SaaS & Project Management
-Create scalable backends for SaaS platforms with multi-tenancy and team hierarchy:
-- **Models**: `Organization`, `Workspace`, `Project`, `Task`, `Member`.
-- **Key Features**: Declarative `@allow` per role (`ADMIN`, `USER`), compound filtering by workspace ID, and real-time task updates.
-
-```graphql
-type Project @model {
-  name: String! @trim
-  description: String
-  status: ProjectStatus! @defaultValue(value: "active")
-  lead: User @relation(name: "LeadProjects", direction: "OneWay")
-  tasks: [Task] @relation(name: "ProjectTasks")
-}
-```
-
----
-
-### 3. E-Commerce & Marketplace Backend
-Power modern online stores and digital marketplaces:
-- **Models**: `Product`, `Category`, `Order`, `OrderItem`, `Review`, `Customer`.
-- **Key Features**: Numerical validation with `@clamp`, SKU indexing with `@unique`, relational aggregation (`productsMeta { count }`), and inventory tracking.
+Define a data model once in `schemas/Product.graphql`:
 
 ```graphql
 type Product @model {
-  title: String! @trim @nameCase
-  sku: String! @unique
-  price: Float! @clamp(min: 0)
-  stockQuantity: Int! @defaultValue(value: "0")
-  category: Category @relation(name: "CategoryProducts")
-}
-```
-
----
-
-### 4. Real-Time Chat & Collaborative Platforms
-Build real-time messaging, notifications, and live presence:
-- **Models**: `ChatRoom`, `Message`, `Participant`.
-- **Key Features**: Auto-generated GraphQL subscriptions (`message(filter: { chatRoom_id: $roomId })`), relational connectors, and unread counters.
-
-```graphql
-type Message @model {
-  content: String!
-  chatRoom: ChatRoom! @relation(name: "ChatRoomMessages")
-  sender: User! @relation(name: "UserMessages", direction: "OneWay")
-}
-```
-
----
-
-## ⚡ Quickstart (60-Second Setup)
-
-### 1. Clone & Install Dependencies
-```bash
-git clone https://github.com/your-username/autographql.git
-cd autographql
-npm install
-```
-
-### 2. Configure Environment & Start Local Databases
-```bash
-cp .env.example .env
-npm run db:up    # Starts MongoDB, PostgreSQL, and Redis via Docker Compose
-```
-
-### 3. Launch the Development Server
-```bash
-npm run dev
-```
-
-### 4. Open AutoGraphQL Studio & Playground
-- **AutoGraphQL Studio UI:** Navigate to **`http://localhost:3000/studio`** (or `/console`) to visually design models, configure hooks, and explore APIs!
-- **GraphQL Playground:** Navigate to **`http://localhost:3000/graphql/core`** to run queries.
-
-> 💡 **Onboarding Video**: Follow along with the [AutoGraphQL Architecture & Setup Video Walkthrough](https://www.youtube.com/watch?v=h7C2RLe4sik) for a step-by-step visual demonstration.
-
----
-
-## 🎨 AutoGraphQL Studio Platform (`/studio`)
-
-> 📖 **Full Studio Guide**: Read **[`docs/studio-user-guide.md`](docs/studio-user-guide.md)** for an in-depth walkthrough of all Studio features, tutorials, and workflows.
-
-AutoGraphQL Studio is a **zero-code, visual developer console** that allows you to manage the entire application lifecycle directly from your browser. Access it anytime at **`http://localhost:3000/studio`** (or `/console`).
-
----
-
-### 1. 🗂️ Universal Data Browser & Content Manager
-Inspect, filter, insert, and inline-edit live database records across MongoDB and PostgreSQL without leaving your browser.
-
-<div align="center">
-  <img src="docs/assets/studio/01-studio-data-browser.png" alt="AutoGraphQL Universal Data Browser" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
-</div>
-
-- **Inline Cell Editing:** Click any table cell to immediately edit values in place with automatic type validation.
-- **Advanced Filtering & Full-Text Search:** Filter by any field using operators (`contains`, `equals`, `gt`, `lt`, `startsWith`).
-- **🎲 Synthetic Mock Seeder:** Generate realistic test data with 1-click presets for rapid prototyping.
-- **Batch CSV & JSON Portability:** Export your datasets or import external records in a single click.
-
----
-
-### 2. 📐 Schema Studio & AI Schema Architect (BYO-LLM)
-Design database models visually, edit raw SDL, or **generate production-grade schemas from plain English** using any connected LLM with full AutoGraphQL AST directive knowledge.
-
-<div align="center">
-  <img src="docs/assets/studio/10-studio-ai-copilot.png" alt="AutoGraphQL Schema Studio & AI Schema Architect (BYO-LLM)" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
-</div>
-
-- **🤖 Universal "Bring Your Own LLM" (BYO-LLM):** Connect seamlessly to:
-  - **Google Cloud Vertex AI (Gemini):** Native Google SDK authentication via Application Default Credentials (`gcloud auth application-default login`) — zero token pasting needed!
-  - **Commercial Cloud Models:** OpenAI (`gpt-4o`), Google Gemini (`gemini-2.0-flash`, `gemini-1.5-pro`), Anthropic Claude (`claude-3-5-sonnet`), Groq (`llama-3.3-70b`), OpenRouter.
-  - **Local Offline Models:** Ollama (`http://localhost:11434/v1` with `llama3.2`, `qwen3`, etc.), vLLM, LocalAI, LM Studio.
-  - **Custom Endpoints:** Any private or self-hosted OpenAI-compatible endpoint.
-- **🔒 Zero Server Storage (Privacy-First):** API keys are stored exclusively in your browser's `localStorage` and passed ephemerally via secure request headers.
-- **🧠 AutoGraphQL AST Directive Knowledge Base:** Generates schemas strictly conforming to AutoGraphQL directives:
-  - Backing Database: `@model(database: postgres)` or MongoDB default.
-  - Security & Multi-Tenancy: `@tenantScoped(field, claim)`, `@ownerScoped(field, claim)`.
-  - Immutable Audit Trails: `@history`.
-  - Relational Connectors: `@relation(name, direction: "OUT" | "IN" | "BOTH")` and `@relationalMeta`.
-  - Field Constraints: `@clamp(min, max)`, `@validate(regex)`, `@defaultValue(value)`, `@unique`.
-  - Transformations & Access: `@trim`, `@nameCase`, `@upperCase`, `@lowerCase`, `@slug`, `@readOnly`, `@writeOnly`, `@encrypted`.
-  - Custom Enums: Auto-generated `enum Status { ... }` definitions.
-- **🔄 RAG Active Schema Awareness:** Automatically injects existing project models (`schemas/`) into context so relations link seamlessly without breaking foreign keys.
-- **🛡️ AST Validation & Self-Healing:** Validates generated SDL with `graphql.parse` and automatically auto-corrects syntax variances.
-- **⚡ Bi-Directional Visual Builder Sync:** 1-click **`⚡ Sync to Visual Builder`** loads generated SDL back into the visual field cards and dropdowns, with instant **`Deploy Model ⚡`** compilation into `schemas/<Model>.graphql`.
-
----
-
-### 3. 🔗 Interactive Visual Entity-Relationship Diagram (ERD)
-Explore and understand your entire application data graph visually.
-
-<div align="center">
-  <img src="docs/assets/studio/03-studio-visual-erd.png" alt="AutoGraphQL Visual ERD Canvas" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
-</div>
-
-- **Automatic Relationship Mapping:** Introspects `@relation` directives and foreign keys to visualize 1:1, 1:N, and N:N connections.
-- **Engine Badge Identifiers:** See at a glance which collections reside in MongoDB (`🍃 Mongo`) vs. relational tables in PostgreSQL (`🐘 Postgres`).
-- **Interactive Canvas:** Zoom, pan, search for specific entities, and use Auto-Layout to organize complex enterprise schemas.
-
----
-
-### 4. 🛡️ Role-Based Access Control (RBAC) & Multi-Tenant RLS Matrix
-Audit and enforce security policies across all models and user roles.
-
-<div align="center">
-  <img src="docs/assets/studio/04-studio-access-rbac.png" alt="AutoGraphQL Access Control and RBAC Matrix" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
-</div>
-
-- **Granular Permission Matrix:** View CRUD capabilities across roles (`ADMIN`, `USER`, `GUEST`).
-- **Row-Level Security (RLS) Diagnostics:** Verify tenant isolation policies (`@tenantScoped`) to guarantee multi-tenant data safety.
-- **1-Click Test JWT Generator:** Generate scoped tokens directly in Studio to test auth rules against live endpoints.
-
----
-
-### 5. 📡 Birdwatch Webhooks & Transactional Outbox
-Monitor and trigger asynchronous event delivery with guaranteed at-least-once reliability.
-
-<div align="center">
-  <img src="docs/assets/studio/05-studio-webhooks-outbox.png" alt="AutoGraphQL Webhooks and Transactional Outbox" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
-</div>
-
-- **Transactional Outbox Worker:** Dispatches events asynchronously with automated retries and exponential backoff.
-- **HMAC-SHA256 Signatures:** Cryptographically sign outgoing payloads to ensure consumer integrity.
-- **Wildcard Subscriptions:** Subscribe endpoints to specific events (e.g. `addUser`, `order:paid`, `post:*`).
-
----
-
-### 6. 📊 Real-Time Telemetry, Health Diagnostics & Live Logs
-Track system health, memory footprint, and query execution without third-party APM overhead.
-
-<div align="center">
-  <img src="docs/assets/studio/06-studio-telemetry-metrics.png" alt="AutoGraphQL Telemetry and Live Server Logs" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
-</div>
-
-- **Real-Time Health Probes:** Live server uptime, heap memory consumption, and active DB connection status.
-- **Streaming Winston Console:** Live log stream with log-level filtering (`INFO`, `WARN`, `ERROR`), search, and auto-scroll.
-
----
-
-## 🛠️ How It Works: The 1-Step Workflow
-
-To create a new database collection and a complete GraphQL API, create a file in `graphqlSchema/core/types/<name>/<Name>.js`:
-
-```graphql
-// graphqlSchema/core/types/product/Product.js
-const Product = `
-  type Product @model {
-    name: String! @trim
-    sku: String! @unique
-    price: Float! @clamp(min: 0)
-    stock: Int @defaultValue(value: "0")
-    category: Category @relation(name: "CategoryProducts")
-  }
-`;
-export default [Product];
-```
-
-**That's it.** AutoGraphQL will automatically:
-1. Compile Mongoose / PostgreSQL database models with indexes and validation.
-2. Generate queries: `product(id: ID)`, `products(filter, first, skip, orderBy)`, `productsMeta(filter)`.
-3. Generate CRUD mutations: `addProduct`, `updateProduct`, `updateProducts`, `deleteProduct`, `deleteProducts`.
-4. Generate relational connectors: `categoryConnectId`, `addToCategory`, `removeFromCategory`.
-5. Generate real-time subscriptions: `product(filter: ...)` WebSocket events.
-
----
-
-## 🧩 Developer Extension & Lifecycle Hooks
-
-> [!TIP]
-> 📖 **Architecture & Hooks Guide**: See **[`docs/developer-extension-and-hooks-guide.md`](docs/developer-extension-and-hooks-guide.md)** for building custom domain schemas, attaching synchronous Pre/Post Hooks, setting up Birdwatch event listeners, and safely pulling upstream AutoGraphQL framework updates without merge conflicts.
-
-```
-AutoGraphQL/
-├── 🧠 FRAMEWORK CORE ENGINE (src/ - Never touch, auto-updated from upstream)
-└── 🎯 YOUR DOMAIN CODE (graphqlSchema/ & .env - Your business models & hooks)
-```
-
----
-
-## 📖 GraphQL API Surface & Examples
-
-### Single & Plural Queries with Filtering and Pagination
-
-```graphql
-# Fetch users with filtering, sorting, and relational profile expansion
-query FetchActiveUsers {
-  users(
-    filter: {
-      and: [
-        { status: active }
-        { email_contains: "@example.com" }
-      ]
-    }
-    first: 10
-    skip: 0
-    orderBy: { createdAt: DESC }
-  ) {
-    id
-    name
-    email
-    username
-    role
-    profile {
-      headline
-      bio
-      company
-      skills
-    }
-    createdAt
-  }
-}
-```
-
----
-
-### Aggregation & Metadata Queries
-
-> [!TIP]
-> 📖 **Full Guide**: See **[`docs/count-and-aggregations-guide.md`](docs/count-and-aggregations-guide.md)** for total counts, filtered counts, group-by segmentations (`@groupBy`), relational child counts (`@relationalMeta`), and multi-tenant RLS.
-
-```graphql
-# Count total users matching filter criteria
-query CountActiveUsers {
-  usersMeta(filter: { status: active }) {
-    count
-  }
-}
-```
-
----
-
-### CRUD Mutations & Batch Operations
-
-```graphql
-# 1. Create a new User
-mutation CreateUser {
-  addUser(
-    input: {
-      name: "Alex Mercer"
-      email: "alex@example.com"
-      username: "alexmercer"
-      password: "SuperSecurePassword123"
-    }
-  ) {
-    id
-    name
-    email
-    username
-  }
-}
-
-# 2. Update a User by ID
-mutation UpdateUser {
-  updateUser(
-    id: "USER_ID_HERE"
-    input: {
-      name: "Alex J. Mercer"
-      bio: "Software Architect & Open Source Contributor"
-    }
-  ) {
-    id
-    name
-    bio
-    updatedAt
-  }
-}
-
-# 3. Delete a User
-mutation DeleteUser {
-  deleteUser(id: "USER_ID_HERE") {
-    id
-  }
-}
-```
-
----
-
-### Relational Connectors & Foreign Key Joins
-
-```graphql
-# Create a UserProfile and connect it directly to an existing User
-mutation CreateAndConnectProfile {
-  addUserProfile(
-    input: {
-      headline: "Senior Cloud Engineer"
-      company: "Tech Corp"
-      skills: ["GraphQL", "Node.js", "Docker"]
-    }
-    userConnectId: "USER_ID_HERE"
-  ) {
-    id
-    headline
-    company
-    user {
-      id
-      name
-      email
-    }
-  }
-}
-```
-
----
-
-### Real-Time WebSocket Subscriptions
-
-```graphql
-# Listen in real time to newly created or updated users
-subscription OnUserUpdated {
-  user(filter: { role: user }) {
-    mutation
-    node {
-      id
-      name
-      email
-      status
-    }
-    updatedFields
-  }
-}
-```
-
----
-
-## 🛡️ Declarative Schema Directives Reference
-
-> [!TIP]
-> 📖 **Full Reference Guide**: See **[`docs/directives-reference.md`](docs/directives-reference.md)** for exhaustive documentation, arguments, behavior, and code examples for all 25+ supported schema directives.
-
-| Directive | Target | Purpose | Example |
-| :--- | :--- | :--- | :--- |
-| **`@model`** | `Type` | Registers type for dynamic database model compilation and GraphQL CRUD generation. | `type Post @model { ... }` |
-| **`@relation`** | `Field` | Establishes 1-to-1, 1-to-N, or N-to-N joins between models. | `author: User @relation(name: "UserPosts")` |
-| **`@defaultValue`** | `Field` | Sets a default value on creation. | `status: Status @defaultValue(value: "active")` |
-| **`@unique`** | `Field` | Enforces unique index constraint in database. | `sku: String! @unique` |
-| **`@uniqueOrEmpty`** | `Field` | Enforces unique constraint while permitting null/empty strings. | `email: String @uniqueOrEmpty` |
-| **`@readOnly`** | `Field` | Prevents client mutation (system-managed field). | `emailVerified: Boolean @readOnly` |
-| **`@writeOnly`** | `Field` | Strips field from GraphQL query responses (e.g. password). | `password: String @writeOnly` |
-| **`@filterOff`** | `Field` | Excludes field from generated Filter input types. | `password: String @filterOff` |
-| **`@clamp`** | `Field` | Validates minimum / maximum numeric values or string lengths. | `price: Float @clamp(min: 0)` |
-| **`@trim`** | `Field` | Automatically trims leading/trailing whitespace. | `name: String @trim` |
-| **`@nameCase`** | `Field` | Capitalizes words to proper title/name case. | `name: String @nameCase` |
-| **`@allow`** / **`@deny`** | `Type`/`Field`| Declarative role-based access control. | `@allow(role: ["admin"], operations: [create, delete])` |
-
----
-
-## 🔍 Advanced Filtering & Operator Engine
-
-AutoGraphQL supports deep MongoDB-style filtering across all queries:
-
-```graphql
-# Complex filter combinations
-filter: {
-  and: [
-    { price_gte: 50.0 }
-    { price_lte: 500.0 }
-    {
-      or: [
-        { category_id: "CAT_1" }
-        { tags_contains: "featured" }
-      ]
-    }
-  ]
-}
-```
-
-### Available Filter Operators
-
-- **Logical**: `and`, `or`, `not`
-- **Equality**: `field`, `field_not`
-- **Substring Matchers**: `field_contains`, `field_startsWith`, `field_endsWith`, `field_not_contains`
-- **Numeric & Date Comparisons**: `field_gt`, `field_gte`, `field_lt`, `field_lte`
-- **Set Inclusion**: `field_in`, `field_not_in`, `field_exists`
-- **Array Mutations**: `push`, `pushMany`, `pushToSet`, `pop`, `popFront`, `popBack`, `popAll`, `replace`
-
----
-
-## 🔐 Authentication & Token Lifecycle
-
-AutoGraphQL comes with a full JWT authentication suite:
-
-```javascript
-import { createToken, verifyToken, createAppToken, verifyAppToken } from './src/auth';
-
-// 1. Generate User JWT
-const token = createToken({ id: 'user_123', username: 'alex', role: 'user' });
-
-// 2. Verify User JWT
-const decoded = verifyToken(token);
-// => { userInfo: { id: 'user_123', username: 'alex' } }
-
-// 3. Application Static Tokens
-const appToken = createAppToken('web');
-const appData = verifyAppToken(appToken);
-// => { appInfo: { name: 'web' } }
-```
-
----
-
-## 💾 Multi-Database Architecture (MongoDB & PostgreSQL)
-
-AutoGraphQL provides seamless support for dual databases:
-- **MongoDB**: Powered by Mongoose for unstructured/semi-structured application models.
-- **PostgreSQL**: Powered by Sequelize for relational schemas, transactional ledger data, and analytical tables.
-
-> [!TIP]
-> 📖 **Comprehensive Guides & Examples**:
-> - 🍃 **[MongoDB Guide & Examples (`docs/mongodb-guide.md`)](docs/mongodb-guide.md)**: Embedded sub-documents, multi-key indexes, aggregations, and real-time subscriptions.
-> - 🐘 **[PostgreSQL Guide & Examples (`docs/postgresql-guide.md`)](docs/postgresql-guide.md)**: Sequelize data types, B-Tree and GIN indexes, 1:1 / 1:N / N:N relational joins, ILIKE filter operators, and multi-tenant RLS.
-
-### ⚙️ Environment-Configurable Default Database Engine (`.env`)
-
-You can configure the global default database engine for all `@model` entities via `DEFAULT_DATABASE_DIALECT` in `.env`:
-
-```bash
-# Option A: MongoDB as default database engine (default)
-DEFAULT_DATABASE_DIALECT=mongoose # accepts 'mongoose' or 'mongodb'
-
-# Option B: PostgreSQL as default database engine
-DEFAULT_DATABASE_DIALECT=postgres # accepts 'postgres' or 'postgresql'
-```
-
-- When `DEFAULT_DATABASE_DIALECT=postgres`, all `@model` types automatically compile into PostgreSQL Sequelize tables by default.
-- When `DEFAULT_DATABASE_DIALECT=mongoose` (or unset), all `@model` types compile into MongoDB Mongoose collections.
-- **Per-Model Override**: You can always override the engine on specific types using `@model(database: postgres)` or `@model(database: mongoose)`.
-
-### Dynamic PostgreSQL Model Compilation
-Declare a model with `database: postgres` in GraphQL SDL, and AutoGraphQL automatically compiles the AST into a Sequelize model at startup:
-
-```graphql
-# Direct a model to PostgreSQL instead of MongoDB:
-type SalesRecord @model(database: postgres) {
   id: ID!
-  transactionId: String! @unique
-  amount: Float!
-  currency: String!
-  isSettled: Boolean! @defaultValue(value: "false")
+  name: String! @trim @nameCase
+  price: Float! @clamp(min: 0)
+  stock: Int! @defaultValue(value: "0")
   createdAt: Date!
 }
 ```
 
-- **Type Mapping**: Converts GraphQL types (`String`, `Int`, `Float`, `Boolean`, `Date`, `JSON`) into native Sequelize `DataTypes` (`STRING`, `INTEGER`, `FLOAT`, `BOOLEAN`, `DATE`, `JSONB`).
-- **Constraints & Indexes**: Automatically configures `unique`, `allowNull`, `defaultValue`, and `@createIndex` indexes.
-- **Polymorphic Execution**: `QueryController` and `DataLoader` automatically detect PostgreSQL models (`isPgModel: true`) and route operations through Sequelize (`findAll`, `findByPk`, `findOne`, `count`).
-
----
-
-## 🏢 Multi-Tenancy & Row-Level Security (RLS)
-
-AutoGraphQL provides declarative Row-Level Security (RLS) and multi-tenancy enforcement directly within your GraphQL schema:
-
-### 1. Declarative Schema Directives
-
-```graphql
-# Enforce tenant isolation on organization-scoped entities
-type Project @model @tenantScoped(field: "organizationId", claim: "organizationId") {
-  id: ID!
-  name: String!
-  budget: Float
-  organizationId: String!
-}
-
-# Enforce user-ownership isolation on private documents
-type UserNote @model @ownerScoped(field: "userId", claim: "userId") {
-  id: ID!
-  content: String!
-  userId: String!
-}
-```
-
-### 2. Automatic Read Query Constraint Injection
-When a user or tenant queries a scoped entity (`projects`, `project(id: ...)`), the RLS engine automatically:
-- Extracts the tenant claim (`context.tenantId`, `context.user.organizationId`, or `context.app.tenantId`).
-- Injects the isolation filter: `{ organizationId: "org_123" }`.
-- **Anti-Spoofing Guarantee**: If a client passes `{ organizationId: "other_org" }` in the GraphQL filter argument, the RLS engine strictly overrides it with the verified token claim.
-
-### 3. Automatic Write Tagging & Mutation Ownership
-- **Create Mutations**: Automatically attaches `organizationId` or `userId` to the incoming record payload.
-- **Update & Delete Mutations**: Validates that the record belongs to the active tenant before allowing modifications, rejecting cross-tenant mutations with `PermissionDeniedError`.
-- **Admin Bypass**: Users with role `ADMIN`, `SYSTEM`, or internal bypass tokens (`context.bypass = true`) can query and manage data across all tenants freely.
-
----
-
-## 🛡️ Production Reliability & Safeguards
-
-AutoGraphQL includes built-in protection against common GraphQL production vulnerabilities and bottlenecks:
-
-### 1. Request-Scoped DataLoader (N+1 Query Resolution)
-When resolving nested relations (e.g., `users { profile { ... } }`), AutoGraphQL instantiates request-scoped DataLoaders inside the Apollo and WebSocket execution context. Sibling lookups are batched into a single `$in` query across MongoDB and PostgreSQL:
-```javascript
-// Automatically batches individual lookups:
-// MongoDB:   Model.find({ id: { $in: ['id1', 'id2', 'id3', ...] } })
-// Sequelize: Model.findAll({ where: { id: ['id1', 'id2', 'id3', ...] } })
-```
-- **Memoization**: Duplicate IDs within the same request tick are deduplicated automatically.
-- **Isolation**: Fresh loaders are instantiated per request, preventing cross-tenant or cross-request memory leaks.
-
-### 2. Query Depth & Complexity Limiting
-Protect production servers from denial-of-service (DoS) and runaway recursive queries before resolvers touch the database:
-- **Depth Limiting**: Enforces a maximum selection depth (configured via `GRAPHQL_MAX_DEPTH`, default `8`). Introspection queries (`__schema`, `__type`) are automatically exempted.
-- **Complexity / Cost Analysis**: Computes computational cost based on scalar fields, relations, and pagination multipliers (`first`, `last`). Rejects queries exceeding `GRAPHQL_MAX_COMPLEXITY` (default `1000`).
-
-### 3. Kubernetes Health & Readiness Probes
-Cloud-native health endpoints designed for Kubernetes, ECS, or Docker Swarm:
-- `GET /health/live` (or `/live`, `/healthz`): Liveness probe verifying process responsiveness and uptime.
-- `GET /health/ready` (or `/ready`, `/readyz`): Readiness probe validating active connections to MongoDB (`readyState === 1`), PostgreSQL, and Redis. Returns HTTP 503 if critical dependencies are down.
-- `GET /health`: Detailed service health breakdown with backward compatibility.
-
----
-
-## 🧪 Automated Test Suite (`npm test`)
-
-AutoGraphQL includes a complete automated test suite verifying all core features using `User` and `UserProfile` as baseline models:
+Start the engine:
 
 ```bash
-npm test
+npm run dev
 ```
 
-### Test Coverage Highlights:
-- ✅ **AST Schema Generation**: Validates single queries, list queries, filters, metadata queries, and real-time subscriptions.
-- ✅ **Dynamic Database Models**: Validates Mongoose schema compilation, path mappings, and auto-timestamps.
-- ✅ **Authentication & Token Lifecycle**: Validates JWT creation, expiry calculation, tamper resistance, and RBAC roles.
-- ✅ **Execution Engine**: Validates AST introspection and end-to-end `graphql()` query execution.
-- ✅ **Phase 1 Reliability & Performance**: Validates request-scoped DataLoader batching, ID deduplication, depth limiting, complexity limiting, and Kubernetes health probes.
-- ✅ **Phase 2 Event-Driven Automation**: Validates mutation event extraction, in-process listener argument mapping, transactional outbox persistence, HMAC-SHA256 signature generation, exponential backoff, and end-to-end HTTP webhook delivery.
-- ✅ **Phase 3 Developer & CI/CD Tooling**: Validates AST schema diffing & breaking-change detection, automated TypeScript client SDK compilation, and Automatic Persisted Queries (APQ) with safelisting.
-- ✅ **Phase 4 Architecture Expansion**: Validates dynamic PostgreSQL (Sequelize) AST model compilation, polymorphic queries, Sequelize DataLoader batching, and declarative Row-Level Security (RLS) multi-tenant isolation.
+AutoGraphQL compiles your schema into a fully functional backend:
 
 ```
-  70 passing (53ms)
+GraphQL SDL (schemas/Product.graphql)
+   ↓
+⚡ AutoGraphQL AST Engine
+   ↓
+Database Models (MongoDB / PostgreSQL) + CRUD + Filtering + Relational Joins + WebSocket Subscriptions
+   ↓
+Production-Ready GraphQL API
 ```
 
----
+### Run a query immediately:
 
-## ⚡ Event-Driven Automation & Webhooks (Birdwatch)
-
-AutoGraphQL features a production-grade, event-driven engine combining **in-process listeners**, a **Transactional Outbox**, and an **authenticated HTTP Webhook Dispatcher**.
-
-### 1. Standard Event Schema
-Every successful mutation produces a standardized event payload:
-```json
-{
-  "id": "evt_clx123abc456",
-  "event": "addUser",
-  "operation": "CREATE",
-  "entityName": "User",
-  "data": { "id": "u_1", "name": "Alice", "email": "alice@example.com" },
-  "params": { "input": { "name": "Alice" } },
-  "metadata": {
-    "timestamp": "2026-09-01T10:00:00.000Z",
-    "appName": "admin-portal",
-    "userId": "usr_999",
-    "userRole": "ADMIN"
+```graphql
+query GetAffordableProducts {
+  products(
+    filter: { price_lte: 100, stock_gt: 0 }
+    orderBy: price_asc
+    first: 10
+  ) {
+    id
+    name
+    price
+    stock
   }
 }
 ```
 
-### 2. In-Process Mutation Listeners (`birdwatchConfig.js`)
-Trigger asynchronous in-process tasks, analytics, or background side-effects:
-```javascript
-// src/birdwatch/birdwatchConfig.js
-const birdWatch = [
-  {
-    on: ['addUser', 'addPost'],
-    do: [
-      {
-        action: async ({ record, operation, context, event }) => {
-          // Send welcome email, trigger notification, or sync to CRM
-          console.log(`Event triggered for ${operation} on ${record.id}`);
-        },
-      },
-    ],
-  },
-];
+### Execute a mutation:
+
+```graphql
+mutation CreateProduct {
+  addProduct(
+    input: {
+      name: "mechanical keyboard" # Formatted to "Mechanical Keyboard" via @nameCase
+      price: 89.99
+      stock: 25
+    }
+  ) {
+    id
+    name
+    price
+  }
+}
 ```
 
-### 3. Outgoing Webhooks & HMAC-SHA256 Signing
-Subscribe external microservices, Zapier, Make, or custom HTTP endpoints to mutation events:
-```javascript
-import { registerWebhook } from './src/birdwatch';
-
-registerWebhook({
-  url: 'https://api.external-service.com/webhooks/autographql',
-  events: ['addUser', 'update*'], // Exact names or wildcard patterns
-  secret: process.env.AUTOGRAPHQL_WEBHOOK_SECRET,
-  headers: {
-    Authorization: 'Bearer external-api-token',
-  },
-});
-```
-
-#### Security Headers Sent to Webhooks:
-- `X-AutoGraphQL-Event`: The name of the mutation event (e.g. `addUser`).
-- `X-AutoGraphQL-Delivery`: Unique delivery attempt ID (`del_...`).
-- `X-AutoGraphQL-Signature`: HMAC-SHA256 signature (`sha256=<hex>`) calculated over the raw JSON payload using the configured secret.
-- `X-AutoGraphQL-Timestamp`: ISO timestamp to guard against replay attacks.
-
-### 4. Transactional Outbox & Exponential Backoff
-- **Non-Blocking**: User mutations return immediately; events are enqueued to the Outbox.
-- **Reliable Worker**: The background outbox worker polls and delivers events to all registered webhooks.
-- **Exponential Backoff**: If an endpoint returns HTTP 4xx/5xx or encounters network errors, retries are scheduled with exponential delays ($\min(2^{\text{attempt}} \times 1000, 60000)\text{ms}$). Events are marked permanently `FAILED` only after exceeding max attempts (default 5).
+**No resolvers to write. No database migrations to run. No router boilerplate.**
 
 ---
 
-## 🛠️ Developer & CI/CD Tooling
+## 💡 Why AutoGraphQL?
 
-### 1. Schema Governance & Breaking-Change Linter
-Prevent breaking GraphQL schema changes from reaching production:
+In a standard Node.js GraphQL project, every entity requires writing and maintaining multiple redundant layers: database schemas, ORM mappings, input types, CRUD resolvers, DataLoader batches, filter parsers, and access rules.
+
+AutoGraphQL eliminates this manual plumbing. By treating your **GraphQL schema as the single source of truth**, the framework automatically derives the database models, queries, mutations, connectors, and subscriptions at startup.
+
+### Architectural Comparison
+
+| Capability | ⚡ AutoGraphQL | 🐘 Hasura | 💎 Prisma | 📜 PostGraphile |
+| :--- | :---: | :---: | :---: | :---: |
+| **Workflow** | **Pure GraphQL SDL** | DB Console + YAML | Proprietary DSL | SQL DDL Tables |
+| **Runtime** | **100% Native Node.js** | Haskell / Go Engine | Node.js / Rust | Node.js |
+| **Databases** | ✅ **MongoDB & PostgreSQL** | ⚠️ SQL-first | ⚠️ ORM only, no API | ❌ PostgreSQL only |
+| **Resolver Generation** | ✅ **Automatic** | ✅ Automatic | ❌ Manual code | ✅ Automatic |
+| **In-Process Lifecycle Hooks**| ✅ **Drop-in JS Hooks** | ❌ External Webhooks | ✅ Middleware | ⚠️ SQL / Extensions |
+| **Multi-Tenancy (RLS)** | ✅ **Directives (`@tenantScoped`)** | ⚠️ Metadata DSL | ❌ Manual WHERE filters | ⚠️ PostgreSQL RLS |
+| **Visual Studio UI** | ✅ **Data + ERD + AI Copilot** | ⚠️ Console | ⚠️ Data Studio only | ❌ GraphiQL only |
+
+> 📊 For a detailed technical analysis, see [`docs/competitor-analysis.md`](docs/competitor-analysis.md) or run the server and view the slide deck at [`http://localhost:3000/slides`](http://localhost:3000/slides).
+
+---
+
+## 👥 Who is AutoGraphQL for?
+
+AutoGraphQL is designed for developers and engineering teams who:
+- Build Node.js backends and prefer GraphQL over manually designed REST endpoints.
+- Value a **schema-first workflow** where GraphQL SDL is the single source of truth.
+- Want to avoid repeatedly hand-writing CRUD resolvers, validation logic, and migration scripts.
+- Need MongoDB, PostgreSQL, or a polyglot architecture combining both.
+- Require built-in relations, multi-tenancy, deep filtering, or real-time subscriptions without glue code.
+
+### It may not be for you if:
+- You need a REST-first architecture with OpenAPI as your primary interface.
+- You want a database-first workflow where existing SQL DDL schemas drive the API.
+- You require a fully managed, proprietary backend-as-a-service (AutoGraphQL is self-hosted framework software).
+
+---
+
+## 🚀 What can you build?
+
+- **Multi-Tenant B2B SaaS**: Tenant-isolated workspaces using `@tenantScoped` Row-Level Security with zero manual filter injection.
+- **Internal Tools & Admin Consoles**: Rapid backends paired with the built-in Studio data browser.
+- **E-Commerce & Marketplaces**: Product catalogs, nested categories, inventory clamping, and order mutations.
+- **Content Platforms & Headless CMS**: Hierarchical taxonomies, relational author/article trees, and multipart media attachments.
+- **Real-Time Collaborative Applications**: Live WebSocket updates via Redis PubSub with zero manual socket wiring.
+
+---
+
+## ⚡ Quick Start
+
+### 1. Clone & Install Dependencies
 
 ```bash
-# 1. Export current executable schema to baseline file
-npm run schema:dump
-
-# 2. Compare current schema against baseline in CI/CD (exits with code 1 on breaking changes)
-npm run schema:diff -- --base schema.graphql
+git clone https://github.com/namanmukund/AutoGraphQL.git
+cd AutoGraphQL
+npm install
 ```
 
-#### Diff Report Formats:
-- `--format console` (default): Colored terminal output for developer CLI workflows.
-- `--format markdown`: GitHub Actions PR comment markdown table.
-- `--format json`: Machine-readable JSON output for automated pipelines.
+### 2. Start Local Databases (Docker)
 
-### 2. Automated TypeScript Client SDK Generator
-Generate a fully type-safe TypeScript client and interfaces directly from your schema AST:
+```bash
+npm run db:up   # Starts MongoDB, PostgreSQL, and Redis in the background
+```
+
+### 3. Configure Environment
+
+```bash
+cp .env.example .env
+```
+
+*(Default settings connect automatically to the local Docker containers.)*
+
+### 4. Launch the Development Server
+
+```bash
+npm run dev
+```
+
+### 5. Open Your Local Interfaces
+
+After starting the server, access the following **local development URLs**:
+
+| Interface | Local URL | Purpose |
+| :--- | :--- | :--- |
+| **🎨 AutoGraphQL Studio** | [`http://localhost:3000/studio`](http://localhost:3000/studio) | Visual data browser, AI schema architect, ERD canvas, and telemetry |
+| **🎮 GraphQL Playground** | [`http://localhost:3000/graphql/core`](http://localhost:3000/graphql/core) | Interactive query and mutation explorer |
+| **🩺 Liveness Probe** | [`http://localhost:3000/health/live`](http://localhost:3000/health/live) | Kubernetes process liveness healthcheck |
+| **🩺 Readiness Probe** | [`http://localhost:3000/health/ready`](http://localhost:3000/health/ready) | Validates MongoDB, PostgreSQL, and Redis connections |
+
+> 🎥 **[Watch the Setup & Architecture Walkthrough on YouTube](https://www.youtube.com/watch?v=h7C2RLe4sik)**
+
+---
+
+## ✨ Key Features
+
+- **🗄️ Multi-Database Polyglot (MongoDB & PostgreSQL)**: Configure your global database engine in `.env` (`DEFAULT_DATABASE_DIALECT=mongoose` or `postgres`), or route individual entities via `@model(database: postgres)`.
+- **🔗 Relational Connectors & Zero N+1 Queries**: Define 1:1, 1:N, or N:N associations with `@relation`. AutoGraphQL automatically batches relational lookups with request-scoped DataLoaders.
+- **🏢 Declarative Row-Level Security (RLS)**: Enforce tenant and owner isolation using `@tenantScoped` and `@ownerScoped`. Verified token claims automatically constrain read and write operations.
+- **⚡ Real-Time WebSocket Subscriptions**: Subscribe to live document creations, updates, and deletions using `graphql-ws` or `subscriptions-transport-ws` backed by Redis PubSub.
+- **🪝 Drop-in Mutation Lifecycle Hooks**: Add custom business logic, password hashing, or validations by creating files in `hooks/` exporting `${mutation}PreHook` or `${mutation}PostHook`.
+- **📡 Transactional Outbox & Webhooks**: Deliver event payloads reliably with in-process Birdwatch listeners, automatic retries with exponential backoff, and HMAC-SHA256 request signatures.
+- **🛠️ Automated TypeScript Client SDK**: Run `npm run codegen:sdk` to compile your schema AST into strongly typed TypeScript models and a type-safe `AutoGraphQLClient`.
+- **🛡️ Production Reliability & DoS Protection**: Built-in query depth limiting (`GRAPHQL_MAX_DEPTH`), complexity cost limiting (`GRAPHQL_MAX_COMPLEXITY`), and Automatic Persisted Queries (APQ) with safelisting.
+
+---
+
+## 🎨 AutoGraphQL Studio — Visual Control Plane
+
+AutoGraphQL includes an embedded visual developer console running locally at [`http://localhost:3000/studio`](http://localhost:3000/studio):
+
+<div align="center">
+  <img src="docs/assets/studio/01-studio-data-browser.png" alt="AutoGraphQL Studio Universal Data Browser" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.35);" />
+</div>
+
+<br />
+
+AutoGraphQL Studio gives you six integrated tools:
+1. **Universal Data Browser**: Inline cell editing, field-level filtering, 1-click synthetic mock data seeding, and CSV/JSON export/import across MongoDB and PostgreSQL.
+2. **AI Schema Architect (BYO-LLM)**: Generate production-grade GraphQL SDL from natural language prompts using Google Cloud Vertex AI (native ADC), OpenAI, Anthropic Claude, Gemini, or local Ollama instances.
+3. **Visual ERD Canvas**: Interactive entity-relationship diagram displaying relationships, foreign keys, and database dialect badges (`🍃 Mongo` vs `🐘 Postgres`).
+4. **RBAC & RLS Matrix**: Visual access control diagnostics across roles (`ADMIN`, `USER`, `GUEST`) with a 1-click test JWT generator.
+5. **Webhooks & Outbox Monitor**: Inspect event deliveries, retry status, and outgoing HMAC-SHA256 signatures.
+6. **Real-Time Telemetry**: Monitor server uptime, heap memory usage, active database connections, and streaming Winston logs.
+
+> 📖 Read the complete Studio guide in [`docs/studio-user-guide.md`](docs/studio-user-guide.md).
+
+---
+
+## 🏗️ What Happens Under the Hood?
+
+```
+GraphQL SDL (schemas/*.graphql)
+   ↓
+Schema Auto-Discovery & AST Parser
+   ↓
+Dynamic Model & Resolver Compilation
+   ↓
+Runtime Gateway (Auth, DataLoader, RLS, Safeguards)
+   ↓
+Storage Layer (MongoDB / PostgreSQL)
+```
+
+1. **Schema as Source of Truth**: At server boot, the schema scanner discovers all `.graphql` and `.js` files in `schemas/` and parses them into a unified AST.
+2. **Dynamic Compilation**: The AST compiler interprets schema directives (`@model`, `@relation`, `@tenantScoped`), compiling Mongoose schemas or Sequelize models, mapping indexes, and synthesizing CRUD resolvers.
+3. **Runtime Execution**: Incoming requests pass through JWT verification, query depth/complexity validation, and declarative RLS filters before execution.
+4. **Batched Resolution**: Relational fields are resolved through request-scoped DataLoaders, merging individual lookups into batched `$in` or `findAll` database queries.
+5. **Extensibility**: In-process Pre/Post hooks (`hooks/`) and Birdwatch event listeners run around database operations to execute custom domain logic without modifying framework code.
+
+---
+
+## 🛡️ Declarative Directives
+
+AutoGraphQL provides over 20 built-in directives to declare database behavior, relationships, transformations, and security directly in your schema.
+
+### Core Directives at a Glance:
+
+| Directive | Scope | Purpose | Example |
+| :--- | :---: | :--- | :--- |
+| **`@model`** | `Type` | Registers type for dynamic MongoDB or PostgreSQL model compilation | `type Product @model { ... }` |
+| **`@relation`** | `Field` | Establishes 1:1, 1:N, or N:N relational associations & foreign keys | `category: Category @relation(name: "CatProd")` |
+| **`@tenantScoped`** | `Type` | Enforces row-level multi-tenant isolation based on verified JWT claims | `@tenantScoped(field: "orgId", claim: "orgId")` |
+| **`@ownerScoped`** | `Type` | Restricts document access to the record owner | `@ownerScoped(field: "userId", claim: "userId")` |
+| **`@userPermissions`**| `Type`/`Field` | Granular role-based access control (`read`, `create`, `update`, `delete`) | `@userPermissions(read: ["ADMIN", "USER"])` |
+| **`@unique`** | `Field` | Enforces unique index constraint in the database | `sku: String! @unique` |
+| **`@defaultValue`** | `Field` | Assigns default value on document creation | `status: Status @defaultValue(value: "active")` |
+| **`@cacheControl`** | `Type`/`Field` | Sets HTTP Cache-Control and Redis caching policies | `@cacheControl(maxAge: 3600, scope: PUBLIC)` |
+
+> 📖 **Directives Reference**: Over 20 directives are available for modeling, validation (`@clamp`), sanitization (`@trim`, `@nameCase`), audit logging (`@history`), and indexing (`@createIndex`). See [`docs/directives-reference.md`](docs/directives-reference.md) for full signatures and examples.
+
+---
+
+## 🧰 TypeScript SDK & Developer Tooling
+
+### Automated Client SDK Generation
+
+Compile your schema AST into a strongly typed TypeScript client:
 
 ```bash
 npm run codegen:sdk
 ```
 
-Outputs `sdk/index.ts` containing:
-- TypeScript interfaces for all `@model` entities (`User`, `UserProfile`, `Post`, etc.).
-- Input types (`CreateUserInput`, `UpdateUserInput`, `UsersFilter`, etc.).
-- `AutoGraphQLClient` with type-safe methods:
+Use the generated client in frontend or service code:
 
 ```typescript
 import { AutoGraphQLClient } from './sdk';
@@ -844,62 +292,64 @@ const client = new AutoGraphQLClient({
   token: 'user_jwt_token',
 });
 
-// Type-safe entity queries and mutations
-const user = await client.user.findById('usr_123', 'id name email');
-const users = await client.user.findMany({ name: { contains: 'Alice' } }, 'id name');
-const newUser = await client.user.create({ name: 'Bob', email: 'bob@example.com' }, 'id name');
-const updated = await client.user.update('usr_123', { name: 'Alice Smith' });
-await client.user.delete('usr_123');
+// Fully typed queries and mutations
+const products = await client.product.findMany({ stock: { gt: 0 } }, 'id name price');
+const newProduct = await client.product.create({ name: 'Mouse', price: 29.99 }, 'id name');
 ```
 
-### 3. Automatic Persisted Queries (APQ) & Production Safelisting
-Reduce bandwidth and protect production servers from arbitrary large queries:
+### Schema Governance & Breaking-Change Linter
 
-- **Standard APQ**: Clients send `{ extensions: { persistedQuery: { version: 1, sha256Hash: "<hash>" } } }`. The server caches queries in memory or Redis and resolves hashes instantly.
-- **Production Safelisting (`PERSISTED_QUERIES_ONLY=true`)**: Locks down execution to only pre-approved queries loaded from `PERSISTED_QUERIES_MANIFEST` (e.g. `persisted-queries.json`). Any unregistered arbitrary queries are rejected with `PERSISTED_QUERY_NOT_SUPPORTED`.
+Verify schema compatibility in CI/CD before deploying:
+
+```bash
+# 1. Dump current executable schema
+npm run schema:dump
+
+# 2. Compare against baseline (fails with exit code 1 on breaking changes)
+npm run schema:diff -- --base schema.graphql
+```
 
 ---
 
-## 📁 Project Directory Structure
+## 🧪 Automated Test Suite
 
+AutoGraphQL includes a complete automated test suite verifying AST generation, database models, DataLoader batching, webhooks, multi-tenancy, and reliability safeguards:
+
+```bash
+npm test
 ```
-AutoGraphQL/
-├── config/                       # Mongoose, Sequelize, Redis, APM & SMS configs
-│   ├── authParams/               # JWT token secrets and expiry rules
-│   ├── mongoDb/                  # MongoDB connection URI settings
-│   ├── postgreSQL/               # PostgreSQL credentials and options
-│   └── redis/                    # Redis cache and PubSub configuration
-├── constants/                    # Directives, filters, scalar types & sanitized error definitions
-│   ├── errors/                   # Generic GraphQL & Database error classes
-│   └── roles.js                  # Standard framework roles (ADMIN, USER, GUEST)
-├── docs/                         # In-depth architectural guides & query/mutation examples
-│   ├── count-and-aggregations-guide.md # Total counts, filtered counts, groupBy, and relational counts
-│   ├── developer-extension-and-hooks-guide.md # Clean architecture, pre/post hooks, and domain customization
-│   ├── directives-reference.md   # Exhaustive reference guide for all 25+ schema directives
-│   ├── file-management-guide.md  # GraphQL multipart uploads, AWS S3/CloudFront, and entity linking
-│   ├── mongodb-guide.md          # Complete MongoDB schema, query, mutation & aggregation guide
-│   └── postgresql-guide.md       # Complete PostgreSQL joins, GIN indexes, and RLS guide
-├── docker-compose.yml            # Docker stack (MongoDB, PostgreSQL, Redis)
-├── graphqlSchema/                # GraphQL SDL models (User, UserProfile, Post, Comment, Category, Tag, File)
-├── scripts/                      # DB index synchronization utilities
-├── src/                          # Pure AutoGraphQL AST & GraphQL core engine
-│   ├── app.js                    # Express + Apollo Server lifecycle with GraphQL Playground
-│   ├── auth/                     # JWT token signing, verification, and expiry helpers
-│   ├── autoGenerate/             # Core AST Parser, Model & Resolver Auto-Generator
-│   ├── connectDB.js              # Database connection manager (MongoDB + PostgreSQL)
-│   ├── graphql/                  # Executable Schema & Directive Resolvers
-│   └── serverCloud.js            # Server entry point
-├── test/                         # Comprehensive unit & integration test suites
-├── utils/                        # Authentication, date, math, and logging utilities
-├── .env.example                  # Comprehensive environment variable template
-├── package.json                  # Modernized dependencies (Node 18+)
-├── LICENSE                       # MIT License
-└── README.md                     # Documentation & usage guide
-```
+
+Continuous integration runs automatically on every pull request across **Node.js 18.x, 20.x, and 22.x** via GitHub Actions.
+
+---
+
+## 📚 Documentation
+
+Detailed architectural and implementation guides are available in [`docs/`](docs/):
+
+- 🛡️ **[Schema Directives Reference](docs/directives-reference.md)**: Full reference for all schema directives.
+- 🎨 **[AutoGraphQL Studio Guide](docs/studio-user-guide.md)**: Complete guide to data browsing, AI schema design, and ERD mapping.
+- 🪝 **[Developer Extension & Hooks Guide](docs/developer-extension-and-hooks-guide.md)**: Pre/post hooks, custom queries, and lifecycle extensions.
+- 🐘 **[PostgreSQL Integration Guide](docs/postgresql-guide.md)**: Sequelize configuration, GIN/B-Tree indexing, and relational queries.
+- 🍃 **[MongoDB Integration Guide](docs/mongodb-guide.md)**: Mongoose compilation, aggregation pipelines, and embedded documents.
+- 📊 **[Counts & Aggregations Guide](docs/count-and-aggregations-guide.md)**: Metadata queries, groupBy segmentation, and child counts.
+- 📁 **[File Management Guide](docs/file-management-guide.md)**: Multipart uploads, AWS S3 storage, and CloudFront signing.
+- 🏆 **[Competitor Analysis](docs/competitor-analysis.md)**: Architectural comparison with Hasura, Prisma, PostGraphile, and Strapi.
+
+---
+
+## ⭐ Try AutoGraphQL
+
+AutoGraphQL turns GraphQL SDL into a complete backend so you can focus on building your product rather than writing repetitive plumbing.
+
+- ⭐ **Star the repository**: Keep up to date with releases and support open-source development.
+- 🚀 **Run the Quick Start**: Experience the 60-second setup locally.
+- 🐛 **Report an issue**: Found a bug or need a feature? Open an [Issue](https://github.com/namanmukund/AutoGraphQL/issues).
+- 🤝 **Contribute**: Read our [Contributing Guidelines](CONTRIBUTING.md) and join development.
 
 ---
 
 ## 📄 License
 
-This project is open-sourced under the [MIT License](LICENSE).
-AutoGraphQL Contributors &copy; 2026.
+AutoGraphQL is open-source software licensed under the [MIT License](LICENSE).  
+&copy; 2026 AutoGraphQL Contributors.
