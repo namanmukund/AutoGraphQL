@@ -7,15 +7,18 @@ import AggregationController, { checkIfDatabaseAggregationAllowedOnType } from '
 import getPaginationAndFilterParams from '../utils/getPaginationAndFilterParams';
 import { applyRowLevelSecurity } from '../../../../security/rls';
 import { buildSequelizeWhereClause } from '../../../models/sqlModelGenerator';
+import { convertSortToSequelizeOrder } from './sorts';
 
 const getQueriedResult = (Model, params, limitValue, skipValue, querySort) => {
   if (Model && (Model.isPgModel || typeof Model.findAll === 'function')) {
     const where = buildSequelizeWhereClause(params || {});
+    // Convert MongoDB sort format { key: 1 } to Sequelize order format [['key', 'ASC']]
+    const order = convertSortToSequelizeOrder(querySort);
     return Model.findAll({
       where,
       limit: limitValue,
       offset: skipValue,
-      order: querySort,
+      ...(order.length > 0 ? { order } : {}),
     }).then((records) => (Array.isArray(records) ? records.map((r) => (r && r.toJSON ? r.toJSON() : r)) : []))
       .catch((err) => err);
   }
@@ -27,13 +30,15 @@ const getQueriedResult = (Model, params, limitValue, skipValue, querySort) => {
 const getQueriedResultFromLast = (Model, params, limitValue, skipValue, querySort) => {
   if (Model && (Model.isPgModel || (typeof Model.count === 'function' && typeof Model.findAll === 'function'))) {
     const where = buildSequelizeWhereClause(params || {});
+    // Convert MongoDB sort format { key: 1 } to Sequelize order format [['key', 'ASC']]
+    const order = convertSortToSequelizeOrder(querySort);
     return Model.count({ where }).then((result) => {
       const valueSkip = result - limitValue - skipValue > 0 ? result - limitValue - skipValue : 0;
       return Model.findAll({
         where,
         limit: limitValue,
         offset: valueSkip,
-        order: querySort,
+        ...(order.length > 0 ? { order } : {}),
       }).then((records) => (Array.isArray(records) ? records.map((r) => (r && r.toJSON ? r.toJSON() : r)) : []))
         .catch((err) => err);
     });
@@ -250,6 +255,7 @@ Sample paramsForFetch argument
           modelName: this.modelName,
           allowDefaultSort: true,
           allowDefaultLimit: true,
+          isPgModel: !!(this.Model && (this.Model.isPgModel || (typeof this.Model.findAll === 'function' && !this.Model.find))),
         }).then(({
           filter, limit: limitValue, skip: skipValue, sort: querySort, isLast = false, initialParams: params,
         }) => this.getQueriedResultFromController(filter, limitValue, skipValue, querySort, isLast, resolverInfoParams)

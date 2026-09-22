@@ -1,0 +1,17 @@
+services:
+  postgres-test:
+    image: postgres:14-alpine
+    container_name: autographql-postgres-test
+    ports:
+      - '5433:5432'
+    environment:
+      POSTGRES_USER: pgtest
+      POSTGRES_PASSWORD: pgtest123
+      POSTGRES_DB: autographql_pg_test
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pgtest -d autographql_pg_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
