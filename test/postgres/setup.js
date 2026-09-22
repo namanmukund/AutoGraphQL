@@ -22,14 +22,46 @@ import {
 } from './testSchema';
 
 const COMPOSE_FILE = path.resolve(__dirname, 'docker-compose.test.yml');
-const PG_PORT = 5433;
-const PG_USER = 'pgtest';
-const PG_PASSWORD = 'pgtest123';
-const PG_DATABASE = 'autographql_pg_test';
-const PG_URI = `postgres://${PG_USER}:${PG_PASSWORD}@localhost:${PG_PORT}/${PG_DATABASE}`;
+const PG_PORT = process.env.PG_PORT || 5433;
+const PG_USER = process.env.PG_USER || 'pgtest';
+const PG_PASSWORD = process.env.PG_PASSWORD || 'pgtest123';
+const PG_DATABASE = process.env.PG_DATABASE || 'autographql_pg_test';
+const PG_URI = process.env.PG_URI || `postgres://${PG_USER}:${PG_PASSWORD}@localhost:${PG_PORT}/${PG_DATABASE}`;
 
 let sequelize = null;
 let models = {};
+let startedOwnContainer = false;
+
+/**
+ * Check if PostgreSQL is already reachable
+ */
+const isPostgresReachable = async () => {
+  try {
+    const testSeq = new Sequelize(PG_URI, { dialect: 'postgres', logging: false });
+    await testSeq.authenticate();
+    await testSeq.close();
+    return true;
+  } catch (err) {
+    return false;
+  }
+};
+
+/**
+ * Detect available docker compose command ('docker compose' or 'docker-compose')
+ */
+const getComposeCommand = () => {
+  try {
+    execSync('docker compose version', { stdio: 'pipe' });
+    return 'docker compose';
+  } catch (e) {
+    try {
+      execSync('docker-compose --version', { stdio: 'pipe' });
+      return 'docker-compose';
+    } catch (err) {
+      return null;
+    }
+  }
+};
 
 /**
  * Wait for PostgreSQL to accept connections
@@ -54,15 +86,35 @@ const waitForPostgres = async (maxRetries = 30, delayMs = 1000) => {
  * Start the test PostgreSQL container
  */
 export const startPostgres = async () => {
-  try {
-    // Stop any existing test container first
-    execSync(`docker-compose -f "${COMPOSE_FILE}" down -v 2>/dev/null || true`, { stdio: 'pipe' });
-  } catch (e) {
-    // Ignore cleanup errors
+  // If PostgreSQL is already running and reachable (e.g. CI service container or external DB)
+  if (await isPostgresReachable()) {
+    return;
   }
 
-  // Start fresh container
-  execSync(`docker-compose -f "${COMPOSE_FILE}" up -d`, { stdio: 'pipe' });
+  const composeCmd = getComposeCommand();
+  if (composeCmd) {
+    try {
+      execSync(`${composeCmd} -f "${COMPOSE_FILE}" down -v 2>/dev/null || true`, { stdio: 'pipe' });
+    } catch (e) {
+      // Ignore cleanup errors
+    }
+    execSync(`${composeCmd} -f "${COMPOSE_FILE}" up -d`, { stdio: 'pipe' });
+    startedOwnContainer = true;
+  } else {
+    // Fallback: try raw docker run
+    try {
+      execSync('docker rm -f autographql-postgres-test 2>/dev/null || true', { stdio: 'pipe' });
+      execSync(
+        `docker run -d --name autographql-postgres-test -p ${PG_PORT}:5432 -e POSTGRES_USER=${PG_USER} -e POSTGRES_PASSWORD=${PG_PASSWORD} -e POSTGRES_DB=${PG_DATABASE} postgres:14-alpine`,
+        { stdio: 'pipe' },
+      );
+      startedOwnContainer = true;
+    } catch (dockerErr) {
+      throw new Error(
+        `Failed to start PostgreSQL container. Neither "docker compose", "docker-compose", nor "docker run" succeeded, and no existing PostgreSQL instance was reachable at ${PG_URI}. Error: ${dockerErr.message}`,
+      );
+    }
+  }
 
   // Wait for PostgreSQL to accept connections
   await waitForPostgres();
@@ -72,10 +124,22 @@ export const startPostgres = async () => {
  * Stop and remove the test PostgreSQL container
  */
 export const stopPostgres = () => {
-  try {
-    execSync(`docker-compose -f "${COMPOSE_FILE}" down -v 2>/dev/null || true`, { stdio: 'pipe' });
-  } catch (e) {
-    // Ignore cleanup errors
+  if (!startedOwnContainer) {
+    return;
+  }
+  const composeCmd = getComposeCommand();
+  if (composeCmd) {
+    try {
+      execSync(`${composeCmd} -f "${COMPOSE_FILE}" down -v 2>/dev/null || true`, { stdio: 'pipe' });
+    } catch (e) {
+      // Ignore cleanup errors
+    }
+  } else {
+    try {
+      execSync('docker rm -f autographql-postgres-test 2>/dev/null || true', { stdio: 'pipe' });
+    } catch (e) {
+      // Ignore cleanup errors
+    }
   }
 };
 
