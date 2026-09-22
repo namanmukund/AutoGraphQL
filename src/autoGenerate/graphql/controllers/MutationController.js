@@ -5,13 +5,34 @@ import { defaultPermissionErrorMsg } from '../../../../constants';
 import { getUpdatedRecordObject } from './utils/utils';
 import { paginationKeys } from './QueryController/paginate';
 import getQueryParams from './QueryController/filters';
+import { buildSequelizeWhereClause } from '../../models/sqlModelGenerator';
 
-const deleteQueriedResult = (Model, params, limitValue, skipValue) => Model.remove(params).limit(limitValue).skip(skipValue).exec();
+/**
+ * Check if a model is a PostgreSQL (Sequelize) model.
+ */
+const isPgModel = (Model) => !!(Model && (Model.isPgModel || (typeof Model.findAll === 'function' && !Model.find)));
 
-const deleteQueriedResultFromLast = (Model, params, limitValue, skipValue) => Model.find(params).count().exec().then((result) => {
-  const valueSkip = result - limitValue - skipValue > 0 ? result - limitValue - skipValue : 0;
-  return Model.remove(params).limit(limitValue).skip(valueSkip).exec();
-});
+const deleteQueriedResult = (Model, params, limitValue, skipValue) => {
+  if (isPgModel(Model)) {
+    const where = buildSequelizeWhereClause(params || {});
+    return Model.destroy({ where, limit: limitValue }).then((count) => ({ deletedCount: count }));
+  }
+  return Model.remove(params).limit(limitValue).skip(skipValue).exec();
+};
+
+const deleteQueriedResultFromLast = (Model, params, limitValue, skipValue) => {
+  if (isPgModel(Model)) {
+    const where = buildSequelizeWhereClause(params || {});
+    return Model.count({ where }).then((total) => {
+      const valueSkip = total - limitValue - skipValue > 0 ? total - limitValue - skipValue : 0;
+      return Model.destroy({ where, limit: limitValue }).then((count) => ({ deletedCount: count }));
+    });
+  }
+  return Model.find(params).count().exec().then((result) => {
+    const valueSkip = result - limitValue - skipValue > 0 ? result - limitValue - skipValue : 0;
+    return Model.remove(params).limit(limitValue).skip(valueSkip).exec();
+  });
+};
 
 // Mutation controller
 class MutationController extends MasterController {
@@ -31,6 +52,13 @@ class MutationController extends MasterController {
         }
         // to prevent creating fields with null/undefined/'' values
         const modifiedInput = pickBy(input, (v) => v !== null && v !== undefined && v !== '');
+
+        // Polymorphic: Sequelize models use Model.create()
+        if (isPgModel(this.Model)) {
+          return this.Model.create(modifiedInput)
+            .then((r) => (r && r.toJSON ? r.toJSON() : r));
+        }
+
         const record = new this.Model(modifiedInput);
         return record.save();
       })
@@ -65,12 +93,24 @@ class MutationController extends MasterController {
             },
           });
         }
+
+        // Polymorphic: Sequelize uses findOne({ where: { id } })
+        if (isPgModel(this.Model)) {
+          return this.Model.findOne({ where: { id } });
+        }
         return this.Model.findOne({ id }).exec();
       })
       .then((res) => {
         if (!res) {
           throw new DatabaseRecordNotFoundError();
         }
+
+        // Polymorphic: Sequelize uses instance.update()
+        if (isPgModel(this.Model)) {
+          return res.update(input)
+            .then((updated) => (updated && updated.toJSON ? updated.toJSON() : updated));
+        }
+
         let record = res;
         /* If reference fields in update doc, then add relation only if it doesnt
           already exist in the relation field and then
@@ -126,6 +166,16 @@ class MutationController extends MasterController {
               message: isAllowed.data,
             },
           });
+        }
+
+        // Polymorphic: Sequelize uses findOne + destroy
+        if (isPgModel(this.Model)) {
+          return this.Model.findOne({ where: { id } })
+            .then((record) => {
+              if (!record) return null;
+              const plain = record.toJSON ? record.toJSON() : record;
+              return record.destroy().then(() => plain);
+            });
         }
         return this.Model.findOneAndRemove({ id }).exec();
       })

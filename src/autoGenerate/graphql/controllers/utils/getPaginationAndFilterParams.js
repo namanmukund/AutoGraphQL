@@ -9,6 +9,7 @@ const getPaginationAndFilterParams = async ({
   modelName,
   allowDefaultLimit = false,
   allowDefaultSort = false,
+  isPgModel = false,
 }) => {
   /* Parsed inputParams post paginationKeys method execution
         {
@@ -63,6 +64,25 @@ const getPaginationAndFilterParams = async ({
   }
 
   if (params.filter) {
+    // For PostgreSQL (Sequelize) models, bypass MongoDB-specific getQueryParams
+    // and pass raw filter directly — buildSequelizeWhereClause handles translation later
+    if (isPgModel) {
+      const rawFilter = params.filter;
+      if (afterId) {
+        rawFilter.id_gt = afterId;
+      } else if (beforeId) {
+        rawFilter.id_lt = beforeId;
+      }
+      return {
+        filter: rawFilter,
+        limit: limitValue,
+        skip: skipValue,
+        sort: querySort,
+        isLast: lastValue,
+        initialParams,
+      };
+    }
+
     const data = await getQueryParams(params, modelName);
     if (afterId) {
       data.id = { $gt: `${afterId}` };
@@ -90,3 +110,4 @@ const getPaginationAndFilterParams = async ({
 };
 
 export default getPaginationAndFilterParams;
+
