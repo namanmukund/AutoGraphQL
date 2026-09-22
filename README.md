@@ -10,6 +10,7 @@
   <a href="https://graphql.org"><img src="https://img.shields.io/badge/GraphQL-15.8-E10098.svg?logo=graphql&logoColor=white" alt="GraphQL" /></a>
   <a href="docs/postgresql-guide.md"><img src="https://img.shields.io/badge/Databases-MongoDB%20%7C%20PostgreSQL-336791.svg" alt="Databases" /></a>
   <a href="sdk"><img src="https://img.shields.io/badge/TypeScript-SDK%20Ready-3178C6.svg?logo=typescript&logoColor=white" alt="TypeScript SDK Ready" /></a>
+  <a href="http://localhost:3000/docs"><img src="https://img.shields.io/badge/Docs-Interactive%20Platform-6366f1.svg?logo=gitbook&logoColor=white" alt="Interactive Documentation Platform" /></a>
 </p>
 
 AI coding tools like Claude Code, Cursor and Copilot have changed how we build software. You can describe a feature and get working code in minutes.
@@ -113,6 +114,7 @@ If your application is getting large and you're starting to feel that your AI co
   <a href="#-why-autographql"><strong>Why AutoGraphQL</strong></a> •
   <a href="#-who-is-autographql-for"><strong>Who It's For</strong></a> •
   <a href="#-quick-start"><strong>Quick Start</strong></a> •
+  <a href="#-developer-documentation-platform"><strong>Docs Platform</strong></a> •
   <a href="#-key-features"><strong>Features</strong></a> •
   <a href="#-autographql-studio--visual-control-plane"><strong>Studio</strong></a> •
   <a href="#️-what-happens-under-the-hood"><strong>Architecture</strong></a> •
@@ -298,6 +300,7 @@ After starting the server, access the following **local development URLs**:
 
 | Interface | Local URL | Purpose |
 | :--- | :--- | :--- |
+| **📖 Docs Platform** | [`http://localhost:3000/docs`](http://localhost:3000/docs) *(or [`/`](http://localhost:3000/))* | Interactive developer documentation, CRUD tour, and MongoDB & PostgreSQL comparisons |
 | **🎨 AutoGraphQL Studio** | [`http://localhost:3000/studio`](http://localhost:3000/studio) | Visual data browser, AI schema architect, ERD canvas, and telemetry |
 | **🎮 GraphQL Playground** | [`http://localhost:3000/graphql/core`](http://localhost:3000/graphql/core) | Interactive query and mutation explorer |
 | **🩺 Liveness Probe** | [`http://localhost:3000/health/live`](http://localhost:3000/health/live) | Kubernetes process liveness healthcheck |
@@ -308,6 +311,24 @@ After starting the server, access the following **local development URLs**:
 > [!TIP]
 > **🤖 Using Cursor, Windsurf, or Claude Code?**  
 > AutoGraphQL includes a ready-to-use [`.cursorrules`](.cursorrules) file and an [AI Prompting Guide](docs/ai-prompting-guide.md). Teach your AI agent all schema directives (`@model`, `@relation`, `@clamp`, `@tenantScoped`) so it can architect valid AutoGraphQL schemas on demand without generating messy backend boilerplate.
+
+---
+
+## 📖 Developer Documentation Platform
+
+AutoGraphQL includes a complete, developer-first documentation website served directly from the engine at [`http://localhost:3000/docs`](http://localhost:3000/docs) (with root [`http://localhost:3000/`](http://localhost:3000/) redirecting automatically).
+
+Built with the design aesthetic and usability of mature developer platforms (like Stripe, Vercel, Supabase, and Convex), the documentation platform features:
+
+- **⚡ Three-Column Responsive Layout**: Sticky left sidebar with 10 structured sections and 40+ topic guides, clean reading pane, and a dynamic "On This Page" scroll-spy table of contents.
+- **🔄 Unified SDL & In-Context Database Tabs**: Side-by-side tabs comparing MongoDB (Mongoose) and PostgreSQL (Sequelize) physical storage, indexes, and execution queries right where they differ, while keeping GraphQL SDL 100% unified.
+- **🔗 Relational Directives Deep-Dive**: Concrete mental model and parallel examples for `1:1`, `1:N`, and `N:N` relationships, demystifying foreign key ownership (`direction: "IN"`), parent references (`direction: "OUT"`), junction tables (`direction: "BOTH"`), and clean unidirectional links (`direction: "OneWay"`).
+- **🌳 Accessing Nested Data**: Hierarchical query traversal across arbitrary depths with step-by-step MongoDB and PostgreSQL execution breakdowns proving zero N+1 DataLoader constant complexity.
+- **⚡ Real-Time WebSocket Subscriptions**: Full guide covering auto-generated subscription schemas (`type Subscription`), AST filter evaluation, `graphql-ws` protocol, and multi-node Redis PubSub scaling.
+- **🎮 Interactive CRUD Tour**: Hands-on walkthrough of `Create`, `Read`, `Update`, and `Delete` with live tabs comparing GraphQL requests, responses, and underlying database driver queries.
+- **🔍 Deep Filtering Visualizer**: Interactive filter builder showing real-time translation from GraphQL inputs into native MongoDB queries (`$regex`, `$options: 'i'`) and PostgreSQL SQL (`ILIKE`, `Op.gte`).
+- **⌨️ Command Palette (`⌘K` / `Ctrl+K`)**: Instant client-side fuzzy search covering all directives, API operations, queries, mutations, subscriptions, and database configurations.
+- **🌙 Dark & Light Themes**: Tailored developer color palettes with high-contrast code blocks and `localStorage` persistence.
 
 ---
 
@@ -442,7 +463,11 @@ Continuous integration runs automatically on every pull request across **Node.js
 
 ## 📚 Documentation
 
-Detailed architectural and implementation guides are available in [`docs/`](docs/):
+### 🌐 Interactive Documentation Platform (Locally Served)
+Start your server and navigate to [`http://localhost:3000/docs`](http://localhost:3000/docs) to explore the complete documentation website with database execution comparisons, the interactive CRUD tour, and instant command-palette search (`⌘K`).
+
+### 📖 Architectural & Topic Guides (Markdown)
+Detailed architectural specifications and guides are also available in [`docs/`](docs/):
 
 - 🤖 **[AI Prompting & Agent Guide](docs/ai-prompting-guide.md)**: Prompt templates for Cursor, Claude Code, and Windsurf to write AutoGraphQL schemas.
 - 🛡️ **[Schema Directives Reference](docs/directives-reference.md)**: Full reference for all schema directives.

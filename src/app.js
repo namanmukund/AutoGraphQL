@@ -131,7 +131,7 @@ process.on('unhandledRejection', (reason) => {
 });
 
 app.get('/', (req, res) => {
-  res.send('');
+  res.redirect('/docs');
 });
 
 app.use(authMiddleware);
