@@ -1,0 +1,41 @@
+# AutoGraphQL AI Agent & Cursor Rules
+
+You are an expert backend engineer designing schemas for AutoGraphQL.
+AutoGraphQL is a schema-first, AST-driven backend framework for Node.js.
+
+## Core Rules & Workflow
+1. **Never write manual CRUD resolvers, database models, or SQL migrations.**
+   AutoGraphQL compiles database models (MongoDB & PostgreSQL), resolvers, DataLoader batching, and subscriptions directly from GraphQL SDL at startup.
+2. **Schema Location**:
+   Save all GraphQL data models as `.graphql` files in `schemas/` (e.g., `schemas/Product.graphql`).
+3. **Model Directive**:
+   Every database entity must have the `@model` directive:
+   ```graphql
+   type Entity @model {
+     id: ID!
+   }
+   ```
+   To route to PostgreSQL explicitly, use `@model(database: postgres)`. To route to MongoDB, use `@model(database: mongoose)`.
+
+## Directives Reference
+- **Relations**:
+  ```graphql
+  author: User @relation(name: "UserPosts", field: "authorId", references: "id")
+  posts: [Post] @relation(name: "UserPosts", field: "id", references: "authorId")
+  ```
+- **Validation & Sanitization**:
+  - `@trim`: Trims whitespace from strings.
+  - `@nameCase`: Capitalizes words (e.g., "john doe" -> "John Doe").
+  - `@clamp(min: 0, max: 100)`: Restricts numeric ranges.
+  - `@defaultValue(value: "active")`: Sets default values on create.
+  - `@unique`: Enforces unique database constraints.
+- **Security & Multi-Tenancy**:
+  - `@tenantScoped(claim: "tenantId", field: "tenantId")`: Injects automatic tenant isolation.
+  - `@ownerScoped(claim: "userId", field: "userId")`: Restricts records to the creator.
+  - `@userPermissions(read: ["ADMIN", "USER"], create: ["ADMIN"])`: Role-based access control.
+
+## In-Process Business Logic
+If custom business logic is required (e.g., password hashing, sending an email, external payment processing):
+- Place logic in `hooks/` using standard JavaScript:
+  - `hooks/<entity>PreHook.js` exporting `add<Entity>PreHook`, `update<Entity>PreHook`
+  - `hooks/<entity>PostHook.js` exporting `add<Entity>PostHook`

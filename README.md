@@ -1,8 +1,6 @@
 # ⚡ AutoGraphQL
 
-## Define your GraphQL schema. Get a production-ready backend automatically.
-
-AutoGraphQL is an open-source, schema-first backend framework for Node.js. It is built for developers who want to build and ship GraphQL APIs without writing repetitive CRUD resolvers, database models, and relational plumbing. By defining your data models once using standard GraphQL SDL and declarative directives, AutoGraphQL automatically compiles dynamic MongoDB and PostgreSQL models, relational connectors, filtering, authorization, subscriptions, and more.
+### Let AI design your backend. Let AutoGraphQL build it.
 
 <p align="center">
   <a href="https://github.com/namanmukund/AutoGraphQL/actions/workflows/ci.yml"><img src="https://github.com/namanmukund/AutoGraphQL/actions/workflows/ci.yml/badge.svg" alt="AutoGraphQL CI" /></a>
@@ -14,8 +12,105 @@ AutoGraphQL is an open-source, schema-first backend framework for Node.js. It is
   <a href="sdk"><img src="https://img.shields.io/badge/TypeScript-SDK%20Ready-3178C6.svg?logo=typescript&logoColor=white" alt="TypeScript SDK Ready" /></a>
 </p>
 
+AI coding tools like Claude Code, Cursor and Copilot have changed how we build software. You can describe a feature and get working code in minutes.
+
+But there is a catch.
+
+As applications and teams get larger, **everyone — and sometimes every AI agent — starts building the backend differently.**
+
+One developer writes one pattern.  
+Another uses a different one.  
+An AI agent generates another.  
+Then comes the debugging, refactoring, testing and maintaining.  
+
+And every iteration consumes more AI context and tokens.
+
+### What if AI didn't have to write all that backend code?
+
+That's the idea behind **AutoGraphQL**.
+
+Instead of asking AI to generate hundreds of lines of backend code for every feature, you define **what your data and APIs should look like** — using GraphQL SDL or through the Studio.
+
+AutoGraphQL takes care of the rest.
+
+**Schema → Backend**
+
+Define your schema once, and AutoGraphQL generates the backend infrastructure around it — database models, CRUD APIs, relations, filtering, authentication, subscriptions, DataLoaders, webhooks and more.
+
+So your workflow becomes:
+
+**You + AI → Design the schema**  
+**AutoGraphQL → Builds the backend**  
+**You → Build the product**  
+
+### 🚀 Why this matters
+
+| Metric | Traditional AI Code Generation (Cursor / Claude) | ⚡ AutoGraphQL + AI |
+| :--- | :--- | :--- |
+| **Token Consumption** | ~5,000 – 15,000 tokens (reading/writing routers, ORMs, resolvers) | **~150 – 300 tokens** (1 concise SDL definition) |
+| **Files Modified** | 4 to 8 files per feature | **1 file** (`schemas/*.graphql`) |
+| **Architectural Drift** | High (different agents/devs invent different patterns) | **Zero** (100% deterministic framework compiler) |
+| **N+1 Query & DataLoader Bugs** | Common AI hallucination / oversight | **Automated** (Zero N+1 via built-in DataLoaders) |
+| **Testing & Debugging Loops** | Multiple iterations to fix imports, types, and syntax | **Instant** (Compiles at boot; zero glue code) |
+
+<br />
+
+**Less AI code generation**  
+Don't spend thousands of tokens asking an AI agent to repeatedly create CRUD operations, resolvers, models and boilerplate.
+
+**More consistency**  
+The framework generates the backend using the same architecture and conventions every time — regardless of which developer or AI agent is working on the application.
+
+**Less code to maintain**  
+You define the intent. The framework handles the repetitive implementation.
+
+**Faster development**  
+What might take an AI coding agent multiple iterations of reading files, generating code, running tests and fixing issues can become a schema change that AutoGraphQL turns into a working backend in seconds.
+
+**AI becomes the architect, not the boilerplate generator.**
+
+### 🧠 Think of it this way
+
+Traditional AI-assisted development:
+
+> "Claude, build me a users API."
+
+Then Claude reads your repository, decides how to implement it, writes code, runs tests, fixes errors and potentially changes multiple files.
+
+With AutoGraphQL:
+
+> "Here is my User schema."
+
+And AutoGraphQL generates the backend around it.
+
+AI can still be used — and we think it should be.
+
+Use AI to:
+
+* design your schema
+* model your entities
+* understand your data relationships
+* evolve your API
+* explore your application requirements
+
+But let **AutoGraphQL generate the repetitive backend machinery.**
+
+### ⚡ The result
+
+**Less code generation.**  
+**Less token consumption.**  
+**Less inconsistency.**  
+**Less boilerplate.**  
+**More control.**  
+**More predictable backends.**  
+
+If your application is getting large and you're starting to feel that your AI coding agent is becoming part of the problem as well as the solution, AutoGraphQL is built for that exact space.
+
+---
+
 <p align="center">
   <a href="#-the-magic-example"><strong>The Magic Example</strong></a> •
+  <a href="#-why-autographql"><strong>Why AutoGraphQL</strong></a> •
   <a href="#-who-is-autographql-for"><strong>Who It's For</strong></a> •
   <a href="#-quick-start"><strong>Quick Start</strong></a> •
   <a href="#-key-features"><strong>Features</strong></a> •
@@ -32,7 +127,11 @@ AutoGraphQL is an open-source, schema-first backend framework for Node.js. It is
 
 ## 🪄 The Magic Example
 
-Define a data model once in `schemas/Product.graphql`:
+### 1. Prompt Cursor, Claude Code, or Copilot:
+
+> *"Create a Product model in AutoGraphQL with price clamping, capitalized name, and default stock."*
+
+### 2. The AI writes this single file in `schemas/Product.graphql`:
 
 ```graphql
 type Product @model {
@@ -43,6 +142,8 @@ type Product @model {
   createdAt: Date!
 }
 ```
+
+> 💡 *That's literally all your AI agent generates! AutoGraphQL's AST engine handles the remaining 500+ lines of Mongoose/Sequelize models, CRUD resolvers, DataLoader batches, and WebSocket subscriptions automatically.*
 
 Start the engine:
 
@@ -151,6 +252,18 @@ AutoGraphQL is designed for developers and engineering teams who:
 
 ## ⚡ Quick Start
 
+### ⏱️ 60-Second Setup (Copy & Paste)
+
+```bash
+git clone https://github.com/namanmukund/AutoGraphQL.git && cd AutoGraphQL && npm install && npm run db:up && cp .env.example .env && npm run dev
+```
+
+> 🚀 *Starts MongoDB, PostgreSQL, and Redis in Docker, compiles your schemas, and opens AutoGraphQL Studio at [`http://localhost:3000/studio`](http://localhost:3000/studio).*
+
+---
+
+### Step-by-Step Setup
+
 ### 1. Clone & Install Dependencies
 
 ```bash
@@ -191,6 +304,10 @@ After starting the server, access the following **local development URLs**:
 | **🩺 Readiness Probe** | [`http://localhost:3000/health/ready`](http://localhost:3000/health/ready) | Validates MongoDB, PostgreSQL, and Redis connections |
 
 > 🎥 **[Watch the Setup & Architecture Walkthrough on YouTube](https://www.youtube.com/watch?v=h7C2RLe4sik)**
+
+> [!TIP]
+> **🤖 Using Cursor, Windsurf, or Claude Code?**  
+> AutoGraphQL includes a ready-to-use [`.cursorrules`](.cursorrules) file and an [AI Prompting Guide](docs/ai-prompting-guide.md). Teach your AI agent all schema directives (`@model`, `@relation`, `@clamp`, `@tenantScoped`) so it can architect valid AutoGraphQL schemas on demand without generating messy backend boilerplate.
 
 ---
 
@@ -327,6 +444,7 @@ Continuous integration runs automatically on every pull request across **Node.js
 
 Detailed architectural and implementation guides are available in [`docs/`](docs/):
 
+- 🤖 **[AI Prompting & Agent Guide](docs/ai-prompting-guide.md)**: Prompt templates for Cursor, Claude Code, and Windsurf to write AutoGraphQL schemas.
 - 🛡️ **[Schema Directives Reference](docs/directives-reference.md)**: Full reference for all schema directives.
 - 🎨 **[AutoGraphQL Studio Guide](docs/studio-user-guide.md)**: Complete guide to data browsing, AI schema design, and ERD mapping.
 - 🪝 **[Developer Extension & Hooks Guide](docs/developer-extension-and-hooks-guide.md)**: Pre/post hooks, custom queries, and lifecycle extensions.
