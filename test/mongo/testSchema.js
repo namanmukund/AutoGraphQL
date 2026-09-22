@@ -1098,6 +1098,12 @@ export const buildExecutableMongoSchema = ({ models, sdlString = mongoGraphQLSDL
     Mutation: {
       // Company CREATE
       addMongoCompany: async (_, { input }) => {
+        if (input.domain) {
+          const existing = await models.MongoCompany.findOne({ domain: input.domain }).lean().exec();
+          if (existing) {
+            throw new Error(`Duplicate value for unique field domain: ${input.domain}`);
+          }
+        }
         const recordId = cuid();
         const doc = new models.MongoCompany({
           id: recordId,
@@ -1107,6 +1113,12 @@ export const buildExecutableMongoSchema = ({ models, sdlString = mongoGraphQLSDL
         return saved.toJSON();
       },
       updateMongoCompany: async (_, { id, input }) => {
+        if (input && input.domain) {
+          const existing = await models.MongoCompany.findOne({ domain: input.domain, id: { $ne: id } }).lean().exec();
+          if (existing) {
+            throw new Error(`Duplicate value for unique field domain: ${input.domain}`);
+          }
+        }
         const updated = await models.MongoCompany.findOneAndUpdate(
           { id },
           { $set: input },
@@ -1121,6 +1133,12 @@ export const buildExecutableMongoSchema = ({ models, sdlString = mongoGraphQLSDL
 
       // User CREATE
       addMongoUser: async (_, { input, companyConnectId }) => {
+        if (input.email) {
+          const existing = await models.MongoUser.findOne({ email: input.email }).lean().exec();
+          if (existing) {
+            throw new Error(`Duplicate value for unique field email: ${input.email}`);
+          }
+        }
         const recordId = cuid();
         const docData = {
           id: recordId,
@@ -1144,6 +1162,12 @@ export const buildExecutableMongoSchema = ({ models, sdlString = mongoGraphQLSDL
         return saved.toJSON();
       },
       updateMongoUser: async (_, { id, input, companyConnectId }) => {
+        if (input && input.email) {
+          const existing = await models.MongoUser.findOne({ email: input.email, id: { $ne: id } }).lean().exec();
+          if (existing) {
+            throw new Error(`Duplicate value for unique field email: ${input.email}`);
+          }
+        }
         const updateData = { ...(input || {}) };
         if (companyConnectId) {
           updateData.companyId = companyConnectId;
@@ -1163,6 +1187,12 @@ export const buildExecutableMongoSchema = ({ models, sdlString = mongoGraphQLSDL
 
       // Post CREATE
       addMongoPost: async (_, { input, authorConnectId, companyConnectId }) => {
+        if (input.slug) {
+          const existing = await models.MongoPost.findOne({ slug: input.slug }).lean().exec();
+          if (existing) {
+            throw new Error(`Duplicate value for unique field slug: ${input.slug}`);
+          }
+        }
         const recordId = cuid();
         const docData = {
           id: recordId,
@@ -1196,6 +1226,12 @@ export const buildExecutableMongoSchema = ({ models, sdlString = mongoGraphQLSDL
         return saved.toJSON();
       },
       updateMongoPost: async (_, { id, input, authorConnectId, companyConnectId }) => {
+        if (input && input.slug) {
+          const existing = await models.MongoPost.findOne({ slug: input.slug, id: { $ne: id } }).lean().exec();
+          if (existing) {
+            throw new Error(`Duplicate value for unique field slug: ${input.slug}`);
+          }
+        }
         const updateData = { ...(input || {}) };
         if (authorConnectId) {
           updateData.authorId = authorConnectId;
@@ -1274,6 +1310,12 @@ export const buildExecutableMongoSchema = ({ models, sdlString = mongoGraphQLSDL
 
       // Product CREATE
       addMongoProduct: async (_, { input }) => {
+        if (input.sku) {
+          const existing = await models.MongoProduct.findOne({ sku: input.sku }).lean().exec();
+          if (existing) {
+            throw new Error(`Duplicate value for unique field sku: ${input.sku}`);
+          }
+        }
         const recordId = cuid();
         const doc = new models.MongoProduct({
           id: recordId,
@@ -1283,6 +1325,12 @@ export const buildExecutableMongoSchema = ({ models, sdlString = mongoGraphQLSDL
         return saved.toJSON();
       },
       updateMongoProduct: async (_, { id, input }) => {
+        if (input && input.sku) {
+          const existing = await models.MongoProduct.findOne({ sku: input.sku, id: { $ne: id } }).lean().exec();
+          if (existing) {
+            throw new Error(`Duplicate value for unique field sku: ${input.sku}`);
+          }
+        }
         const updated = await models.MongoProduct.findOneAndUpdate(
           { id },
           { $set: input },

@@ -89,6 +89,13 @@ export const startMongoTestEnvironment = async (sdl = mongoGraphQLSDL, forceNew 
   }
 
   testModels = createMongooseModelsFromAST(sdl, testConnection);
+  // Ensure indexes (such as unique constraints) are initialized
+  for (const m of Object.values(testModels)) {
+    if (m && typeof m.init === 'function') {
+      await m.init().catch(() => {});
+    }
+  }
+
   executableSchema = buildExecutableMongoSchema({ models: testModels, sdlString: sdl });
 
   return {
