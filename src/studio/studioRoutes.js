@@ -41,6 +41,20 @@ router.get(['/slides', '/slides/competitor-analysis'], (req, res) => {
   }
 });
 
+// 1c. Serve Documentation Static Assets (screenshots, diagrams)
+router.use('/docs/assets', express.static(path.resolve(process.cwd(), 'docs', 'assets')));
+
+// 1d. Serve Developer Documentation Platform
+router.get(['/docs', '/docs/*', '/documentation'], (req, res) => {
+  const docsPath = path.resolve(__dirname, 'public', 'docs.html');
+  if (fs.existsSync(docsPath)) {
+    res.sendFile(docsPath);
+  } else {
+    res.status(404).send('AutoGraphQL Documentation UI not found');
+  }
+});
+
+
 // 2. GET /api/studio/schemas - List all schemas
 router.get('/api/studio/schemas', (req, res) => {
   try {
