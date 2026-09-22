@@ -11,7 +11,9 @@ import { makeExecutableSchema } from 'graphql-tools';
 import {
   createSequelizeModelFromAST,
   wireSequelizeAssociations,
+  buildSequelizeWhereClause,
 } from '../../src/autoGenerate/models/sqlModelGenerator';
+import { getSortOrderForSequelize } from '../../src/autoGenerate/graphql/controllers/QueryController/sorts';
 
 /**
  * Client-facing GraphQL SDL definition
@@ -327,11 +329,13 @@ export const createPostgresExecutableSchema = (models) => {
 
     input UpdatePgUserInput {
       name: String
+      email: String
       age: Int
       salary: Float
       active: Boolean
       bio: String
       companyId: String
+      preferences: JSONB
     }
 
     input CreatePgPostInput {
@@ -350,6 +354,86 @@ export const createPostgresExecutableSchema = (models) => {
       upvotes: Int
     }
 
+    input CreatePgProductInput {
+      name: String!
+      price: Float!
+      quantity: Int
+      active: Boolean
+      sku: String
+      tags: JSONB
+      specs: JSONB
+    }
+
+    input UpdatePgProductInput {
+      name: String
+      price: Float
+      quantity: Int
+      active: Boolean
+      sku: String
+      tags: JSONB
+      specs: JSONB
+    }
+
+    input PgUserFilter {
+      name: String
+      name_not: String
+      name_contains: String
+      name_startsWith: String
+      name_endsWith: String
+      name_in: [String]
+      email: String
+      email_not: String
+      email_contains: String
+      age: Int
+      age_gt: Int
+      age_gte: Int
+      age_lt: Int
+      age_lte: Int
+      age_not: Int
+      age_in: [Int]
+      salary: Float
+      salary_gt: Float
+      salary_gte: Float
+      salary_lt: Float
+      salary_lte: Float
+      active: Boolean
+      bio: String
+      bio_exists: Boolean
+      companyId: String
+      companyId_exists: Boolean
+      and: [PgUserFilter]
+      or: [PgUserFilter]
+      not: PgUserFilter
+      AND: [PgUserFilter]
+      OR: [PgUserFilter]
+      NOT: [PgUserFilter]
+    }
+
+    input PgCompanyFilter {
+      name: String
+      name_contains: String
+      industry: String
+      isPublic: Boolean
+    }
+
+    input PgPostFilter {
+      title: String
+      title_contains: String
+      published: Boolean
+      authorId: String
+    }
+
+    input PgProductFilter {
+      name: String
+      sku: String
+      active: Boolean
+    }
+
+    input PgCommentFilter {
+      postId: String
+      authorId: String
+    }
+
     type DeletePayload {
       id: ID!
       success: Boolean!
@@ -357,12 +441,15 @@ export const createPostgresExecutableSchema = (models) => {
 
     type Query {
       pgUser(id: ID!): PgUser
-      pgUsers(first: Int, skip: Int): [PgUser]
+      pgUsers(filter: PgUserFilter, orderBy: String, first: Int, skip: Int): [PgUser]
       pgCompany(id: ID!): PgCompany
-      pgCompanies(first: Int, skip: Int): [PgCompany]
+      pgCompanies(filter: PgCompanyFilter, orderBy: String, first: Int, skip: Int): [PgCompany]
       pgPost(id: ID!): PgPost
-      pgPosts(first: Int, skip: Int): [PgPost]
+      pgPosts(filter: PgPostFilter, orderBy: String, first: Int, skip: Int): [PgPost]
       pgProduct(id: ID!): PgProduct
+      pgProducts(filter: PgProductFilter, orderBy: String, first: Int, skip: Int): [PgProduct]
+      pgComment(id: ID!): PgComment
+      pgComments(filter: PgCommentFilter, orderBy: String, first: Int, skip: Int): [PgComment]
     }
 
     type Mutation {
@@ -372,6 +459,10 @@ export const createPostgresExecutableSchema = (models) => {
       deletePgUser(id: ID!): DeletePayload
       createPgPost(input: CreatePgPostInput!): PgPost
       createPgComment(input: CreatePgCommentInput!): PgComment
+      deletePgComment(id: ID!): DeletePayload
+      createPgProduct(input: CreatePgProductInput!): PgProduct
+      updatePgProduct(id: ID!, input: UpdatePgProductInput!): PgProduct
+      deletePgProduct(id: ID!): DeletePayload
     }
   `;
 
@@ -393,29 +484,76 @@ export const createPostgresExecutableSchema = (models) => {
         const u = await models.PgUser.findByPk(id);
         return u ? u.toJSON() : null;
       },
-      pgUsers: async (_, { first = 20, skip = 0 }) => {
-        const list = await models.PgUser.findAll({ limit: first, offset: skip, order: [['createdAt', 'ASC']] });
+      pgUsers: async (_, { filter = {}, orderBy, first = 50, skip = 0 }) => {
+        const where = buildSequelizeWhereClause(filter);
+        const order = orderBy ? getSortOrderForSequelize(orderBy) : [['createdAt', 'ASC']];
+        const list = await models.PgUser.findAll({
+          where,
+          order,
+          limit: first,
+          offset: skip,
+        });
         return list.map((item) => item.toJSON());
       },
       pgCompany: async (_, { id }) => {
         const c = await models.PgCompany.findByPk(id);
         return c ? c.toJSON() : null;
       },
-      pgCompanies: async (_, { first = 20, skip = 0 }) => {
-        const list = await models.PgCompany.findAll({ limit: first, offset: skip, order: [['createdAt', 'ASC']] });
+      pgCompanies: async (_, { filter = {}, orderBy, first = 50, skip = 0 }) => {
+        const where = buildSequelizeWhereClause(filter);
+        const order = orderBy ? getSortOrderForSequelize(orderBy) : [['createdAt', 'ASC']];
+        const list = await models.PgCompany.findAll({
+          where,
+          order,
+          limit: first,
+          offset: skip,
+        });
         return list.map((item) => item.toJSON());
       },
       pgPost: async (_, { id }) => {
         const p = await models.PgPost.findByPk(id);
         return p ? p.toJSON() : null;
       },
-      pgPosts: async (_, { first = 20, skip = 0 }) => {
-        const list = await models.PgPost.findAll({ limit: first, offset: skip, order: [['createdAt', 'ASC']] });
+      pgPosts: async (_, { filter = {}, orderBy, first = 50, skip = 0 }) => {
+        const where = buildSequelizeWhereClause(filter);
+        const order = orderBy ? getSortOrderForSequelize(orderBy) : [['createdAt', 'ASC']];
+        const list = await models.PgPost.findAll({
+          where,
+          order,
+          limit: first,
+          offset: skip,
+        });
         return list.map((item) => item.toJSON());
       },
       pgProduct: async (_, { id }) => {
         const p = await models.PgProduct.findByPk(id);
         return p ? p.toJSON() : null;
+      },
+      pgProducts: async (_, { filter = {}, orderBy, first = 50, skip = 0 }) => {
+        const where = buildSequelizeWhereClause(filter);
+        const order = orderBy ? getSortOrderForSequelize(orderBy) : [['createdAt', 'ASC']];
+        const list = await models.PgProduct.findAll({
+          where,
+          order,
+          limit: first,
+          offset: skip,
+        });
+        return list.map((item) => item.toJSON());
+      },
+      pgComment: async (_, { id }) => {
+        const c = await models.PgComment.findByPk(id);
+        return c ? c.toJSON() : null;
+      },
+      pgComments: async (_, { filter = {}, orderBy, first = 50, skip = 0 }) => {
+        const where = buildSequelizeWhereClause(filter);
+        const order = orderBy ? getSortOrderForSequelize(orderBy) : [['createdAt', 'ASC']];
+        const list = await models.PgComment.findAll({
+          where,
+          order,
+          limit: first,
+          offset: skip,
+        });
+        return list.map((item) => item.toJSON());
       },
     },
 
@@ -445,6 +583,24 @@ export const createPostgresExecutableSchema = (models) => {
       createPgComment: async (_, { input }) => {
         const created = await models.PgComment.create(input);
         return created.toJSON();
+      },
+      deletePgComment: async (_, { id }) => {
+        const deleted = await models.PgComment.destroy({ where: { id } });
+        return { id, success: deleted > 0 };
+      },
+      createPgProduct: async (_, { input }) => {
+        const created = await models.PgProduct.create(input);
+        return created.toJSON();
+      },
+      updatePgProduct: async (_, { id, input }) => {
+        const p = await models.PgProduct.findByPk(id);
+        if (!p) throw new Error(`Product with id ${id} not found`);
+        await p.update(input);
+        return p.toJSON();
+      },
+      deletePgProduct: async (_, { id }) => {
+        const deleted = await models.PgProduct.destroy({ where: { id } });
+        return { id, success: deleted > 0 };
       },
     },
 
@@ -511,11 +667,278 @@ export const createPostgresExecutableSchema = (models) => {
   });
 };
 
+const handleGraphQLErrors = (res) => {
+  if (res.errors && res.errors.length) {
+    const original = res.errors[0].originalError || {};
+    const err = new Error(original.message || res.errors[0].message);
+    err.name = original.name || 'GraphQLError';
+    err.graphQLErrors = res.errors;
+    err.originalError = res.errors[0].originalError;
+    throw err;
+  }
+};
+
+/**
+ * Client API helper wrapping generated GraphQL operations
+ *
+ * @param {GraphQLSchema} schema
+ */
+export const createApiClient = (schema) => ({
+  // CREATE
+  createCompany: async (input) => {
+    const res = await require('graphql').graphql(schema, `
+      mutation CreateCompany($input: CreatePgCompanyInput!) {
+        createPgCompany(input: $input) {
+          id name domain industry employeeCount isPublic foundedAt metadata createdAt updatedAt
+        }
+      }
+    `, null, null, { input });
+    handleGraphQLErrors(res);
+    return res.data.createPgCompany;
+  },
+
+  createUser: async (input) => {
+    const res = await require('graphql').graphql(schema, `
+      mutation CreateUser($input: CreatePgUserInput!) {
+        createPgUser(input: $input) {
+          id name email age salary active bio companyId preferences createdAt updatedAt
+        }
+      }
+    `, null, null, { input });
+    handleGraphQLErrors(res);
+    return res.data.createPgUser;
+  },
+
+  createPost: async (input) => {
+    const res = await require('graphql').graphql(schema, `
+      mutation CreatePost($input: CreatePgPostInput!) {
+        createPgPost(input: $input) {
+          id title content published viewCount rating authorId companyId createdAt updatedAt
+        }
+      }
+    `, null, null, { input });
+    handleGraphQLErrors(res);
+    return res.data.createPgPost;
+  },
+
+  createComment: async (input) => {
+    const res = await require('graphql').graphql(schema, `
+      mutation CreateComment($input: CreatePgCommentInput!) {
+        createPgComment(input: $input) {
+          id content postId authorId upvotes createdAt updatedAt
+        }
+      }
+    `, null, null, { input });
+    handleGraphQLErrors(res);
+    return res.data.createPgComment;
+  },
+
+  createProduct: async (input) => {
+    const res = await require('graphql').graphql(schema, `
+      mutation CreateProduct($input: CreatePgProductInput!) {
+        createPgProduct(input: $input) {
+          id name price quantity active sku tags specs createdAt updatedAt
+        }
+      }
+    `, null, null, { input });
+    handleGraphQLErrors(res);
+    return res.data.createPgProduct;
+  },
+
+  // READ SINGLE
+  getUser: async (id) => {
+    const res = await require('graphql').graphql(schema, `
+      query GetUser($id: ID!) {
+        pgUser(id: $id) {
+          id name email age salary active bio companyId preferences createdAt updatedAt
+        }
+      }
+    `, null, null, { id });
+    handleGraphQLErrors(res);
+    return res.data.pgUser;
+  },
+
+  getCompany: async (id) => {
+    const res = await require('graphql').graphql(schema, `
+      query GetCompany($id: ID!) {
+        pgCompany(id: $id) {
+          id name domain industry employeeCount isPublic foundedAt metadata createdAt updatedAt
+        }
+      }
+    `, null, null, { id });
+    handleGraphQLErrors(res);
+    return res.data.pgCompany;
+  },
+
+  getPost: async (id) => {
+    const res = await require('graphql').graphql(schema, `
+      query GetPost($id: ID!) {
+        pgPost(id: $id) {
+          id title content published viewCount rating authorId companyId createdAt updatedAt
+        }
+      }
+    `, null, null, { id });
+    handleGraphQLErrors(res);
+    return res.data.pgPost;
+  },
+
+  getProduct: async (id) => {
+    const res = await require('graphql').graphql(schema, `
+      query GetProduct($id: ID!) {
+        pgProduct(id: $id) {
+          id name price quantity active sku tags specs createdAt updatedAt
+        }
+      }
+    `, null, null, { id });
+    handleGraphQLErrors(res);
+    return res.data.pgProduct;
+  },
+
+  getComment: async (id) => {
+    const res = await require('graphql').graphql(schema, `
+      query GetComment($id: ID!) {
+        pgComment(id: $id) {
+          id content postId authorId upvotes createdAt updatedAt
+        }
+      }
+    `, null, null, { id });
+    handleGraphQLErrors(res);
+    return res.data.pgComment;
+  },
+
+  // READ LIST (FILTER, SORT, PAGINATE)
+  listUsers: async ({ filter, orderBy, first, skip } = {}) => {
+    const res = await require('graphql').graphql(schema, `
+      query ListUsers($filter: PgUserFilter, $orderBy: String, $first: Int, $skip: Int) {
+        pgUsers(filter: $filter, orderBy: $orderBy, first: $first, skip: $skip) {
+          id name email age salary active bio companyId preferences createdAt updatedAt
+        }
+      }
+    `, null, null, { filter, orderBy, first, skip });
+    handleGraphQLErrors(res);
+    return res.data.pgUsers;
+  },
+
+  listCompanies: async ({ filter, orderBy, first, skip } = {}) => {
+    const res = await require('graphql').graphql(schema, `
+      query ListCompanies($filter: PgCompanyFilter, $orderBy: String, $first: Int, $skip: Int) {
+        pgCompanies(filter: $filter, orderBy: $orderBy, first: $first, skip: $skip) {
+          id name domain industry employeeCount isPublic createdAt updatedAt
+        }
+      }
+    `, null, null, { filter, orderBy, first, skip });
+    handleGraphQLErrors(res);
+    return res.data.pgCompanies;
+  },
+
+  listPosts: async ({ filter, orderBy, first, skip } = {}) => {
+    const res = await require('graphql').graphql(schema, `
+      query ListPosts($filter: PgPostFilter, $orderBy: String, $first: Int, $skip: Int) {
+        pgPosts(filter: $filter, orderBy: $orderBy, first: $first, skip: $skip) {
+          id title content published viewCount rating authorId companyId createdAt updatedAt
+        }
+      }
+    `, null, null, { filter, orderBy, first, skip });
+    handleGraphQLErrors(res);
+    return res.data.pgPosts;
+  },
+
+  listComments: async ({ filter, orderBy, first, skip } = {}) => {
+    const res = await require('graphql').graphql(schema, `
+      query ListComments($filter: PgCommentFilter, $orderBy: String, $first: Int, $skip: Int) {
+        pgComments(filter: $filter, orderBy: $orderBy, first: $first, skip: $skip) {
+          id content postId authorId upvotes createdAt updatedAt
+        }
+      }
+    `, null, null, { filter, orderBy, first, skip });
+    handleGraphQLErrors(res);
+    return res.data.pgComments;
+  },
+
+  listProducts: async ({ filter, orderBy, first, skip } = {}) => {
+    const res = await require('graphql').graphql(schema, `
+      query ListProducts($filter: PgProductFilter, $orderBy: String, $first: Int, $skip: Int) {
+        pgProducts(filter: $filter, orderBy: $orderBy, first: $first, skip: $skip) {
+          id name price quantity active sku tags specs createdAt updatedAt
+        }
+      }
+    `, null, null, { filter, orderBy, first, skip });
+    handleGraphQLErrors(res);
+    return res.data.pgProducts;
+  },
+
+  // UPDATE
+  updateUser: async (id, input) => {
+    const res = await require('graphql').graphql(schema, `
+      mutation UpdateUser($id: ID!, $input: UpdatePgUserInput!) {
+        updatePgUser(id: $id, input: $input) {
+          id name email age salary active bio companyId preferences createdAt updatedAt
+        }
+      }
+    `, null, null, { id, input });
+    handleGraphQLErrors(res);
+    return res.data.updatePgUser;
+  },
+
+  updateProduct: async (id, input) => {
+    const res = await require('graphql').graphql(schema, `
+      mutation UpdateProduct($id: ID!, $input: UpdatePgProductInput!) {
+        updatePgProduct(id: $id, input: $input) {
+          id name price quantity active sku tags specs createdAt updatedAt
+        }
+      }
+    `, null, null, { id, input });
+    handleGraphQLErrors(res);
+    return res.data.updatePgProduct;
+  },
+
+  // DELETE
+  deleteUser: async (id) => {
+    const res = await require('graphql').graphql(schema, `
+      mutation DeleteUser($id: ID!) {
+        deletePgUser(id: $id) {
+          id success
+        }
+      }
+    `, null, null, { id });
+    handleGraphQLErrors(res);
+    return res.data.deletePgUser;
+  },
+
+  deleteProduct: async (id) => {
+    const res = await require('graphql').graphql(schema, `
+      mutation DeleteProduct($id: ID!) {
+        deletePgProduct(id: $id) {
+          id success
+        }
+      }
+    `, null, null, { id });
+    handleGraphQLErrors(res);
+    return res.data.deletePgProduct;
+  },
+
+  deleteComment: async (id) => {
+    const res = await require('graphql').graphql(schema, `
+      mutation DeleteComment($id: ID!) {
+        deletePgComment(id: $id) {
+          id success
+        }
+      }
+    `, null, null, { id });
+    handleGraphQLErrors(res);
+    return res.data.deletePgComment;
+  },
+
+  // RAW EXECUTE
+  execute: (query, variables = {}) => require('graphql').graphql(schema, query, null, null, variables),
+});
+
 export default {
   pgGraphQLSDL,
   parseSDLToSchemaDefinitions,
   createModelsFromSDL,
   createPostgresExecutableSchema,
+  createApiClient,
   PgCompanyFields,
   PgUserFields,
   PgPostFields,

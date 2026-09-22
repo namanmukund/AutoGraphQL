@@ -25,6 +25,7 @@ import {
   parseSDLToSchemaDefinitions,
   createModelsFromSDL,
   createPostgresExecutableSchema,
+  createApiClient,
 } from './testSchema';
 import {
   createSequelizeModelFromAST,
@@ -39,6 +40,8 @@ import { convertSortToSequelizeOrder, getSortOrderForSequelize } from '../../src
 
 let sequelize;
 let models;
+let gqlSchema;
+let api;
 
 // ─── LIFECYCLE ────────────────────────────────────────────────────────────────
 
@@ -48,6 +51,8 @@ before(async function bootstrapPostgres() {
   const db = await setupDatabase();
   sequelize = db.sequelize;
   models = db.models;
+  gqlSchema = createPostgresExecutableSchema(models);
+  api = createApiClient(gqlSchema);
 });
 
 afterEach(async function cleanBetweenSuites() {
@@ -61,74 +66,65 @@ after(async function shutdownPostgres() {
   stopPostgres();
 });
 
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
+// ─── HELPERS (Driven via client GraphQL API) ──────────────────────────────────
 
 const createCompany = async (overrides = {}) => {
   const defaults = {
-    id: cuid(),
     name: `Company ${Date.now()}`,
-    domain: `company-${Date.now()}.com`,
+    domain: `company-${Date.now()}-${Math.random().toString(36).slice(2)}.com`,
     industry: 'Technology',
     employeeCount: 100,
     isPublic: false,
-    foundedAt: new Date('2020-01-15'),
     metadata: { tier: 'enterprise' },
   };
-  return models.PgCompany.create({ ...defaults, ...overrides });
+  return api.createCompany({ ...defaults, ...overrides });
 };
 
 const createUser = async (overrides = {}) => {
   const defaults = {
-    id: cuid(),
     name: 'Test User',
     email: `user-${Date.now()}-${Math.random().toString(36).slice(2)}@test.com`,
     age: 30,
     salary: 75000.50,
     active: true,
     bio: 'A test user',
-    lastLoginAt: new Date(),
     preferences: { theme: 'dark', notifications: true },
   };
-  return models.PgUser.create({ ...defaults, ...overrides });
+  return api.createUser({ ...defaults, ...overrides });
 };
 
 const createPost = async (authorId, overrides = {}) => {
   const defaults = {
-    id: cuid(),
     title: `Post ${Date.now()}`,
     content: 'Lorem ipsum dolor sit amet',
     published: false,
-    viewCount: 0,
     rating: 4.5,
     authorId,
-    publishedAt: null,
   };
-  return models.PgPost.create({ ...defaults, ...overrides });
+  return api.createPost({ ...defaults, ...overrides });
 };
 
 const createComment = async (postId, authorId, overrides = {}) => {
   const defaults = {
-    id: cuid(),
     content: 'Great post!',
     postId,
     authorId,
     upvotes: 0,
   };
-  return models.PgComment.create({ ...defaults, ...overrides });
+  return api.createComment({ ...defaults, ...overrides });
 };
 
 const createProduct = async (overrides = {}) => {
   const defaults = {
-    id: cuid(),
     name: `Product ${Date.now()}`,
     price: 29.99,
     quantity: 100,
     active: true,
     sku: `SKU-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-    tags: ['electronics', 'sale'],
+    tags: { category: 'electronics' },
     specs: { weight: '1.5kg', color: 'black' },
   };
-  return models.PgProduct.create({ ...defaults, ...overrides });
+  return api.createProduct({ ...defaults, ...overrides });
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -270,8 +266,8 @@ describe('2. CREATE Operations', () => {
     assert.strictEqual(plain.active, true, 'active should default to true');
   });
 
-  it('should generate cuid-format ids when using createSequelizeModelFromAST default', async () => {
-    const product = await models.PgProduct.create({
+  it('should generate cuid-format ids when creating records via API', async () => {
+    const product = await createProduct({
       name: 'Auto ID Product',
       price: 9.99,
       sku: `auto-${Date.now()}`,
@@ -280,9 +276,9 @@ describe('2. CREATE Operations', () => {
     assert.ok(product.id.length > 10, 'ID should be cuid format');
   });
 
-  it('should reject missing required fields', async () => {
+  it('should reject missing required fields via API', async () => {
     try {
-      await models.PgUser.create({ bio: 'no name or email' });
+      await api.createUser({ bio: 'no name or email' });
       assert.fail('Should have thrown');
     } catch (err) {
       assert.ok(err.message, 'Should have error message');
@@ -329,26 +325,26 @@ describe('3. READ Operations', () => {
     testUser = await createUser({ name: 'Read User', email: 'read@test.com' });
   });
 
-  it('should find a record by primary key', async () => {
-    const found = await models.PgUser.findByPk(testUser.id);
+  it('should find a record by primary key via GraphQL API', async () => {
+    const found = await api.getUser(testUser.id);
     assert.ok(found);
     assert.strictEqual(found.id, testUser.id);
     assert.strictEqual(found.name, 'Read User');
   });
 
-  it('should find a record using findOne with where clause', async () => {
-    const found = await models.PgUser.findOne({ where: { email: 'read@test.com' } });
-    assert.ok(found);
-    assert.strictEqual(found.email, 'read@test.com');
+  it('should find a record using query with filter', async () => {
+    const results = await api.listUsers({ filter: { email: 'read@test.com' } });
+    assert.ok(results && results.length === 1);
+    assert.strictEqual(results[0].email, 'read@test.com');
   });
 
   it('should return null for non-existent ID', async () => {
-    const found = await models.PgUser.findByPk('non-existent-id-12345');
+    const found = await api.getUser('non-existent-id-12345');
     assert.strictEqual(found, null);
   });
 
   it('should return empty array for no matching records', async () => {
-    const results = await models.PgUser.findAll({ where: { name: 'NoSuchUser' } });
+    const results = await api.listUsers({ filter: { name: 'NoSuchUser' } });
     assert.ok(Array.isArray(results));
     assert.strictEqual(results.length, 0);
   });
@@ -356,21 +352,20 @@ describe('3. READ Operations', () => {
   it('should fetch multiple records', async () => {
     await createUser({ email: 'read2@test.com' });
     await createUser({ email: 'read3@test.com' });
-    const results = await models.PgUser.findAll();
+    const results = await api.listUsers();
     assert.ok(results.length >= 3);
   });
 
-  it('should convert to plain objects with toJSON', async () => {
-    const found = await models.PgUser.findByPk(testUser.id);
-    const plain = found.toJSON();
-    assert.ok(typeof plain === 'object');
-    assert.ok(!plain.dataValues, 'toJSON should not have dataValues wrapper');
-    assert.strictEqual(plain.name, 'Read User');
+  it('should return plain data objects from GraphQL API', async () => {
+    const found = await api.getUser(testUser.id);
+    assert.ok(typeof found === 'object');
+    assert.ok(!found.dataValues, 'GraphQL API response should not have Sequelize dataValues wrapper');
+    assert.strictEqual(found.name, 'Read User');
   });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// SECTION 4: FILTERING (buildSequelizeWhereClause)
+// SECTION 4: FILTERING
 // ═══════════════════════════════════════════════════════════════════════════════
 
 describe('4. Filtering', () => {
@@ -382,93 +377,85 @@ describe('4. Filtering', () => {
   });
 
   it('should filter by exact equality', async () => {
-    const where = buildSequelizeWhereClause({ name: 'Alice' });
-    const results = await models.PgUser.findAll({ where });
+    const results = await api.listUsers({ filter: { name: 'Alice' } });
     assert.strictEqual(results.length, 1);
     assert.strictEqual(results[0].name, 'Alice');
   });
 
   it('should filter with _not (inequality)', async () => {
-    const where = buildSequelizeWhereClause({ name_not: 'Alice' });
-    const results = await models.PgUser.findAll({ where });
+    const results = await api.listUsers({ filter: { name_not: 'Alice' } });
     assert.ok(results.length >= 3);
     results.forEach((r) => assert.notStrictEqual(r.name, 'Alice'));
   });
 
   it('should filter with _gt (greater than)', async () => {
-    const where = buildSequelizeWhereClause({ age_gt: 30 });
-    const results = await models.PgUser.findAll({ where });
+    const results = await api.listUsers({ filter: { age_gt: 30 } });
     assert.ok(results.length >= 2);
     results.forEach((r) => assert.ok(r.age > 30));
   });
 
   it('should filter with _gte (greater than or equal)', async () => {
-    const where = buildSequelizeWhereClause({ age_gte: 35 });
-    const results = await models.PgUser.findAll({ where });
+    const results = await api.listUsers({ filter: { age_gte: 35 } });
     assert.ok(results.length >= 2);
     results.forEach((r) => assert.ok(r.age >= 35));
   });
 
   it('should filter with _lt (less than)', async () => {
-    const where = buildSequelizeWhereClause({ salary_lt: 70000 });
-    const results = await models.PgUser.findAll({ where });
+    const results = await api.listUsers({ filter: { salary_lt: 70000 } });
     assert.ok(results.length >= 2);
     results.forEach((r) => assert.ok(r.salary < 70000));
   });
 
   it('should filter with _lte (less than or equal)', async () => {
-    const where = buildSequelizeWhereClause({ salary_lte: 65000 });
-    const results = await models.PgUser.findAll({ where });
+    const results = await api.listUsers({ filter: { salary_lte: 65000 } });
     assert.ok(results.length >= 2);
     results.forEach((r) => assert.ok(r.salary <= 65000));
   });
 
   it('should filter with _in (set inclusion)', async () => {
-    const where = buildSequelizeWhereClause({ name_in: ['Alice', 'Bob'] });
-    const results = await models.PgUser.findAll({ where });
+    const results = await api.listUsers({ filter: { name_in: ['Alice', 'Bob'] } });
     assert.strictEqual(results.length, 2);
+    const names = results.map((r) => r.name);
+    assert.ok(names.includes('Alice') && names.includes('Bob'));
   });
 
   it('should filter with _contains (case-insensitive ILIKE)', async () => {
-    const where = buildSequelizeWhereClause({ name_contains: 'li' });
-    const results = await models.PgUser.findAll({ where });
-    // Alice and Charlie both contain 'li'
+    const results = await api.listUsers({ filter: { name_contains: 'li' } });
     assert.ok(results.length >= 2);
+    results.forEach((r) => assert.ok(r.name.toLowerCase().includes('li')));
   });
 
   it('should filter with _startsWith', async () => {
-    const where = buildSequelizeWhereClause({ name_startsWith: 'Al' });
-    const results = await models.PgUser.findAll({ where });
+    const results = await api.listUsers({ filter: { name_startsWith: 'Al' } });
     assert.strictEqual(results.length, 1);
     assert.strictEqual(results[0].name, 'Alice');
   });
 
   it('should filter with _endsWith', async () => {
-    const where = buildSequelizeWhereClause({ name_endsWith: 'ob' });
-    const results = await models.PgUser.findAll({ where });
+    const results = await api.listUsers({ filter: { name_endsWith: 'ob' } });
     assert.strictEqual(results.length, 1);
     assert.strictEqual(results[0].name, 'Bob');
   });
 
   it('should filter with _exists (null check)', async () => {
     await createUser({ name: 'NoBio', email: 'nobio@test.com', bio: null });
-    const where = buildSequelizeWhereClause({ bio_exists: false });
-    const results = await models.PgUser.findAll({ where });
+    const results = await api.listUsers({ filter: { bio_exists: false } });
     assert.ok(results.length >= 1);
+    const noBio = results.find((r) => r.name === 'NoBio');
+    assert.ok(noBio);
+    assert.strictEqual(noBio.bio, null);
   });
 
   it('should filter with boolean values', async () => {
-    const where = buildSequelizeWhereClause({ active: false });
-    const results = await models.PgUser.findAll({ where });
+    const results = await api.listUsers({ filter: { active: false } });
     assert.strictEqual(results.length, 1);
     assert.strictEqual(results[0].name, 'Charlie');
   });
 
   it('should filter with AND logical operator', async () => {
-    const where = buildSequelizeWhereClause({
-      and: [{ active: true }, { age_gte: 30 }],
+    const results = await api.listUsers({
+      filter: { and: [{ active: true }, { age_gte: 30 }] },
     });
-    const results = await models.PgUser.findAll({ where });
     assert.ok(results.length >= 1);
     results.forEach((r) => {
       assert.strictEqual(r.active, true);
@@ -477,28 +464,29 @@ describe('4. Filtering', () => {
   });
 
   it('should filter with OR logical operator', async () => {
-    const where = buildSequelizeWhereClause({
-      or: [{ name: 'Alice' }, { name: 'Bob' }],
+    const results = await api.listUsers({
+      filter: { or: [{ name: 'Alice' }, { name: 'Bob' }] },
     });
-    const results = await models.PgUser.findAll({ where });
     assert.strictEqual(results.length, 2);
   });
 
   it('should filter with NOT logical operator', async () => {
-    const where = buildSequelizeWhereClause({ not: { active: false } });
-    const results = await models.PgUser.findAll({ where });
+    const results = await api.listUsers({
+      filter: { not: { active: false } },
+    });
     assert.ok(results.length >= 3);
     results.forEach((r) => assert.strictEqual(r.active, true));
   });
 
   it('should handle combined filters', async () => {
-    const where = buildSequelizeWhereClause({
-      and: [
-        { active: true },
-        { or: [{ age_gt: 30 }, { salary_gt: 60000 }] },
-      ],
+    const results = await api.listUsers({
+      filter: {
+        and: [
+          { active: true },
+          { or: [{ age_gt: 30 }, { salary_gt: 60000 }] },
+        ],
+      },
     });
-    const results = await models.PgUser.findAll({ where });
     assert.ok(results.length >= 2);
   });
 });
@@ -519,20 +507,20 @@ describe('5. Pagination', () => {
   });
 
   it('should limit results with first/limit', async () => {
-    const results = await models.PgUser.findAll({ limit: 3 });
+    const results = await api.listUsers({ first: 3 });
     assert.strictEqual(results.length, 3);
   });
 
-  it('should skip results with offset', async () => {
-    const all = await models.PgUser.findAll({ order: [['name', 'ASC']] });
-    const offset = await models.PgUser.findAll({ offset: 3, order: [['name', 'ASC']] });
+  it('should skip results with offset/skip', async () => {
+    const all = await api.listUsers({ orderBy: 'name_ASC', first: 20 });
+    const offset = await api.listUsers({ skip: 3, orderBy: 'name_ASC', first: 20 });
     assert.ok(offset.length <= all.length - 3);
     assert.strictEqual(offset[0].name, all[3].name);
   });
 
   it('should combine limit and offset for paging', async () => {
-    const page1 = await models.PgUser.findAll({ limit: 3, offset: 0, order: [['name', 'ASC']] });
-    const page2 = await models.PgUser.findAll({ limit: 3, offset: 3, order: [['name', 'ASC']] });
+    const page1 = await api.listUsers({ first: 3, skip: 0, orderBy: 'name_ASC' });
+    const page2 = await api.listUsers({ first: 3, skip: 3, orderBy: 'name_ASC' });
     assert.strictEqual(page1.length, 3);
     assert.strictEqual(page2.length, 3);
     // No overlap
@@ -542,22 +530,22 @@ describe('5. Pagination', () => {
   });
 
   it('should return empty for offset beyond total', async () => {
-    const results = await models.PgUser.findAll({ offset: 1000 });
+    const results = await api.listUsers({ skip: 1000 });
     assert.strictEqual(results.length, 0);
   });
 
   it('should not duplicate or skip records across pages', async () => {
     const allIds = new Set();
     const pageSize = 3;
-    let offset = 0;
+    let skip = 0;
     let page;
     do {
-      page = await models.PgUser.findAll({ limit: pageSize, offset, order: [['id', 'ASC']] });
+      page = await api.listUsers({ first: pageSize, skip, orderBy: 'id_ASC' });
       page.forEach((r) => {
         assert.ok(!allIds.has(r.id), `Duplicate record: ${r.id}`);
         allIds.add(r.id);
       });
-      offset += pageSize;
+      skip += pageSize;
     } while (page.length === pageSize);
 
     const totalCount = await models.PgUser.count();
@@ -577,28 +565,28 @@ describe('6. Sorting', () => {
   });
 
   it('should sort ascending by name', async () => {
-    const results = await models.PgUser.findAll({ order: [['name', 'ASC']] });
+    const results = await api.listUsers({ orderBy: 'name_ASC' });
     for (let i = 1; i < results.length; i += 1) {
       assert.ok(results[i].name >= results[i - 1].name);
     }
   });
 
   it('should sort descending by age', async () => {
-    const results = await models.PgUser.findAll({ order: [['age', 'DESC']] });
+    const results = await api.listUsers({ orderBy: 'age_DESC' });
     for (let i = 1; i < results.length; i += 1) {
       assert.ok(results[i].age <= results[i - 1].age);
     }
   });
 
   it('should sort numeric fields correctly', async () => {
-    const results = await models.PgUser.findAll({ order: [['salary', 'ASC']] });
+    const results = await api.listUsers({ orderBy: 'salary_ASC' });
     for (let i = 1; i < results.length; i += 1) {
       assert.ok(results[i].salary >= results[i - 1].salary);
     }
   });
 
   it('should sort by createdAt timestamp', async () => {
-    const results = await models.PgUser.findAll({ order: [['createdAt', 'ASC']] });
+    const results = await api.listUsers({ orderBy: 'createdAt_ASC' });
     for (let i = 1; i < results.length; i += 1) {
       assert.ok(new Date(results[i].createdAt) >= new Date(results[i - 1].createdAt));
     }
@@ -626,8 +614,8 @@ describe('6. Sorting', () => {
   });
 
   it('should combine sorting with pagination', async () => {
-    const page1 = await models.PgUser.findAll({ order: [['salary', 'DESC']], limit: 2, offset: 0 });
-    const page2 = await models.PgUser.findAll({ order: [['salary', 'DESC']], limit: 2, offset: 2 });
+    const page1 = await api.listUsers({ orderBy: 'salary_DESC', first: 2, skip: 0 });
+    const page2 = await api.listUsers({ orderBy: 'salary_DESC', first: 2, skip: 2 });
     if (page1.length && page2.length) {
       assert.ok(page1[page1.length - 1].salary >= page2[0].salary);
     }
@@ -646,15 +634,19 @@ describe('7. UPDATE Operations', () => {
   });
 
   it('should update a single field', async () => {
-    const record = await models.PgUser.findByPk(testUser.id);
-    await record.update({ name: 'Updated Name' });
+    const updated = await api.updateUser(testUser.id, { name: 'Updated Name' });
+    assert.strictEqual(updated.name, 'Updated Name');
+    // Verify persistence in PostgreSQL directly
     const refreshed = await models.PgUser.findByPk(testUser.id);
     assert.strictEqual(refreshed.name, 'Updated Name');
   });
 
   it('should update multiple fields', async () => {
-    const record = await models.PgUser.findByPk(testUser.id);
-    await record.update({ name: 'Multi Updated', age: 30, salary: 60000 });
+    const updated = await api.updateUser(testUser.id, { name: 'Multi Updated', age: 30, salary: 60000 });
+    assert.strictEqual(updated.name, 'Multi Updated');
+    assert.strictEqual(updated.age, 30);
+    assert.strictEqual(updated.salary, 60000);
+    // Verify persistence in PostgreSQL directly
     const refreshed = await models.PgUser.findByPk(testUser.id);
     assert.strictEqual(refreshed.name, 'Multi Updated');
     assert.strictEqual(refreshed.age, 30);
@@ -662,60 +654,54 @@ describe('7. UPDATE Operations', () => {
   });
 
   it('should preserve fields not being updated', async () => {
-    const record = await models.PgUser.findByPk(testUser.id);
-    await record.update({ name: 'New Name' });
+    const updated = await api.updateUser(testUser.id, { name: 'New Name' });
+    assert.strictEqual(updated.email, 'update@test.com', 'Email should remain unchanged');
+    assert.strictEqual(updated.age, 25, 'Age should remain unchanged');
     const refreshed = await models.PgUser.findByPk(testUser.id);
-    assert.strictEqual(refreshed.email, 'update@test.com', 'Email should remain unchanged');
-    assert.strictEqual(refreshed.age, 25, 'Age should remain unchanged');
+    assert.strictEqual(refreshed.email, 'update@test.com');
   });
 
   it('should set a field to null', async () => {
-    const record = await models.PgUser.findByPk(testUser.id);
-    await record.update({ bio: null });
+    const updated = await api.updateUser(testUser.id, { bio: null });
+    assert.strictEqual(updated.bio, null);
     const refreshed = await models.PgUser.findByPk(testUser.id);
     assert.strictEqual(refreshed.bio, null);
   });
 
   it('should update JSONB fields', async () => {
-    const record = await models.PgUser.findByPk(testUser.id);
-    await record.update({ preferences: { theme: 'light', lang: 'fr' } });
+    const updated = await api.updateUser(testUser.id, { preferences: { theme: 'light', lang: 'fr' } });
+    assert.deepStrictEqual(updated.preferences, { theme: 'light', lang: 'fr' });
     const refreshed = await models.PgUser.findByPk(testUser.id);
-    const plain = refreshed.toJSON();
-    assert.deepStrictEqual(plain.preferences, { theme: 'light', lang: 'fr' });
+    assert.deepStrictEqual(refreshed.toJSON().preferences, { theme: 'light', lang: 'fr' });
   });
 
   it('should update boolean fields', async () => {
-    const record = await models.PgUser.findByPk(testUser.id);
-    await record.update({ active: false });
+    const updated = await api.updateUser(testUser.id, { active: false });
+    assert.strictEqual(updated.active, false);
     const refreshed = await models.PgUser.findByPk(testUser.id);
     assert.strictEqual(refreshed.active, false);
   });
 
   it('should update updatedAt timestamp', async () => {
-    const record = await models.PgUser.findByPk(testUser.id);
-    const before = new Date(record.updatedAt);
-    // Small delay to ensure timestamp difference
+    const before = new Date(testUser.updatedAt);
     await new Promise((resolve) => setTimeout(resolve, 100));
-    await record.update({ name: 'Timestamp Test' });
-    const refreshed = await models.PgUser.findByPk(testUser.id);
-    assert.ok(new Date(refreshed.updatedAt) >= before);
+    const updated = await api.updateUser(testUser.id, { name: 'Timestamp Test' });
+    assert.ok(new Date(updated.updatedAt) >= before);
   });
 
   it('should verify update in PostgreSQL directly', async () => {
-    const record = await models.PgUser.findByPk(testUser.id);
-    await record.update({ name: 'Direct Verify' });
+    await api.updateUser(testUser.id, { name: 'Direct Verify' });
     const [rows] = await sequelize.query(`SELECT name FROM pguser WHERE id = '${testUser.id}'`);
     assert.strictEqual(rows[0].name, 'Direct Verify');
   });
 
   it('should reject invalid update (unique violation)', async () => {
     await createUser({ email: 'taken@test.com' });
-    const record = await models.PgUser.findByPk(testUser.id);
     try {
-      await record.update({ email: 'taken@test.com' });
+      await api.updateUser(testUser.id, { email: 'taken@test.com' });
       assert.fail('Should have thrown unique constraint error');
     } catch (err) {
-      assert.ok(err.name === 'SequelizeUniqueConstraintError' || err.message.includes('unique'));
+      assert.ok(err.name === 'SequelizeUniqueConstraintError' || err.message.includes('unique') || err.message.includes('Validation error'));
     }
   });
 });
@@ -727,34 +713,43 @@ describe('7. UPDATE Operations', () => {
 describe('8. DELETE Operations', () => {
   it('should delete a record by ID', async () => {
     const user = await createUser({ email: 'delete@test.com' });
-    const record = await models.PgUser.findByPk(user.id);
-    assert.ok(record);
-    await record.destroy();
+    const res = await api.deleteUser(user.id);
+    assert.strictEqual(res.id, user.id);
+    assert.strictEqual(res.success, true);
+    // Verify deletion in PostgreSQL directly
     const deleted = await models.PgUser.findByPk(user.id);
     assert.strictEqual(deleted, null);
   });
 
   it('should verify deletion in PostgreSQL directly', async () => {
     const user = await createUser({ email: 'deleteverify@test.com' });
-    const record = await models.PgUser.findByPk(user.id);
-    await record.destroy();
+    await api.deleteUser(user.id);
     const [rows] = await sequelize.query(`SELECT * FROM pguser WHERE id = '${user.id}'`);
     assert.strictEqual(rows.length, 0);
   });
 
   it('should handle deletion of non-existent record gracefully', async () => {
-    const result = await models.PgUser.destroy({ where: { id: 'non-existent-id' } });
-    assert.strictEqual(result, 0, 'No rows should be affected');
+    const result = await api.deleteUser('non-existent-id-12345');
+    assert.strictEqual(result.success, false);
   });
 
-  it('should delete with destroy using where clause', async () => {
-    await createUser({ email: 'batchdel1@test.com', active: false });
-    await createUser({ email: 'batchdel2@test.com', active: false });
-    await createUser({ email: 'batchdel3@test.com', active: true });
-    const count = await models.PgUser.destroy({ where: { active: false } });
-    assert.strictEqual(count, 2);
-    const remaining = await models.PgUser.count();
-    assert.strictEqual(remaining, 1);
+  it('should delete multiple records and confirm in PostgreSQL', async () => {
+    const u1 = await createUser({ email: 'batchdel1@test.com', active: false });
+    const u2 = await createUser({ email: 'batchdel2@test.com', active: false });
+    const u3 = await createUser({ email: 'batchdel3@test.com', active: true });
+
+    await api.deleteUser(u1.id);
+    await api.deleteUser(u2.id);
+
+    const remaining = await api.listUsers();
+    const remainingIds = remaining.map((u) => u.id);
+    assert.ok(!remainingIds.includes(u1.id));
+    assert.ok(!remainingIds.includes(u2.id));
+    assert.ok(remainingIds.includes(u3.id));
+
+    // Confirm in PostgreSQL directly
+    const count = await models.PgUser.count();
+    assert.strictEqual(count, 1);
   });
 });
 
@@ -775,72 +770,143 @@ describe('9. Relationships', () => {
   });
 
   it('should query User → Posts (one-to-many)', async () => {
-    const userWithPosts = await models.PgUser.findByPk(user1.id, {
-      include: [{ model: models.PgPost, as: 'posts' }],
-    });
-    assert.ok(userWithPosts.posts);
-    assert.strictEqual(userWithPosts.posts.length, 2);
+    const res = await api.execute(`
+      query GetUserPosts($id: ID!) {
+        pgUser(id: $id) {
+          id
+          name
+          posts {
+            id
+            title
+          }
+        }
+      }
+    `, { id: user1.id });
+    assert.ok(!res.errors, `Errors: ${JSON.stringify(res.errors)}`);
+    assert.ok(res.data.pgUser.posts);
+    assert.strictEqual(res.data.pgUser.posts.length, 2);
   });
 
   it('should query Post → Author (many-to-one / belongsTo)', async () => {
-    const postWithAuthor = await models.PgPost.findByPk(post1.id, {
-      include: [{ model: models.PgUser, as: 'author' }],
-    });
-    assert.ok(postWithAuthor.author);
-    assert.strictEqual(postWithAuthor.author.name, 'Author1');
+    const res = await api.execute(`
+      query GetPostAuthor($id: ID!) {
+        pgPost(id: $id) {
+          id
+          title
+          author {
+            id
+            name
+          }
+        }
+      }
+    `, { id: post1.id });
+    assert.ok(!res.errors, `Errors: ${JSON.stringify(res.errors)}`);
+    assert.ok(res.data.pgPost.author);
+    assert.strictEqual(res.data.pgPost.author.name, 'Author1');
   });
 
   it('should query Company → Users (one-to-many)', async () => {
-    const companyWithUsers = await models.PgCompany.findByPk(company.id, {
-      include: [{ model: models.PgUser, as: 'users' }],
-    });
-    assert.ok(companyWithUsers.users);
-    assert.strictEqual(companyWithUsers.users.length, 2);
+    const res = await api.execute(`
+      query GetCompanyUsers($id: ID!) {
+        pgCompany(id: $id) {
+          id
+          name
+          users {
+            id
+            name
+          }
+        }
+      }
+    `, { id: company.id });
+    assert.ok(!res.errors, `Errors: ${JSON.stringify(res.errors)}`);
+    assert.ok(res.data.pgCompany.users);
+    assert.strictEqual(res.data.pgCompany.users.length, 2);
   });
 
   it('should query Post → Comments (one-to-many)', async () => {
-    const postWithComments = await models.PgPost.findByPk(post1.id, {
-      include: [{ model: models.PgComment, as: 'comments' }],
-    });
-    assert.ok(postWithComments.comments);
-    assert.strictEqual(postWithComments.comments.length, 1);
-    assert.strictEqual(postWithComments.comments[0].content, 'Nice post!');
+    const res = await api.execute(`
+      query GetPostComments($id: ID!) {
+        pgPost(id: $id) {
+          id
+          title
+          comments {
+            id
+            content
+          }
+        }
+      }
+    `, { id: post1.id });
+    assert.ok(!res.errors, `Errors: ${JSON.stringify(res.errors)}`);
+    assert.ok(res.data.pgPost.comments);
+    assert.strictEqual(res.data.pgPost.comments.length, 1);
+    assert.strictEqual(res.data.pgPost.comments[0].content, 'Nice post!');
   });
 
   it('should query nested relationships: User → Posts → Comments', async () => {
-    const userDeep = await models.PgUser.findByPk(user1.id, {
-      include: [{
-        model: models.PgPost,
-        as: 'posts',
-        include: [{ model: models.PgComment, as: 'comments' }],
-      }],
-    });
-    assert.ok(userDeep.posts);
-    const postOne = userDeep.posts.find((p) => p.title === 'Post One');
+    const res = await api.execute(`
+      query GetUserDeep($id: ID!) {
+        pgUser(id: $id) {
+          id
+          name
+          posts {
+            id
+            title
+            comments {
+              id
+              content
+            }
+          }
+        }
+      }
+    `, { id: user1.id });
+    assert.ok(!res.errors, `Errors: ${JSON.stringify(res.errors)}`);
+    assert.ok(res.data.pgUser.posts);
+    const postOne = res.data.pgUser.posts.find((p) => p.title === 'Post One');
     assert.ok(postOne);
     assert.ok(postOne.comments);
     assert.strictEqual(postOne.comments.length, 1);
+    assert.strictEqual(postOne.comments[0].content, 'Nice post!');
   });
 
   it('should query Comment → Author (nested relationship)', async () => {
-    const commentWithAuthor = await models.PgComment.findByPk(comment1.id, {
-      include: [{ model: models.PgUser, as: 'author' }],
-    });
-    assert.ok(commentWithAuthor.author);
-    assert.strictEqual(commentWithAuthor.author.name, 'Author2');
+    const res = await api.execute(`
+      query GetCommentAuthor($id: ID!) {
+        pgComment(id: $id) {
+          id
+          content
+          author {
+            id
+            name
+          }
+        }
+      }
+    `, { id: comment1.id });
+    assert.ok(!res.errors, `Errors: ${JSON.stringify(res.errors)}`);
+    assert.ok(res.data.pgComment.author);
+    assert.strictEqual(res.data.pgComment.author.name, 'Author2');
   });
 
   it('should query Comment → Post → Author (deep nested)', async () => {
-    const commentDeep = await models.PgComment.findByPk(comment1.id, {
-      include: [{
-        model: models.PgPost,
-        as: 'post',
-        include: [{ model: models.PgUser, as: 'author' }],
-      }],
-    });
-    assert.ok(commentDeep.post);
-    assert.ok(commentDeep.post.author);
-    assert.strictEqual(commentDeep.post.author.name, 'Author1');
+    const res = await api.execute(`
+      query GetCommentDeep($id: ID!) {
+        pgComment(id: $id) {
+          id
+          content
+          post {
+            id
+            title
+            author {
+              id
+              name
+            }
+          }
+        }
+      }
+    `, { id: comment1.id });
+    assert.ok(!res.errors, `Errors: ${JSON.stringify(res.errors)}`);
+    assert.ok(res.data.pgComment.post);
+    assert.ok(res.data.pgComment.post.author);
+    assert.strictEqual(res.data.pgComment.post.author.name, 'Author1');
   });
 });
 
@@ -1523,11 +1589,11 @@ describe('17. Client GraphQL SDL Input & End-to-End GraphQL Operation Execution'
     `;
 
     const page1 = await graphql(gqlSchema, query, null, null, { first: 2, skip: 0 });
-    assert.ok(!page1.errors);
+    assert.ok(!page1.errors, `Page1 errors: ${JSON.stringify(page1.errors)}`);
     assert.strictEqual(page1.data.pgUsers.length, 2);
 
     const page2 = await graphql(gqlSchema, query, null, null, { first: 2, skip: 2 });
-    assert.ok(!page2.errors);
+    assert.ok(!page2.errors, `Page2 errors: ${JSON.stringify(page2.errors)}`);
     assert.strictEqual(page2.data.pgUsers.length, 2);
 
     // Verify non-overlapping results

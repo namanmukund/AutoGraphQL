@@ -301,15 +301,15 @@ export const buildSequelizeWhereClause = (filter = {}) => {
     const value = filter[key];
 
     // Logical operators
-    if (key === 'and' && Array.isArray(value)) {
+    if ((key === 'and' || key === 'AND') && Array.isArray(value)) {
       where[Op.and] = value.map((f) => buildSequelizeWhereClause(f));
       return;
     }
-    if (key === 'or' && Array.isArray(value)) {
+    if ((key === 'or' || key === 'OR') && Array.isArray(value)) {
       where[Op.or] = value.map((f) => buildSequelizeWhereClause(f));
       return;
     }
-    if (key === 'not' && typeof value === 'object') {
+    if ((key === 'not' || key === 'NOT') && typeof value === 'object') {
       where[Op.not] = buildSequelizeWhereClause(value);
       return;
     }
